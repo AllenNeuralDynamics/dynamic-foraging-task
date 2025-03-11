@@ -3363,7 +3363,7 @@ class Window(QMainWindow):
         self.load_tag=1
         self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
         self._GetProjectName(mouse_id)
-        logging.info(self.Metadata_dialog.ProjectName.currentText())
+        logging.info(self.Metadata_dialog.ProjectName.currentText()) ## DEBUG
     
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -3916,7 +3916,7 @@ class Window(QMainWindow):
 
         # set the load tag to zero
         self.load_tag=0
-
+        logging.info(self.Metadata_dialog.ProjectName.currentText()+' 1') ## DEBUG
         # post weight not entered and session ran
         if self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
             reply = QMessageBox.critical(self,
@@ -3941,7 +3941,7 @@ class Window(QMainWindow):
         self._connect_Sessionlist(connect=True)
         self.SessionlistSpin.setEnabled(False)
         self.Sessionlist.setEnabled(False)
-
+        logging.info(self.Metadata_dialog.ProjectName.currentText()+' 2') ## DEBUG
         # Clear warnings
         self.NewSession.setDisabled(False)
         # Toggle button colors
@@ -4003,6 +4003,7 @@ class Window(QMainWindow):
                         # Allow the session to continue, but log error
                         logging.error('Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(mouse_id, self.FIPMode.currentText(), fip_mode),extra={'tags': [self.warning_log_tag]})
 
+            logging.info(self.Metadata_dialog.ProjectName.currentText()+' 3') ## DEBUG
             if self.StartANewSession == 0 :
                 reply = QMessageBox.question(self,
                     'Box {}, Start'.format(self.box_letter),
@@ -4025,7 +4026,7 @@ class Window(QMainWindow):
                 logging.info('User declines using default name')
                 return
             logging.info('Starting session, with experimenter: {}'.format(self.behavior_session_model.experimenter[0]))
-
+            logging.info(self.Metadata_dialog.ProjectName.currentText()+' 4') ## DEBUG
             # check repo status
             if (self.current_branch not in ['main','production_testing']) & (self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
                 # Prompt user over off-pipeline branch
@@ -4043,6 +4044,7 @@ class Window(QMainWindow):
                     logging.error('Starting session on branch: {}'.format(self.current_branch),extra={'tags': [self.warning_log_tag]})
 
             # Check for untracked local changes
+            logging.info(self.Metadata_dialog.ProjectName.currentText()+' 5') ## DEBUG
             if self.behavior_session_model.allow_dirty_repo & (self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
                 # prompt user over untracked local changes
                 reply = QMessageBox.critical(self,
@@ -4069,6 +4071,7 @@ class Window(QMainWindow):
                 logging.info('Cannot start session without starting FIP workflow')
                 return
 
+            logging.info(self.Metadata_dialog.ProjectName.currentText()+' 6') ## DEBUG
             # Check if photometry excitation is running or not
             if self.PhotometryB.currentText()=='on' and (not self.StartExcitation.isChecked()):
                 logging.warning('photometry is set to "on", but excitation is not running')
@@ -4096,7 +4099,7 @@ class Window(QMainWindow):
 
             # disable sound button
             self.action_Sound.setEnabled(False)
-
+            logging.info(self.Metadata_dialog.ProjectName.currentText()+' 7') ## DEBUG
             # empty post weight after pass through checks in case user cancels run
             self.WeightAfter.setText('')
 
@@ -4105,8 +4108,9 @@ class Window(QMainWindow):
             self.NewSession.setStyleSheet("background-color : none")
             self.NewSession.setChecked(False)
             # disable metadata fields
+            logging.info(self.Metadata_dialog.ProjectName.currentText()+' 8') ## DEBUG
             self._set_metadata_enabled(False)
-
+            logging.info(self.Metadata_dialog.ProjectName.currentText()+' 9') ## DEBUG
             # Set IACUC protocol in metadata based on schedule
             protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
             if protocol is not None:
@@ -4116,7 +4120,7 @@ class Window(QMainWindow):
                     update_session_metadata=True
                 )
                 logging.info('Setting IACUC Protocol: {}'.format(protocol))
-
+            logging.info(self.Metadata_dialog.ProjectName.currentText()+' 10') ## DEBUG
             self.session_run = True   # session has been started
 
             self.keyPressEvent(allow_reset=True)
