@@ -3363,7 +3363,8 @@ class Window(QMainWindow):
         self.load_tag=1
         self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
         self._GetProjectName(mouse_id)
-
+        logging.info(self.Metadata_dialog.ProjectName.currentText())
+    
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
         self.ToInitializeVisual=1
