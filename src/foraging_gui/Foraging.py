@@ -1188,11 +1188,8 @@ class Window(QMainWindow):
         # Users can opt out of setting the default project name
         # In this case they must set the project name manually
         if self.Settings['add_default_project_name'] and add_default:
-            project_name=self._set_default_project()
+            project_name=self._set_default_project()   
 
-        # Set attribute
-        self.project_name = project_name
-    
     def _GetApprovedAINDProjectNames(self):
         end_point = "http://aind-metadata-service/project_names"
         timeout = 5
@@ -4839,13 +4836,6 @@ class Window(QMainWindow):
 
         logging.info('Generating upload manifest')
         try:
-            if not hasattr(self, 'project_name'):
-                self.project_name = 'Behavior Platform'
-                logging.error('No project name attribute, using default')
-            if self.project_name==None:
-                self.project_name = 'Behavior Platform'
-                logging.error('project name was None, using default')
-
             # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
             # Random offset reduces strain on downstream servers getting many requests at once
             date_format = "%Y-%m-%d_%H-%M-%S"
@@ -4879,7 +4869,7 @@ class Window(QMainWindow):
                     os.path.join(self.MetadataFolder,'rig.json').replace('\\','/'),
                     ],
                 'schedule_time':schedule_time,
-                'project_name':self.project_name,
+                'project_name':self.Metadata_dialog.ProjectName.currentText(),
                 'script': {}
                 }
 
