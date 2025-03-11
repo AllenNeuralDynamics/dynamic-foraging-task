@@ -28,6 +28,7 @@ PID_NEWSCALE = 0xea61
 
 
 class GenerateTrials():
+
     def __init__(self, win, task_logic: AindDynamicForagingTaskLogic,
                  session_model: AindBehaviorSessionModel,
                  opto_model: Optogenetics,
@@ -35,6 +36,7 @@ class GenerateTrials():
                  curriculum=None,
                  trainer_state=None,
                  ):
+
         self.win = win
         # set model attributes
         self.task_logic = task_logic
@@ -310,9 +312,15 @@ class GenerateTrials():
         if warmup == 0 and self.task_logic.task_parameters.warmup is not None:
             # set warm up to off
             self.task_logic.task_parameters.warmup = None
-            self.win.task_widget.apply_schema(self.task_logic)
+            self.win.task_widget.setEnabled(True)
+            self.win.task_widget.apply_schema(self.task_logic.task_parameters)
+            self.win.task_widget.setEnabled(False)
             self.win.NextBlock.setChecked(True)
             logging.info('Warm up is turned off', extra={'tags': [self.win.warning_log_tag]})
+
+            #update label
+            self.win.label_curriculum_stage.setText(self.trainer_state.stage.name)
+            self.win.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
 
     def _get_warmup_state(self):
         '''calculate the metrics related to the warm up and decide if we should turn on the warm up'''
@@ -338,7 +346,7 @@ class GenerateTrials():
             if self.curriculum is not None:
                 logging.info("Updating curriculum")
                 # find next transition from warmup state
-                next_stage = self.curriculum.curriculum.see_stage_transitions(self.trainer_state.stage)[0][1]
+                next_stage = self.curriculum.graph.nodes[1]
                 self.trainer_state = DynamicForagingTrainerState(curriculum=self.curriculum,
                                                                  stage=next_stage,
                                                                  is_on_curriculum=True)
