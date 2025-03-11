@@ -1163,15 +1163,14 @@ class Window(QMainWindow):
 
     def _GetProjectName(self, mouse_id):
         logging.info('Getting Project name')
-        add_default=True
         project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
-    
+        add_default = True 
+
         # Check if this is a valid project name
-        if project_name not in self._GetApprovedAINDProjectNames():
-            if project_name is not None:
-                logging.error('Project name {} is not valid, using default, please correct schedule'.format(project_name))
-            else:
-                logging.info('Project name {} is not valid, using default, please correct schedule'.format(project_name))
+        if project_name is None:
+            logging.info('Project name {} is not valid, using default, please correct schedule'.format(project_name))
+        elif project_name not in self._GetApprovedAINDProjectNames():
+            logging.error('Project name {} is not valid, using default, please correct schedule'.format(project_name))
             project_name = None
 
         # If we have a valid name update the metadata dialog
@@ -1183,13 +1182,16 @@ class Window(QMainWindow):
                 index = index[0]
                 self.Metadata_dialog.ProjectName.setCurrentIndex(index)
                 self.Metadata_dialog._show_project_info()
-                logging.info('Setting Project name: {}'.format(project_name))
+                logging.info('Setting project name: {}'.format(project_name))
                 add_default = False
 
-        if self.add_default_project_name and add_default:
-            logging.info('setting project name to default')
+        # Users can opt out of setting the default project name
+        # In this case they must set the project name manually
+        if self.Settings['add_default_project_name'] and add_default:
             project_name=self._set_default_project()
-        return project_name
+
+        # Set attribute
+        self.project_name = project_name
     
     def _GetApprovedAINDProjectNames(self):
         end_point = "http://aind-metadata-service/project_names"
@@ -1276,7 +1278,6 @@ class Window(QMainWindow):
             'open_ephys_machine_ip_address':'',
             'metadata_dialog_folder':os.path.join(self.SettingFolder,"metadata_dialog")+'\\',
             'rig_metadata_folder':os.path.join(self.SettingFolder,"rig_metadata")+'\\',
-            'project_info_file':os.path.join(self.SettingFolder,"Project Name and Funding Source v2.csv"),
             'schedule_path': os.path.join('Z:\\','dynamic_foraging','DynamicForagingSchedule.csv'),
             'go_cue_decibel_box1':60,
             'go_cue_decibel_box2':60,
@@ -1350,7 +1351,6 @@ class Window(QMainWindow):
         self.open_ephys_machine_ip_address=self.Settings['open_ephys_machine_ip_address']
         self.metadata_dialog_folder = self.Settings['metadata_dialog_folder']
         self.rig_metadata_folder = self.Settings['rig_metadata_folder']
-        self.project_info_file = self.Settings['project_info_file']
         self.go_cue_decibel_box1 = self.Settings['go_cue_decibel_box1']
         self.go_cue_decibel_box2 = self.Settings['go_cue_decibel_box2']
         self.go_cue_decibel_box3 = self.Settings['go_cue_decibel_box3']
@@ -1364,8 +1364,6 @@ class Window(QMainWindow):
         self.auto_engage = self.Settings['auto_engage']
         self.clear_figure_after_save = self.Settings['clear_figure_after_save']
         self.add_default_project_name = self.Settings['add_default_project_name']
-        if not is_absolute_path(self.project_info_file):
-            self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
 
         # Also stream log info to the console if enabled
         if self.Settings['show_log_info_in_console']:
@@ -3863,7 +3861,7 @@ class Window(QMainWindow):
     def _set_default_project(self):
         '''Set default project information'''
         project_name = 'Behavior Platform'
-        logging.info('Setting Project name: {}'.format('Behavior Platform'))
+        logging.error('Setting default project name: {}'.format('Behavior Platform'))
         projects = [self.Metadata_dialog.ProjectName.itemText(i)
                     for i in range(self.Metadata_dialog.ProjectName.count())]
         index = np.where(np.array(projects) == 'Behavior Platform')[0]
@@ -4127,7 +4125,7 @@ class Window(QMainWindow):
                 logging.info('Setting IACUC Protocol: {}'.format(protocol))
 
             # Set Project Name in metadata based on schedule
-            self.project_name = self._GetProjectName(mouse_id)
+            self._GetProjectName(mouse_id)
             
             self.session_run = True   # session has been started
 
@@ -4851,8 +4849,11 @@ class Window(QMainWindow):
         try:
             if not hasattr(self, 'project_name'):
                 self.project_name = 'Behavior Platform'
+                logging.error('No project name attribute, using default')
             if self.project_name==None:
                 self.project_name = 'Behavior Platform'
+                logging.error('project name was None, using default')
+
             # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
             # Random offset reduces strain on downstream servers getting many requests at once
             date_format = "%Y-%m-%d_%H-%M-%S"
