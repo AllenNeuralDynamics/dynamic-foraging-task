@@ -3052,6 +3052,7 @@ class Window(QMainWindow):
         self.ID.setText(mouse_id)
         self.Experimenter.setText(experimenter)
         self.ID.returnPressed.emit()
+        self._GetProjectName(mouse_id)
         self.TargetRatio.setText('0.85')
         self.keyPressEvent(allow_reset=True)
 
@@ -3364,6 +3365,7 @@ class Window(QMainWindow):
         self.keyPressEvent() # Accept all updates
         self.load_tag=1
         self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
+        self._GetProjectName(mouse_id)
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -4117,9 +4119,6 @@ class Window(QMainWindow):
                 )
                 logging.info('Setting IACUC Protocol: {}'.format(protocol))
 
-            # Set Project Name in metadata based on schedule
-            self._GetProjectName(mouse_id)
-            
             self.session_run = True   # session has been started
 
             self.keyPressEvent(allow_reset=True)
