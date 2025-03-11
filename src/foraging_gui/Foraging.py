@@ -1995,7 +1995,7 @@ class Window(QMainWindow):
                         child.setStyleSheet('background-color: white;')
                         self._Task()
 
-                    if child.objectName() in {'WeightAfter','LickSpoutDistance','ModuleAngle','ArcAngle','ProtocolID','Stick_RotationAngle','LickSpoutReferenceX','LickSpoutReferenceY','LickSpoutReferenceZ','LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','Stick_ArcAngle','Stick_ModuleAngle','RotationAngle','ManipulatorX','ManipulatorY','ManipulatorZ','ProbeTarget','RigMetadataFile','IACUCProtocol','Experimenter','TotalWater','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
+                    if child.objectName() in {'WeightAfter','LickSpoutDistance','ModuleAngle','ArcAngle','ProtocolID','Stick_RotationAngle','LickSpoutReferenceX','LickSpoutReferenceY','LickSpoutReferenceZ','LickSpoutReferenceArea','ProjectCode','Stick_ArcAngle','Stick_ModuleAngle','RotationAngle','ManipulatorX','ManipulatorY','ManipulatorZ','ProbeTarget','RigMetadataFile','IACUCProtocol','Experimenter','TotalWater','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
@@ -2064,7 +2064,7 @@ class Window(QMainWindow):
                             self.UpdateParameters = 0
 
                         self.Continue=0
-                        if child.objectName() in {'LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','ProbeTarget','RigMetadataFile','Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
+                        if child.objectName() in {'LickSpoutReferenceArea','ProjectCode','ProbeTarget','RigMetadataFile','Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
                             child.setStyleSheet(f'color: {self.default_text_color};')
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
@@ -3870,13 +3870,6 @@ class Window(QMainWindow):
             self.Metadata_dialog.ProjectName.setCurrentIndex(index)
             self.Metadata_dialog._show_project_info()
         else:
-            project_info = {
-                'Funding Institution': ['Allen Institute'],
-                'Grant Number': ['nan'],
-                'Investigators': ['Jeremiah Cohen'],
-                'Fundee': ['nan'],
-            }
-            self.Metadata_dialog.project_info = project_info
             self.Metadata_dialog.ProjectName.addItems([project_name])
         return project_name
 
