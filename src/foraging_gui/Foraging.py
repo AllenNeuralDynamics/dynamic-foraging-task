@@ -1168,7 +1168,7 @@ class Window(QMainWindow):
 
         # Check if this is a valid project name
         if project_name is None:
-            logging.info('Project name {} is not valid, using default, please correct schedule'.format(project_name))
+            logging.info('Project name not on schedule, using default')
         elif project_name not in self._GetApprovedAINDProjectNames():
             logging.error('Project name {} is not valid, using default, please correct schedule'.format(project_name))
             project_name = None

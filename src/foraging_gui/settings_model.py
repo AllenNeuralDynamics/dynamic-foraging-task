@@ -119,7 +119,6 @@ class DFTSettingsModel(BaseModel):
     open_ephys_machine_ip_address: str
     metadata_dialog_folder: str
     rig_metadata_folder: str
-    project_info_file: str
     schedule_path: str
     go_cue_decibel_box1: float
     go_cue_decibel_box2: float
