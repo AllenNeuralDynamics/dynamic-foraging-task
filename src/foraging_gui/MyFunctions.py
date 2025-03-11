@@ -15,6 +15,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 
 from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
+from aind_behavior_dynamic_foraging.CurriculumManager.trainer import DynamicForagingTrainerState
 from aind_behavior_dynamic_foraging import AindDynamicForagingTaskLogic
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import Optogenetics
@@ -27,15 +28,27 @@ PID_NEWSCALE = 0xea61
 
 
 class GenerateTrials():
+
     def __init__(self, win, task_logic: AindDynamicForagingTaskLogic,
                  session_model: AindBehaviorSessionModel,
                  opto_model: Optogenetics,
-                 fip_model: FiberPhotometry):
+                 fip_model: FiberPhotometry,
+                 curriculum=None,
+                 trainer_state=None,
+                 ):
+
         self.win = win
+        # set model attributes
         self.task_logic = task_logic
         self.session_model = session_model
         self.opto_model = opto_model
         self.fip_model = fip_model
+
+        # set curriculum attributes
+        self.curriculum = curriculum
+        self.trainer_state = trainer_state
+
+
         self.B_LeftLickIntervalPercent = None  # percentage of left lick intervals under 100ms
         self.B_RightLickIntervalPercent = None  # percentage of right lick intervals under 100ms
         self.B_CrossSideIntervalPercent = None  # percentage of cross side lick intervals under 100ms
@@ -299,9 +312,15 @@ class GenerateTrials():
         if warmup == 0 and self.task_logic.task_parameters.warmup is not None:
             # set warm up to off
             self.task_logic.task_parameters.warmup = None
-            self.win.task_widget.apply_schema(self.task_logic)
+            self.win.task_widget.setEnabled(True)
+            self.win.task_widget.apply_schema(self.task_logic.task_parameters)
+            self.win.task_widget.setEnabled(False)
             self.win.NextBlock.setChecked(True)
             logging.info('Warm up is turned off', extra={'tags': [self.win.warning_log_tag]})
+
+            #update label
+            self.win.label_curriculum_stage.setText(self.trainer_state.stage.name)
+            self.win.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
 
     def _get_warmup_state(self):
         '''calculate the metrics related to the warm up and decide if we should turn on the warm up'''
@@ -323,6 +342,14 @@ class GenerateTrials():
         if finish_trial >= self.task_logic.task_parameters.warmup.min_trial and \
                 finish_ratio >= self.task_logic.task_parameters.warmup.min_finish_ratio and \
                 abs(choice_ratio - 0.5) <= self.task_logic.task_parameters.warmup.max_choice_ratio_bias:
+
+            if self.curriculum is not None:
+                logging.info("Updating curriculum")
+                # find next transition from warmup state
+                next_stage = self.curriculum.graph.nodes[1]
+                self.trainer_state = DynamicForagingTrainerState(curriculum=self.curriculum,
+                                                                 stage=next_stage,
+                                                                 is_on_curriculum=True)
             # turn off the warm up
             warmup = 0
         else:

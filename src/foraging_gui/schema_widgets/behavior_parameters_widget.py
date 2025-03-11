@@ -201,6 +201,7 @@ if __name__ == "__main__":
 
     task_model.task_parameters.block_parameters.min = 10
     task_model.task_parameters.auto_water = None
+    task_model.task_parameters.warmup = None
     task_widget.apply_schema(task_model.task_parameters)
 
     sys.exit(app.exec_())
