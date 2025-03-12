@@ -2016,7 +2016,7 @@ class MetadataDialog(QDialog):
         '''get the widgets used for saving/loading metadata'''
         exclude_widgets=self._get_children_keys(self.Probes)
         exclude_widgets+=self._get_children_keys(self.Microscopes)
-        exclude_widgets+=['EphysProbes','RigMetadataFile','StickMicroscopes']
+        exclude_widgets+=['EphysProbes','RigMetadataFile','StickMicroscopes', 'ProjectName']
         widget_dict = {w.objectName(): w for w in self.findChildren(
             (QtWidgets.QLineEdit, QtWidgets.QTextEdit, QtWidgets.QComboBox))
             if w.objectName() not in exclude_widgets}
