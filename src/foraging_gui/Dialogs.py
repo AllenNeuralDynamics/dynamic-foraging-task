@@ -372,6 +372,9 @@ class WaterCalibrationDialog(QDialog):
         self.EmergencyStop.clicked.connect(self._EmergencyStop)
         self.showrecent.textChanged.connect(self._Showrecent)
         self.showspecificcali.activated.connect(self._ShowSpecifcDay)
+        # toggle multi value calibration on and off
+        self.groupBox_2.setEnabled(False)
+        self.multi_value_enable.toggled.connect(self.groupBox_2.setEnabled)
 
     def _Showrecent(self):
         '''update the calibration figure'''
