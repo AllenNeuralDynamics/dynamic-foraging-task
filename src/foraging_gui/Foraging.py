@@ -163,8 +163,8 @@ class Window(QMainWindow):
                   f"    2) In the comment list the following information:<br> "
                   f"            - Date and time of error<br>"
                   f"            - Box info (ex. 6D)<br>"
-                  f"            - Attach logs (found in  C:\\Users\\svc_aind_behavior\\Documents\\foraging_gui_logs<br>"
-                  f"            - Short description of the last thing done on the machine (ex. overnight bleaching)<br>"
+                  f"            - Attach logs (found in  C:\\Users\\svc_aind_behavior\\Documents\\foraging_gui_logs). Please add the two most recent files<br>"
+                  f"            - Short description of the last thing done on the GUI before the error. (ex. overnight bleaching, closed gui, opened gui - error)<br>"
                   f"Thank you, with your efforts hopefully we can vanquish this error and never see it again...<br>")
             show_msg_box("Stage Widget Error", "Stage Widget Error Diagnostic Help", msg)
             raise e
@@ -4991,6 +4991,10 @@ def log_git_hash():
 
 
 def show_msg_box(window_title, title, msg):
+    '''
+    Display a Qwindow alert to the user. This is originally implemented to debug the stagewidget connection issues.
+    This can be removed after the issue is resolved.
+    '''
     if QtWidgets.QApplication.instance() is not None:
         msg_box = QtWidgets.QMessageBox()
         msg_box.setWindowTitle(window_title)
