@@ -3915,6 +3915,7 @@ class Window(QMainWindow):
 
         # set the load tag to zero
         self.load_tag=0
+
         # post weight not entered and session ran
         if self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
             reply = QMessageBox.critical(self,
@@ -3939,6 +3940,7 @@ class Window(QMainWindow):
         self._connect_Sessionlist(connect=True)
         self.SessionlistSpin.setEnabled(False)
         self.Sessionlist.setEnabled(False)
+
         # Clear warnings
         self.NewSession.setDisabled(False)
         # Toggle button colors
@@ -4022,6 +4024,7 @@ class Window(QMainWindow):
                 logging.info('User declines using default name')
                 return
             logging.info('Starting session, with experimenter: {}'.format(self.behavior_session_model.experimenter[0]))
+
             # check repo status
             if (self.current_branch not in ['main','production_testing']) & (self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']):
                 # Prompt user over off-pipeline branch
@@ -4092,6 +4095,7 @@ class Window(QMainWindow):
 
             # disable sound button
             self.action_Sound.setEnabled(False)
+
             # empty post weight after pass through checks in case user cancels run
             self.WeightAfter.setText('')
 
@@ -4099,8 +4103,10 @@ class Window(QMainWindow):
             self.Start.setStyleSheet("background-color : green;")
             self.NewSession.setStyleSheet("background-color : none")
             self.NewSession.setChecked(False)
+
             # disable metadata fields
             self._set_metadata_enabled(False)
+
             # Set IACUC protocol in metadata based on schedule
             protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
             if protocol is not None:
