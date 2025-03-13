@@ -68,6 +68,9 @@ class RigClient:
     def TriggerGoCue(self, value):
         self.send("/TriggerGoCue", value)
 
+    def set_attenuation_left(self, value: int):
+        self.send("/AttenuationLeft", value)
+
     def Left_Bait(self, value):
         self.send("/Left_Bait", value)
     
