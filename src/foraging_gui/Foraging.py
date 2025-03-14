@@ -194,8 +194,8 @@ class Window(QMainWindow):
         self.bias_thread = threading.Thread()   # dummy thread
 
         # create sound button
-        self.sound_button = SoundButton(left_attenuation_db=self.SettingsBox[f"AttenuationLeft"],
-                                        right_attenuation_db=self.SettingsBox[f"AttenuationRight"])
+        self.sound_button = SoundButton(left_attenuation_db=int(self.SettingsBox[f"AttenuationLeft"]),
+                                        right_attenuation_db=int(self.SettingsBox[f"AttenuationRight"]))
         self.toolBar_3.addWidget(self.sound_button)
 
         # Set up more parameters
@@ -2450,7 +2450,7 @@ class Window(QMainWindow):
         :param value: value to set attenuation
         """
 
-        #getattr(self.Channel3, f"set_attenuation_{direction}")(value)
+        getattr(self.Channel3, f"set_attenuation_{direction}")(value)
         self.SettingsBox[f"Attenuation{direction.capitalize()}"] = value
         # Writing to CSV
         with open(self.SettingsBoxFile, "w", newline="") as file:
