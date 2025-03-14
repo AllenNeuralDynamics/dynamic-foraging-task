@@ -2432,7 +2432,7 @@ class Window(QMainWindow):
 
         self.Channel3.TriggerGoCue(1)
         # clear messages
-        #self.Channel.receive()
+        self.Channel.receive()
 
     def change_attenuation(self, direction: Literal["right", "left"], value: int) -> None:
         """
@@ -2443,7 +2443,7 @@ class Window(QMainWindow):
 
         getattr(self.Channel3, f"set_attenuation_{direction}")(value)
         # clear messages
-        # self.Channel.receive()
+        self.Channel.receive()
 
     def _Metadata(self):
         '''Open the metadata dialog'''
