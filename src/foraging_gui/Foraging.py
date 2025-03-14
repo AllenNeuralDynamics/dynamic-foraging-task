@@ -194,8 +194,7 @@ class Window(QMainWindow):
         self.bias_thread = threading.Thread()   # dummy thread
 
         # create sound button
-        self.sound_button = SoundButton(left_attenuation_db=int(self.SettingsBox[f"AttenuationLeft"]),
-                                        right_attenuation_db=int(self.SettingsBox[f"AttenuationRight"]))
+        self.sound_button = SoundButton(attenuation=int(self.SettingsBox[f"AttenuationLeft"]))
         self.toolBar_3.addWidget(self.sound_button)
 
         # Set up more parameters
@@ -340,8 +339,7 @@ class Window(QMainWindow):
         # create QTimer to deliver constant tone
         self.beep_loop = QtCore.QTimer(timeout=self.play_beep, interval=10)
         self.sound_button.toggled.connect(lambda checked: self.beep_loop.start() if checked else self.beep_loop.stop())
-        self.sound_button.rightAttenuationChanged.connect(lambda value: self.change_attenuation("right", value))
-        self.sound_button.leftAttenuationChanged.connect(lambda value: self.change_attenuation("left", value))
+        self.sound_button.attenuationChanged.connect(self.change_attenuation)
 
         self.actionMeta_Data.triggered.connect(self._Metadata)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
@@ -2443,15 +2441,17 @@ class Window(QMainWindow):
         # clear messages
         self.Channel.receive()
 
-    def change_attenuation(self, direction: Literal["right", "left"], value: int) -> None:
+    def change_attenuation(self, value: int) -> None:
         """
-        Change attenuation of specified channel
+        Change attenuation of for both right and left channels
         :param direction: specification of right or left channel
         :param value: value to set attenuation
         """
 
-        getattr(self.Channel3, f"set_attenuation_{direction}")(value)
-        self.SettingsBox[f"Attenuation{direction.capitalize()}"] = value
+        getattr(self.Channel3, f"set_attenuation_left")(value)
+        getattr(self.Channel3, f"set_attenuation_right")(value)
+        self.SettingsBox[f"AttenuationLeft"] = value
+        self.SettingsBox[f"AttenuationRight"] = value
         # Writing to CSV
         with open(self.SettingsBoxFile, "w", newline="") as file:
             writer = csv.writer(file)
