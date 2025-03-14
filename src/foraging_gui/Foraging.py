@@ -2443,7 +2443,7 @@ class Window(QMainWindow):
 
         getattr(self.Channel3, f"set_attenuation_{direction}")(value)
         # clear messages
-        self.Channel.receive()
+        #self.Channel.receive()
 
     def _Metadata(self):
         '''Open the metadata dialog'''
