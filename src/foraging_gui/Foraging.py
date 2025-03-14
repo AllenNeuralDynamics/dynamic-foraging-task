@@ -36,6 +36,7 @@ from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
+from typing import Literal
 from StageWidget.main import get_stage_widget
 
 import foraging_gui
@@ -180,7 +181,6 @@ class Window(QMainWindow):
 
         # create sound button
         self.sound_button = SoundButton()
-        self.sound_button.rightAttenuationChanged
         self.toolBar_3.addWidget(self.sound_button)
 
         # Set up more parameters
@@ -326,6 +326,8 @@ class Window(QMainWindow):
         # create QTimer to deliver constant tone
         self.beep_loop = QtCore.QTimer(timeout=self.play_beep, interval=10)
         self.sound_button.toggled.connect(lambda checked: self.beep_loop.start() if checked else self.beep_loop.stop())
+        self.sound_button.rightAttenuationChanged.connect(lambda value: self.change_attenuation("right", value))
+        self.sound_button.leftAttenuationChanged.connect(lambda value: self.change_attenuation("left", value))
 
         self.actionMeta_Data.triggered.connect(self._Metadata)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
@@ -2431,6 +2433,17 @@ class Window(QMainWindow):
         self.Channel3.TriggerGoCue(1)
         # clear messages
         #self.Channel.receive()
+
+    def change_attenuation(self, direction: Literal["right", "left"], value: int) -> None:
+        """
+        Change attenuation of specified channel
+        :param direction: specification of right or left channel
+        :param value: value to set attenuation
+        """
+
+        getattr(self.Channel3, f"set_attenuation_{direction}")(value)
+        # clear messages
+        # self.Channel.receive()
 
     def _Metadata(self):
         '''Open the metadata dialog'''
