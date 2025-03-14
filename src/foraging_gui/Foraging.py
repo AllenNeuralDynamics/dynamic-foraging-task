@@ -2450,6 +2450,7 @@ class Window(QMainWindow):
         """
 
         getattr(self.Channel3, f"set_attenuation_{direction}")(value)
+        if self.sound_button.check
         # clear messages
         #self.Channel.receive()
 

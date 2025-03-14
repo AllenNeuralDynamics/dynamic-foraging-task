@@ -1530,7 +1530,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM12</harp:PortName>
+                      <harp:PortName>COM3</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -1542,19 +1542,6 @@
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:Delay">
                       <rx:DueTime>PT2S</rx:DueTime>
-                    </Combinator>
-                  </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Take">
-                      <rx:Count>1</rx:Count>
-                    </Combinator>
-                  </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>SoundCardEvents</Name>
-                  </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Delay">
-                      <rx:DueTime>PT4S</rx:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -1592,7 +1579,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:Delay">
-                      <rx:DueTime>PT2S</rx:DueTime>
+                      <rx:DueTime>PT4S</rx:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -1611,19 +1598,10 @@
                   <Expression xsi:type="scr:ExpressionTransform">
                     <scr:Expression>Convert.ToInt32(it)</scr:Expression>
                   </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>AttenuationRight</Name>
-                  </Expression>
-                  <Expression xsi:type="scr:ExpressionTransform">
-                    <scr:Expression>Convert.ToInt32(it)</scr:Expression>
-                  </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Merge" />
-                  </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Take">
-                      <rx:Count>1</rx:Count>
-                    </Combinator>
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="AttenuationRight" />
+                    </PropertyMappings>
                   </Expression>
                   <Expression xsi:type="p1:CreateMessage">
                     <harp:MessageType>Write</harp:MessageType>
@@ -1635,20 +1613,28 @@
                     <Name>SoundCardCommands</Name>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
-                    <Name>SoundCardEvents</Name>
+                    <Name>AttenuationRight</Name>
                   </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Delay">
-                      <rx:DueTime>PT4S</rx:DueTime>
-                    </Combinator>
+                  <Expression xsi:type="p1:CreateMessage">
+                    <harp:MessageType>Write</harp:MessageType>
+                    <harp:Payload xsi:type="p1:CreateAttenuationRightPayload">
+                      <p1:AttenuationRight>60</p1:AttenuationRight>
+                    </harp:Payload>
                   </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Take">
-                      <rx:Count>1</rx:Count>
-                    </Combinator>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>SoundCardCommands</Name>
                   </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:SubscribeWhen" />
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>AttenuationLeft</Name>
+                  </Expression>
+                  <Expression xsi:type="p1:CreateMessage">
+                    <harp:MessageType>Write</harp:MessageType>
+                    <harp:Payload xsi:type="p1:CreateAttenuationLeftPayload">
+                      <p1:AttenuationLeft>0</p1:AttenuationLeft>
+                    </harp:Payload>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>SoundCardCommands</Name>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
                     <Name>GoCue</Name>
@@ -1699,10 +1685,14 @@
                   <Edge From="25" To="26" Label="Source2" />
                   <Edge From="26" To="27" Label="Source1" />
                   <Edge From="28" To="29" Label="Source1" />
-                  <Edge From="29" To="31" Label="Source1" />
-                  <Edge From="30" To="31" Label="Source2" />
+                  <Edge From="29" To="30" Label="Source1" />
                   <Edge From="31" To="32" Label="Source1" />
                   <Edge From="32" To="33" Label="Source1" />
+                  <Edge From="34" To="35" Label="Source1" />
+                  <Edge From="35" To="37" Label="Source1" />
+                  <Edge From="36" To="37" Label="Source2" />
+                  <Edge From="37" To="38" Label="Source1" />
+                  <Edge From="38" To="39" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
