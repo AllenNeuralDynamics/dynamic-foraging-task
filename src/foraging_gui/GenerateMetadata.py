@@ -14,7 +14,6 @@ from aind_data_schema.components.stimulus import AuditoryStimulation
 from aind_data_schema.components.devices import SpoutSide,Calibration
 from aind_data_schema_models.units import SizeUnit,FrequencyUnit,SoundIntensityUnit,PowerUnit
 
-from aind_data_schema.core.data_description import Funding
 from aind_data_schema_models.organizations import Organization
 from aind_data_schema_models.modalities import Modality
 from aind_data_schema_models.platforms import Platform
@@ -242,16 +241,6 @@ class generate_metadata:
             self.box_type = 'Ephys'
         else:
             self.box_type = 'Behavior'
-
-    def _get_funding_source(self):
-        '''
-        Get the funding source
-        '''
-        self.funding_source=[Funding(
-            funder=getattr(Organization,self.name_mapper['institute'][self.Obj['meta_data_dialog']['session_metadata']['FundingSource']]),
-            grant_number=self.Obj['meta_data_dialog']['session_metadata']['GrantNumber'],
-            fundee=self.Obj['meta_data_dialog']['session_metadata']['Fundee'],
-        )]
                 
     def _get_platform(self):
         '''
@@ -294,16 +283,6 @@ class generate_metadata:
             self.session_start_time = ''
             self.session_end_time = ''
         
-    def _get_investigators(self):
-        '''
-        Get investigators
-        '''
-        self.investigators=[]
-        investigators=self.Obj['meta_data_dialog']['session_metadata']['Investigators'].split(',')
-        for investigator in investigators:
-            if investigator != '':
-                self.investigators.append(PIDName(name=investigator, registry=self.orcid))
-
     def _save_rig_metadata(self):
         '''
         Save the rig metadata to the MetadataFolder

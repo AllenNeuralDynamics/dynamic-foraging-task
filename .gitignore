@@ -9,6 +9,7 @@
 .DS_Store
 __pycache__
 *.egg-info
+*.db
 dist
 obj
 bin
