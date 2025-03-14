@@ -112,9 +112,6 @@ class Window(QMainWindow):
         # Load Rig Json
         self._LoadRigJson()
 
-        # Stage Widget
-        self.stage_widget = None
-
         # Load User interface
         self._LoadUI()
 
@@ -154,6 +151,23 @@ class Window(QMainWindow):
         self.unsaved_data = False   # Setting unsaved data to False
         self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames
         self.session_run = False    # flag to indicate if session has been run or not
+
+        # Stage Widget
+        self.stage_widget = None
+        try:
+            self._load_stage()
+        except IOError as e:
+            msg = (f"ERROR...<br>"
+                  f"Dear scientist, please perform the following to document this issue:<br>"
+                  f"    1) Create comment here: <a href=https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/925>Github Link</a><br>"
+                  f"    2) In the comment list the following information:<br> "
+                  f"            - Date and time of error<br>"
+                  f"            - Box info (ex. 6D)<br>"
+                  f"            - Attach logs (found in  C:\\Users\\svc_aind_behavior\\Documents\\foraging_gui_logs). Please add the two most recent files<br>"
+                  f"            - Short description of the last thing done on the GUI before the error. (ex. overnight bleaching, closed gui, opened gui - error)<br>"
+                  f"Thank you, with your efforts hopefully we can vanquish this error and never see it again...<br>")
+            show_msg_box("Stage Widget Error", "Stage Widget Error Diagnostic Help", msg)
+            raise e
 
         # Connect to Bonsai
         self._InitializeBonsai()
@@ -207,7 +221,6 @@ class Window(QMainWindow):
         self._WaterCalibration()# to open the water calibration panel
         self._Camera()
         self._InitializeMotorStage()
-        self._load_stage()
         self._Metadata()
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005
@@ -5006,6 +5019,20 @@ def log_git_hash():
         print('local repository is clean')
 
     return git_hash, git_branch, repo_url, repo_dirty_flag, dirty_files, version
+
+
+def show_msg_box(window_title, title, msg):
+    '''
+    Display a Qwindow alert to the user. This is originally implemented to debug the stagewidget connection issues.
+    This can be removed after the issue is resolved.
+    '''
+    if QtWidgets.QApplication.instance() is not None:
+        msg_box = QtWidgets.QMessageBox()
+        msg_box.setWindowTitle(window_title)
+        msg_box.setText('<span style="color:purple;font-weight:bold"> {} </span> <br><br> {}'.format(title, msg))
+        msg_box.exec_()
+    else:
+        logging.error('could not launch custom message box')
 
 
 def show_exception_box(log_msg):
