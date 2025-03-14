@@ -23,6 +23,7 @@ class SoundButton(QToolButton):
 
         # configure right slider
         self.right_slider = QSlider()
+        self.right_slider.setValue(right_attenuation_db)
         self.right_slider.setMaximum(500)
         self.right_slider.setStyleSheet("""
                                         QSlider::groove:horizontal {
@@ -59,6 +60,7 @@ class SoundButton(QToolButton):
 
         # configure left slider
         self.left_slider = QSlider()
+        self.left_slider.setValue(left_attenuation_db)
         self.left_slider.setMaximum(500)
         self.left_slider.setStyleSheet("""
                                         QSlider::groove:horizontal {
