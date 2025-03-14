@@ -2450,7 +2450,13 @@ class Window(QMainWindow):
         """
 
         getattr(self.Channel3, f"set_attenuation_{direction}")(value)
-        
+        self.SettingsBox[f"Attenuation{direction.capitalize()}"] = value
+        # Writing to CSV
+        with open(self.SettingsBoxFile, "w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(self.SettingsBox.keys())
+            writer.writerow(self.SettingsBox.values())
+
     def _Metadata(self):
         '''Open the metadata dialog'''
         if self.OpenMetadata==0:
