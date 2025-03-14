@@ -1892,27 +1892,15 @@ class MetadataDialog(QDialog):
         '''show the project information based on current project name'''
         current_project_index = self.ProjectName.currentIndex()
         self.current_project_name=self.ProjectName.currentText()
-        self.funding_institution=self.project_info['Funding Institution'][current_project_index]
-        self.grant_number=self.project_info['Grant Number'][current_project_index]
-        self.investigators=self.project_info['Investigators'][current_project_index]
-        self.fundee=self.project_info['Fundee'][current_project_index]
-        self.FundingSource.setText(str(self.funding_institution))
-        self.Investigators.setText(str(self.investigators))
-        self.GrantNumber.setText(str(self.grant_number))
-        self.Fundee.setText(str(self.fundee))
 
     def _save_lick_spout_distance(self):
         '''save the lick spout distance'''
         self.MainWindow.Other_lick_spout_distance=self.LickSpoutDistance.text()
 
     def _show_project_names(self):
-        '''show the project names from the project spreadsheet'''
-        # load the project spreadsheet
-        project_info_file = self.MainWindow.project_info_file
-        if not os.path.exists(project_info_file):
-            return
-        self.project_info = pd.read_excel(project_info_file)
-        project_names = self.project_info['Project Name'].tolist()
+        '''show the project names'''
+        project_names = self.MainWindow._GetApprovedAINDProjectNames()
+
         # show the project information
         # adding project names to the project combobox
         self._manage_signals(enable=False,keys=['ProjectName'],action=self._show_project_info)
@@ -2031,7 +2019,7 @@ class MetadataDialog(QDialog):
         '''get the widgets used for saving/loading metadata'''
         exclude_widgets=self._get_children_keys(self.Probes)
         exclude_widgets+=self._get_children_keys(self.Microscopes)
-        exclude_widgets+=['EphysProbes','RigMetadataFile','StickMicroscopes']
+        exclude_widgets+=['EphysProbes','RigMetadataFile','StickMicroscopes', 'ProjectName']
         widget_dict = {w.objectName(): w for w in self.findChildren(
             (QtWidgets.QLineEdit, QtWidgets.QTextEdit, QtWidgets.QComboBox))
             if w.objectName() not in exclude_widgets}
