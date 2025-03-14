@@ -1536,7 +1536,7 @@
                   <Expression xsi:type="rx:BehaviorSubject">
                     <Name>SoundCardEvents</Name>
                   </Expression>
-                  <Expression xsi:type="rx:BehaviorSubject">
+                  <Expression xsi:type="SubscribeSubject">
                     <Name>SoundCardEvents</Name>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -1574,7 +1574,7 @@
                   <Expression xsi:type="MulticastSubject">
                     <Name>SoundCardCommands</Name>
                   </Expression>
-                  <Expression xsi:type="rx:BehaviorSubject">
+                  <Expression xsi:type="SubscribeSubject">
                     <Name>SoundCardEvents</Name>
                   </Expression>
                   <Expression xsi:type="Combinator">
