@@ -184,9 +184,12 @@ class Window(QMainWindow):
         self.threadpool6=QThreadPool() # for saving data
         self.threadpool_workertimer=QThreadPool() # for timing
 
+        # initialize thread lock
+        self.data_lock = threading.Lock()
+
         # create bias indicator
         self.bias_n_size = 200
-        self.bias_indicator = BiasIndicator(x_range=self.bias_n_size)  # TODO: Where to store bias_threshold parameter? self.Settings?
+        self.bias_indicator = BiasIndicator(x_range=self.bias_n_size, data_lock=self.data_lock)
         self.bias_indicator.biasValue.connect(self.bias_calculated)  # update dashboard value
         self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         self.bias_thread = threading.Thread()   # dummy thread
@@ -2809,16 +2812,17 @@ class Window(QMainWindow):
 
         # don't save the data if the load tag is 1
         if self.load_tag==0:
-            # save Json or mat
-            if self.SaveFile.endswith('.mat'):
-            # Save data to a .mat file
-                savemat(self.SaveFile, Obj)
-            elif self.SaveFile.endswith('par.json') and self.load_tag==0:
-                with open(self.SaveFile, "w") as outfile:
-                    json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
-            elif self.SaveFile.endswith('.json'):
-                with open(self.SaveFile, "w") as outfile:
-                    json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
+            with self.data_lock:
+                # save Json or mat
+                if self.SaveFile.endswith('.mat'):
+                # Save data to a .mat file
+                    savemat(self.SaveFile, Obj)
+                elif self.SaveFile.endswith('par.json') and self.load_tag==0:
+                    with open(self.SaveFile, "w") as outfile:
+                        json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
+                elif self.SaveFile.endswith('.json'):
+                    with open(self.SaveFile, "w") as outfile:
+                        json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
 
         # Toggle unsaved data to False
         if BackupSave==0:
@@ -4245,7 +4249,7 @@ class Window(QMainWindow):
             # clear bias indicator graph
             self.bias_indicator.clear()
             # create workers
-            worker1 = Worker(self.get_animal_response,self.Channel,self.Channel3,self.Channel4)
+            worker1 = Worker(self.GeneratedTrials._GetAnimalResponse, self.Channel,self.Channel3, self.data_lock)
             worker1.signals.finished.connect(self._thread_complete)
             workerLick = Worker(GeneratedTrials._get_irregular_timestamp,self.Channel2)
             workerLick.signals.finished.connect(self._thread_complete2)
@@ -4264,7 +4268,6 @@ class Window(QMainWindow):
             self.workerStartTrialLoop=workerStartTrialLoop
             self.workerStartTrialLoop1=workerStartTrialLoop1
             self.worker_save=worker_save
-            self.data_lock = threading.Lock()
         else:
             PlotM=self.PlotM
             worker1=self.worker1
@@ -4460,17 +4463,19 @@ class Window(QMainWindow):
                     # add data to bias_indicator
                     if not self.bias_thread.is_alive():
                         logger.debug('Starting bias thread.')
-                        self.bias_thread = threading.Thread(target=self.calculate_bias,
-                                                       kwargs={'trial_num': len(formatted_history),
-                                                               'choice_history': choice_history,
-                                                               'reward_history': np.array(any_reward).astype(int)})
+                        self.bias_thread = threading.Thread(target=self.bias_indicator.calculate_bias,
+                                                            kwargs={'trial_num': len(formatted_history),
+                                                                    'choice_history': choice_history,
+                                                                    'reward_history': np.array(any_reward).astype(int),
+                                                                    'n_trial_back': 5,
+                                                                    'cv': 1})
                         self.bias_thread.start()
                     else:
                         logger.debug('Skipping bias calculation as previous is still in progress. ')
 
                 # save the data everytrial
                 if GeneratedTrials.CurrentSimulation==True:
-                    GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3,self.Channel4)
+                    GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3, self.data_lock)
                     self.ANewTrial=1
                     self.NewTrialRewardOrder=1
                 else:
@@ -4481,10 +4486,9 @@ class Window(QMainWindow):
                     GeneratedTrials._GenerateATrial(self.Channel4)
 
                 # Save data in a separate thread
-                with self.data_lock:
-                    if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
-                        self.previous_backup_completed=0
-                        self.threadpool6.start(worker_save)
+                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
+                    self.previous_backup_completed=0
+                    self.threadpool6.start(worker_save)
 
                 # show disk space
                 self._show_disk_space()
@@ -4532,18 +4536,11 @@ class Window(QMainWindow):
 
     def _perform_backup(self,BackupSave):
         # Backup save logic
-        with self.data_lock:
-            try:
-                self._Save(BackupSave=BackupSave)
-            except Exception as e:
-                logging.error('backup save failed: {}'.format(e))
+        try:
+            self._Save(BackupSave=BackupSave)
+        except Exception as e:
+            logging.error('backup save failed: {}'.format(e))
 
-    def get_animal_response(self, channel1, channel3, channel4):
-        """
-        Data locking thread for update animal response data
-        """
-        with self.data_lock:
-            self.GeneratedTrials._GetAnimalResponse(channel1, channel3, channel4)
 
     def bias_calculated(self, bias: float, confidence_interval: list[float, float], trial_number: int) -> None:
         """
@@ -4567,22 +4564,6 @@ class Window(QMainWindow):
             self.GeneratedTrials.B_Bias_CI[trial_number - 1:] = confidence_interval # set last value to newest bias CI
 
         self.GeneratedTrials.B_Bias[trial_number-1:] = bias
-
-    def calculate_bias(self, trial_num: int, choice_history: np.ndarray, reward_history:np.ndarray):
-        """
-        Calculate bias based on lick data
-        :param trial_num: Trial number of currently at
-        :param choice_history: Choice history (0 = left choice, 1 = right choice).
-        :param reward_history: Reward history (0 = unrewarded, 1 = rewarded).
-        """
-
-        with self.data_lock:
-            self.bias_indicator.calculate_bias(trial_num= trial_num,
-                                               choice_history= choice_history,
-                                               reward_history= np.array(reward_history).astype(int),
-                                               n_trial_back= 5,
-                                               cv=1)
-
 
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         logging.info('starting trial loop 1')
