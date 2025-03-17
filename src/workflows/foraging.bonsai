@@ -1568,7 +1568,7 @@
                   <Expression xsi:type="p1:CreateMessage">
                     <harp:MessageType>Write</harp:MessageType>
                     <harp:Payload xsi:type="p1:CreateAttenuationLeftPayload">
-                      <p1:AttenuationLeft>0</p1:AttenuationLeft>
+                      <p1:AttenuationLeft>53</p1:AttenuationLeft>
                     </harp:Payload>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
@@ -1606,7 +1606,7 @@
                   <Expression xsi:type="p1:CreateMessage">
                     <harp:MessageType>Write</harp:MessageType>
                     <harp:Payload xsi:type="p1:CreateAttenuationRightPayload">
-                      <p1:AttenuationRight>60</p1:AttenuationRight>
+                      <p1:AttenuationRight>53</p1:AttenuationRight>
                     </harp:Payload>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
@@ -1614,6 +1614,11 @@
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
                     <Name>AttenuationRight</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:Delay">
+                      <rx:DueTime>PT4S</rx:DueTime>
+                    </Combinator>
                   </Expression>
                   <Expression xsi:type="p1:CreateMessage">
                     <harp:MessageType>Write</harp:MessageType>
@@ -1626,6 +1631,11 @@
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
                     <Name>AttenuationLeft</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:Delay">
+                      <rx:DueTime>PT2S</rx:DueTime>
+                    </Combinator>
                   </Expression>
                   <Expression xsi:type="p1:CreateMessage">
                     <harp:MessageType>Write</harp:MessageType>
@@ -1686,13 +1696,15 @@
                   <Edge From="26" To="27" Label="Source1" />
                   <Edge From="28" To="29" Label="Source1" />
                   <Edge From="29" To="30" Label="Source1" />
-                  <Edge From="31" To="32" Label="Source1" />
+                  <Edge From="30" To="31" Label="Source1" />
                   <Edge From="32" To="33" Label="Source1" />
+                  <Edge From="33" To="34" Label="Source1" />
                   <Edge From="34" To="35" Label="Source1" />
-                  <Edge From="35" To="37" Label="Source1" />
-                  <Edge From="36" To="37" Label="Source2" />
-                  <Edge From="37" To="38" Label="Source1" />
-                  <Edge From="38" To="39" Label="Source1" />
+                  <Edge From="36" To="37" Label="Source1" />
+                  <Edge From="37" To="39" Label="Source1" />
+                  <Edge From="38" To="39" Label="Source2" />
+                  <Edge From="39" To="40" Label="Source1" />
+                  <Edge From="40" To="41" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -3798,7 +3810,7 @@
                     <Name>FromBonsaiOSC3</Name>
                   </Expression>
                   <Expression xsi:type="osc:Parse">
-                    <osc:Address>/TriggerGoCue</osc:Address>
+                    <osc:Address>/AttenuationLeft</osc:Address>
                     <osc:TypeTag>i</osc:TypeTag>
                   </Expression>
                   <Expression xsi:type="rx:PublishSubject">
@@ -3808,7 +3820,7 @@
                     <Name>FromBonsaiOSC3</Name>
                   </Expression>
                   <Expression xsi:type="osc:Parse">
-                    <osc:Address>/TriggerGoCue</osc:Address>
+                    <osc:Address>/AttenuationRight</osc:Address>
                     <osc:TypeTag>i</osc:TypeTag>
                   </Expression>
                   <Expression xsi:type="rx:PublishSubject">
