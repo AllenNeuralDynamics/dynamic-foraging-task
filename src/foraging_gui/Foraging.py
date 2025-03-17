@@ -2439,16 +2439,19 @@ class Window(QMainWindow):
 
         self.Channel3.TriggerGoCue(1)
         # clear messages
-        self.Channel.receive()
+        #self.Channel.receive()
 
     def change_attenuation(self, value: int) -> None:
         """
         Change attenuation of for both right and left channels
-        :param direction: specification of right or left channel
         :param value: value to set attenuation
         """
 
-        getattr(self.Channel3, f"set_attenuation_left")(value)
+        beeping = self.beep_loop.isActive()
+
+        if beeping:
+            self.beep_loop.stop()
+        #getattr(self.Channel3, f"set_attenuation_left")(value)
         getattr(self.Channel3, f"set_attenuation_right")(value)
         self.SettingsBox[f"AttenuationLeft"] = value
         self.SettingsBox[f"AttenuationRight"] = value
@@ -2458,6 +2461,11 @@ class Window(QMainWindow):
             # Write each key-value pair as a row
             for key, value in self.SettingsBox.items():
                 writer.writerow([key, value])
+        if beeping:
+            self.beep_loop.start()
+
+        # else:
+        #     self.Channel.receive()
 
     def _Metadata(self):
         '''Open the metadata dialog'''
