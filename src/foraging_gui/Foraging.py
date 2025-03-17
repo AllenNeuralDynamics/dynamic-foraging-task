@@ -690,6 +690,11 @@ class Window(QMainWindow):
             self.label_curriculum_stage.setText(self.trainer_state.stage.name)
             self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
 
+            self.task_widget.setEnabled(False)
+            self.session_widget.setEnabled(False)
+            self.Opto_dialog.opto_widget.setEnabled(False)
+            self.fip_widget.setEnabled(False)
+
         except Exception as e:
             if 'No record found' in str(e):  # mouse doesn't exist
                 logging.warning(f"{mouse_id} is not in Slims. Double check id, and add to Slims if missing",
@@ -707,7 +712,7 @@ class Window(QMainWindow):
         :param mouse_id: mouse id string to load from slims
         """
 
-        if self.metrics is not None:    # loaded mouse
+        if self.metrics is not None and hasattr(self, "GeneratedTrials"):    # loaded mouse
             # add current session to metrics
             logging.info("Constructing new metrics.")
             new_metrics = DynamicForagingMetrics(
@@ -2714,12 +2719,12 @@ class Window(QMainWindow):
         """
         Method to update all widget based on pydantic models
         """
-        print('update models')
+
         self.task_widget.apply_schema(self.task_logic.task_parameters)
         self.session_widget.apply_schema(self.session_model)
         self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
         self.fip_widget.apply_schema(self.fip_model)
-        print('finished updating models')
+
     def save_task_models(self):
         """
         Save session and task model as well as opto and fip if applicable
