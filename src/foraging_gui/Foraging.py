@@ -296,8 +296,7 @@ class Window(QMainWindow):
         self.load_slims_progress.setMovie(movie)
 
         # hook up signals
-        self.mouse_selector_dialog.acceptedMouseID.connect(lambda: self.load_slims_progress.move(self.geometry().center().x() - (self.load_slims_progress.width() // 2),
-                                                                                                 self.geometry().center().y() - (self.load_slims_progress.height() // 2)))
+        self.mouse_selector_dialog.acceptedMouseID.connect(lambda: self.geometry().center())
         self.mouse_selector_dialog.acceptedMouseID.connect(self.load_slims_progress.show)
         self.mouse_selector_dialog.acceptedMouseID.connect(lambda: threading.Thread(target=self.load_slims_mouse,
                                                                                     kwargs={"mouse_id": self.mouse_selector_dialog.combo.currentText()}).start())
@@ -502,6 +501,7 @@ class Window(QMainWindow):
         self.Opto_dialog.laser_1_calibration_power.textChanged.connect(self._toggle_save_color)
         self.Opto_dialog.laser_2_calibration_power.textChanged.connect(self._toggle_save_color)
         self.pushButton_streamlit.clicked.connect(self._open_mouse_on_streamlit)
+        self.on_curriculum.clicked.connect(self.off_curriculum)
 
         # add validator for weight and water fields
         double_validator = QtGui.QDoubleValidator()
@@ -628,26 +628,26 @@ class Window(QMainWindow):
         else:
             widget.setStyleSheet(unchecked_color)
 
-    def _manage_warning_labels(self, warning_labels, warning_text=''):
-        '''
-            Manage the warning labels.
+    def off_curriculum(self, checked) -> None:
+        """
+        Function to handle going off curriculum.
+        :param checked: if on_curriculum checkbox is checked or not
+        """
 
-            If there is a warning, set the color to self.default_warning_color. If there is no warning, set the text to ''.
-        Parameters
-        ----------
-        warning_label : single QtWidgets.QLabel or list of QtWidgets.QLabel
-            The warning label to manage
-        warning_text : str
-            The warning text to display
-        Returns
-        -------
-        None
-        '''
-        if not isinstance(warning_labels, list):
-            warning_labels = [warning_labels]
-        for warning_label in warning_labels:
-            warning_label.setText(warning_text)
-            warning_label.setStyleSheet(f'color: {self.default_warning_color};')
+        if not checked:     # user wants to go off curriculum
+            reply = QMessageBox.question(self, 'Off Curriculum', 'You are going off curriculum. Are you absolutely sure'
+                                                                 ' you would like to do this? Once you do this, there '
+                                                                 'is no going back. This could really annoying.',
+                                         QMessageBox.No, QMessageBox.Yes)
+            if reply == QMessageBox.No:
+                self.on_curriculum.setChecked(True)
+            else:
+                self.task_widget.setEnabled(True)
+                self.session_widget.setEnabled(True)
+                self.fip_widget.setEnabled(True)
+                self.Opto_dialog.opto_widget.setEnabled(True)
+                self.on_curriculum.setEnabled(False)
+
 
     def load_slims_mouse(self, mouse_id: str):
         """
@@ -661,7 +661,7 @@ class Window(QMainWindow):
             logging.info(f"Successfully fetched {mouse_id} from Slims.")
 
             logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
-            self.curriculum, self.trainer_state, self.metrics, attachments = self.trainer.load_data(mouse_id)
+            self.curriculum, self.trainer_state, self.metrics, attachments, session = self.trainer.load_data(mouse_id)
             self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
 
             attachment_names = [attachment.name for attachment in attachments]
@@ -692,17 +692,22 @@ class Window(QMainWindow):
             self.label_curriculum_stage.setText(self.trainer_state.stage.name)
             self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
 
-            self.task_widget.setEnabled(False)
-            self.session_widget.setEnabled(False)
-            self.Opto_dialog.opto_widget.setEnabled(False)
-            self.fip_widget.setEnabled(False)
+            # enable or disable widget based on if session is on curriculum
+            self.task_widget.setEnabled(not session.is_curriculum_suggestion)
+            self.session_widget.setEnabled(not session.is_curriculum_suggestion)
+            self.Opto_dialog.opto_widget.setEnabled(not session.is_curriculum_suggestion)
+            self.fip_widget.setEnabled(not session.is_curriculum_suggestion)
+
+            # set state of on_curriculum check
+            self.on_curriculum.setChecked(session.is_curriculum_suggestion)
+            self.on_curriculum.setVisible(True)
 
         except Exception as e:
             if 'No record found' in str(e):  # mouse doesn't exist
                 logging.warning(f"{mouse_id} is not in Slims. Double check id, and add to Slims if missing",
                                 extra={'tags': [self.warning_log_tag]})
             else:
-                logging.warning(f"Error loading mouse {mouse_id} curriculum loaded from Slims.",
+                logging.warning(f"Error loading mouse {mouse_id} curriculum loaded from Slims. {e}",
                                 extra={'tags': [self.warning_log_tag]})
         finally:
             self.load_slims_progress.hide()
@@ -725,11 +730,12 @@ class Window(QMainWindow):
             )
             logging.info("Writing trainer state to slims.")
             slims_model, next_trainer_state = self.trainer.write_data(subject_id=mouse_id,
-                                                  metrics=new_metrics,
-                                                  curriculum=self.curriculum,
-                                                  trainer_state=self.trainer_state,
-                                                  date=datetime.now() if not hasattr(self, "session_model")
-                                                  else self.session_model.date)
+                                                                      metrics=new_metrics,
+                                                                      curriculum=self.curriculum,
+                                                                      trainer_state=self.trainer_state,
+                                                                      date=datetime.now() if not hasattr(self, "session_model")
+                                                                      else self.session_model.date,
+                                                                      on_curriculum=self.on_curriculum.checked())
 
             # add session model as an attachment
             self.slims_client.add_attachment_content(
@@ -3426,6 +3432,11 @@ class Window(QMainWindow):
         self.Opto_dialog.opto_widget.setEnabled(True)
         self.fip_widget.setEnabled(True)
 
+        self.curriculum = None
+        self.trainer_state = None
+        self.metrics = None
+        self.on_curriculum.setVisible(False)
+
         self.label_curriculum_stage.setText("")
 
         # add session to slims
@@ -3765,6 +3776,7 @@ class Window(QMainWindow):
             self.session_widget.setEnabled(False)
             self.Opto_dialog.opto_widget.setEnabled(False)
             self.fip_widget.setEnabled(False)
+            self.on_curriculum.setEnabled(False)
 
             self.session_run = True   # session has been started
 
@@ -3789,6 +3801,7 @@ class Window(QMainWindow):
             self.session_widget.setEnabled(True)
             self.Opto_dialog.opto_widget.setEnabled(True)
             self.fip_widget.setEnabled(True)
+            self.on_curriculum.setEnabled(True)
 
             # If the photometry timer is running, stop it
             if self.finish_Timer == 0:

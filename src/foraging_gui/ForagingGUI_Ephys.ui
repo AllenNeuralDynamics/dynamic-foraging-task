@@ -1262,11 +1262,36 @@
     <layout class="QHBoxLayout" name="fip_layout">
     </layout>
    </widget>
-   <widget class="QLabel" name="label_curriculum_stage">
+   <widget class="QCheckBox" name="on_curriculum">
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+      <horstretch>5</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>On Curriculum</string>
+    </property>
     <property name="geometry">
      <rect>
       <x>830</x>
       <y>830</y>
+      <width>371</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="visible">
+     <bool>false</bool>
+    </property>
+    <property name="checked">
+    <bool>true</bool>
+   </property>
+   </widget>
+   <widget class="QLabel" name="label_curriculum_stage">
+    <property name="geometry">
+     <rect>
+      <x>800</x>
+      <y>860</y>
       <width>371</width>
       <height>81</height>
      </rect>
@@ -1879,7 +1904,7 @@
    <zorder>StartExcitation</zorder>
    <zorder>StartBleaching</zorder>
    <zorder>AutoTrain</zorder>
-   <zorder>label_curriculum_stage</zorder>
+<!--   <zorder>label_curriculum_stage</zorder>-->
    <zorder>pushButton_streamlit</zorder>
    <zorder>StartEphysRecording</zorder>
    <zorder>label_65</zorder>
