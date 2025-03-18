@@ -698,9 +698,9 @@ class Window(QMainWindow):
             self.Opto_dialog.opto_widget.setEnabled(not session.is_curriculum_suggestion)
             self.fip_widget.setEnabled(not session.is_curriculum_suggestion)
 
-            # set state of on_curriculum check
+            # # set state of on_curriculum check
             self.on_curriculum.setChecked(session.is_curriculum_suggestion)
-            self.on_curriculum.setVisible(True)
+
 
         except Exception as e:
             if 'No record found' in str(e):  # mouse doesn't exist
@@ -2732,6 +2732,8 @@ class Window(QMainWindow):
         self.session_widget.apply_schema(self.session_model)
         self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
         self.fip_widget.apply_schema(self.fip_model)
+        if self.curriculum is not None:
+            self.on_curriculum.setVisible(True)
 
     def save_task_models(self):
         """
