@@ -18,6 +18,7 @@ class FIBParametersWidget(SchemaWidgetBase):
 
         super().__init__(schema)
         self.schema_fields_widgets["experiment_type"].hide()
+        self.schema_fields_widgets["stage_start"].hide()
 
         # make entire fip schema optional
         # hide or show auto_water
@@ -52,7 +53,8 @@ class FIBParametersWidget(SchemaWidgetBase):
         for widget in self.schema_fields_widgets.values():
             widget.setEnabled(True)
         super().apply_schema(*args, **kwargs)
-
+        for widget in self.schema_fields_widgets.values():
+            widget.setEnabled(self.schema.mode is not None)
 
     def _set_widget_text(self, name, value):
         """Set widget text if widget is QLineEdit or QCombobox

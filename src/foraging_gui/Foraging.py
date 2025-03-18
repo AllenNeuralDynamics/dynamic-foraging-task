@@ -80,7 +80,8 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
 )
 
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
-    FiberPhotometry
+    FiberPhotometry,
+    STAGE_STARTS
 )
 
 from aind_behavior_dynamic_foraging.CurriculumManager.trainer import DynamicForagingTrainerServer
@@ -294,6 +295,9 @@ class Window(QMainWindow):
         self.load_slims_progress.setWindowFlag(Qt.FramelessWindowHint)
         self.load_slims_progress.setMovie(movie)
 
+        # hook up signals
+        self.mouse_selector_dialog.acceptedMouseID.connect(lambda: self.load_slims_progress.move(self.geometry().center().x() - (self.load_slims_progress.width() // 2),
+                                                                                                 self.geometry().center().y() - (self.load_slims_progress.height() // 2)))
         self.mouse_selector_dialog.acceptedMouseID.connect(self.load_slims_progress.show)
         self.mouse_selector_dialog.acceptedMouseID.connect(lambda: threading.Thread(target=self.load_slims_mouse,
                                                                                     kwargs={"mouse_id": self.mouse_selector_dialog.combo.currentText()}).start())
@@ -653,23 +657,18 @@ class Window(QMainWindow):
 
         try:
             logging.info(f"Fetching {mouse_id} from Slims.")
-            mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
+            self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
             logging.info(f"Successfully fetched {mouse_id} from Slims.")
 
-
             logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
-            self.curriculum, self.trainer_state, self.metrics = self.trainer.load_data(mouse_id)
+            self.curriculum, self.trainer_state, self.metrics, attachments = self.trainer.load_data(mouse_id)
             self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
 
-            # fetch session and check for session, opto and fip attachments
-            logging.info(f"Checking for attachments")
-            last_ses = self.slims_client.fetch_models(models.behavior_session.SlimsBehaviorSession, mouse_pk=mouse.pk)[-1]
-            attachments = self.slims_client.fetch_attachments(last_ses)
             attachment_names = [attachment.name for attachment in attachments]
 
             # update session model with slims session information
-            sess_attach = attachments[attachment_names.index(AindBehaviorSessionModel.__name__)]
-            slims_session_model = AindBehaviorSessionModel(**self.slims_client.fetch_attachment_content(sess_attach).json())
+            ses_att = attachments[attachment_names.index(AindBehaviorSessionModel.__name__)]
+            slims_session_model = AindBehaviorSessionModel(**self.slims_client.fetch_attachment_content(ses_att).json())
             self.session_model.experiment = slims_session_model.experiment
             self.session_model.experimenter = slims_session_model.experimenter
             self.session_model.subject = slims_session_model.subject
@@ -685,6 +684,9 @@ class Window(QMainWindow):
                 logging.info(f"Applying fip model")
                 fip_attachment = attachments[attachment_names.index(self.fip_model.experiment_type)]
                 self.fip_model = FiberPhotometry(**self.slims_client.fetch_attachment_content(fip_attachment).json())
+                # check if current stage is past stage_start
+                self.fip_model.mode = None if STAGE_STARTS.index(self.trainer_state.stage.name) < \
+                                              STAGE_STARTS.index(self.fip_model.stage_start) else self.fip_model.mode
 
             logging.info(f"Mouse {mouse_id} curriculum loaded from Slims.", extra={'tags': [self.warning_log_tag]})
             self.label_curriculum_stage.setText(self.trainer_state.stage.name)
@@ -721,13 +723,13 @@ class Window(QMainWindow):
                 session_total=self.metrics.session_total+1,
                 session_at_current_stage=self.metrics.session_at_current_stage+1
             )
-
-            logging.info("Generating next session stage.")
-            next_trainer_state = Trainer(self.curriculum).evaluate(trainer_state=self.trainer_state,
-                                                                   metrics=new_metrics)
-
             logging.info("Writing trainer state to slims.")
-            slims_model = self.trainer.write_data(mouse_id, self.curriculum, next_trainer_state)
+            slims_model, next_trainer_state = self.trainer.write_data(subject_id=mouse_id,
+                                                  metrics=new_metrics,
+                                                  curriculum=self.curriculum,
+                                                  trainer_state=self.trainer_state,
+                                                  date=datetime.now() if not hasattr(self, "session_model")
+                                                  else self.session_model.date)
 
             # add session model as an attachment
             self.slims_client.add_attachment_content(
@@ -3640,67 +3642,7 @@ class Window(QMainWindow):
         # Toggle button colors
         if self.Start.isChecked():
             logging.info('Start button pressed: starting trial loop')
-
-            # check if FIP setting match schedule. skip if test mouse or mouse isn't in schedule or
             mouse_id = self.session_model.subject
-            if hasattr(self, 'schedule') and mouse_id in self.schedule['Mouse ID'].values and \
-                    mouse_id not in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']:
-                fip_mode = self._GetInfoFromSchedule(mouse_id, 'FIP Mode')
-                fip_is_nan = (isinstance(fip_mode, float) and math.isnan(fip_mode)) or fip_mode is None
-                # remove STAGE_ string for consistency between schedule and auto-train. Schedule denotes final stage as
-                # FINAL and auto-train has STAGE_FINAL
-                first_fip_stage = str(self._GetInfoFromSchedule(mouse_id, 'First FP Stage')).split('STAGE_')[-1]
-                current_stage = 'nan' if self.trainer_state is None else self.trainer_state.stage
-                nodes = {} if self.curriculum is None else self.curriculum.graph.nodes
-                stages = ['nan'] + [stage.name.split('stage_')[-1] for stage in nodes.values()] \
-                         + ['unknown training stage']
-                if fip_is_nan and self.fip_model.mode is not None:
-                    reply = QMessageBox.critical(self,
-                                                 'Box {}, Start'.format(self.box_letter),
-                                                 'Photometry is set to "on", but the FIP Mode is not in schedule. '
-                                                 'Continue anyways?',
-                                                 QMessageBox.Yes | QMessageBox.No, )
-                    if reply == QMessageBox.No:
-                        self.Start.setChecked(False)
-                        logging.info('User declines starting session due to conflicting FIP information')
-                        return
-                    else:
-                        # Allow the session to continue, but log error
-                        logging.error('Starting session with conflicting FIP information: mouse {}, FIP on, '
-                                      'but not in schedule'.format(mouse_id))
-                elif not fip_is_nan and self.fip_model.mode is None and first_fip_stage in stages and \
-                        stages.index(current_stage) >= stages.index(first_fip_stage):
-                    reply = QMessageBox.critical(self,
-                                                 'Box {}, Start'.format(self.box_letter),
-                                                 f'Photometry is set to "off" but schedule indicate '
-                                                 f'FIP Mode is {fip_mode}. Continue anyways?',
-                                                 QMessageBox.Yes | QMessageBox.No, )
-                    if reply == QMessageBox.No:
-                        self.Start.setChecked(False)
-                        logging.info('User declines starting session due to conflicting FIP information')
-                        return
-                    else:
-                        # Allow the session to continue, but log error
-                        logging.error(
-                            'Starting session with conflicting FIP information: mouse {}, FIP off, but schedule lists FIP {}'.format(
-                                mouse_id, fip_mode))
-
-                elif not fip_is_nan and self.fip_model.mode is not None and fip_mode != self.fip_model.mode:
-                    reply = QMessageBox.critical(self,
-                                                 'Box {}, Start'.format(self.box_letter),
-                                                 f'FIP Mode is set to {self.fip_model.mode} but schedule indicate '
-                                                 f'FIP Mode is {fip_mode}. Continue anyways?',
-                                                 QMessageBox.Yes | QMessageBox.No, )
-                    if reply == QMessageBox.No:
-                        self.Start.setChecked(False)
-                        logging.info('User declines starting session due to conflicting FIP information')
-                        return
-                    else:
-                        # Allow the session to continue, but log error
-                        logging.error(
-                            'Starting session with conflicting FIP information: mouse {}, FIP mode {}, schedule lists {}'.format(
-                                mouse_id, self.fip_model.mode, fip_mode))
-
             if self.StartANewSession == 0:
                 reply = QMessageBox.question(self,
                                              'Box {}, Start'.format(self.box_letter),
