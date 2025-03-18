@@ -112,9 +112,6 @@ class Window(QMainWindow):
         # Load Rig Json
         self._LoadRigJson()
 
-        # Stage Widget
-        self.stage_widget = None
-
         # Load User interface
         self._LoadUI()
 
@@ -154,6 +151,23 @@ class Window(QMainWindow):
         self.unsaved_data = False   # Setting unsaved data to False
         self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames
         self.session_run = False    # flag to indicate if session has been run or not
+
+        # Stage Widget
+        self.stage_widget = None
+        try:
+            self._load_stage()
+        except IOError as e:
+            msg = (f"ERROR...<br>"
+                  f"Dear scientist, please perform the following to document this issue:<br>"
+                  f"    1) Create comment here: <a href=https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/925>Github Link</a><br>"
+                  f"    2) In the comment list the following information:<br> "
+                  f"            - Date and time of error<br>"
+                  f"            - Box info (ex. 6D)<br>"
+                  f"            - Attach logs (found in  C:\\Users\\svc_aind_behavior\\Documents\\foraging_gui_logs). Please add the two most recent files<br>"
+                  f"            - Short description of the last thing done on the GUI before the error. (ex. overnight bleaching, closed gui, opened gui - error)<br>"
+                  f"Thank you, with your efforts hopefully we can vanquish this error and never see it again...<br>")
+            show_msg_box("Stage Widget Error", "Stage Widget Error Diagnostic Help", msg)
+            raise e
 
         # Connect to Bonsai
         self._InitializeBonsai()
@@ -207,7 +221,6 @@ class Window(QMainWindow):
         self._WaterCalibration()# to open the water calibration panel
         self._Camera()
         self._InitializeMotorStage()
-        self._load_stage()
         self._Metadata()
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
         self.WaterPerRewardedTrial=0.005
@@ -1163,15 +1176,14 @@ class Window(QMainWindow):
 
     def _GetProjectName(self, mouse_id):
         logging.info('Getting Project name')
-        add_default=True
         project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
-    
+        add_default = True 
+
         # Check if this is a valid project name
-        if project_name not in self._GetApprovedAINDProjectNames():
-            if project_name is not None:
-                logging.error('Project name {} is not valid, using default, please correct schedule'.format(project_name))
-            else:
-                logging.info('Project name {} is not valid, using default, please correct schedule'.format(project_name))
+        if project_name is None:
+            logging.info('Project name not on schedule, using default')
+        elif project_name not in self._GetApprovedAINDProjectNames():
+            logging.error('Project name {} is not valid, using default, please correct schedule'.format(project_name))
             project_name = None
 
         # If we have a valid name update the metadata dialog
@@ -1183,17 +1195,17 @@ class Window(QMainWindow):
                 index = index[0]
                 self.Metadata_dialog.ProjectName.setCurrentIndex(index)
                 self.Metadata_dialog._show_project_info()
-                logging.info('Setting Project name: {}'.format(project_name))
+                logging.info('Setting project name: {}'.format(project_name))
                 add_default = False
 
-        if self.add_default_project_name and add_default:
-            logging.info('setting project name to default')
-            project_name=self._set_default_project()
-        return project_name
-    
+        # Users can opt out of setting the default project name
+        # In this case they must set the project name manually
+        if self.Settings['add_default_project_name'] and add_default:
+            project_name=self._set_default_project()   
+
     def _GetApprovedAINDProjectNames(self):
         end_point = "http://aind-metadata-service/project_names"
-        timeout = 5
+        timeout = 10
         try:
             response = requests.get(end_point, timeout=timeout)
         except TimeoutError as e:
@@ -1276,7 +1288,6 @@ class Window(QMainWindow):
             'open_ephys_machine_ip_address':'',
             'metadata_dialog_folder':os.path.join(self.SettingFolder,"metadata_dialog")+'\\',
             'rig_metadata_folder':os.path.join(self.SettingFolder,"rig_metadata")+'\\',
-            'project_info_file':os.path.join(self.SettingFolder,"Project Name and Funding Source v2.csv"),
             'schedule_path': os.path.join('Z:\\','dynamic_foraging','DynamicForagingSchedule.csv'),
             'go_cue_decibel_box1':60,
             'go_cue_decibel_box2':60,
@@ -1350,7 +1361,6 @@ class Window(QMainWindow):
         self.open_ephys_machine_ip_address=self.Settings['open_ephys_machine_ip_address']
         self.metadata_dialog_folder = self.Settings['metadata_dialog_folder']
         self.rig_metadata_folder = self.Settings['rig_metadata_folder']
-        self.project_info_file = self.Settings['project_info_file']
         self.go_cue_decibel_box1 = self.Settings['go_cue_decibel_box1']
         self.go_cue_decibel_box2 = self.Settings['go_cue_decibel_box2']
         self.go_cue_decibel_box3 = self.Settings['go_cue_decibel_box3']
@@ -1364,8 +1374,6 @@ class Window(QMainWindow):
         self.auto_engage = self.Settings['auto_engage']
         self.clear_figure_after_save = self.Settings['clear_figure_after_save']
         self.add_default_project_name = self.Settings['add_default_project_name']
-        if not is_absolute_path(self.project_info_file):
-            self.project_info_file = os.path.join(self.SettingFolder,self.project_info_file)
 
         # Also stream log info to the console if enabled
         if self.Settings['show_log_info_in_console']:
@@ -1997,7 +2005,7 @@ class Window(QMainWindow):
                         child.setStyleSheet('background-color: white;')
                         self._Task()
 
-                    if child.objectName() in {'WeightAfter','LickSpoutDistance','ModuleAngle','ArcAngle','ProtocolID','Stick_RotationAngle','LickSpoutReferenceX','LickSpoutReferenceY','LickSpoutReferenceZ','LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','Stick_ArcAngle','Stick_ModuleAngle','RotationAngle','ManipulatorX','ManipulatorY','ManipulatorZ','ProbeTarget','RigMetadataFile','IACUCProtocol','Experimenter','TotalWater','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
+                    if child.objectName() in {'WeightAfter','LickSpoutDistance','ModuleAngle','ArcAngle','ProtocolID','Stick_RotationAngle','LickSpoutReferenceX','LickSpoutReferenceY','LickSpoutReferenceZ','LickSpoutReferenceArea','Stick_ArcAngle','Stick_ModuleAngle','RotationAngle','ManipulatorX','ManipulatorY','ManipulatorZ','ProbeTarget','RigMetadataFile','IACUCProtocol','Experimenter','TotalWater','ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
                         continue
                     if child.objectName()=='UncoupledReward':
                         Correct=self._CheckFormat(child)
@@ -2066,7 +2074,7 @@ class Window(QMainWindow):
                             self.UpdateParameters = 0
 
                         self.Continue=0
-                        if child.objectName() in {'LickSpoutReferenceArea','Fundee','ProjectCode','GrantNumber','FundingSource','Investigators','ProbeTarget','RigMetadataFile','Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
+                        if child.objectName() in {'LickSpoutReferenceArea','ProbeTarget','RigMetadataFile','Experimenter', 'UncoupledReward', 'ExtraWater','laser_1_target','laser_2_target','laser_1_calibration_power','laser_2_calibration_power','laser_1_calibration_voltage','laser_2_calibration_voltage'}:
                             child.setStyleSheet(f'color: {self.default_text_color};')
                             self.Continue=1
                         if child.text()=='': # If empty, change background color and wait for confirmation
@@ -3054,6 +3062,7 @@ class Window(QMainWindow):
         self.ID.setText(mouse_id)
         self.Experimenter.setText(experimenter)
         self.ID.returnPressed.emit()
+        self._GetProjectName(mouse_id)
         self.TargetRatio.setText('0.85')
         self.keyPressEvent(allow_reset=True)
 
@@ -3366,7 +3375,8 @@ class Window(QMainWindow):
         self.keyPressEvent() # Accept all updates
         self.load_tag=1
         self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
-
+        self._GetProjectName(mouse_id)
+    
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
         self.ToInitializeVisual=1
@@ -3863,7 +3873,7 @@ class Window(QMainWindow):
     def _set_default_project(self):
         '''Set default project information'''
         project_name = 'Behavior Platform'
-        logging.info('Setting Project name: {}'.format('Behavior Platform'))
+        logging.error('Setting default project name: {}'.format('Behavior Platform'))
         projects = [self.Metadata_dialog.ProjectName.itemText(i)
                     for i in range(self.Metadata_dialog.ProjectName.count())]
         index = np.where(np.array(projects) == 'Behavior Platform')[0]
@@ -3872,13 +3882,6 @@ class Window(QMainWindow):
             self.Metadata_dialog.ProjectName.setCurrentIndex(index)
             self.Metadata_dialog._show_project_info()
         else:
-            project_info = {
-                'Funding Institution': ['Allen Institute'],
-                'Grant Number': ['nan'],
-                'Investigators': ['Jeremiah Cohen'],
-                'Fundee': ['nan'],
-            }
-            self.Metadata_dialog.project_info = project_info
             self.Metadata_dialog.ProjectName.addItems([project_name])
         return project_name
 
@@ -4113,6 +4116,7 @@ class Window(QMainWindow):
             self.Start.setStyleSheet("background-color : green;")
             self.NewSession.setStyleSheet("background-color : none")
             self.NewSession.setChecked(False)
+
             # disable metadata fields
             self._set_metadata_enabled(False)
 
@@ -4125,10 +4129,6 @@ class Window(QMainWindow):
                     update_session_metadata=True
                 )
                 logging.info('Setting IACUC Protocol: {}'.format(protocol))
-
-            # Set Project Name in metadata based on schedule
-            self.project_name = self._GetProjectName(mouse_id)
-            
             self.session_run = True   # session has been started
 
             self.keyPressEvent(allow_reset=True)
@@ -4849,10 +4849,6 @@ class Window(QMainWindow):
 
         logging.info('Generating upload manifest')
         try:
-            if not hasattr(self, 'project_name'):
-                self.project_name = 'Behavior Platform'
-            if self.project_name==None:
-                self.project_name = 'Behavior Platform'
             # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
             # Random offset reduces strain on downstream servers getting many requests at once
             date_format = "%Y-%m-%d_%H-%M-%S"
@@ -4886,7 +4882,7 @@ class Window(QMainWindow):
                     os.path.join(self.MetadataFolder,'rig.json').replace('\\','/'),
                     ],
                 'schedule_time':schedule_time,
-                'project_name':self.project_name,
+                'project_name':self.Metadata_dialog.ProjectName.currentText(),
                 'script': {}
                 }
 
@@ -5023,6 +5019,20 @@ def log_git_hash():
         print('local repository is clean')
 
     return git_hash, git_branch, repo_url, repo_dirty_flag, dirty_files, version
+
+
+def show_msg_box(window_title, title, msg):
+    '''
+    Display a Qwindow alert to the user. This is originally implemented to debug the stagewidget connection issues.
+    This can be removed after the issue is resolved.
+    '''
+    if QtWidgets.QApplication.instance() is not None:
+        msg_box = QtWidgets.QMessageBox()
+        msg_box.setWindowTitle(window_title)
+        msg_box.setText('<span style="color:purple;font-weight:bold"> {} </span> <br><br> {}'.format(title, msg))
+        msg_box.exec_()
+    else:
+        logging.error('could not launch custom message box')
 
 
 def show_exception_box(log_msg):
