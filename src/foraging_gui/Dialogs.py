@@ -2664,7 +2664,24 @@ class AutoTrainDialog(QDialog):
             # -- This is a new mouse, we add the first dummy session --
             # Update global curriculum_in_use
             self.curriculum_in_use = self.selected_curriculum['curriculum']
-            
+
+            curriculum_in_schedule = self.MainWindow._GetInfoFromSchedule(self.selected_subject_id,
+                                                                          "Autotrain Curriculum Name")
+
+            if curriculum_in_schedule is not None and curriculum_in_schedule != self.curriculum_in_use.curriculum_name:
+                reply = QMessageBox.question(self, "Box {}, Wrong Curriculum".format(self.MainWindow.box_letter),
+                                             f"The curriculum {self.curriculum_in_use.curriculum_name} is not the same"
+                                             f" as in the schedule: {curriculum_in_schedule}. "
+                                             f"Would you like to continue anyway?",
+                                             QMessageBox.Yes,
+                                             QMessageBox.No)
+                if reply == QMessageBox.Yes:
+                    logging.error(f"Mouse {self.selected_subject_id} was started on curriculum "
+                                  f"{self.curriculum_in_use.curriculum_name} which is different than curriculum "
+                                  f"{curriculum_in_schedule} found in schedule.")
+                else:
+                    return
+
             # Add a dummy entry to df_training_manager
             self.df_training_manager = pd.concat(
                 [self.df_training_manager, 
