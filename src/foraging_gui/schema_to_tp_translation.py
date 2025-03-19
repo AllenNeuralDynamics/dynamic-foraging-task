@@ -16,7 +16,6 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry
 
 
-
 def task_parameters_to_tp_conversion(task_parameters: AindDynamicForagingTaskParameters) -> dict:
     """
     Map the AindDynamicForagingTaskParameters to previously foraging gui TP_ parameters
@@ -106,6 +105,7 @@ def task_parameters_to_tp_conversion(task_parameters: AindDynamicForagingTaskPar
         'warmup': task_parameters.warmup
     }
 
+
 def session_to_tp_conversion(session_model: AindBehaviorSessionModel) -> dict:
     """
     Map the AindBehaviorSessionModel to previously foraging gui TP_ parameters
@@ -113,14 +113,15 @@ def session_to_tp_conversion(session_model: AindBehaviorSessionModel) -> dict:
     """
 
     return {
-     'Experimenter': session_model.experimenter[0],
-     'ID': session_model.subject,
-     'ShowNotes': session_model.notes,
-     'TP_Experimenter': session_model.experimenter[0],
-     'TP_ID': session_model.subject,
-     'TP_Task': session_model.experiment,
-     'Task': session_model.experiment,
-     }
+        'Experimenter': session_model.experimenter[0],
+        'ID': session_model.subject,
+        'ShowNotes': session_model.notes,
+        'TP_Experimenter': session_model.experimenter[0],
+        'TP_ID': session_model.subject,
+        'TP_Task': session_model.experiment,
+        'Task': session_model.experiment,
+    }
+
 
 def fip_to_tp_conversion(fip_model: FiberPhotometry) -> dict:
     """
@@ -129,19 +130,29 @@ def fip_to_tp_conversion(fip_model: FiberPhotometry) -> dict:
     """
 
     return {
-     'PhotometryB': False if fip_model.mode is None else True,
-     'TP_FIPMode': fip_model.mode,
-     'TP_PhotometryB': False if fip_model.mode is None else True,
-     'TP_baselinetime': fip_model.baseline_time,
-     'baselinetime': fip_model.baseline_time,
-     'fiber_mode': fip_model.mode,
-     }
+        'PhotometryB': False if fip_model.mode is None else True,
+        'TP_FIPMode': fip_model.mode,
+        'TP_PhotometryB': False if fip_model.mode is None else True,
+        'TP_baselinetime': fip_model.baseline_time,
+        'baselinetime': fip_model.baseline_time,
+        'fiber_mode': fip_model.mode,
+    }
+
 
 def opto_to_tp_conversion(opto_model: Optogenetics) -> dict:
     """
     Map the Optogenetics to previously foraging gui TP_ parameters
     :param opto_model: opto model to map
     """
+
+    dictionary = {
+        'TP_FractionOfSession': getattr(opto_model.session_control, "session_fraction", None),
+        'TP_MinOptoInterval': opto_model.minimum_trial_interval,
+        'TP_SampleFrequency': opto_model.sample_frequency,
+        'TP_SessionAlternating': getattr(opto_model.session_control, "alternating_sessions", None),
+        'TP_SessionStartWith': getattr(opto_model.session_control, "optogenetic_start", None),
+        'TP_SessionWideControl': opto_model.session_control,
+    }
 
     sort_map = ["LaserColorOne",
                 "LaserColorTwo",
@@ -153,121 +164,49 @@ def opto_to_tp_conversion(opto_model: Optogenetics) -> dict:
     # fill gaps in laser dict
     lasers.update({laser.name: laser for laser in opto_model.laser_colors})
 
-    dictionary = {}
-
     for i in range(1, 6):
         laser_name = sort_map[i]
-        dictionary[f'TP_ConditionP_{i}'] = lasers[laser_name]
+        if lasers[laser_name] is not None:
+            dictionary[f'TP_ConditionP_{i}'] = lasers[laser_name].condition_probability
+            dictionary[f'TP_Condition_{i}'] = getattr(lasers[laser_name], 'pulse_condition', None)
+            dictionary[f'TP_Duration_{i}'] = lasers[laser_name].duration
+            dictionary[f'TP_Frequency_{i}'] = getattr(lasers[laser_name].protocol, 'frequency', None)
+            dictionary[f'TP_LaserColor_{i}'] = lasers[laser_name].color
+            dictionary[f'TP_LaserEnd_{i}'] = getattr(lasers[laser_name].end, 'interval_condition', None) is None
+            dictionary[f'TP_LaserStart_{i}'] = getattr(lasers[laser_name].start, 'interval_condition', None) is None
+            dictionary[f'TP_OffsetEnd_{i}'] = getattr(lasers[laser_name].end, 'offset', None) is None
+            dictionary[f'TP_OffsetStart_{i}'] = getattr(lasers[laser_name].start, 'offset', None) is None
+            dictionary[f'TP_Probability_{i}'] = lasers[laser_name].probability
+            dictionary[f'TP_Protocol_{i}'] = lasers[laser_name].protocol.name
+            dictionary[f'TP_PulseDur_{i}'] = getattr(lasers[laser_name].protocol, 'duration', None)
+            dictionary[f'TP_RD_{i}'] = getattr(lasers[laser_name].protocol, 'ramp_down', None)
 
-    {
-     'TP_ConditionP_1':,
-     'TP_ConditionP_2',
-     'TP_ConditionP_3',
-     'TP_ConditionP_4',
-     'TP_ConditionP_5',
-     'TP_ConditionP_6',
-     'TP_Condition_1',
-     'TP_Condition_2',
-     'TP_Condition_3',
-     'TP_Condition_4',
-     'TP_Condition_5',
-     'TP_Condition_6',
-     'TP_Duration_1',
-     'TP_Duration_2',
-     'TP_Duration_3',
-     'TP_Duration_4',
-     'TP_Duration_5',
-     'TP_Duration_6',
-     'TP_FractionOfSession',
-     'TP_Frequency_1',
-     'TP_Frequency_2',
-     'TP_Frequency_3',
-     'TP_Frequency_4',
-     'TP_Frequency_5',
-     'TP_Frequency_6',
-     'TP_Laser1_power_1',
-     'TP_Laser1_power_2',
-     'TP_Laser1_power_3',
-     'TP_Laser1_power_4',
-     'TP_Laser1_power_5',
-     'TP_Laser1_power_6',
-     'TP_Laser2_power_1',
-     'TP_Laser2_power_2',
-     'TP_Laser2_power_3',
-     'TP_Laser2_power_4',
-     'TP_Laser2_power_5',
-     'TP_Laser2_power_6',
-     'TP_LaserColor_1',
-     'TP_LaserColor_2',
-     'TP_LaserColor_3',
-     'TP_LaserColor_4',
-     'TP_LaserColor_5',
-     'TP_LaserColor_6',
-     'TP_LaserEnd_1',
-     'TP_LaserEnd_2',
-     'TP_LaserEnd_3',
-     'TP_LaserEnd_4',
-     'TP_LaserEnd_5',
-     'TP_LaserEnd_6',
-     'TP_LaserStart_1',
-     'TP_LaserStart_2',
-     'TP_LaserStart_3',
-     'TP_LaserStart_4',
-     'TP_LaserStart_5',
-     'TP_LaserStart_6',
-     'TP_Laser_calibration',
-     'TP_LatestCalibrationDate',
-     'TP_Location_1',
-     'TP_Location_2',
-     'TP_Location_3',
-     'TP_Location_4',
-     'TP_Location_5',
-     'TP_Location_6',
-     'TP_MinOptoInterval',
-     'TP_OffsetEnd_1',
-     'TP_OffsetEnd_2',
-     'TP_OffsetEnd_3',
-     'TP_OffsetEnd_4',
-     'TP_OffsetEnd_5',
-     'TP_OffsetEnd_6',
-     'TP_OffsetStart_1',
-     'TP_OffsetStart_2',
-     'TP_OffsetStart_3',
-     'TP_OffsetStart_4',
-     'TP_OffsetStart_5',
-     'TP_OffsetStart_6',
-     'TP_Probability_1',
-     'TP_Probability_2',
-     'TP_Probability_3',
-     'TP_Probability_4',
-     'TP_Probability_5',
-     'TP_Probability_6',
-     'TP_Protocol_1',
-     'TP_Protocol_2',
-     'TP_Protocol_3',
-     'TP_Protocol_4',
-     'TP_Protocol_5',
-     'TP_Protocol_6',
-     'TP_PulseDur_1',
-     'TP_PulseDur_2',
-     'TP_PulseDur_3',
-     'TP_PulseDur_4',
-     'TP_PulseDur_5',
-     'TP_PulseDur_6',
-     'TP_RD_1',
-     'TP_RD_2',
-     'TP_RD_3',
-     'TP_RD_4',
-     'TP_RD_5',
-     'TP_RD_6',
-     'TP_SampleFrequency',
-     'TP_SessionAlternating',
-     'TP_SessionStartWith',
-     'TP_SessionWideControl',
-     'TP_laser_1_calibration_power',
-     'TP_laser_1_calibration_voltage',
-     'TP_laser_1_target',
-     'TP_laser_2_calibration_power',
-     'TP_laser_2_calibration_voltage',
-     'TP_laser_2_target',
-     }
+            # map laser locations
+            loc_map = ["LocationOne", "LocationTwo"]
+            locs = {k: None for k in loc_map}
+            locs.update({loc.name: loc for loc in lasers[laser_name].location})
+            dictionary[f'TP_Laser1_power_{i}'] = None if locs["LocationOne"] is None else locs["LocationOne"].power
+            dictionary[f'TP_Laser2_power_{i}'] = None if locs["LocationTwo"] is None else locs["LocationTwo"].power
+            if locs["LocationOne"] is None:
+                dictionary[f'TP_Location_{i}'] = "laser2"
+            elif locs["LocationTwo"] is None:
+                dictionary[f'TP_Location_{i}'] = "laser1"
+            else:
+                dictionary[f'TP_Location_{i}'] = "both"
+        else:
+            dictionary[f'TP_ConditionP_{i}'] = None
+            dictionary[f'TP_Condition_{i}'] = None
+            dictionary[f'TP_Duration_{i}'] = None
+            dictionary[f'TP_Frequency_{i}'] = None
+            dictionary[f'TP_LaserColor_{i}'] = None
+            dictionary[f'TP_LaserEnd_{i}'] = None
+            dictionary[f'TP_LaserStart_{i}'] = None
+            dictionary[f'TP_OffsetEnd_{i}'] = None
+            dictionary[f'TP_OffsetStart_{i}'] = None
+            dictionary[f'TP_Probability_{i}'] = None
+            dictionary[f'TP_Protocol_{i}'] = None
+            dictionary[f'TP_PulseDur_{i}'] = None
+            dictionary[f'TP_RD_{i}'] = None
+            dictionary[f'TP_Laser1_power_{i}'] = None
+            dictionary[f'TP_Laser2_power_{i}'] = None
+            dictionary[f'TP_Location_{i}'] = None
