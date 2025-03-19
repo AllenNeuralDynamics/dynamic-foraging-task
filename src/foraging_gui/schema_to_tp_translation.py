@@ -210,3 +210,5 @@ def opto_to_tp_conversion(opto_model: Optogenetics) -> dict:
             dictionary[f'TP_Laser1_power_{i}'] = None
             dictionary[f'TP_Laser2_power_{i}'] = None
             dictionary[f'TP_Location_{i}'] = None
+
+    return dictionary

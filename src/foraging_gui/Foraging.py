@@ -2463,7 +2463,7 @@ class Window(QMainWindow):
             Obj = {}
 
         # add in keys for backwards compatibility
-        task_map = task_parameters_to_tp_conversion(self.task_logic)
+        task_map = task_parameters_to_tp_conversion(self.task_logic.task_parameters)
         session_map = session_to_tp_conversion(self.session_model)
         fip_map = fip_to_tp_conversion(self.fip_model)
         opto_map = opto_to_tp_conversion(self.opto_model)
