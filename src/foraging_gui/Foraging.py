@@ -4315,28 +4315,31 @@ class Window(QMainWindow):
         """
         Data cleanup and saving that needs to be done at end of session.
         """
+        if hasattr(self, 'GeneratedTrials'):
+            # If the session never generated any trials, then we don't need to perform these tasks
 
-        # fill out GenerateTrials B_Bias
-        last_bias = self.GeneratedTrials.B_Bias[-1]
-        b_bias_len = len(self.GeneratedTrials.B_Bias)
-        bias_filler = [last_bias] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_bias_len)
-        self.GeneratedTrials.B_Bias = np.concatenate((self.GeneratedTrials.B_Bias, bias_filler), axis=0)
+            # fill out GenerateTrials B_Bias
+            last_bias = self.GeneratedTrials.B_Bias[-1]
+            b_bias_len = len(self.GeneratedTrials.B_Bias)
+            bias_filler = [last_bias] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_bias_len)
+            self.GeneratedTrials.B_Bias = np.concatenate((self.GeneratedTrials.B_Bias, bias_filler), axis=0)
 
-        # fill out GenerateTrials B_Bias_CI
-        last_ci = self.GeneratedTrials.B_Bias_CI[-1]
-        b_ci_len = len(self.GeneratedTrials.B_Bias_CI)
-        ci_filler = [last_ci] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_ci_len)
-        if ci_filler != []:
-            self.GeneratedTrials.B_Bias_CI = np.concatenate((self.GeneratedTrials.B_Bias_CI, ci_filler), axis=0)
+            # fill out GenerateTrials B_Bias_CI
+            last_ci = self.GeneratedTrials.B_Bias_CI[-1]
+            b_ci_len = len(self.GeneratedTrials.B_Bias_CI)
+            ci_filler = [last_ci] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_ci_len)
+            if ci_filler != []:
+                self.GeneratedTrials.B_Bias_CI = np.concatenate((self.GeneratedTrials.B_Bias_CI, ci_filler), axis=0)
 
-        # stop lick interval calculation
-        self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
+            # stop lick interval calculation
+            self.GeneratedTrials.lick_interval_time.stop()
 
         # validate behavior session model and document validation errors if any
         try:
             AindBehaviorSessionModel(**self.behavior_session_model.model_dump())
         except ValidationError as e:
             logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+
         # save behavior session model
         with open(self.behavior_session_modelJson, "w") as outfile:
             outfile.write(self.behavior_session_model.model_dump_json())
