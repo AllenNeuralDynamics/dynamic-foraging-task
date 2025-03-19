@@ -309,9 +309,9 @@ class GenerateTrials():
         if self.task_logic.task_parameters.warmup is None:
             return
         warmup = self._get_warmup_state()
-        if warmup == 0 and self.task_logic.task_parameters.warmup is not None:
-            # set warm up to off
-            self.task_logic.task_parameters.warmup = None
+        if warmup == 0:
+            # update task logic with new trainer state
+            self.task_logic = self.trainer_state.stage.task
             self.win.task_widget.setEnabled(True)
             self.win.task_widget.apply_schema(self.task_logic.task_parameters)
             self.win.task_widget.setEnabled(False)

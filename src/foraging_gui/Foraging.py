@@ -659,11 +659,11 @@ class Window(QMainWindow):
             logging.info(f"Fetching {mouse_id} from Slims.")
             self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
             logging.info(f"Successfully fetched {mouse_id} from Slims.")
-
+            from pprint import pprint
             logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
             self.curriculum, self.trainer_state, self.metrics, attachments, session = self.trainer.load_data(mouse_id)
             self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
-
+            pprint(self.trainer_state.stage.task.model_dump())
             attachment_names = [attachment.name for attachment in attachments]
 
             # update session model with slims session information
@@ -698,7 +698,7 @@ class Window(QMainWindow):
             self.Opto_dialog.opto_widget.setEnabled(not session.is_curriculum_suggestion)
             self.fip_widget.setEnabled(not session.is_curriculum_suggestion)
 
-            # # set state of on_curriculum check
+            # set state of on_curriculum check
             self.on_curriculum.setChecked(session.is_curriculum_suggestion)
 
 
@@ -728,15 +728,23 @@ class Window(QMainWindow):
                 session_total=self.metrics.session_total+1,
                 session_at_current_stage=self.metrics.session_at_current_stage+1
             )
-            logging.info("Writing trainer state to slims.")
-            slims_model, next_trainer_state = self.trainer.write_data(subject_id=mouse_id,
-                                                                      metrics=new_metrics,
-                                                                      curriculum=self.curriculum,
-                                                                      trainer_state=self.trainer_state,
-                                                                      date=datetime.now() if not hasattr(self, "session_model")
-                                                                      else self.session_model.date,
-                                                                      on_curriculum=self.on_curriculum.checked())
 
+            if self.curriculum.isChecked() and self.task_logic == self.trainer_state.stage.task:
+                # evaluating trainer state
+                self.log.info("Generating next session stage.")
+                next_trainer_state = Trainer(self.curriculum).evaluate(trainer_state=self.trainer_state,
+                                                                       metrics=new_metrics)
+            else:   # mouse is off curriculum so push trainer state used
+                self.trainer_state.stage.task = self.task_logic
+                next_trainer_state = self.trainer_state
+
+            logging.info("Writing trainer state to slims.")
+            slims_model = self.trainer.write_data(subject_id=mouse_id,
+                                                  curriculum=self.curriculum,
+                                                  trainer_state=next_trainer_state,
+                                                  date=datetime.now() if not hasattr(self, "session_model")
+                                                  else self.session_model.date,
+                                                  on_curriculum=self.on_curriculum.isChecked())
             # add session model as an attachment
             self.slims_client.add_attachment_content(
                 record=slims_model,
@@ -762,6 +770,12 @@ class Window(QMainWindow):
             logging.info(f"Writing next session to Slims successful. "
                          f"Mouse {mouse_id} will run on {next_trainer_state.stage.name} next session.",
                          extra={'tags': [self.warning_log_tag]})
+
+        # reset load state
+        self.curriculum = None
+        self.trainer_state = None
+        self.metrics = None
+        self.on_curriculum.setVisible(False)
 
 
     def _session_list(self):
@@ -3433,16 +3447,12 @@ class Window(QMainWindow):
         self.session_widget.setEnabled(True)
         self.Opto_dialog.opto_widget.setEnabled(True)
         self.fip_widget.setEnabled(True)
-
-        self.curriculum = None
-        self.trainer_state = None
-        self.metrics = None
-        self.on_curriculum.setVisible(False)
-
-        self.label_curriculum_stage.setText("")
+        self.on_curriculum.setEnabled(True)
 
         # add session to slims
         self.write_session_to_slims(self.session_model.subject)
+
+        self.label_curriculum_stage.setText("")
 
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully == 0:
@@ -3799,10 +3809,10 @@ class Window(QMainWindow):
                 return
 
             # enable task model widgets
-            self.task_widget.setEnabled(True)
-            self.session_widget.setEnabled(True)
-            self.Opto_dialog.opto_widget.setEnabled(True)
-            self.fip_widget.setEnabled(True)
+            self.task_widget.setEnabled(not self.on_curriculum.isVisible() or not self.on_curriculum.isChecked())
+            self.session_widget.setEnabled(not self.on_curriculum.isVisible() or not self.on_curriculum.isChecked())
+            self.Opto_dialog.opto_widget.setEnabled(not self.on_curriculum.isVisible() or not self.on_curriculum.isChecked())
+            self.fip_widget.setEnabled(not self.on_curriculum.isVisible() or not self.on_curriculum.isChecked())
             self.on_curriculum.setEnabled(True)
 
             # If the photometry timer is running, stop it
