@@ -287,19 +287,14 @@ class Window(QMainWindow):
         # initialize mouse selector
         slims_mice = self.slims_client.fetch_models(models.SlimsMouseContent)[-100:]  # grab 100 latest mice from slims
         self.mouse_selector_dialog = MouseSelectorDialog([mouse.barcode for mouse in slims_mice], self.box_letter)
-        # create label gif to indicate mouse is being loaded
+
+        # create label giff to indicate mouse is being loaded
         movie = QtGui.QMovie("resources/mouse_loading.gif")
         movie.setScaledSize(QtCore.QSize(200, 200))
         movie.start()
         self.load_slims_progress = QLabel()
         self.load_slims_progress.setWindowFlag(Qt.FramelessWindowHint)
         self.load_slims_progress.setMovie(movie)
-
-        # hook up signals
-        self.mouse_selector_dialog.acceptedMouseID.connect(lambda: self.geometry().center())
-        self.mouse_selector_dialog.acceptedMouseID.connect(self.load_slims_progress.show)
-        self.mouse_selector_dialog.acceptedMouseID.connect(lambda: threading.Thread(target=self.load_slims_mouse,
-                                                                                    kwargs={"mouse_id": self.mouse_selector_dialog.combo.currentText()}).start())
 
         self._Optogenetics()  # open the optogenetics panel
         self._LaserCalibration()  # to open the laser calibration panel
@@ -318,6 +313,10 @@ class Window(QMainWindow):
         self.CreateNewFolder = 1  # to create new folder structure (a new session)
         self.ManualWaterVolume = [0, 0]
         self._StopPhotometry()  # Make sure photoexcitation is stopped
+
+        # create QTimer to flash start button color
+        self.start_flash = QTimer(timeout=self.toggle_save_color, interval=500)
+        self.is_purple = False
 
         # Initialize open ephys saving dictionary
         self.open_ephys = []
@@ -503,6 +502,14 @@ class Window(QMainWindow):
         self.pushButton_streamlit.clicked.connect(self._open_mouse_on_streamlit)
         self.on_curriculum.clicked.connect(self.off_curriculum)
 
+        # hook up signals
+        self.mouse_selector_dialog.acceptedMouseID.connect(lambda: self.geometry().center())
+        self.mouse_selector_dialog.acceptedMouseID.connect(lambda: self.Load.setEnabled(False))
+        self.mouse_selector_dialog.acceptedMouseID.connect(self.load_slims_progress.show)
+        self.mouse_selector_dialog.acceptedMouseID.connect(lambda: threading.Thread(target=self.load_slims_mouse,
+                                                                                    kwargs={
+                                                                                        "mouse_id": self.mouse_selector_dialog.combo.currentText()}).start())
+
         # add validator for weight and water fields
         double_validator = QtGui.QDoubleValidator()
         self.BaseWeight.setValidator(double_validator)
@@ -599,7 +606,8 @@ class Window(QMainWindow):
                 response['recording_type'] = self.OpenEphysRecordingType.currentText()
                 self.open_ephys.append(response)
                 self.unsaved_data = True
-                self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+                #self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+                self.start_flash.start()
                 EphysControl.stop_open_ephys_recording()
                 QMessageBox.warning(self, '', 'Open Ephys has stopped recording! Please save the data again!')
             except Exception as e:
@@ -731,7 +739,7 @@ class Window(QMainWindow):
 
             if self.on_curriculum.isChecked():
                 # evaluating trainer state
-                self.log.info("Generating next session stage.")
+                logging.info("Generating next session stage.")
                 next_trainer_state = Trainer(self.curriculum).evaluate(trainer_state=self.trainer_state,
                                                                        metrics=new_metrics)
             else:   # mouse is off curriculum so push trainer state used
@@ -776,7 +784,7 @@ class Window(QMainWindow):
         self.trainer_state = None
         self.metrics = None
         self.on_curriculum.setVisible(False)
-
+        self.label_curriculum_stage.setText("")
 
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''
@@ -1221,7 +1229,8 @@ class Window(QMainWindow):
             self.CreateNewFolder = 0
             log_folder = self.HarpFolder
             self.unsaved_data = True
-            self.Save.setStyleSheet("color: white;background-color : mediumorchid")
+            #self.Save.setStyleSheet("color: white;background-color : mediumorchid")
+            self.start_flash.start()
         else:
             # temporary logging
             loggingtype = 1
@@ -2624,6 +2633,7 @@ class Window(QMainWindow):
         # Toggle unsaved data to False
         if BackupSave == 0:
             self.unsaved_data = False
+            self.start_flash.stop()
             self.Save.setStyleSheet("background-color : None;")
             self.Save.setStyleSheet("color: black;")
 
@@ -2640,7 +2650,8 @@ class Window(QMainWindow):
                 QMessageBox.warning(self, '',
                                     'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
                 self.unsaved_data = True
-                self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+                #self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+                self.start_flash.start()
 
             self.Save.setChecked(False)  # uncheck button
 
@@ -3433,12 +3444,14 @@ class Window(QMainWindow):
             self.WeightAfter.setText('')
 
         # Reset GUI visuals
+        self.start_flash.stop()
         self.Save.setStyleSheet("color:black;background-color:None;")
         self.NewSession.setStyleSheet("background-color : green;")
         self.NewSession.setChecked(False)
         self.Start.setStyleSheet("background-color : none")
         self.Start.setChecked(False)
         self.Start.setDisabled(False)
+        self.Load.setEnabled(True)
         self.TotalWaterWarning.setText('')
         self._set_metadata_enabled(True)
 
@@ -3451,8 +3464,6 @@ class Window(QMainWindow):
 
         # add session to slims
         self.write_session_to_slims(self.session_model.subject)
-
-        self.label_curriculum_stage.setText("")
 
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully == 0:
@@ -4335,12 +4346,26 @@ class Window(QMainWindow):
     def _toggle_save_color(self):
         '''toggle the color of the save button to mediumorchid'''
         self.unsaved_data = True
-        self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+        self.start_flash.start()
+        #self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
 
     def _PostWeightChange(self):
         self.unsaved_data = True
-        self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+        #self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+        self.start_flash.start()
         self._UpdateSuggestedWater()
+
+    def toggle_save_color(self):
+        """
+        Function to emulate flashing of color for button
+        """
+
+        """Switch button background color"""
+        if self.is_purple:
+            self.Save.setStyleSheet("color:black;background-color:None;")
+        else:
+            self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+        self.is_purple = not self.is_purple
 
     def _UpdateSuggestedWater(self, ManualWater=0):
         '''Update the suggested water from the manually give water'''
