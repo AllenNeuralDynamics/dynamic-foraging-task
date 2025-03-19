@@ -700,7 +700,7 @@ class Window(QMainWindow):
 
             # set state of on_curriculum check
             self.on_curriculum.setChecked(session.is_curriculum_suggestion)
-
+            self.on_curriculum.setEnabled(session.is_curriculum_suggestion)
 
         except Exception as e:
             if 'No record found' in str(e):  # mouse doesn't exist
@@ -729,7 +729,7 @@ class Window(QMainWindow):
                 session_at_current_stage=self.metrics.session_at_current_stage+1
             )
 
-            if self.curriculum.isChecked() and self.task_logic == self.trainer_state.stage.task:
+            if self.on_curriculum.isChecked():
                 # evaluating trainer state
                 self.log.info("Generating next session stage.")
                 next_trainer_state = Trainer(self.curriculum).evaluate(trainer_state=self.trainer_state,

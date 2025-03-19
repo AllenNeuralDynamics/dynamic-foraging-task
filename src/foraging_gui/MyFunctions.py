@@ -1398,6 +1398,7 @@ class GenerateTrials():
                 self.fip_stop_timer.setSingleShot(True)
                 self.fip_stop_timer.start()
             self.win.sessionEnded.emit()
+            self.win.write_session_to_slims(self.session_model.subject)
 
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
