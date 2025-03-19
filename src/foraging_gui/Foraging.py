@@ -2468,7 +2468,7 @@ class Window(QMainWindow):
         fip_map = fip_to_tp_conversion(self.fip_model)
         opto_map = opto_to_tp_conversion(self.opto_model)
 
-        for key, value in {**task_map, **session_map, **fip_map, **opto_map}:
+        for key, value in {**task_map, **session_map, **fip_map, **opto_map}.items():
             if "TP_" in key:
                 Obj[key] = [value] if key not in Obj.keys() else Obj[key] + [value]
             else:
