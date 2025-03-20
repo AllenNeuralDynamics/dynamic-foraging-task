@@ -2744,7 +2744,6 @@ class Window(QMainWindow):
                     Obj[keyname][widget.objectName()] = widget.currentText()
         return Obj
 
-    def _Open(self, input_file=''):
     def _OpenLast(self):
         self._Open(open_last=True)
 
