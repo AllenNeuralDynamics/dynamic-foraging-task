@@ -17,6 +17,7 @@ from aind_data_schema_models.units import SizeUnit, FrequencyUnit, SoundIntensit
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_behavior_dynamic_foraging.DataSchemas.task_logic import AindDynamicForagingTaskLogic
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import Optogenetics
+from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry
 
 from aind_data_schema.core.data_description import Funding
 from aind_data_schema_models.organizations import Organization
@@ -72,11 +73,13 @@ class generate_metadata:
     def __init__(self, session_model: AindBehaviorSessionModel,
                  task_logic: AindDynamicForagingTaskLogic,
                  opto_model: Optogenetics,
+                 fip_model: FiberPhotometry,
                  json_file=None, Obj=None, dialog_metadata_file=None, dialog_metadata=None, output_folder=None):
 
         self.session_model = session_model
         self.task_logic = task_logic
         self.opto_model = opto_model
+        self.fip_model = fip_model
 
         self.session_metadata_success = False
         self.rig_metadata_success = False
@@ -674,7 +677,7 @@ class generate_metadata:
             detectors=self.fib_detectors,
             fiber_connections=self.fiber_connections,
             software=self.behavior_software,
-            notes=f'Fib modality: fib mode: {self.Obj["fiber_mode"]}',
+            notes=f'Fib modality: fib mode: {self.fip_model.mode}',
         ))
 
     def _get_fiber_connections(self):
