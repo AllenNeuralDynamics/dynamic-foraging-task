@@ -157,8 +157,8 @@ class BehaviorParametersWidget(SchemaWidgetBase):
 
         value = self.path_get(self.schema, name.split("."))
         if dict not in type(value).__mro__ and list not in type(value).__mro__ and BaseModel not in type(value).__mro__:  # not a dictionary or list like value
-            if value is None and hasattr(self, name+"_check_box"):   # optional type so uncheck widget
-               getattr(self, name+"_check_box").setChecked(False)
+            if hasattr(self, name + "_check_box"):  # optional type
+                getattr(self, name + "_check_box").setChecked(not value is None)
             else:
                 self._set_widget_text(name, value)
         elif dict in type(value).__mro__ or BaseModel in type(value).__mro__:
@@ -201,6 +201,7 @@ if __name__ == "__main__":
 
     task_model.task_parameters.block_parameters.min = 10
     task_model.task_parameters.auto_water = None
+    task_model.task_parameters.warmup = None
     task_widget.apply_schema(task_model.task_parameters)
 
     sys.exit(app.exec_())
