@@ -1546,7 +1546,7 @@ class GenerateTrials():
         '''Add offset to the waveform'''
 
         if self.selected_condition.start is not None and self.selected_condition.start.offset > 0:
-            OffsetPoints = int(self.opto_model.sample_frequency * self.selected_condition.start)
+            OffsetPoints = int(self.opto_model.sample_frequency * self.selected_condition.start.offset)
             Offset = np.zeros(OffsetPoints)
             self.my_wave = np.concatenate((Offset, self.my_wave), axis=0)
 

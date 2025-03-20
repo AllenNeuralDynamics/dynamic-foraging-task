@@ -2745,6 +2745,117 @@ class Window(QMainWindow):
         return Obj
 
     def _Open(self, input_file=''):
+    def _OpenLast(self):
+        self._Open(open_last=True)
+
+    def _OpenLast_find_session(self, mouse_id, experimenter):
+        '''
+            Returns the filepath of the last available session of this mouse
+            Returns a tuple (Bool, str)
+            Bool is True is a valid filepath was found, false otherwise
+            If a valid filepath was found, then str contains the filepath
+        '''
+
+        # Is this mouse on this computer?
+        filepath = os.path.join(self.default_saveFolder, self.current_box)
+        mouse_dirs = os.listdir(filepath)
+        if mouse_id not in mouse_dirs:
+            reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
+                                         'Mouse ID {} does not have any saved sessions on this computer'.format(
+                                             mouse_id),
+                                         QMessageBox.Ok)
+            logging.info('User input mouse id {}, which had no sessions on this computer'.format(mouse_id))
+            return False, ''
+
+        # Are there any session from this mouse?
+        session_dir = os.path.join(self.default_saveFolder, self.current_box, mouse_id)
+        sessions = os.listdir(session_dir)
+        if len(sessions) == 0:
+            reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
+                                         'Mouse ID {} does not have any saved sessions on this computer'.format(
+                                             mouse_id),
+                                         QMessageBox.Ok)
+            logging.info('User input mouse id {}, which had no sessions on this computer'.format(mouse_id))
+            return False, ''
+
+        # do any of the sessions have saved data? Grab the most recent
+        for i in range(len(sessions) - 1, -1, -1):
+            s = sessions[i]
+            if 'behavior_' in s:
+                json_file = os.path.join(self.default_saveFolder,
+                                         self.current_box, mouse_id, s, 'behavior', s.split('behavior_')[1] + '.json')
+                if os.path.isfile(json_file):
+                    date = s.split('_')[2]
+                    session_date = date.split('-')[1] + '/' + date.split('-')[2] + '/' + date.split('-')[0]
+                    reply = QMessageBox.information(self,
+                                                    'Box {}, Please verify'.format(self.box_letter),
+                                                    '<span style="color:purple;font-weight:bold">'
+                                                    'Mouse ID: {}</span><br>'
+                                                    'Last session: {}<br>'
+                                                    'Filename: {}<br>'
+                                                    'Experimenter: {}'.format(mouse_id, session_date, s, experimenter),
+                                                    QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Ok)
+                    if reply == QMessageBox.Cancel:
+                        logging.info('User hit cancel')
+                        return False, ''
+                    else:
+                        return True, json_file
+
+        # none of the sessions have saved data.
+        reply = QMessageBox.critical(self, 'Box {}, Load mouse'.format(self.box_letter),
+                                     'Mouse ID {} does not have any saved sessions on this computer'.format(mouse_id),
+                                     QMessageBox.Ok)
+        logging.info('User input mouse id {}, which had no sessions on this computer'.format(mouse_id))
+        return False, ''
+
+    def _OpenNewMouse(self, mouse_id):
+        '''
+            Queries the user to start a new mouse
+        '''
+        reply = QMessageBox.question(self,
+                                     'Box {}, Load mouse'.format(self.box_letter),
+                                     'No data for mouse <span style="color:purple;font-weight:bold">{}</span>, start new mouse?'.format(
+                                         mouse_id),
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        if reply == QMessageBox.No:
+            logging.info('User declines to start new mouse: {}'.format(mouse_id))
+            return reply
+
+        # Set ID, clear weight information
+        logging.info('User starting a new mouse: {}'.format(mouse_id))
+        self.TargetRatio.setText('0.85')
+
+
+    def _Open_getListOfMice(self):
+        '''
+            Returns a list of mice with data saved on this computer
+        '''
+        filepath = os.path.join(self.default_saveFolder, self.current_box)
+        now = datetime.now()
+        mouse_dirs = os.listdir(filepath)
+        mouse_dirs.sort(reverse=True,
+                        key=lambda x: os.path.getmtime(os.path.join(filepath, x)))  # in order of date modified
+        mice = []
+        experimenters = []
+        for m in mouse_dirs:
+            session_dir = os.path.join(self.default_saveFolder, self.current_box, str(m))
+            sessions = os.listdir(session_dir)
+            sessions.sort(reverse=True)
+            for s in sessions:
+                if 'behavior_' in s:
+                    json_file = os.path.join(self.default_saveFolder,
+                                             self.current_box, str(m), s, 'behavior', s.split('behavior_')[1] + '.json')
+                    if os.path.isfile(json_file):
+                        with open(json_file, 'r') as file:
+                            name = json.load(file)["Experimenter"]
+                        mice.append(m)
+                        experimenters.append(name)
+                        break
+        dates = [datetime.fromtimestamp(os.path.getmtime(os.path.join(filepath, path))) for path in mouse_dirs]
+        two_week = [mouse_dir for mouse_dir, mod_date in zip(mice, dates) if (now - mod_date).days <= 14]
+        return mice, experimenters, two_week
+
+    def _Open(self, open_last=False, input_file=''):
         if input_file == '':
             # stop current session first
             self._StopCurrentSession()
@@ -2982,8 +3093,7 @@ class Window(QMainWindow):
         else:
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
-        self.load_tag = 1
-        self.session_widget.subject_widget.returnPressed.emit()  # Mimic the return press event to auto-engage AutoTrain
+        self.load_tag=1
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
