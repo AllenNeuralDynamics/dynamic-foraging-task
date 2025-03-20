@@ -3094,8 +3094,7 @@ class Window(QMainWindow):
         else:
             self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
-        self.load_tag = 1
-        self.session_widget.subject_widget.returnPressed.emit()  # Mimic the return press event to auto-engage AutoTrain
+        self.load_tag=1
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
