@@ -3441,7 +3441,10 @@ class OpticalTaggingDialog(QDialog):
     
     def _get_laser_waveform(self, protocol: str, frequency: int, pulse_duration: float,
                         input_voltage: float, duration_each_cycle: float,
-                        ramp_up_duration: float, ramp_down_duration: float) -> np.array:
+                        ramp_up_duration: float, ramp_down_duration: float,
+                        sample_frequency: int = 5000,
+                        
+                        ) -> np.array:
         '''Get the waveform for the laser with linear ramp up and down for each pulse.
         
         Args:
@@ -3452,6 +3455,7 @@ class OpticalTaggingDialog(QDialog):
             duration_each_cycle: The total duration of one cycle.
             ramp_up_duration: Duration for the linear ramp up at the beginning of each pulse (ms).
             ramp_down_duration: Duration for the linear ramp down at the end of each pulse (ms).
+            sample_frequency: The sample frequency of the NI-daq (Hz).
             
         Returns:
             np.array: The complete waveform for the laser.
@@ -3460,8 +3464,6 @@ class OpticalTaggingDialog(QDialog):
         if protocol != 'Pulse':
             logger.warning(f"Unknown protocol: {protocol}")
             return
-
-        sample_frequency = 5000  # should be replaced
 
         # Calculate the total number of points per pulse
         PointsEachPulse = int(sample_frequency * pulse_duration / 1000)
