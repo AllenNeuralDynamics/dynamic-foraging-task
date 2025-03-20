@@ -1208,10 +1208,10 @@ class Window(QMainWindow):
 
     def _GetApprovedAINDProjectNames(self):
         end_point = "http://aind-metadata-service/project_names"
-        timeout = 10
+        timeout = 30
         try:
             response = requests.get(end_point, timeout=timeout)
-        except TimeoutError as e:
+        except Exception as e:
             logging.error(f"Failed to fetch project names from endpoint. {e}")
             return []
         if response.ok:
