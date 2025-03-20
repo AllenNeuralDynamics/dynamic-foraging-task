@@ -3093,6 +3093,8 @@ class OpticalTaggingDialog(QDialog):
             "duration_each_cycle": self.Duration_each_cycle.text(),
             "interval_between_cycles": self.Interval_between_cycles.text(),
             "cycles_each_condition": self.Cycles_each_condition.text(),
+            "pulse_ramp_up": self.Pulse_ramp_up.text(),
+            "pulse_ramp_down": self.Pulse_ramp_down.text(),
         }
         # save the data 
         with open(save_file, 'w') as f:
@@ -3193,6 +3195,8 @@ class OpticalTaggingDialog(QDialog):
                 protocol = self.current_optical_tagging_par['protocol_sampled_all'][i]
                 frequency = self.current_optical_tagging_par['frequency_sampled_all'][i]
                 pulse_duration = self.current_optical_tagging_par['pulse_duration_sampled_all'][i]
+                pulse_ramp_up = self.current_optical_tagging_par['pulse_ramp_up_sampled_all'][i]
+                pulse_ramp_down = self.current_optical_tagging_par['pulse_ramp_down_sampled_all'][i]
                 laser_name = self.current_optical_tagging_par['laser_name_sampled_all'][i]
                 target_power = self.current_optical_tagging_par['target_power_sampled_all'][i]
                 laser_color = self.current_optical_tagging_par['laser_color_sampled_all'][i]
@@ -3203,6 +3207,8 @@ class OpticalTaggingDialog(QDialog):
                 my_wave=self._produce_waveforms(protocol=protocol, 
                                                 frequency=frequency, 
                                                 pulse_duration=pulse_duration, 
+                                                pulse_ramp_up=pulse_ramp_up,
+                                                pulse_ramp_down=pulse_ramp_down,
                                                 laser_name=laser_name, 
                                                 target_power=target_power, 
                                                 laser_color=laser_color, 
@@ -3211,6 +3217,8 @@ class OpticalTaggingDialog(QDialog):
                 my_wave_control=self._produce_waveforms(protocol=protocol,
                                                         frequency=frequency,
                                                         pulse_duration=pulse_duration,
+                                                        pulse_ramp_up=pulse_ramp_up,
+                                                        pulse_ramp_down=pulse_ramp_down,
                                                         laser_name=laser_name,
                                                         target_power=0,
                                                         laser_color=laser_color,
@@ -3353,11 +3361,15 @@ class OpticalTaggingDialog(QDialog):
             QMessageBox.critical(self.MainWindow, "Error", "Please select the laser to use.")
             return
         
+        pulse_ramp_up_list = extract_numbers_from_string(self.Pulse_ramp_up.text())
+        pulse_ramp_down_list = extract_numbers_from_string(self.Pulse_ramp_down.text())
         # Generate combinations for each laser
-        protocol_sampled, frequency_sampled, pulse_duration_sampled, laser_name_sampled, target_power_sampled, laser_color_sampled,duration_each_cycle_sampled,interval_between_cycles_sampled = zip(*[
-            (protocol, frequency, pulse_duration, laser_name, target_power, laser_config[laser_name][1].currentText(),duration_each_cycle,interval_between_cycles)
+        protocol_sampled, frequency_sampled, pulse_duration_sampled,pulse_ramp_up_sampled,pulse_ramp_down_sampled, laser_name_sampled, target_power_sampled, laser_color_sampled,duration_each_cycle_sampled,interval_between_cycles_sampled = zip(*[
+            (protocol, frequency, pulse_duration,pulse_ramp_up,pulse_ramp_down, laser_name, target_power, laser_config[laser_name][1].currentText(),duration_each_cycle,interval_between_cycles)
             for frequency in frequency_list
             for pulse_duration in pulse_duration_list
+            for pulse_ramp_up in pulse_ramp_up_list
+            for pulse_ramp_down in pulse_ramp_down_list
             for laser_name, (power_field, _) in laser_config.items()
             for target_power in extract_numbers_from_string(power_field.text())
             for duration_each_cycle in extract_numbers_from_string(self.Duration_each_cycle.text())
@@ -3367,6 +3379,8 @@ class OpticalTaggingDialog(QDialog):
         self.current_optical_tagging_par['protocol_sampled_all'] = []
         self.current_optical_tagging_par['frequency_sampled_all'] = []
         self.current_optical_tagging_par['pulse_duration_sampled_all'] = []
+        self.current_optical_tagging_par['pulse_ramp_up_sampled_all'] = []
+        self.current_optical_tagging_par['pulse_ramp_down_sampled_all'] = []
         self.current_optical_tagging_par['laser_name_sampled_all'] = []
         self.current_optical_tagging_par['target_power_sampled_all'] = []
         self.current_optical_tagging_par['laser_color_sampled_all'] = []
@@ -3380,6 +3394,8 @@ class OpticalTaggingDialog(QDialog):
             protocol_sampled_now = [protocol_sampled[i] for i in random_indices]
             frequency_sampled_now = [frequency_sampled[i] for i in random_indices]
             pulse_duration_sampled_now = [pulse_duration_sampled[i] for i in random_indices]
+            pulse_ramp_up_sampled_now = [pulse_ramp_up_sampled[i] for i in random_indices]
+            pulse_ramp_down_sampled_now = [pulse_ramp_down_sampled[i] for i in random_indices]
             laser_name_sampled_now = [laser_name_sampled[i] for i in random_indices]
             target_power_sampled_now = [target_power_sampled[i] for i in random_indices]
             laser_color_sampled_now = [laser_color_sampled[i] for i in random_indices]
@@ -3388,6 +3404,8 @@ class OpticalTaggingDialog(QDialog):
             self.current_optical_tagging_par['protocol_sampled_all'].extend(protocol_sampled_now)
             self.current_optical_tagging_par['frequency_sampled_all'].extend(frequency_sampled_now)
             self.current_optical_tagging_par['pulse_duration_sampled_all'].extend(pulse_duration_sampled_now)
+            self.current_optical_tagging_par['pulse_ramp_up_sampled_all'].extend(pulse_ramp_up_sampled_now)
+            self.current_optical_tagging_par['pulse_ramp_down_sampled_all'].extend(pulse_ramp_down_sampled_now)
             self.current_optical_tagging_par['laser_name_sampled_all'].extend(laser_name_sampled_now)
             self.current_optical_tagging_par['target_power_sampled_all'].extend(target_power_sampled_now)
             self.current_optical_tagging_par['laser_color_sampled_all'].extend(laser_color_sampled_now)
@@ -3414,7 +3432,16 @@ class OpticalTaggingDialog(QDialog):
             self.label1_3.setEnabled(True)
             self.label1_16.setEnabled(True)
     
-    def _produce_waveforms(self,protocol:str,frequency:int,pulse_duration:float,laser_name:str,target_power:float,laser_color:str,duration_each_cycle:float):
+    def _produce_waveforms(self,protocol:str,
+                           frequency:int,
+                           pulse_duration:float,
+                           pulse_ramp_up:float,
+                           pulse_ramp_down:float,
+                           laser_name:str,
+                           target_power:float,
+                           laser_color:str,
+                           duration_each_cycle:float
+                           ):
         '''Produce the waveforms for the optical tagging'''
         # get the amplitude of the laser
         if target_power==0:
@@ -3431,19 +3458,20 @@ class OpticalTaggingDialog(QDialog):
         
         # produce the waveform
         my_wave=self._get_laser_waveform(protocol=protocol,
-                                         frequency=frequency,
-                                         pulse_duration=pulse_duration,
-                                         input_voltage=input_voltage,
-                                         duration_each_cycle=duration_each_cycle
+                                        frequency=frequency,
+                                        pulse_duration=pulse_duration,
+                                        pulse_ramp_up=pulse_ramp_up,
+                                        pulse_ramp_down=pulse_ramp_down,
+                                        input_voltage=input_voltage,
+                                        duration_each_cycle=duration_each_cycle
                                     )
         
         return my_wave
     
     def _get_laser_waveform(self, protocol: str, frequency: int, pulse_duration: float,
                         input_voltage: float, duration_each_cycle: float,
-                        ramp_up_duration: float, ramp_down_duration: float,
+                        pulse_ramp_up: float, pulse_ramp_down: float,
                         sample_frequency: int = 5000,
-                        
                         ) -> np.array:
         '''Get the waveform for the laser with linear ramp up and down for each pulse.
         
@@ -3453,8 +3481,8 @@ class OpticalTaggingDialog(QDialog):
             pulse_duration: The total duration of the pulse (ms).
             input_voltage: The input voltage of the laser.
             duration_each_cycle: The total duration of one cycle.
-            ramp_up_duration: Duration for the linear ramp up at the beginning of each pulse (ms).
-            ramp_down_duration: Duration for the linear ramp down at the end of each pulse (ms).
+            pulse_ramp_up: Duration for the linear ramp up at the beginning of each pulse (ms).
+            pulse_ramp_down: Duration for the linear ramp down at the end of each pulse (ms).
             sample_frequency: The sample frequency of the NI-daq (Hz).
             
         Returns:
@@ -3469,8 +3497,8 @@ class OpticalTaggingDialog(QDialog):
         PointsEachPulse = int(sample_frequency * pulse_duration / 1000)
 
         # Calculate the number of points for ramp up and ramp down
-        ramp_up_points = int(sample_frequency * ramp_up_duration / 1000)
-        ramp_down_points = int(sample_frequency * ramp_down_duration / 1000)
+        ramp_up_points = int(sample_frequency * pulse_ramp_up / 1000)
+        ramp_down_points = int(sample_frequency * pulse_ramp_down / 1000)
         
         # Check if ramp durations exceed pulse duration
         if ramp_up_points + ramp_down_points > PointsEachPulse:

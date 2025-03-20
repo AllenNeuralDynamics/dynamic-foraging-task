@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>501</width>
-    <height>582</height>
+    <height>693</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -413,7 +413,7 @@
    <property name="geometry">
     <rect>
      <x>81</x>
-     <y>420</y>
+     <y>480</y>
      <width>76</width>
      <height>20</height>
     </rect>
@@ -438,7 +438,7 @@
    <property name="geometry">
     <rect>
      <x>161</x>
-     <y>420</y>
+     <y>480</y>
      <width>71</width>
      <height>22</height>
     </rect>
@@ -451,7 +451,7 @@
    <property name="geometry">
     <rect>
      <x>16</x>
-     <y>320</y>
+     <y>380</y>
      <width>141</width>
      <height>20</height>
     </rect>
@@ -479,7 +479,7 @@
    <property name="geometry">
     <rect>
      <x>161</x>
-     <y>320</y>
+     <y>380</y>
      <width>70</width>
      <height>20</height>
     </rect>
@@ -504,7 +504,7 @@
    <property name="geometry">
     <rect>
      <x>16</x>
-     <y>350</y>
+     <y>410</y>
      <width>141</width>
      <height>20</height>
     </rect>
@@ -532,7 +532,7 @@
    <property name="geometry">
     <rect>
      <x>161</x>
-     <y>350</y>
+     <y>410</y>
      <width>70</width>
      <height>20</height>
     </rect>
@@ -557,7 +557,7 @@
    <property name="geometry">
     <rect>
      <x>161</x>
-     <y>380</y>
+     <y>440</y>
      <width>70</width>
      <height>20</height>
     </rect>
@@ -582,7 +582,7 @@
    <property name="geometry">
     <rect>
      <x>26</x>
-     <y>380</y>
+     <y>440</y>
      <width>131</width>
      <height>20</height>
     </rect>
@@ -717,7 +717,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>490</y>
+     <y>550</y>
      <width>101</width>
      <height>31</height>
     </rect>
@@ -730,7 +730,7 @@
    <property name="geometry">
     <rect>
      <x>160</x>
-     <y>450</y>
+     <y>510</y>
      <width>70</width>
      <height>31</height>
     </rect>
@@ -746,13 +746,172 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>530</y>
+     <y>590</y>
      <width>101</width>
      <height>31</height>
     </rect>
    </property>
    <property name="text">
     <string>Clear data</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="Pulse_ramp_up">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>162</x>
+     <y>300</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>1</string>
+   </property>
+   <property name="readOnly">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label1_21">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>300</y>
+     <width>76</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>90</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>pulse ramp up(ms)=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label1_22">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>53</x>
+     <y>330</y>
+     <width>101</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>200</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>pulse ramp down(ms)=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="Pulse_ramp_down">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>330</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>1</string>
+   </property>
+   <property name="readOnly">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label1_23">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>25</x>
+     <y>630</y>
+     <width>131</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>NI-daq sample frequency=</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="NI_daq_sample_frequency">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>630</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>5000</string>
+   </property>
+   <property name="readOnly">
+    <bool>false</bool>
    </property>
   </widget>
  </widget>
