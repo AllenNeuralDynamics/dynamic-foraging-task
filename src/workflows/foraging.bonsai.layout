@@ -65,11 +65,11 @@
       <Visible>true</Visible>
       <Location>
         <X>4</X>
-        <Y>5</Y>
+        <Y>4</Y>
       </Location>
       <Size>
-        <Width>2147</Width>
-        <Height>1230</Height>
+        <Width>1019</Width>
+        <Height>699</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -583,11 +583,11 @@
       <Visible>true</Visible>
       <Location>
         <X>4</X>
-        <Y>5</Y>
+        <Y>4</Y>
       </Location>
       <Size>
-        <Width>2147</Width>
-        <Height>1230</Height>
+        <Width>1019</Width>
+        <Height>697</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -607,63 +607,15 @@
           <Visible>true</Visible>
           <Location>
             <X>4</X>
-            <Y>5</Y>
+            <Y>4</Y>
           </Location>
           <Size>
-            <Width>2147</Width>
-            <Height>1230</Height>
+            <Width>1019</Width>
+            <Height>699</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
         <EditorVisualizerLayout>
-          <DialogSettings>
-            <Visible>false</Visible>
-            <Location>
-              <X>0</X>
-              <Y>0</Y>
-            </Location>
-            <Size>
-              <Width>0</Width>
-              <Height>0</Height>
-            </Size>
-            <WindowState>Normal</WindowState>
-          </DialogSettings>
-          <DialogSettings>
-            <Visible>false</Visible>
-            <Location>
-              <X>0</X>
-              <Y>0</Y>
-            </Location>
-            <Size>
-              <Width>0</Width>
-              <Height>0</Height>
-            </Size>
-            <WindowState>Normal</WindowState>
-          </DialogSettings>
-          <DialogSettings>
-            <Visible>false</Visible>
-            <Location>
-              <X>0</X>
-              <Y>0</Y>
-            </Location>
-            <Size>
-              <Width>0</Width>
-              <Height>0</Height>
-            </Size>
-            <WindowState>Normal</WindowState>
-          </DialogSettings>
-          <DialogSettings>
-            <Visible>false</Visible>
-            <Location>
-              <X>0</X>
-              <Y>0</Y>
-            </Location>
-            <Size>
-              <Width>0</Width>
-              <Height>0</Height>
-            </Size>
-            <WindowState>Normal</WindowState>
-          </DialogSettings>
           <DialogSettings>
             <Visible>false</Visible>
             <Location>
@@ -3167,11 +3119,11 @@
       <Visible>true</Visible>
       <Location>
         <X>4</X>
-        <Y>5</Y>
+        <Y>4</Y>
       </Location>
       <Size>
-        <Width>2147</Width>
-        <Height>1230</Height>
+        <Width>1019</Width>
+        <Height>699</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -3311,11 +3263,11 @@
           <Visible>true</Visible>
           <Location>
             <X>4</X>
-            <Y>5</Y>
+            <Y>4</Y>
           </Location>
           <Size>
-            <Width>2147</Width>
-            <Height>1230</Height>
+            <Width>1019</Width>
+            <Height>699</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -3793,11 +3745,11 @@
           <Visible>true</Visible>
           <Location>
             <X>4</X>
-            <Y>5</Y>
+            <Y>4</Y>
           </Location>
           <Size>
-            <Width>2147</Width>
-            <Height>1230</Height>
+            <Width>1019</Width>
+            <Height>699</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -4325,11 +4277,11 @@
       <Visible>true</Visible>
       <Location>
         <X>4</X>
-        <Y>5</Y>
+        <Y>4</Y>
       </Location>
       <Size>
-        <Width>2147</Width>
-        <Height>1230</Height>
+        <Width>1019</Width>
+        <Height>699</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -4349,11 +4301,11 @@
           <Visible>true</Visible>
           <Location>
             <X>4</X>
-            <Y>5</Y>
+            <Y>4</Y>
           </Location>
           <Size>
-            <Width>2147</Width>
-            <Height>1230</Height>
+            <Width>1019</Width>
+            <Height>697</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -6307,11 +6259,11 @@
           <Visible>true</Visible>
           <Location>
             <X>4</X>
-            <Y>5</Y>
+            <Y>4</Y>
           </Location>
           <Size>
-            <Width>2147</Width>
-            <Height>1230</Height>
+            <Width>1019</Width>
+            <Height>697</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
@@ -8704,11 +8656,11 @@
       <Visible>true</Visible>
       <Location>
         <X>4</X>
-        <Y>5</Y>
+        <Y>4</Y>
       </Location>
       <Size>
-        <Width>2147</Width>
-        <Height>1230</Height>
+        <Width>1019</Width>
+        <Height>699</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -8903,11 +8855,11 @@
       <Visible>true</Visible>
       <Location>
         <X>4</X>
-        <Y>5</Y>
+        <Y>4</Y>
       </Location>
       <Size>
-        <Width>2147</Width>
-        <Height>1230</Height>
+        <Width>1019</Width>
+        <Height>699</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -8927,11 +8879,11 @@
           <Visible>true</Visible>
           <Location>
             <X>4</X>
-            <Y>5</Y>
+            <Y>4</Y>
           </Location>
           <Size>
-            <Width>2147</Width>
-            <Height>1230</Height>
+            <Width>1019</Width>
+            <Height>699</Height>
           </Size>
           <WindowState>Normal</WindowState>
         </EditorDialogSettings>
