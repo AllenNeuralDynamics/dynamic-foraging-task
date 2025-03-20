@@ -88,13 +88,6 @@ from aind_behavior_dynamic_foraging.CurriculumManager.trainer import DynamicFora
 from aind_behavior_dynamic_foraging.CurriculumManager.metrics import DynamicForagingMetrics
 from aind_behavior_curriculum import Trainer
 
-from foraging_gui.schema_to_tp_translation import (
-    task_parameters_to_tp_conversion,
-    session_to_tp_conversion,
-    fip_to_tp_conversion,
-    opto_to_tp_conversion
-)
-
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear()  # clear handlers so console output can be configured
 logging.raiseExceptions = os.getenv('FORAGING_DEV_MODE', False)
@@ -674,11 +667,9 @@ class Window(QMainWindow):
             logging.info(f"Fetching {mouse_id} from Slims.")
             self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
             logging.info(f"Successfully fetched {mouse_id} from Slims.")
-            from pprint import pprint
             logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
             self.curriculum, self.trainer_state, self.metrics, attachments, session = self.trainer.load_data(mouse_id)
             self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
-            pprint(self.trainer_state.stage.task.model_dump())
             attachment_names = [attachment.name for attachment in attachments]
 
             # update session model with slims session information
@@ -2461,18 +2452,6 @@ class Window(QMainWindow):
                 Obj = {}
         else:
             Obj = {}
-
-        # add in keys for backwards compatibility
-        task_map = task_parameters_to_tp_conversion(self.task_logic.task_parameters)
-        session_map = session_to_tp_conversion(self.session_model)
-        fip_map = fip_to_tp_conversion(self.fip_model)
-        opto_map = opto_to_tp_conversion(self.opto_model)
-
-        for key, value in {**task_map, **session_map, **fip_map, **opto_map}.items():
-            if "TP_" in key:
-                Obj[key] = [value] if key not in Obj.keys() else Obj[key] + [value]
-            else:
-                Obj[key] = value
 
         if self.load_tag == 0:
             widget_dict = {w.objectName(): w for w in self.centralwidget.findChildren(
