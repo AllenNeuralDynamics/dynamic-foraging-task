@@ -2451,11 +2451,15 @@ class Window(QMainWindow):
 
         if beeping:
             self.beep_loop.stop()
-        sleep(1)
-        getattr(self.Channel3, f"set_attenuation_left")(value)
-        time.sleep(1)
-        getattr(self.Channel3, f"set_attenuation_right")(value)
-        time.sleep(1)
+        right_timer = QtCore.QTimer(timeout=lambda: getattr(self.Channel3, f"set_attenuation_right")(value), interval=100)
+        right_timer.setSingleShot(True)
+        left_timer = QtCore.QTimer(timeout=lambda: getattr(self.Channel3, f"set_attenuation_left")(value),
+                                    interval=200)
+        left_timer.setSingleShot(True)
+
+        right_timer.start()
+        left_timer.start()
+
         self.SettingsBox[f"AttenuationLeft"] = value
         self.SettingsBox[f"AttenuationRight"] = value
         # Writing to CSV
