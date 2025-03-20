@@ -2468,8 +2468,12 @@ class Window(QMainWindow):
             # Write each key-value pair as a row
             for key, value in self.SettingsBox.items():
                 writer.writerow([key, value])
+
         if beeping:
-            self.beep_loop.start()
+            restart_beep = QtCore.QTimer(timeout=self.beep_loop.start,
+                                    interval=400)
+            restart_beep.setSingleShot(True)
+            restart_beep.start()
 
         # else:
         #     self.Channel.receive()
