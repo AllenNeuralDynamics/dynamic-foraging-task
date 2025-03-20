@@ -2451,8 +2451,11 @@ class Window(QMainWindow):
 
         if beeping:
             self.beep_loop.stop()
+        sleep(1)
         getattr(self.Channel3, f"set_attenuation_left")(value)
+        time.sleep(1)
         getattr(self.Channel3, f"set_attenuation_right")(value)
+        time.sleep(1)
         self.SettingsBox[f"AttenuationLeft"] = value
         self.SettingsBox[f"AttenuationRight"] = value
         # Writing to CSV
