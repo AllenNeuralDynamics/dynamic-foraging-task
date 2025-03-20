@@ -2451,7 +2451,7 @@ class Window(QMainWindow):
 
         if beeping:
             self.beep_loop.stop()
-        #getattr(self.Channel3, f"set_attenuation_left")(value)
+        getattr(self.Channel3, f"set_attenuation_left")(value)
         getattr(self.Channel3, f"set_attenuation_right")(value)
         self.SettingsBox[f"AttenuationLeft"] = value
         self.SettingsBox[f"AttenuationRight"] = value
