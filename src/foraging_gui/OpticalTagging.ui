@@ -863,7 +863,7 @@
   </widget>
   <widget class="QLabel" name="label1_23">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
@@ -891,7 +891,7 @@
   </widget>
   <widget class="QLineEdit" name="NI_daq_sample_frequency">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
