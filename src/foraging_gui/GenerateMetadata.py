@@ -14,6 +14,9 @@ from aind_data_schema.components.stimulus import AuditoryStimulation
 from aind_data_schema.components.devices import SpoutSide,Calibration
 from aind_data_schema_models.units import SizeUnit,FrequencyUnit,SoundIntensityUnit,PowerUnit
 
+from aind_behavior_services.session import AindBehaviorSessionModel
+from aind_behavior_dynamic_foraging.DataSchemas.task_logic import AindDynamicForagingTaskLogic
+
 from aind_data_schema.core.data_description import Funding
 from aind_data_schema_models.organizations import Organization
 from aind_data_schema_models.modalities import Modality
@@ -63,8 +66,17 @@ class generate_metadata:
         json file to the metadata folder
 
     '''
-    def __init__(self, json_file=None, Obj=None, dialog_metadata_file=None,dialog_metadata=None, output_folder=None):
-        
+    def __init__(self, session_model: AindBehaviorSessionModel,
+                 task_logic: AindDynamicForagingTaskLogic,
+                 json_file=None,
+                 Obj=None,
+                 dialog_metadata_file=None,
+                 dialog_metadata=None,
+                 output_folder=None):
+
+        self.session_model = session_model
+        self.task_logic = task_logic
+
         self.session_metadata_success=False
         self.rig_metadata_success=False
 
@@ -511,14 +523,14 @@ class generate_metadata:
         #self.data_streams = self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
 
         session_params = {
-            "experimenter_full_name": [self.Obj['Experimenter']],
-            "subject_id": self.Obj['ID'],
+            "experimenter_full_name": self.session_model.experimenter,
+            "subject_id": self.session_model.subject,
             "session_start_time": self.session_start_time,
             "session_end_time": self.session_end_time,
-            "session_type": self.Obj['Task'],
+            "session_type": self.session_model.experiment,
             "iacuc_protocol": self.Obj['meta_data_dialog']['session_metadata']['IACUCProtocol'],
             "rig_id": self.Obj['meta_data_dialog']['rig_metadata']['rig_id'],
-            "notes": self.Obj['ShowNotes'],
+            "notes": self.session_model.notes,
             "weight_unit": "gram",
             "reward_consumed_total": self.total_reward_consumed_in_session,
             "reward_consumed_unit": "microliter",
@@ -849,13 +861,15 @@ class generate_metadata:
         '''
         Get the reward probability
         '''
-        if self.Obj['Task'] in ['Uncoupled Baiting','Uncoupled Without Baiting']:
+        if self.session_model.experiment in ['Uncoupled Baiting','Uncoupled Without Baiting']:
             # Get reward prob pool from the input string (e.g., ["0.1", "0.5", "0.9"])
-            return self.Obj['UncoupledReward']
-        elif self.Obj['Task'] in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
-            RewardPairs=self.Obj['B_RewardFamilies'][int(self.Obj['RewardFamily'])-1][:int(self.Obj['RewardPairsN'])]
-            RewardProb=np.array(RewardPairs)/np.expand_dims(np.sum(RewardPairs,axis=1),axis=1)*float(self.Obj['BaseRewardSum'])
-            return str(RewardProb.tolist())
+            return self.task_logic.task_parameters.uncoupled_reward
+        elif self.session_model.experiment in ['Coupled Baiting','Coupled Without Baiting','RewardN']:
+            t = self.task_logic.task_parameters
+            reward_pairs = self.Obj['B_RewardFamilies'][t.reward_probability.family - 1][:t.reward_probability.pairs_n]
+            reward_prob = np.array(reward_pairs) / np.expand_dims(np.sum(reward_pairs, axis=1),
+                                                                axis=1) * t.reward_probability.base_reward_sum
+            return str(reward_prob.tolist())
         else:
             logging.info('Task is not recognized!')
             return ''
