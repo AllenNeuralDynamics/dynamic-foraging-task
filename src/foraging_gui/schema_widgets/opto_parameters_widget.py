@@ -135,16 +135,15 @@ class OptoParametersWidget(SchemaWidgetBase):
             ),
         )
         active_lasers = self.path_get(self.schema, name_lst[:-1])
-        if laser_color.name not in [laser.name for laser in active_lasers]:
-            if enabled:
-                active_lasers.append(laser_color)
-            else:
-                remove_index = [i for i, laser in enumerate(active_lasers) if laser.name == laser_color.name]
-                if len(remove_index) == 1:
-                    del active_lasers[remove_index[0]]
-            self.path_set(self.schema, name_lst[:-1], active_lasers)
-            self.ValueChangedInside.emit(".".join(name_lst[:-1]))
-
+        if enabled and laser_color.name not in [laser.name for laser in active_lasers]:     # checkbox was clicked
+            active_lasers.append(laser_color)
+        elif not enabled and laser_color.name in [laser.name for laser in active_lasers]:   # checkbox was unclicked
+            remove_index = [i for i, laser in enumerate(active_lasers) if laser.name == laser_color.name]
+            if len(remove_index) == 1:
+                del active_lasers[remove_index[0]]
+        self.path_set(self.schema, name_lst[:-1], active_lasers)
+        self.ValueChangedInside.emit(".".join(name_lst[:-1]))
+    
     def toggle_location_field(self, name: str, enabled: bool) -> None:
         """
         Add or remove optional field
