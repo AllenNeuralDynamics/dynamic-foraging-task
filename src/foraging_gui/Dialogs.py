@@ -3439,42 +3439,93 @@ class OpticalTaggingDialog(QDialog):
         
         return my_wave
     
-    def _get_laser_waveform(self,protocol:str,frequency:int,pulse_duration:float,input_voltage:float,duration_each_cycle:float)->np.array:
-        '''Get the waveform for the laser
+    def _get_laser_waveform(self, protocol: str, frequency: int, pulse_duration: float,
+                        input_voltage: float, duration_each_cycle: float,
+                        ramp_up_duration: float, ramp_down_duration: float) -> np.array:
+        '''Get the waveform for the laser with linear ramp up and down for each pulse.
+        
         Args:
             protocol: The protocol to use (only 'Pulse' is supported).
             frequency: The frequency of the pulse.
-            pulse_duration: The duration of the pulse.
+            pulse_duration: The total duration of the pulse (ms).
             input_voltage: The input voltage of the laser.
+            duration_each_cycle: The total duration of one cycle.
+            ramp_up_duration: Duration for the linear ramp up at the beginning of each pulse (ms).
+            ramp_down_duration: Duration for the linear ramp down at the end of each pulse (ms).
+            
         Returns:
-            np.array: The waveform of the laser.
+            np.array: The complete waveform for the laser.
         '''
-        # get the waveform
-        if protocol!='Pulse':
+        # Check protocol
+        if protocol != 'Pulse':
             logger.warning(f"Unknown protocol: {protocol}")
             return
-        sample_frequency=5000 # should be replaced
-        PointsEachPulse=int(sample_frequency*pulse_duration/1000)
-        PulseIntervalPoints=int(1/frequency*sample_frequency-PointsEachPulse)
-        if PulseIntervalPoints<0:
+
+        sample_frequency = 5000  # should be replaced
+
+        # Calculate the total number of points per pulse
+        PointsEachPulse = int(sample_frequency * pulse_duration / 1000)
+
+        # Calculate the number of points for ramp up and ramp down
+        ramp_up_points = int(sample_frequency * ramp_up_duration / 1000)
+        ramp_down_points = int(sample_frequency * ramp_down_duration / 1000)
+        
+        # Check if ramp durations exceed pulse duration
+        if ramp_up_points + ramp_down_points > PointsEachPulse:
+            logging.warning('Ramp up and ramp down durations exceed the total pulse duration!',
+                            extra={'tags': [self.MainWindow.warning_log_tag]})
+            return
+
+        # The remaining points are for the plateau (steady high) part of the pulse
+        plateau_points = PointsEachPulse - (ramp_up_points + ramp_down_points)
+        
+        # Build the pulse waveform:
+        # Linear ramp-up: from 0 to input_voltage over ramp_up_points
+        if ramp_up_points > 0:
+            ramp_up = np.linspace(0, input_voltage, ramp_up_points, endpoint=False)
+        else:
+            ramp_up = np.array([])
+        
+        # Plateau at input_voltage
+        if plateau_points > 0:
+            plateau = input_voltage * np.ones(plateau_points)
+        else:
+            plateau = np.array([])
+        
+        # Linear ramp-down: from input_voltage to 0 over ramp_down_points
+        if ramp_down_points > 0:
+            ramp_down = np.linspace(input_voltage, 0, ramp_down_points, endpoint=False)
+        else:
+            ramp_down = np.array([])
+        
+        # Construct one pulse with ramp up, plateau, and ramp down
+        EachPulse = np.concatenate((ramp_up, plateau, ramp_down), axis=0)
+        
+        # Calculate the number of points for the off interval between pulses
+        PulseIntervalPoints = int(1 / frequency * sample_frequency - PointsEachPulse)
+        if PulseIntervalPoints < 0:
             logging.warning('Pulse frequency and pulse duration are not compatible!',
                             extra={'tags': [self.MainWindow.warning_log_tag]})
-        TotalPoints=int(sample_frequency*duration_each_cycle)
-        PulseNumber=np.floor(duration_each_cycle*frequency) 
-        EachPulse=input_voltage*np.ones(PointsEachPulse)
-        PulseInterval=np.zeros(PulseIntervalPoints)
-        WaveFormEachCycle=np.concatenate((EachPulse, PulseInterval), axis=0)
-        my_wave=np.empty(0)
-        # pulse number should be greater than 0
-        if PulseNumber>1:
-            for i in range(int(PulseNumber-1)):
-                my_wave=np.concatenate((my_wave, WaveFormEachCycle), axis=0)
+        
+        PulseInterval = np.zeros(PulseIntervalPoints)
+        WaveFormEachCycle = np.concatenate((EachPulse, PulseInterval), axis=0)
+        
+        TotalPoints = int(sample_frequency * duration_each_cycle)
+        PulseNumber = np.floor(duration_each_cycle * frequency)
+        
+        my_wave = np.empty(0)
+        # Ensure pulse number is greater than 0
+        if PulseNumber >= 1:
+            for i in range(int(PulseNumber - 1)):
+                my_wave = np.concatenate((my_wave, WaveFormEachCycle), axis=0)
         else:
-            logging.warning('Pulse number is less than 1!', extra={'tags': [self.MainWindow.warning_log_tag]})
+            logging.warning('Pulse number is less than 1!',
+                            extra={'tags': [self.MainWindow.warning_log_tag]})
             return
-        my_wave=np.concatenate((my_wave, EachPulse), axis=0)
-        my_wave=np.concatenate((my_wave, np.zeros(TotalPoints-np.shape(my_wave)[0])), axis=0)
-        my_wave=np.append(my_wave,[0,0])
+
+        my_wave = np.concatenate((my_wave, EachPulse), axis=0)
+        my_wave = np.concatenate((my_wave, np.zeros(TotalPoints - np.shape(my_wave)[0])), axis=0)
+        my_wave = np.append(my_wave, [0, 0])
         return my_wave
 
     def _get_laser_amplitude(self,target_power:float,laser_color:str,protocol:str,laser_name:str)->float:
