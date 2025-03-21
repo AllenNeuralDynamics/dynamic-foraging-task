@@ -429,7 +429,9 @@ class generate_metadata:
             self.trials_finished=np.count_nonzero(self.Obj['B_AnimalResponseHistory']!=2)
             self.trials_rewarded=np.count_nonzero(np.logical_or(self.Obj['B_RewardedHistory'][0],self.Obj['B_RewardedHistory'][1]))
             self.total_reward_consumed_in_session= float(self.Obj.get('BS_TotalReward', 0))
-
+        if 'random_reward_par' in self.Obj:
+            if 'RandomWaterVolume' in self.Obj['random_reward_par']:
+                self.total_reward_consumed_in_session+=np.sum(self.Obj['random_reward_par']['RandomWaterVolume'])
         # Wrong format of WeightAfter
         # Remove all the non-numeric characters except the dot in the WeightAfter
         if self.Obj['WeightAfter']!='':
@@ -446,6 +448,26 @@ class generate_metadata:
         else:
             self.Obj['settings_box']['AINDLickDetector']=int(self.Obj['settings_box']['AINDLickDetector'])
 
+        # Handle the edge cases for the optical tagging
+        if 'OpticalTagging_dialog' not in self.Obj:
+            self.Obj['OpticalTagging_dialog'] = {}
+        if 'optical_tagging_par' not in self.Obj:
+            self.Obj['optical_tagging_par'] = {}
+        if 'optical_tagging_start_time' not in self.Obj['optical_tagging_par']:
+            self.Obj['optical_tagging_par']['optical_tagging_start_time'] = ''
+        if 'optical_tagging_end_time' not in self.Obj['optical_tagging_par']:
+            self.Obj['optical_tagging_par']['optical_tagging_end_time'] = ''
+
+        # Handle the edge cases for the random reward
+        if 'RandomReward_dialog' not in self.Obj:
+            self.Obj['RandomReward_dialog'] = {}
+        if 'random_reward_par' not in self.Obj:
+            self.Obj['random_reward_par'] = {}
+        if 'random_reward_start_time' not in self.Obj['random_reward_par']:
+            self.Obj['random_reward_par']['random_reward_start_time'] = ''
+        if 'random_reward_end_time' not in self.Obj['random_reward_par']:
+            self.Obj['random_reward_par']['random_reward_end_time'] = ''
+        
     def _initialize_fields(self,dic,keys,default_value=''):
         '''
         Initialize fields
@@ -463,7 +485,6 @@ class generate_metadata:
             if key not in dic:
                 dic[key] = default_value
 
-
     def _session(self):
         '''
         Create metadata related to Session class in the aind_data_schema
@@ -472,6 +493,7 @@ class generate_metadata:
         if self.Obj['meta_data_dialog']['rig_metadata']=={}:
             logging.info('rig metadata is empty!')
             return
+        self._get_behavior_software()
         self._get_reward_delivery()
         self._get_water_calibration()
         self._get_opto_calibration()
@@ -482,10 +504,20 @@ class generate_metadata:
         self._get_ophys_stream()
         self._get_high_speed_camera_stream()
         self._get_session_time()
-        if self.session_start_time == '' or self.session_end_time == '':
+        if (self.session_start_time == '' or self.session_end_time == '') and (self.Obj['random_reward_par']['random_reward_start_time']=='' or self.Obj['random_reward_par']['random_reward_end_time']=='') and  (self.Obj['optical_tagging_par']['optical_tagging_start_time']=='' or self.Obj['optical_tagging_par']['optical_tagging_start_time']==''):
             logging.info('session start time or session end time is empty!')
             return
-
+        start_time=self.session_start_time
+        end_time=self.session_end_time
+        if start_time == '' or end_time == '':
+            start_time=self.Obj['random_reward_par']['random_reward_start_time']
+            end_time=self.Obj['random_reward_par']['random_reward_end_time']
+        if start_time=='' or end_time=='':
+            start_time=self.Obj['optical_tagging_par']['optical_tagging_start_time']
+            end_time=self.Obj['optical_tagging_par']['optical_tagging_end_time']
+        if start_time=='' or end_time=='':
+            logging.info('session start time or session end time is empty!')
+            return
         self._get_stimulus()
         self._combine_data_streams()
         #self.data_streams = self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
@@ -493,8 +525,8 @@ class generate_metadata:
         session_params = {
             "experimenter_full_name": [self.Obj['Experimenter']],
             "subject_id": self.Obj['ID'],
-            "session_start_time": self.session_start_time,
-            "session_end_time": self.session_end_time,
+            "session_start_time": start_time,
+            "session_end_time": end_time,
             "session_type": self.Obj['Task'],
             "iacuc_protocol": self.Obj['meta_data_dialog']['session_metadata']['IACUCProtocol'],
             "rig_id": self.Obj['meta_data_dialog']['rig_metadata']['rig_id'],
@@ -713,8 +745,82 @@ class generate_metadata:
         self.stimulus=[]
         self._get_behavior_stimulus()
         self._get_optogenetics_stimulus()
-        self.stimulus=self.behavior_stimulus+self.optogenetics_stimulus
+        self._get_optical_tagging_stimulus()
+        self._get_random_reward_stimulus()
+        self.stimulus=self.behavior_stimulus+self.optogenetics_stimulus+self.optical_tagging_stimulus+self.random_reward_stimulus
 
+    def _get_random_reward_stimulus(self):
+        '''
+        Make the random reward stimulus metadata
+        '''
+        self.random_reward_stimulus=[]
+        if self.Obj['RandomReward_dialog']=={} or self.Obj['random_reward_par']['random_reward_start_time']=='' or self.Obj['random_reward_par']['random_reward_end_time']=='':
+            logging.info('No random reward detected!')
+            return 
+        self.random_reward_stimulus.append(StimulusEpoch(
+            software=self.behavior_software,
+            stimulus_device_names=['Reward lick spout'], # this should be improved in the future
+            stimulus_name='The random reward stimulus',
+            stimulus_modalities=[StimulusModality.NONE],
+            stimulus_start_time=self.Obj['random_reward_par']['random_reward_start_time'],
+            stimulus_end_time=self.Obj['random_reward_par']['random_reward_end_time'],
+            output_parameters=self._get_random_reward_output_parameters(),
+            reward_consumed_during_epoch=np.sum(self.Obj['random_reward_par']['RandomWaterVolume']),
+            reward_consumed_unit="microliter",
+            trials_total= len(self.Obj['random_reward_par']['volumes']),
+        ))
+    
+    def _get_random_reward_output_parameters(self):
+        '''Get the output parameters for random reward'''
+        output_parameters = {
+            'spout':self.Obj['RandomReward_dialog']['WhichSpout'],
+            'left_reward_volume':self.Obj['RandomReward_dialog']['LeftVolume'],
+            'right_reward_volume':self.Obj['RandomReward_dialog']['RightVolume'],
+            'reward_number_each_condition':self.Obj['RandomReward_dialog']['RewardN'],
+            'interval_distribution':self.Obj['RandomReward_dialog']['IntervalDistribution'],
+            'interval_beta':self.Obj['RandomReward_dialog']['IntervalBeta'],
+            'interval_min':self.Obj['RandomReward_dialog']['IntervalMin'],
+            'interval_max':self.Obj['RandomReward_dialog']['IntervalMax']
+        }
+        return output_parameters
+
+    def _get_optical_tagging_stimulus(self):
+        '''
+        Make the optical tagging stimulus metadata
+        '''
+        self.optical_tagging_stimulus=[]
+        if self.Obj['OpticalTagging_dialog']=={} or self.Obj['optical_tagging_par']['optical_tagging_start_time']=='' or self.Obj['optical_tagging_par']['optical_tagging_end_time']=='':
+            logging.info('No optical tagging detected!')
+            return 
+        self._get_optical_tagging_light_source_config()
+        self.optical_tagging_stimulus.append(StimulusEpoch(
+                software=self.behavior_software,    
+                stimulus_device_names=self.light_names_used_in_optical_tagging,
+                stimulus_name='The optical tagging stimulus',
+                stimulus_modalities=[StimulusModality.OPTOGENETICS],
+                stimulus_start_time=self.Obj['optical_tagging_par']['optical_tagging_start_time'],
+                stimulus_end_time=self.Obj['optical_tagging_par']['optical_tagging_end_time'],
+                light_source_config=self.optical_tagging_light_source_config,
+                output_parameters=self._get_optical_tagging_output_parameters(),
+        ))
+
+    def _get_optical_tagging_output_parameters(self):
+        '''Get the output parameters for optical tagging'''
+        output_parameters = {
+            'Laser':self.Obj['OpticalTagging_dialog']['WhichLaser'],
+            'Protocol':self.Obj['OpticalTagging_dialog']['Protocol'],
+            'Cycles_each_condition':self.Obj['OpticalTagging_dialog']['Cycles_each_condition'],
+            'Frequency':self.Obj['OpticalTagging_dialog']['Frequency'],
+            'Pulse_duration':self.Obj['OpticalTagging_dialog']['Pulse_duration'],
+            'Laser_1_color':self.Obj['OpticalTagging_dialog']['Laser_1_color'],
+            'Laser_2_color':self.Obj['OpticalTagging_dialog']['Laser_2_color'],
+            'Laser_1_power':self.Obj['OpticalTagging_dialog']['Laser_1_power'],
+            'Laser_2_power':self.Obj['OpticalTagging_dialog']['Laser_2_power'],
+            'Duration_each_cycle':self.Obj['OpticalTagging_dialog']['Duration_each_cycle'],
+            'Interval_between_cycles':self.Obj['OpticalTagging_dialog']['Interval_between_cycles'],
+        }
+        return output_parameters
+    
     def _get_behavior_stimulus(self):
         '''
         Make the audio stimulus metadata
@@ -884,6 +990,18 @@ class generate_metadata:
                 self.light_source_config.append(LightEmittingDiodeConfig(
                     name=light_source,
                 ))
+    def _get_optical_tagging_light_source_config(self):
+        '''
+        get the optical tagging light source config
+        '''
+        self.optical_tagging_light_source_config=[]
+        self._get_light_names_used_in_optical_tagging()
+        for light_source in self.light_names_used_in_optical_tagging:
+            wavelength=self._get_light_pars(light_source)
+            self.optical_tagging_light_source_config.append(LaserConfig(
+                name=light_source,
+                wavelength=wavelength,
+            ))
 
     def _get_light_pars(self,light_source):
         '''
@@ -893,7 +1011,22 @@ class generate_metadata:
             if current_stimulus_device['name']==light_source:
                 return current_stimulus_device['wavelength']
 
-
+    def _get_light_names_used_in_optical_tagging(self):
+        '''
+        Get the optogenetics laser names used in the optical tagging
+        '''
+        self.light_names_used_in_optical_tagging=[]
+        light_sources=[]
+        for i in range(len(self.Obj['optical_tagging_par']['laser_color'])):
+            if self.Obj['optical_tagging_par']['laser_name'][i]=="Laser_1":
+                laser_tag=1
+            elif self.Obj['optical_tagging_par']['laser_name'][i]=="Laser_2":
+                laser_tag=2
+            light_sources.append({'color':self.Obj['optical_tagging_par']['laser_color'][i],'laser_tag':laser_tag})
+        for light_source in light_sources:
+            self.light_names_used_in_optical_tagging.append([key for key, value in self.name_mapper['laser_name_mapper'].items() if value == light_source][0])
+        self.light_names_used_in_optical_tagging = list(set(self.light_names_used_in_optical_tagging))
+        
     def _get_light_names_used_in_session(self):
         '''
         Get the optogenetics laser names used in the session
@@ -1344,6 +1477,6 @@ class generate_metadata:
 
 if __name__ == '__main__':
     
-    generate_metadata(json_file=r'Y:\753126\behavior_753126_2024-10-07_10-14-07\behavior\753126_2024-10-07_10-14-07.json',output_folder=r'H:\test')
+    generate_metadata(json_file=r'I:\BehaviorData\323_EPHYS3\0\behavior_0_2025-01-02_13-11-29\behavior\0_2025-01-02_13-11-29.json',output_folder=r'H:\test')
     #generate_metadata(json_file=r'Y:\753126\behavior_753126_2024-10-15_12-20-35\behavior\753126_2024-10-15_12-20-35.json',output_folder=r'H:\test')
     #generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')

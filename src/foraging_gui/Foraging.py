@@ -42,7 +42,7 @@ import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
 from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,MetadataDialog
-from foraging_gui.Dialogs import LaserCalibrationDialog
+from foraging_gui.Dialogs import LaserCalibrationDialog,OpticalTaggingDialog,RandomRewardDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
@@ -201,6 +201,8 @@ class Window(QMainWindow):
         self.OpenLaserCalibration=0
         self.OpenCamera=0
         self.OpenMetadata=0
+        self.OpenOpticalTagging=0
+        self.OpenRandomReward=0
         self.NewTrialRewardOrder=0
         self.LickSta=0
         self.LickSta_ToInitializeVisual=1
@@ -223,6 +225,8 @@ class Window(QMainWindow):
         self._LaserCalibration()# to open the laser calibration panel
         self._WaterCalibration()# to open the water calibration panel
         self._Camera()
+        self._OpticalTagging()
+        self._RandomReward()
         self._InitializeMotorStage()
         self._Metadata()
         self.RewardFamilies=[[[8,1],[6, 1],[3, 1],[1, 1]],[[8, 1], [1, 1]],[[1,0],[.9,.1],[.8,.2],[.7,.3],[.6,.4],[.5,.5]],[[6, 1],[3, 1],[1, 1]]]
@@ -338,6 +342,8 @@ class Window(QMainWindow):
         self.action_Sound.toggled.connect(lambda checked: self.beep_loop.start() if checked else self.beep_loop.stop())
 
         self.actionMeta_Data.triggered.connect(self._Metadata)
+        self.actionOptical_Tagging.triggered.connect(self._OpticalTagging)
+        self.actionRandom_Reward.triggered.connect(self._RandomReward)  
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
         self.actionLicks_sta.triggered.connect(self._LickSta)
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
@@ -2428,6 +2434,26 @@ class Window(QMainWindow):
         else:
             self.Camera_dialog.hide()
 
+    def _OpticalTagging(self):
+        '''Open the optical tagging dialog'''
+        if self.OpenOpticalTagging==0:
+            self.OpticalTagging_dialog = OpticalTaggingDialog(MainWindow=self)
+            self.OpenOpticalTagging=1
+        if self.actionOptical_Tagging.isChecked()==True:
+            self.OpticalTagging_dialog.show()
+        else:
+            self.OpticalTagging_dialog.hide()
+
+    def _RandomReward(self):
+        '''Open the random reward dialog'''
+        if self.OpenRandomReward==0:
+            self.RandomReward_dialog = RandomRewardDialog(MainWindow=self)
+            self.OpenRandomReward=1
+        if self.actionRandom_Reward.isChecked()==True:
+            self.RandomReward_dialog.show()
+        else:
+            self.RandomReward_dialog.hide()
+            
     def play_beep(self):
         """
         Convenience function to play tone
@@ -2663,7 +2689,7 @@ class Window(QMainWindow):
                 QtWidgets.QComboBox,QtWidgets.QDoubleSpinBox,QtWidgets.QSpinBox))}
             widget_dict.update({w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)})
             self._Concat(widget_dict,Obj,'None')
-            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog']
+            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','Metadata_dialog','OpticalTagging_dialog','RandomReward_dialog']
             for dialog_name in dialogs:
                 if hasattr(self, dialog_name):
                     widget_dict = {w.objectName(): w for w in getattr(self, dialog_name).findChildren(
@@ -2764,6 +2790,9 @@ class Window(QMainWindow):
             # save manual water 
             Obj['ManualWaterVolume']=self.ManualWaterVolume
 
+            # save the random water
+            Obj['RandomWaterVolume']=self.RandomReward_dialog.random_reward_par['RandomWaterVolume']
+            
             # save camera start/stop time
             Obj['Camera_dialog']['camera_start_time']=self.Camera_dialog.camera_start_time
             Obj['Camera_dialog']['camera_stop_time']=self.Camera_dialog.camera_stop_time
@@ -2779,6 +2808,12 @@ class Window(QMainWindow):
         Obj['PhotometryFolder']=self.PhotometryFolder
         Obj['MetadataFolder']=self.MetadataFolder
         Obj['SaveFile']=self.SaveFile
+
+        # save optical tagging parameters
+        Obj['optical_tagging_par']=self.OpticalTagging_dialog.optical_tagging_par
+
+        # save random reward parameters
+        Obj['random_reward_par']=self.RandomReward_dialog.random_reward_par
 
         # generate the metadata file and update slims
         try:
@@ -2800,8 +2835,7 @@ class Window(QMainWindow):
                 if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.behavior_session_model.subject not in ['0','1','2','3','4','5','6','7','8','9','10']:
                     self._AddWaterLogResult(session)
                 self.bias_indicator.clear()  # prepare for new session
-
-
+                
         except Exception as e:
             logging.warning('Meta data is not saved!', extra= {'tags': {self.warning_log_tag}})
             logging.error('Error generating session metadata: '+str(e))
@@ -3177,7 +3211,7 @@ class Window(QMainWindow):
             self.Obj = Obj
 
             widget_dict={}
-            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','centralwidget','TrainingParameters']
+            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','centralwidget','TrainingParameters','OpticalTagging_dialog','RandomReward_dialog']
             for dialog_name in dialogs:
                 if hasattr(self, dialog_name):
                     widget_types = (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit,
@@ -3200,6 +3234,8 @@ class Window(QMainWindow):
                             CurrentObj=Obj['LaserCalibration_dialog']
                         elif widget.parent().objectName()=='MetaData':
                             CurrentObj=Obj['Metadata_dialog']
+                        elif widget.parent().objectName()=='RandomReward':
+                            CurrentObj=Obj['RandomReward_dialog']
                         else:
                             CurrentObj=Obj.copy()
                     except Exception as e:
@@ -3922,7 +3958,7 @@ class Window(QMainWindow):
         if hasattr(self, 'RandomReward_dialog'):
             self.RandomReward_dialog.random_reward_par={}
             self.RandomReward_dialog.random_reward_par['RandomWaterVolume']=[0,0]
-            
+
         # delete the optical tagging
         if hasattr(self, 'OpticalTagging_dialog'):
             self.OpticalTagging_dialog.optical_tagging_par={}
@@ -4173,14 +4209,15 @@ class Window(QMainWindow):
             try:
                 # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
                 if (not (self.Camera_dialog.StartRecording.isChecked() and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
-                    # Turn off the camera recording
-                    self.Camera_dialog.StartRecording.setChecked(False)
-                    # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging. 
-                    if self.Camera_dialog.AutoControl.currentText()=='Yes' and self.Camera_dialog.StartPreview.isChecked():
-                        self.Camera_dialog.StartPreview.setChecked(False)
-                        # sleep for 1 second to make sure the trigger is off
-                        time.sleep(1)
-                    self.Ot_log_folder=self._restartlogging()
+                    if self.logging_type!=0:
+                        # Turn off the camera recording
+                        self.Camera_dialog.StartRecording.setChecked(False)
+                        # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging. 
+                        if self.Camera_dialog.AutoControl.currentText()=='Yes' and self.Camera_dialog.StartPreview.isChecked():
+                            self.Camera_dialog.StartPreview.setChecked(False)
+                            # sleep for 1 second to make sure the trigger is off
+                            time.sleep(1)
+                        self.Ot_log_folder=self._restartlogging()
             except Exception as e:
                 if 'ConnectionAbortedError' in str(e):
                     logging.info('lost bonsai connection: restartlogging()')
@@ -4659,7 +4696,6 @@ class Window(QMainWindow):
             logger.info('Give left manual water (ul): '+str(np.round(float(self.TP_GiveWaterL_volume),3)),
                            extra={'tags': [self.warning_log_tag]})
 
-
     def _give_reserved_water(self,valve=None):
         '''give reserved water usually after the go cue'''
         if valve=='left':
@@ -4757,7 +4793,11 @@ class Window(QMainWindow):
                 ManualWaterVolume=np.sum(self.ManualWaterVolume)
             else:
                 ManualWaterVolume=0
-            water_in_session=BS_TotalReward+ManualWaterVolume
+            
+            if hasattr(self,'RandomReward_dialog'):
+                RandomWaterVolume=np.sum(self.RandomReward_dialog.random_reward_par['RandomWaterVolume'])
+
+            water_in_session=BS_TotalReward+ManualWaterVolume+RandomWaterVolume
             self.water_in_session=water_in_session
             if self.WeightAfter.text()!='' and self.BaseWeight.text()!='' and self.TargetRatio.text()!='':
                 # calculate the suggested water

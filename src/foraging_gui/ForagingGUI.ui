@@ -691,8 +691,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>627</width>
-                  <height>325</height>
+                  <width>621</width>
+                  <height>334</height>
                  </rect>
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout">
@@ -1194,8 +1194,7 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="QWidget" name="groupBox_6">
-                     </widget>
+                     <widget class="QWidget" name="groupBox_6" native="true"/>
                     </item>
                    </layout>
                   </widget>
@@ -1534,8 +1533,7 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="QWidget" name="groupBox_6">
-                     </widget>
+                     <widget class="QWidget" name="groupBox_6" native="true"/>
                     </item>
                     <item>
                      <widget class="QWidget" name="widget" native="true">
@@ -1731,7 +1729,7 @@
                          <property name="value">
                           <double>0.030000000000000</double>
                          </property>
-                         <property name="disabled">
+                         <property name="disabled" stdset="0">
                           <bool>true</bool>
                          </property>
                         </widget>
@@ -1759,8 +1757,8 @@
                          <property name="value">
                           <double>0.030000000000000</double>
                          </property>
-                         <property name="disabled">
-                         <bool>true</bool>
+                         <property name="disabled" stdset="0">
+                          <bool>true</bool>
                          </property>
                         </widget>
                        </item>
@@ -1813,7 +1811,7 @@
                          <property name="value">
                           <double>3.000000000000000</double>
                          </property>
-                          <property name="disabled">
+                         <property name="disabled" stdset="0">
                           <bool>true</bool>
                          </property>
                         </widget>
@@ -1841,9 +1839,9 @@
                          <property name="value">
                           <double>3.000000000000000</double>
                          </property>
-                         <property name="disabled">
-                         <bool>true</bool>
-                        </property>
+                         <property name="disabled" stdset="0">
+                          <bool>true</bool>
+                         </property>
                         </widget>
                        </item>
                        <item row="2" column="3">
@@ -2344,7 +2342,7 @@ Double dipping:
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>1072</width>
+                  <width>1177</width>
                   <height>463</height>
                  </rect>
                 </property>
@@ -4856,6 +4854,8 @@ Current pair:
     <addaction name="action_Calibration"/>
     <addaction name="actionLaser_Calibration"/>
     <addaction name="actionMeta_Data"/>
+    <addaction name="actionOptical_Tagging"/>
+    <addaction name="actionRandom_Reward"/>
     <addaction name="separator"/>
     <addaction name="menuSimulation"/>
     <addaction name="actionDrawing_after_stopping"/>
@@ -4982,6 +4982,7 @@ Current pair:
    </attribute>
    <addaction name="action_Calibration"/>
    <addaction name="actionLaser_Calibration"/>
+   <addaction name="actionOptical_Tagging"/>
    <addaction name="actionMeta_Data"/>
   </widget>
   <widget class="QToolBar" name="toolBar_3">
@@ -5254,6 +5255,26 @@ Current pair:
   <action name="actionOpen_video_folder">
    <property name="text">
     <string>Open video folder</string>
+   </property>
+  </action>
+  <action name="actionOptical_Tagging">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>resources/OpticalTagging.jpg</normaloff>resources/OpticalTagging.jpg</iconset>
+   </property>
+   <property name="text">
+    <string>Optical Tagging</string>
+   </property>
+  </action>
+  <action name="actionRandom_Reward">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Random Reward</string>
    </property>
   </action>
  </widget>
