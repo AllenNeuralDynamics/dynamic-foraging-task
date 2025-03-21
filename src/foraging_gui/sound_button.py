@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QSpinBox, QWidget, QSlider, QGridLayout, QLabel, QToolButton, QWidgetAction, QMenu
+from PyQt5.QtWidgets import QSpinBox, QWidget, QGridLayout, QLabel, QToolButton, QWidgetAction, QMenu
 from PyQt5.QtGui import QIcon
 from PyQt5.Qt import pyqtSignal, Qt, QMouseEvent
 
@@ -19,12 +19,16 @@ class SoundButton(QToolButton):
         self.volume_widget_layout = QGridLayout()
         self.volume_widget.setLayout(self.volume_widget_layout)
 
+        # configure label
+        self.label = QLabel("Attenuation: ")
+        self.volume_widget_layout.addWidget(self.label, 0, 0)
+
         # configure spinbox
         self.attenuation_box = QSpinBox()
+        self.attenuation_box.setRange(0, 500)
         self.attenuation_box.setValue(attenuation)
-        self.attenuation_box.setMaximum(500)
         self.attenuation_box.valueChanged.connect(self.attenuationChanged.emit)
-        self.volume_widget_layout.addWidget(self.attenuation_box, 0, 0)
+        self.volume_widget_layout.addWidget(self.attenuation_box, 0, 1)
 
         # configure popup window
         self.menu = QMenu()
