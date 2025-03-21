@@ -4184,6 +4184,7 @@ class Window(QMainWindow):
                 logging.info('Start button pressed: user continued session')
                 self.Start.setChecked(True)
                 return
+
             # If the photometry timer is running, stop it
             if self.finish_Timer==0:
                 self.ignore_timer=True
@@ -4195,7 +4196,8 @@ class Window(QMainWindow):
                     self.workertimer._stop()
 
             self.session_end_tasks()
-
+            self.sound_button.setEnabled(True)
+            
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
             self._StopCurrentSession()
