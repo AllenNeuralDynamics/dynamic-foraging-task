@@ -3281,36 +3281,24 @@ class OpticalTaggingDialog(QDialog):
             else:
                 break
 
-    def _save_data(self, protocol, frequency, pulse_duration, pulse_ramp_up,pulse_ramp_down,laser_name, target_power, laser_color, duration_each_cycle, interval_between_cycles, location_tag, laser_start_timestamp, success_tag):
-        '''Extend the current parameters to self.optical_tagging_par'''
-        if 'protocol' not in self.optical_tagging_par.keys():
-            self.optical_tagging_par['protocol']=[]
-            self.optical_tagging_par['frequency']=[]
-            self.optical_tagging_par['pulse_duration']=[]
-            self.optical_tagging_par['pulse_ramp_up']=[]
-            self.optical_tagging_par['pulse_ramp_down']=[]
-            self.optical_tagging_par['laser_name']=[]
-            self.optical_tagging_par['target_power']=[]
-            self.optical_tagging_par['laser_color']=[]
-            self.optical_tagging_par['duration_each_cycle']=[]
-            self.optical_tagging_par['interval_between_cycles']=[]
-            self.optical_tagging_par['location_tag']=[]
-            self.optical_tagging_par['laser_start_timestamp']=[]
-            self.optical_tagging_par['success_tag']=[]
-        else:
-            self.optical_tagging_par['protocol'].append(protocol)
-            self.optical_tagging_par['frequency'].append(frequency)
-            self.optical_tagging_par['pulse_duration'].append(pulse_duration)
-            self.optical_tagging_par['pulse_ramp_up'].append(pulse_ramp_up)
-            self.optical_tagging_par['pulse_ramp_down'].append(pulse_ramp_down)
-            self.optical_tagging_par['laser_name'].append(laser_name)
-            self.optical_tagging_par['target_power'].append(target_power)
-            self.optical_tagging_par['laser_color'].append(laser_color)
-            self.optical_tagging_par['duration_each_cycle'].append(duration_each_cycle)
-            self.optical_tagging_par['interval_between_cycles'].append(interval_between_cycles)
-            self.optical_tagging_par['location_tag'].append(location_tag)
-            self.optical_tagging_par['laser_start_timestamp'].append(laser_start_timestamp)
-            self.optical_tagging_par['success_tag'].append(success_tag)
+    def _save_data(self, **kwargs):
+        """
+        Extend the current parameters in self.optical_tagging_par using any provided keyword arguments.
+        
+        Each keyword argument's key is used as a dictionary key, and its value is appended
+        to the corresponding list.
+        """
+        # Initialize the dictionary if it hasn't been already
+        if not hasattr(self, 'optical_tagging_par') or not isinstance(self.optical_tagging_par, dict):
+            self.optical_tagging_par = {}
+            
+        for key, value in kwargs.items():
+            # If the key is not present, initialize with an empty list
+            if key not in self.optical_tagging_par:
+                self.optical_tagging_par[key] = []
+            # Append the new value to the list for this key
+            self.optical_tagging_par[key].append(value)
+
 
     def _initiate_laser(self):
         '''Initiate laser in bonsai'''
