@@ -2467,8 +2467,8 @@ class Window(QMainWindow):
         if beeping:
             self.beep_loop.start()
 
-        else:
-            self.Channel.receive()
+        # else:
+        #     self.Channel.receive()
 
     def _Metadata(self):
         '''Open the metadata dialog'''
