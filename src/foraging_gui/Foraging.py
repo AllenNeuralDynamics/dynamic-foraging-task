@@ -36,6 +36,7 @@ from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
+from typing import Literal
 from StageWidget.main import get_stage_widget
 
 import foraging_gui
@@ -49,6 +50,7 @@ from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScal
 from foraging_gui.stage import Stage
 from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.warning_widget import WarningWidget
+from foraging_gui.sound_button import SoundButton
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
@@ -194,6 +196,10 @@ class Window(QMainWindow):
         self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         self.bias_thread = threading.Thread()   # dummy thread
 
+        # create sound button
+        self.sound_button = SoundButton(attenuation=int(self.SettingsBox[f"AttenuationLeft"]))
+        self.toolBar_3.addWidget(self.sound_button)
+
         # Set up more parameters
         self.FIP_started=False
         self.OpenOptogenetics=0
@@ -335,7 +341,8 @@ class Window(QMainWindow):
 
         # create QTimer to deliver constant tone
         self.beep_loop = QtCore.QTimer(timeout=self.play_beep, interval=10)
-        self.action_Sound.toggled.connect(lambda checked: self.beep_loop.start() if checked else self.beep_loop.stop())
+        self.sound_button.toggled.connect(lambda checked: self.beep_loop.start() if checked else self.beep_loop.stop())
+        self.sound_button.attenuationChanged.connect(self.change_attenuation)
 
         self.actionMeta_Data.triggered.connect(self._Metadata)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
@@ -2437,6 +2444,35 @@ class Window(QMainWindow):
         # clear messages
         self.Channel.receive()
 
+    def change_attenuation(self, value: int) -> None:
+        """
+        Change attenuation of for both right and left channels
+        :param value: value to set attenuation
+        """
+
+        beeping = self.beep_loop.isActive()
+
+        if beeping:
+            self.beep_loop.stop()
+
+        self.Channel3.set_attenuation_right(value)
+        self.Channel3.set_attenuation_left(value)
+
+        self.SettingsBox[f"AttenuationLeft"] = value
+        self.SettingsBox[f"AttenuationRight"] = value
+        # Writing to CSV
+        with open(self.SettingsBoxFile, "w", newline="") as file:
+            writer = csv.writer(file)
+            # Write each key-value pair as a row
+            for key, value in self.SettingsBox.items():
+                writer.writerow([key, value])
+
+        if beeping:
+            self.beep_loop.start()
+
+        # else:
+        #     self.Channel.receive()
+
     def _Metadata(self):
         '''Open the metadata dialog'''
         if self.OpenMetadata==0:
@@ -3753,7 +3789,7 @@ class Window(QMainWindow):
             self.WeightAfter.setText('')
 
         # Reset GUI visuals
-        self.action_Sound.setEnabled(True)
+        self.sound_button.setEnabled(True)
         self.Save.setStyleSheet("color:black;background-color:None;")
         self.NewSession.setStyleSheet("background-color : green;")
         self.NewSession.setChecked(False)
@@ -4111,7 +4147,7 @@ class Window(QMainWindow):
                     return
 
             # disable sound button
-            self.action_Sound.setEnabled(False)
+            self.sound_button.setEnabled(False)
 
             # empty post weight after pass through checks in case user cancels run
             self.WeightAfter.setText('')
@@ -4152,6 +4188,7 @@ class Window(QMainWindow):
                 logging.info('Start button pressed: user continued session')
                 self.Start.setChecked(True)
                 return
+
             # If the photometry timer is running, stop it
             if self.finish_Timer==0:
                 self.ignore_timer=True
@@ -4163,7 +4200,8 @@ class Window(QMainWindow):
                     self.workertimer._stop()
 
             self.session_end_tasks()
-
+            self.sound_button.setEnabled(True)
+            
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
             self._StopCurrentSession()
