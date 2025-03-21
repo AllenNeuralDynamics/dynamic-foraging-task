@@ -3155,7 +3155,7 @@ class OpticalTaggingDialog(QDialog):
                 time.sleep(0.1)
             self.optical_tagging_par={}
             self.label_show_current.setText('')
-            self.LocationTag.setValue(0)
+            self.LocationTag.setText('')
 
     def _start_over(self):
         '''Stop the optical tagging and start over (parameters will be shuffled)'''
@@ -3169,9 +3169,6 @@ class OpticalTaggingDialog(QDialog):
     def _thread_complete_tag(self):
         '''Complete the optical tagging'''
         self.thread_finish_tag = 1
-        # Add 1 to the location tag when the cycle is finished
-        if self.cycle_finish_tag == 1:
-            self.LocationTag.setValue(self.LocationTag.value()+1)
         self.Start.setChecked(False)
         self.Start.setStyleSheet("background-color : none")
         # update the stop time
@@ -3411,7 +3408,7 @@ class OpticalTaggingDialog(QDialog):
             self.current_optical_tagging_par['laser_color_sampled_all'].extend(laser_color_sampled_now)
             self.current_optical_tagging_par['duration_each_cycle_sampled_all'].extend(duration_each_cycle_sampled)
             self.current_optical_tagging_par['interval_between_cycles_sampled_all'].extend(interval_between_cycles_sampled)
-            self.current_optical_tagging_par['location_tag_sampled_all'].extend([float(self.LocationTag.value())]*len(protocol_sampled))
+            self.current_optical_tagging_par['location_tag_sampled_all'].extend([self.LocationTag.text()]*len(protocol_sampled))
 
     def _WhichLaser(self):
         '''Select the laser to use and disable non-relevant widgets'''

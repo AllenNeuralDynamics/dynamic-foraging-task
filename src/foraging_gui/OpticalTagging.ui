@@ -434,16 +434,6 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QSpinBox" name="LocationTag">
-   <property name="geometry">
-    <rect>
-     <x>161</x>
-     <y>480</y>
-     <width>71</width>
-     <height>22</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QLabel" name="label1_18">
    <property name="enabled">
     <bool>true</bool>
@@ -909,6 +899,31 @@
    </property>
    <property name="text">
     <string>5000</string>
+   </property>
+   <property name="readOnly">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="LocationTag">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>480</y>
+     <width>70</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>1000</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>100</string>
    </property>
    <property name="readOnly">
     <bool>false</bool>
