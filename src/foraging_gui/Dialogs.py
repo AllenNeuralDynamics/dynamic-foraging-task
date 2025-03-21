@@ -3430,7 +3430,7 @@ class OpticalTaggingDialog(QDialog):
             self.label1_16.setEnabled(True)
     
     def _produce_waveforms(self,protocol:str,
-                           frequency:int,
+                           frequency:float,
                            pulse_duration:float,
                            pulse_ramp_up:float,
                            pulse_ramp_down:float,
@@ -3465,7 +3465,7 @@ class OpticalTaggingDialog(QDialog):
         
         return my_wave
     
-    def _get_laser_waveform(self, protocol: str, frequency: int, pulse_duration: float,
+    def _get_laser_waveform(self, protocol: str, frequency: float, pulse_duration: float,
                         input_voltage: float, duration_each_cycle: float,
                         pulse_ramp_up: float, pulse_ramp_down: float
                         ) -> np.array:
