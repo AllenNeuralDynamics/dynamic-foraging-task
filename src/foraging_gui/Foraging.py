@@ -3110,6 +3110,8 @@ class Window(QMainWindow):
                             CurrentObj=Obj['LaserCalibration_dialog']
                         elif widget.parent().objectName()=='MetaData':
                             CurrentObj=Obj['Metadata_dialog']
+                        elif widget.parent().objectName()=='RandomReward':
+                            CurrentObj=Obj['RandomReward_dialog']
                         else:
                             CurrentObj=Obj.copy()
                     except Exception as e:
