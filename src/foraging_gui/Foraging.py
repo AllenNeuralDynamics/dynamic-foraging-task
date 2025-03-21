@@ -2451,14 +2451,9 @@ class Window(QMainWindow):
 
         if beeping:
             self.beep_loop.stop()
-        right_timer = QtCore.QTimer(timeout=lambda: getattr(self.Channel3, f"set_attenuation_right")(value), interval=100)
-        right_timer.setSingleShot(True)
-        left_timer = QtCore.QTimer(timeout=lambda: getattr(self.Channel3, f"set_attenuation_left")(value),
-                                    interval=200)
-        left_timer.setSingleShot(True)
 
-        right_timer.start()
-        left_timer.start()
+        self.Channel3.set_attenuation_right(value)
+        self.Channel3.set_attenuation_left(value)
 
         self.SettingsBox[f"AttenuationLeft"] = value
         self.SettingsBox[f"AttenuationRight"] = value
@@ -2470,10 +2465,7 @@ class Window(QMainWindow):
                 writer.writerow([key, value])
 
         if beeping:
-            restart_beep = QtCore.QTimer(timeout=self.beep_loop.start,
-                                    interval=400)
-            restart_beep.setSingleShot(True)
-            restart_beep.start()
+            self.beep_loop.start()
 
         # else:
         #     self.Channel.receive()
