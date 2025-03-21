@@ -3252,6 +3252,8 @@ class OpticalTaggingDialog(QDialog):
                 self._save_data(protocol=protocol,
                                 frequency=frequency,
                                 pulse_duration=pulse_duration,
+                                pulse_ramp_up=pulse_ramp_up,
+                                pulse_ramp_down=pulse_ramp_down,
                                 laser_name=laser_name,
                                 target_power=target_power,
                                 laser_color=laser_color,
@@ -3279,12 +3281,14 @@ class OpticalTaggingDialog(QDialog):
             else:
                 break
 
-    def _save_data(self, protocol, frequency, pulse_duration, laser_name, target_power, laser_color, duration_each_cycle, interval_between_cycles, location_tag, laser_start_timestamp, success_tag):
+    def _save_data(self, protocol, frequency, pulse_duration, pulse_ramp_up,pulse_ramp_down,laser_name, target_power, laser_color, duration_each_cycle, interval_between_cycles, location_tag, laser_start_timestamp, success_tag):
         '''Extend the current parameters to self.optical_tagging_par'''
         if 'protocol' not in self.optical_tagging_par.keys():
             self.optical_tagging_par['protocol']=[]
             self.optical_tagging_par['frequency']=[]
             self.optical_tagging_par['pulse_duration']=[]
+            self.optical_tagging_par['pulse_ramp_up']=[]
+            self.optical_tagging_par['pulse_ramp_down']=[]
             self.optical_tagging_par['laser_name']=[]
             self.optical_tagging_par['target_power']=[]
             self.optical_tagging_par['laser_color']=[]
@@ -3297,6 +3301,8 @@ class OpticalTaggingDialog(QDialog):
             self.optical_tagging_par['protocol'].append(protocol)
             self.optical_tagging_par['frequency'].append(frequency)
             self.optical_tagging_par['pulse_duration'].append(pulse_duration)
+            self.optical_tagging_par['pulse_ramp_up'].append(pulse_ramp_up)
+            self.optical_tagging_par['pulse_ramp_down'].append(pulse_ramp_down)
             self.optical_tagging_par['laser_name'].append(laser_name)
             self.optical_tagging_par['target_power'].append(target_power)
             self.optical_tagging_par['laser_color'].append(laser_color)
