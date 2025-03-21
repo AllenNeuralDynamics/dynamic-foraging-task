@@ -376,6 +376,9 @@ class WaterCalibrationDialog(QDialog):
         self.EmergencyStop.clicked.connect(self._EmergencyStop)
         self.showrecent.textChanged.connect(self._Showrecent)
         self.showspecificcali.activated.connect(self._ShowSpecifcDay)
+        # toggle multi value calibration on and off
+        self.groupBox_2.setEnabled(False)
+        self.multi_value_enable.toggled.connect(self.groupBox_2.setEnabled)
 
     def _Showrecent(self):
         '''update the calibration figure'''
@@ -1100,7 +1103,7 @@ class WaterCalibrationDialog(QDialog):
             if reply == QMessageBox.Cancel:
                 logging.warning('Spot check discarded due to type', extra={'tags': self.MainWindow.warning_log_tag})
             else:
-                logging.error('Water calibration spot check exceeds tolerance: {}'.format(error))
+                logging.warning('Water calibration spot check, {}, exceeds tolerance: {}'.format(valve,error))
                 save.setStyleSheet("color: white;background-color : mediumorchid;")
                 self.Warning.setText(
                     f'Measuring {valve.lower()} valve: {volume}uL' + \
@@ -1110,8 +1113,8 @@ class WaterCalibrationDialog(QDialog):
                 )
                 self._SaveValve(valve)
                 if self.check_spot_failures(valve) >= 2:
-                    msg = 'Two or more spot checks have failed in the last 30 days. Please create a SIPE ticket to ' \
-                          'check rig.'
+                    msg = 'Two or more spot checks, {}, have failed in the last 30 days. Please create a SIPE ticket to ' \
+                          'check rig.'.format(valve)
                     logging.error(msg, extra={'tags': self.MainWindow.warning_log_tag})
                     QMessageBox.critical(self, f'Spot check {valve}', msg, QMessageBox.Ok)
         else:
@@ -1839,7 +1842,6 @@ class MetadataDialog(QDialog):
         self.meta_data['rig_metadata'] = {}
         self.meta_data['session_metadata'] = {}
         self.meta_data['rig_metadata_file'] = ''
-        self.GoCueDecibel.setText(str(self.MainWindow.Other_go_cue_decibel))
         self.LickSpoutDistance.setText(str(self.MainWindow.Other_lick_spout_distance))
         self._get_basics()
         self._show_project_names()
@@ -1878,7 +1880,6 @@ class MetadataDialog(QDialog):
         self.Stick_ModuleAngle.textChanged.connect(self._save_configuration)
         self.Stick_RotationAngle.textChanged.connect(self._save_configuration)
         self.ProjectName.currentIndexChanged.connect(self._show_project_info)
-        self.GoCueDecibel.textChanged.connect(self._save_go_cue_decibel)
         self.LickSpoutDistance.textChanged.connect(self._save_lick_spout_distance)
 
     def _set_reference(self, reference: dict):
@@ -1895,31 +1896,15 @@ class MetadataDialog(QDialog):
         '''show the project information based on current project name'''
         current_project_index = self.ProjectName.currentIndex()
         self.current_project_name=self.ProjectName.currentText()
-        self.funding_institution=self.project_info['Funding Institution'][current_project_index]
-        self.grant_number=self.project_info['Grant Number'][current_project_index]
-        self.investigators=self.project_info['Investigators'][current_project_index]
-        self.fundee=self.project_info['Fundee'][current_project_index]
-        self.FundingSource.setText(str(self.funding_institution))
-        self.Investigators.setText(str(self.investigators))
-        self.GrantNumber.setText(str(self.grant_number))
-        self.Fundee.setText(str(self.fundee))
 
     def _save_lick_spout_distance(self):
         '''save the lick spout distance'''
         self.MainWindow.Other_lick_spout_distance=self.LickSpoutDistance.text()
 
-    def _save_go_cue_decibel(self):
-        '''save the go cue decibel'''
-        self.MainWindow.Other_go_cue_decibel=self.GoCueDecibel.text()
-
     def _show_project_names(self):
-        '''show the project names from the project spreadsheet'''
-        # load the project spreadsheet
-        project_info_file = self.MainWindow.project_info_file
-        if not os.path.exists(project_info_file):
-            return
-        self.project_info = pd.read_excel(project_info_file)
-        project_names = self.project_info['Project Name'].tolist()
+        '''show the project names'''
+        project_names = self.MainWindow._GetApprovedAINDProjectNames()
+
         # show the project information
         # adding project names to the project combobox
         self._manage_signals(enable=False,keys=['ProjectName'],action=self._show_project_info)
@@ -2038,7 +2023,7 @@ class MetadataDialog(QDialog):
         '''get the widgets used for saving/loading metadata'''
         exclude_widgets=self._get_children_keys(self.Probes)
         exclude_widgets+=self._get_children_keys(self.Microscopes)
-        exclude_widgets+=['EphysProbes','RigMetadataFile','StickMicroscopes']
+        exclude_widgets+=['EphysProbes','RigMetadataFile','StickMicroscopes', 'ProjectName']
         widget_dict = {w.objectName(): w for w in self.findChildren(
             (QtWidgets.QLineEdit, QtWidgets.QTextEdit, QtWidgets.QComboBox))
             if w.objectName() not in exclude_widgets}

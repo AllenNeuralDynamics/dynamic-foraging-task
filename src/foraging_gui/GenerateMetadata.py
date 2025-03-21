@@ -14,7 +14,6 @@ from aind_data_schema.components.stimulus import AuditoryStimulation
 from aind_data_schema.components.devices import SpoutSide,Calibration
 from aind_data_schema_models.units import SizeUnit,FrequencyUnit,SoundIntensityUnit,PowerUnit
 
-from aind_data_schema.core.data_description import Funding
 from aind_data_schema_models.organizations import Organization
 from aind_data_schema_models.modalities import Modality
 from aind_data_schema_models.platforms import Platform
@@ -242,16 +241,6 @@ class generate_metadata:
             self.box_type = 'Ephys'
         else:
             self.box_type = 'Behavior'
-
-    def _get_funding_source(self):
-        '''
-        Get the funding source
-        '''
-        self.funding_source=[Funding(
-            funder=getattr(Organization,self.name_mapper['institute'][self.Obj['meta_data_dialog']['session_metadata']['FundingSource']]),
-            grant_number=self.Obj['meta_data_dialog']['session_metadata']['GrantNumber'],
-            fundee=self.Obj['meta_data_dialog']['session_metadata']['Fundee'],
-        )]
                 
     def _get_platform(self):
         '''
@@ -293,32 +282,7 @@ class generate_metadata:
         else:
             self.session_start_time = ''
             self.session_end_time = ''
-
-
-    def _get_modality(self):
-        '''
-        Get all the modalities used in the session
-        '''
-        self.modality = []
-        if self.behavior_streams!=[]:
-            self.modality.append(Modality.BEHAVIOR)
-        if self.ephys_streams!=[]:
-            self.modality.append(Modality.ECEPHYS)
-        if self.ophys_streams!=[]:
-            self.modality.append(Modality.FIB)
-        if self.high_speed_camera_streams!=[]:
-            self.modality.append(Modality.BEHAVIOR_VIDEOS)
         
-    def _get_investigators(self):
-        '''
-        Get investigators
-        '''
-        self.investigators=[]
-        investigators=self.Obj['meta_data_dialog']['session_metadata']['Investigators'].split(',')
-        for investigator in investigators:
-            if investigator != '':
-                self.investigators.append(PIDName(name=investigator, registry=self.orcid))
-
     def _save_rig_metadata(self):
         '''
         Save the rig metadata to the MetadataFolder
@@ -420,8 +384,9 @@ class generate_metadata:
     
         # Missing field Other_go_cue_decibel is not recorded in the behavior json file.
         # Possible reason: 1) the go cue decibel is not set in the foraging settings file. 2) old version of the software.
-        if 'Other_go_cue_decibel' not in self.Obj:
-            self.Obj['Other_go_cue_decibel'] = 60
+        if self.Obj.get('Other_go_cue_decibel', '') == '':
+            self.Obj['Other_go_cue_decibel'] = 74
+            logging.error('No go cue decibel recorded in the ForagingSettings.json file. Using default value of 74 dB')
 
         # Missing field 'fiber_photometry_start_time' and 'fiber_photometry_end_time' in the json file.
         # Possible reason: 1) the fiber photometry data is not recorded in the session. 2) the fiber photometry data is recorded but the start and end time are not recorded in the old version of the software.
@@ -533,6 +498,7 @@ class generate_metadata:
         self._get_water_calibration()
         self._get_opto_calibration()
         self.calibration=self.water_calibration+self.opto_calibration
+        self._get_behavior_software()
         self._get_behavior_stream()
         self._get_ephys_stream()
         self._get_ophys_stream()
@@ -677,6 +643,8 @@ class generate_metadata:
         if self.Obj['fiber_photometry_start_time']=='':
             logging.info('No photometry data stream detected!')
             return
+        if self.Obj['fiber_photometry_end_time'] == '':
+            self.Obj['fiber_photometry_end_time'] = str(datetime.now())
         self._get_photometry_light_sources_config()
         self._get_photometry_detectors()
         self._get_fiber_connections()
@@ -886,7 +854,7 @@ class generate_metadata:
             trials_total= self.trials_total,
             trials_finished= self.trials_finished,
             trials_rewarded=self.trials_rewarded,
-            notes=f"The duration of go cue is 100ms. The frequency is 7500Hz. Decibel is {self.Obj['Other_go_cue_decibel']}dB. The total reward consumed in the session is {self.total_reward_consumed_in_session} microliter. The total reward indcluding consumed in the session and supplementary water is {self.Obj['TotalWater']} millimeters.",
+            notes=f"The duration of go cue is 100 ms. The frequency is 7500 Hz. Amplitude is {self.Obj['Other_go_cue_decibel']}dB. The total reward consumed in the session is {self.total_reward_consumed_in_session} microliters. The total reward including consumed in the session and supplementary water is {self.Obj['TotalWater']} milliliters.",
         ))
 
 

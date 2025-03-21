@@ -3412,7 +3412,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="12" column="3">
-                       <widget class="QLineEdit" name="auto_stop_ignore_win">
+                       <widget class="QSpinBox" name="auto_stop_ignore_win">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                           <horstretch>0</horstretch>
@@ -3425,8 +3425,8 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
-                         <string>30</string>
+                        <property name="value">
+                         <number>30</number>
                         </property>
                        </widget>
                       </item>
@@ -4252,7 +4252,7 @@ Double dipping:
                        </widget>
                       </item>
                       <item row="12" column="6">
-                       <widget class="QLineEdit" name="auto_stop_ignore_ratio_threshold">
+                       <widget class="QDoubleSpinBox" name="auto_stop_ignore_ratio_threshold">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                           <horstretch>0</horstretch>
@@ -4265,8 +4265,8 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
-                         <string>.8</string>
+                        <property name="value">
+                         <double>.8</double>
                         </property>
                        </widget>
                       </item>
@@ -5003,6 +5003,7 @@ Current pair:
    </attribute>
    <addaction name="action_Optogenetics"/>
    <addaction name="action_Camera"/>
+   <addaction name="action_Sound"/>
   </widget>
   <action name="action_Calibration">
    <property name="checkable">
@@ -5014,6 +5015,15 @@ Current pair:
    </property>
    <property name="text">
     <string>Water Calibration</string>
+   </property>
+  </action>
+  <action name="action_Sound">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>resources/speaker.png</normaloff>resources/speaker.png</iconset>
    </property>
   </action>
   <action name="action_Camera">
