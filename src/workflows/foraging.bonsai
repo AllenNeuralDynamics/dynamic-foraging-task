@@ -4146,6 +4146,8 @@
                   <Edge From="153" To="154" Label="Source1" />
                   <Edge From="155" To="156" Label="Source1" />
                   <Edge From="156" To="157" Label="Source1" />
+                  <Edge From="158" To="159" Label="Source1" />
+                  <Edge From="159" To="160" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -9026,7 +9028,7 @@
         <Property Name="FileName" DisplayName="SettingsPath" />
       </Expression>
       <Expression xsi:type="io:CsvReader">
-        <io:FileName>C:\Users\xinxin.yin\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
+        <io:FileName>C:\Users\svc_aind_ephys\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
         <io:ScanPattern>%s,%s</io:ScanPattern>
         <io:SkipRows>0</io:SkipRows>
       </Expression>
