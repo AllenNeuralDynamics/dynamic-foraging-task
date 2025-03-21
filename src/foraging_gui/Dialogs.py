@@ -3267,12 +3267,14 @@ class OpticalTaggingDialog(QDialog):
                 # Emit signal to update the label
                 update_label(
                     f"Cycles: {i+1}/{len(self.current_optical_tagging_par['protocol_sampled_all'])} \n"
+                    f"Power: {target_power} mW\n"
                     f"Color: {laser_color}\n"
                     f"Laser: {laser_name}\n"
-                    f"Power: {target_power} mW\n"
                     f"protocol: {protocol}\n"
                     f"Frequency: {frequency} Hz\n"
                     f"Pulse Duration: {pulse_duration} ms\n"
+                    f"Ramp Up: {pulse_ramp_up} ms\n"
+                    f"Ramp Down: {pulse_ramp_down} ms\n"
                     f"Duration: {duration_each_cycle} s\n"
                     f"Interval: {interval_between_cycles} s"
                 )
@@ -3298,7 +3300,6 @@ class OpticalTaggingDialog(QDialog):
                 self.optical_tagging_par[key] = []
             # Append the new value to the list for this key
             self.optical_tagging_par[key].append(value)
-
 
     def _initiate_laser(self):
         '''Initiate laser in bonsai'''
