@@ -28,7 +28,8 @@ class GenerateTrials():
         self.B_LeftLickIntervalPercent = None      # percentage of left lick intervals under 100ms
         self.B_RightLickIntervalPercent = None     # percentage of right lick intervals under 100ms
         self.B_CrossSideIntervalPercent = None     # percentage of cross side lick intervals under 100ms
-        self.B_Bias = [0]  # lick bias
+        self.B_Bias = np.array([0], dtype=np.float64)  # lick bias
+        self.B_Bias_CI = np.array([[0, 0]], dtype=np.float64)  # lick bias confidence intervals
         self.B_RewardFamilies=self.win.RewardFamilies
         self.B_CurrentTrialN=-1 # trial number starts from 0; Update when trial starts
         self.B_LickPortN=2
@@ -289,6 +290,7 @@ class GenerateTrials():
             self.win.keyPressEvent()
             self.win.NextBlock.setChecked(True)
             self.win._NextBlock()
+            self.win.UpdateParameters=1
             logging.info('Warm up is turned off', extra={'tags': [self.win.warning_log_tag]})
 
     def _get_warmup_state(self):
@@ -424,7 +426,8 @@ class GenerateTrials():
             self.B_ANewBlock[:]=1
             self.win.NextBlock.setChecked(False)
             self.win.NextBlock.setStyleSheet("background-color : none")
-            self._override_block_len([0,1])
+            if self.B_CurrentTrialN>=0:
+                self._override_block_len([0,1])
             return  # Early return here
             
         # --- Decide block transition based on this block length ---
@@ -1216,6 +1219,8 @@ class GenerateTrials():
                 self.fip_stop_timer.setSingleShot(True)
                 self.fip_stop_timer.start()
 
+            self.win.session_end_tasks()
+
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
         if self.TP_AutoReward:
@@ -1641,7 +1646,7 @@ class GenerateTrials():
                 for i, side in enumerate(['L', 'R']):
                     self.BlockLenHistory[i][-1] = self.BlockLenHistory[i][-1]+1
 
-    def _GetAnimalResponse(self,Channel1,Channel3,Channel4):
+    def _GetAnimalResponse(self,Channel1,Channel3, data_lock):
         '''Get the animal's response'''
         self._CheckSimulationSession()
         if self.CurrentSimulation==True:
@@ -1687,30 +1692,35 @@ class GenerateTrials():
             elif Rec[0].address=='/RewardOutcome':
                 TrialOutcome=Rec[1][1][0]
                 if TrialOutcome=='NoResponse':
-                    self.B_AnimalCurrentResponse=2
-                    self.B_CurrentRewarded[0]=False
-                    self.B_CurrentRewarded[1]=False
-                    self._add_one_trial()
+                    with data_lock:
+                        self.B_AnimalCurrentResponse=2
+                        self.B_CurrentRewarded[0]=False
+                        self.B_CurrentRewarded[1]=False
+                        self._add_one_trial()
                 elif TrialOutcome=='RewardLeft':
-                    self.B_AnimalCurrentResponse=0
-                    self.B_Baited[0]=False
-                    self.B_CurrentRewarded[1]=False
-                    self.B_CurrentRewarded[0]=True  
+                    with data_lock:
+                        self.B_AnimalCurrentResponse=0
+                        self.B_Baited[0]=False
+                        self.B_CurrentRewarded[1]=False
+                        self.B_CurrentRewarded[0]=True
                 elif TrialOutcome=='ErrorLeft':
-                    self.B_AnimalCurrentResponse=0
-                    self.B_Baited[0]=False
-                    self.B_CurrentRewarded[0]=False
-                    self.B_CurrentRewarded[1]=False
+                    with data_lock:
+                        self.B_AnimalCurrentResponse=0
+                        self.B_Baited[0]=False
+                        self.B_CurrentRewarded[0]=False
+                        self.B_CurrentRewarded[1]=False
                 elif TrialOutcome=='RewardRight':
-                    self.B_AnimalCurrentResponse=1
-                    self.B_Baited[1]=False
-                    self.B_CurrentRewarded[0]=False
-                    self.B_CurrentRewarded[1]=True
+                    with data_lock:
+                        self.B_AnimalCurrentResponse=1
+                        self.B_Baited[1]=False
+                        self.B_CurrentRewarded[0]=False
+                        self.B_CurrentRewarded[1]=True
                 elif TrialOutcome=='ErrorRight':
-                    self.B_AnimalCurrentResponse=1
-                    self.B_Baited[1]=False
-                    self.B_CurrentRewarded[0]=False
-                    self.B_CurrentRewarded[1]=False
+                    with data_lock:
+                        self.B_AnimalCurrentResponse=1
+                        self.B_Baited[1]=False
+                        self.B_CurrentRewarded[0]=False
+                        self.B_CurrentRewarded[1]=False
                 B_CurrentRewarded=self.B_CurrentRewarded
                 B_AnimalCurrentResponse=self.B_AnimalCurrentResponse
             elif Rec[0].address=='/TrialEndTime':
@@ -1749,7 +1759,8 @@ class GenerateTrials():
                 in_delay=0
             elif Rec[0].address=='/DOPort2Output': #this port is used to trigger optogenetics aligned to Go cue
                 B_DOPort2Output=Rec[1][1][0]
-                self.B_DOPort2Output=np.append(self.B_DOPort2Output,B_DOPort2Output)
+                with data_lock:
+                    self.B_DOPort2Output=np.append(self.B_DOPort2Output,B_DOPort2Output)
             elif Rec[0].address=='/ITIStartTimeHarp':
                 TrialStartTimeHarp=Rec[1][1][0]
             elif Rec[0].address=='/BehaviorEvent':
@@ -1767,24 +1778,24 @@ class GenerateTrials():
                     current_receiveN+=1
             if current_receiveN==ReceiveN:
                 break
-        
-        self.B_RewardedHistory=np.append(self.B_RewardedHistory,B_CurrentRewarded,axis=1)
-        self.B_AnimalResponseHistory=np.append(self.B_AnimalResponseHistory,B_AnimalCurrentResponse)
-        # get the event harp time
-        self.B_TrialStartTimeHarp=np.append(self.B_TrialStartTimeHarp,TrialStartTimeHarp)
-        self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp[0])
-        self.B_DelayStartTimeHarpComplete.append(DelayStartTimeHarp)
-        self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
-        self.B_GoCueTimeBehaviorBoard=np.append(self.B_GoCueTimeBehaviorBoard,GoCueTimeBehaviorBoard)
-        self.B_GoCueTimeSoundCard=np.append(self.B_GoCueTimeSoundCard,GoCueTimeSoundCard)
-        # get the event time
-        self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
-        self.B_DelayStartTime=np.append(self.B_DelayStartTime,DelayStartTime[0])
-        self.B_DelayStartTimeComplete.append(DelayStartTime)
-        self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)
-        self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime)
-        self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
-        self.GetResponseFinish=1
+        with data_lock:
+            self.B_RewardedHistory=np.append(self.B_RewardedHistory,B_CurrentRewarded,axis=1)
+            self.B_AnimalResponseHistory=np.append(self.B_AnimalResponseHistory,B_AnimalCurrentResponse)
+            # get the event harp time
+            self.B_TrialStartTimeHarp=np.append(self.B_TrialStartTimeHarp,TrialStartTimeHarp)
+            self.B_DelayStartTimeHarp=np.append(self.B_DelayStartTimeHarp,DelayStartTimeHarp[0])
+            self.B_DelayStartTimeHarpComplete.append(DelayStartTimeHarp)
+            self.B_TrialEndTimeHarp=np.append(self.B_TrialEndTimeHarp,TrialEndTimeHarp)
+            self.B_GoCueTimeBehaviorBoard=np.append(self.B_GoCueTimeBehaviorBoard,GoCueTimeBehaviorBoard)
+            self.B_GoCueTimeSoundCard=np.append(self.B_GoCueTimeSoundCard,GoCueTimeSoundCard)
+            # get the event time
+            self.B_TrialStartTime=np.append(self.B_TrialStartTime,TrialStartTime)
+            self.B_DelayStartTime=np.append(self.B_DelayStartTime,DelayStartTime[0])
+            self.B_DelayStartTimeComplete.append(DelayStartTime)
+            self.B_TrialEndTime=np.append(self.B_TrialEndTime,TrialEndTime)
+            self.B_GoCueTime=np.append(self.B_GoCueTime,GoCueTime)
+            self.B_RewardOutcomeTime=np.append(self.B_RewardOutcomeTime,RewardOutcomeTime)
+            self.GetResponseFinish=1
 
     def _set_valve_time_left(self,channel3,LeftValue=0.01,Multiplier=1):
         '''set the left valve time'''
