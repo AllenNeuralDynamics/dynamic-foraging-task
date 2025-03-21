@@ -2439,7 +2439,7 @@ class Window(QMainWindow):
 
         self.Channel3.TriggerGoCue(1)
         # clear messages
-        #self.Channel.receive()
+        self.Channel.receive()
 
     def change_attenuation(self, value: int) -> None:
         """
