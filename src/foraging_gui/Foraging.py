@@ -3084,7 +3084,7 @@ class Window(QMainWindow):
                 for key in widget_keys:
                     try:
                         widget = widget_dict[key]
-                        if widget.parent().objectName() in ['Optogenetics','Optogenetics_trial_parameters','SessionParameters']:
+                        if widget.parent().objectName() in ['Optogenetics','Optogenetics_trial_parameters','SessionParameters','OpticalTagging']:
                             CurrentObj=Obj['Opto_dialog']
                         elif widget.parent().objectName()=='Camera':
                             CurrentObj=Obj['Camera_dialog']
@@ -3092,6 +3092,8 @@ class Window(QMainWindow):
                             CurrentObj=Obj['LaserCalibration_dialog']
                         elif widget.parent().objectName()=='MetaData':
                             CurrentObj=Obj['Metadata_dialog']
+                        elif widget.parent().objectName()=='OpticalTagging':
+                            CurrentObj=Obj['OpticalTagging_dialog']
                         else:
                             CurrentObj=Obj.copy()
                     except Exception as e:
