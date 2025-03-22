@@ -753,6 +753,8 @@ class generate_metadata:
             'Cycles_each_condition':self.Obj['OpticalTagging_dialog']['Cycles_each_condition'],
             'Frequency':self.Obj['OpticalTagging_dialog']['Frequency'],
             'Pulse_duration':self.Obj['OpticalTagging_dialog']['Pulse_duration'],
+            'Pulse_ramp_up':self.Obj['OpticalTagging_dialog']['Pulse_ramp_up'],
+            'Pulse_ramp_down':self.Obj['OpticalTagging_dialog']['Pulse_ramp_down'],
             'Laser_1_color':self.Obj['OpticalTagging_dialog']['Laser_1_color'],
             'Laser_2_color':self.Obj['OpticalTagging_dialog']['Laser_2_color'],
             'Laser_1_power':self.Obj['OpticalTagging_dialog']['Laser_1_power'],
