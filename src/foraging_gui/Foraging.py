@@ -3206,8 +3206,6 @@ class Window(QMainWindow):
                     widget_keys.append(key)
             try:
                 for key in widget_keys:
-                    if key =="Cycles_each_condition":
-                        pass
                     try:
                         widget = widget_dict[key]
                         if widget.parent().objectName() in ['Optogenetics','Optogenetics_trial_parameters','SessionParameters']:
