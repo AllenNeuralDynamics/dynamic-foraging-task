@@ -3306,8 +3306,9 @@ class Window(QMainWindow):
                                 self._NextBlock()
                     else:
                         widget = widget_dict[key]
-                        if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
+                        if widget.isEnabled() and not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
                             widget.clear()
+
             except Exception as e:
                 # Catch the exception and print error information
                 logging.error(traceback.format_exc())
