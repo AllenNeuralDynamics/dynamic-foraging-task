@@ -141,10 +141,28 @@ class GenerateTrials():
             **session_to_tp_conversion(self.session_model),
             **fip_to_tp_conversion(self.fip_model),
             **opto_to_tp_conversion(self.opto_model),
-            "left_valve_open_times": [],
-            "right_valve_open_times": [],
-            "multipliers": []
-        }
+            "LeftValue": [],    # left valve open times
+            "RightValue": [],   # right valve open times
+            "TP_LeftValue": [],  # left valve open times
+            "TP_RightValue": [],
+            "multipliers": [],
+            "AutoTrain": False,
+            "TP_AutoTrain": [],
+            "TP_Laser_calibration": [],
+            "TP_LatestCalibrationDate": [],
+            "TP_auto_train_curriculum_name": [],
+            "TP_auto_train_curriculum_schema_version": [],
+            "TP_auto_train_curriculum_version": [],
+            "TP_auto_train_engaged": [],
+            "TP_auto_train_stage": [],
+            "TP_auto_train_stage_overridden": [],
+            "TP_laser_1_calibration_power": [],
+            "TP_laser_1_calibration_voltage": [],
+            "TP_laser_1_target": [],
+            "TP_laser_2_calibration_power": [],
+            "TP_laser_2_calibration_voltage": [],
+            "TP_laser_2_target": []
+            }
         self.selected_condition = None
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
@@ -722,9 +740,9 @@ class GenerateTrials():
         self.BS_RewardN = np.sum(B_RewardedHistory[0] == True) + np.sum(B_RewardedHistory[1] == True)
 
         BS_auto_water_left, BS_earned_reward_left, BS_AutoWater_N_left, BS_EarnedReward_N_left = self._process_values(
-            self.Obj["left_valve_open_times"], self.B_AutoWaterTrial[0], self.Obj["multipliers"], B_RewardedHistory[0])
+            self.Obj["LeftValue"], self.B_AutoWaterTrial[0], self.Obj["multipliers"], B_RewardedHistory[0])
         BS_auto_water_right, BS_earned_reward_right, BS_AutoWater_N_right, BS_EarnedReward_N_right = self._process_values(
-            self.Obj["right_valve_open_times"], self.B_AutoWaterTrial[1], self.Obj["multipliers"], B_RewardedHistory[1])
+            self.Obj["RightValue"], self.B_AutoWaterTrial[1], self.Obj["multipliers"], B_RewardedHistory[1])
         self.BS_auto_water = [BS_auto_water_left, BS_auto_water_right]
         self.BS_earned_reward = [BS_earned_reward_left, BS_earned_reward_right]
         self.BS_AutoWater_N = [BS_AutoWater_N_left, BS_AutoWater_N_right]
@@ -2038,6 +2056,7 @@ class GenerateTrials():
                 setattr(self, 'TP_' + child.objectName(), child.isChecked())
 
     def _SaveParameters(self):
+
         # save models mapped to TP_ parameters
         task_tp = task_parameters_to_tp_conversion(self.task_logic.task_parameters)
         session_tp = session_to_tp_conversion(self.session_model)
@@ -2048,6 +2067,7 @@ class GenerateTrials():
             if "TP_" == key[:3]:
                 self.Obj[key] = [self.Obj[key], value] if type(self.Obj[key]) is not list else self.Obj[key] + [value]
 
+        # loop through and save all TP_ attributes
         for attr_name in dir(self):
             if attr_name.startswith('TP_'):
                 # Add the field to the dictionary with the 'TP_' prefix removed
@@ -2065,12 +2085,33 @@ class GenerateTrials():
         # get the newscale positions
         if hasattr(self.win, 'current_stage') or self.win.stage_widget is not None:
             self.B_StagePositions.append(self.win._GetPositions())
-        # save valve_open_times
-        self.Obj["left_valve_open_times"].append(self.win.left_valve_open_time)
-        self.Obj["right_valve_open_times"].append(self.win.right_valve_open_time)
-        # save multiplier value
+
+        # map miscellaneous values
+        self.Obj["LeftValue"].append(self.win.left_valve_open_time)
+        self.Obj["RightValue"].append(self.win.right_valve_open_time)
+        self.Obj["TP_LeftValue"].append(self.win.left_valve_open_time)
+        self.Obj["TP_RightValue"].append(self.win.right_valve_open_time)
         self.Obj["multipliers"].append(.8 if self.task_logic.task_parameters.auto_water is None
                                        else self.task_logic.task_parameters.auto_water.multiplier)
+        # add auto train parameters
+        self.Obj["AutoTrain"] = self.curriculum is not None
+        self.Obj["TP_AutoTrain"].append(self.curriculum is not None)
+        self.Obj["TP_auto_train_curriculum_name"].append(getattr(self.curriculum, 'name', None))
+        self.Obj["TP_auto_train_curriculum_schema_version"].append(self.task_logic.version)
+        self.Obj["TP_auto_train_curriculum_version"].append(getattr(self.curriculum, 'version', None))
+        self.Obj["TP_auto_train_engaged"].append(self.curriculum is not None)
+        self.Obj["TP_auto_train_engaged"].append(getattr(self.trainer_state, 'stage', None))
+        self.Obj["TP_auto_train_stage_overridden"].append(not self.win.on_curriculum.isChecked() if self.curriculum is
+                                                                                                    not None else None)
+        # add opto parameters
+        self.Obj["TP_Laser_calibration"].append(self.win.Opto_dialog.Laser_calibration.currentText())
+        self.Obj["TP_LatestCalibrationDate"].append(self.win.Opto_dialog.LatestCalibrationDate.text())
+        self.Obj["TP_laser_1_calibration_power"].append(self.win.Opto_dialog.laser_1_calibration_power.text())
+        self.Obj["TP_laser_1_calibration_voltage"].append(self.win.Opto_dialog.laser_1_calibration_voltage.text())
+        self.Obj["TP_laser_1_target"].append(self.win.Opto_dialog.laser_1_target.text())
+        self.Obj["TP_laser_2_calibration_power"].append(self.win.Opto_dialog.laser_2_calibration_power.text())
+        self.Obj["TP_laser_2_calibration_voltage"].append(self.win.Opto_dialog.laser_2_calibration_voltage.text())
+        self.Obj["TP_laser_2_target"].append(self.win.Opto_dialog.laser_2_target.text())
 
 class NewScaleSerialY():
     '''modified by Xinxin Yin'''
