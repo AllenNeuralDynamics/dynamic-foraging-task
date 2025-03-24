@@ -4871,11 +4871,17 @@ class Window(QMainWindow):
 
         logging.info('Generating upload manifest')
         try:
-            # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
-            # Random offset reduces strain on downstream servers getting many requests at once
             date_format = "%Y-%m-%d_%H-%M-%S"
-            schedule = self.behavior_session_model.date.strftime(date_format).split('_')[0]+'_20-30-00'
-            schedule_time = datetime.strptime(schedule,date_format) + timedelta(seconds=np.random.randint(30*60))
+            if self.behavior_session_model.date.strftime('%H-%M-%S') < '18-30-00':
+                # Session started before 6:30
+                # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
+                # Random offset reduces strain on downstream servers getting many requests at once
+                schedule = self.behavior_session_model.date.strftime(date_format).split('_')[0]+'_20-30-00'
+                schedule_time = datetime.strptime(schedule,date_format) + timedelta(seconds=np.random.randint(30*60))
+            else:
+                # Session started after 6:30
+                # upload time is current time plus 3 hours plus a random offset
+                schedule_time = self.behavior_session_model.date + timedelta(hours=3,seconds =np.random.randin(30*60))
             capsule_id = '0ae9703f-9012-4d0b-ad8d-b6a00858b80d'
             mount = 'FIP'
 
