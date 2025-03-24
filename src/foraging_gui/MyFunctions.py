@@ -318,17 +318,20 @@ class GenerateTrials():
             return
         warmup = self._get_warmup_state()
         if warmup == 0:
-            # update task logic with new trainer state
-            self.task_logic = self.trainer_state.stage.task
+            if self.trainer_state is not None:
+                # update task logic with new trainer state
+                self.task_logic = self.trainer_state.stage.task
+
+                # update label
+                self.win.label_curriculum_stage.setText(self.trainer_state.stage.name)
+                self.win.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
+            else:
+                self.task_logic.task_parameters.warmup = None
             self.win.task_widget.setEnabled(True)
             self.win.task_widget.apply_schema(self.task_logic.task_parameters)
             self.win.task_widget.setEnabled(False)
             self.win.NextBlock.setChecked(True)
             logging.info('Warm up is turned off', extra={'tags': [self.win.warning_log_tag]})
-
-            #update label
-            self.win.label_curriculum_stage.setText(self.trainer_state.stage.name)
-            self.win.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
 
     def _get_warmup_state(self):
         '''calculate the metrics related to the warm up and decide if we should turn on the warm up'''
@@ -2042,8 +2045,8 @@ class GenerateTrials():
         opto_tp = opto_to_tp_conversion(self.opto_model)
 
         for key, value in {**task_tp, **session_tp, **fip_tp, **opto_tp}.items():
-            if "TP_" == key[:2]:
-                self.Obj[key].append(value)
+            if "TP_" == key[:3]:
+                self.Obj[key] = [self.Obj[key], value] if type(self.Obj[key]) is not list else self.Obj[key] + [value]
 
         for attr_name in dir(self):
             if attr_name.startswith('TP_'):
