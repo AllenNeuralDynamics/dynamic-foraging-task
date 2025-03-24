@@ -12,12 +12,14 @@ from hashlib import md5
 from typing import Literal
 from pydantic import BaseModel
 
+
 import logging_loki
 import socket
 import harp
 import threading
 import yaml
 import shutil
+import importlib
 from pathlib import Path
 from datetime import date, datetime, timezone, timedelta
 from aind_slims_api import SlimsClient
@@ -84,7 +86,12 @@ from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
     STAGE_STARTS
 )
 
-from aind_behavior_dynamic_foraging.CurriculumManager.trainer import DynamicForagingTrainerServer
+from aind_behavior_dynamic_foraging.CurriculumManager.trainer import (
+    DynamicForagingTrainerServer,
+    Curriculum,
+    Metrics,
+    TrainerState,
+)
 from aind_behavior_dynamic_foraging.CurriculumManager.metrics import DynamicForagingMetrics
 from aind_behavior_curriculum import Trainer
 
@@ -668,13 +675,24 @@ class Window(QMainWindow):
             self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
             logging.info(f"Successfully fetched {mouse_id} from Slims.")
             logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
-            self.curriculum, self.trainer_state, self.metrics, attachments, session = self.trainer.load_data(mouse_id)
+            self.curriculum, self.trainer_state, self.metrics, atts, session = self.trainer.load_data(mouse_id)
+
+            if self.curriculum is None: # No session written to slims so create curriculum based on schedule
+
+                self.curriculum, self.trainer_state, self.metrics, atts, session = self.create_curriculum(mouse_id)
+                attachment_names =
+                logging.error(f"Cannot find or make a curriculum for mouse {mouse_id} since there is no session "
+                              f"information in slims or schedule")
+
+            else:  # format attachment list
+                attachment_names = [attachment.name for attachment in atts]     # populate attachment names
+                atts = [self.slims_client.fetch_attachment_content(att).json() for att in atts]
             self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
-            attachment_names = [attachment.name for attachment in attachments]
+
 
             # update session model with slims session information
-            ses_att = attachments[attachment_names.index(AindBehaviorSessionModel.__name__)]
-            slims_session_model = AindBehaviorSessionModel(**self.slims_client.fetch_attachment_content(ses_att).json())
+            session = atts[attachment_names.index(AindBehaviorSessionModel.__name__)]
+            slims_session_model = AindBehaviorSessionModel(**session)
             self.session_model.experiment = slims_session_model.experiment
             self.session_model.experimenter = slims_session_model.experimenter
             self.session_model.subject = slims_session_model.subject
@@ -682,14 +700,14 @@ class Window(QMainWindow):
 
             # update opto_model
             if self.opto_model.experiment_type in attachment_names:
-                opto_attachment = attachments[attachment_names.index(self.opto_model.experiment_type)]
-                self.opto_model = Optogenetics(**self.slims_client.fetch_attachment_content(opto_attachment).json())
+                opto = atts[attachment_names.index(self.opto_model.experiment_type)]
+                self.opto_model = Optogenetics(**opto)
 
             # update fip_model
             if self.fip_model.experiment_type in attachment_names:
                 logging.info(f"Applying fip model")
-                fip_attachment = attachments[attachment_names.index(self.fip_model.experiment_type)]
-                self.fip_model = FiberPhotometry(**self.slims_client.fetch_attachment_content(fip_attachment).json())
+                fip = atts[attachment_names.index(self.fip_model.experiment_type)]
+                self.fip_model = FiberPhotometry(**fip)
                 # check if current stage is past stage_start
                 self.fip_model.mode = None if STAGE_STARTS.index(self.trainer_state.stage.name) < \
                                               STAGE_STARTS.index(self.fip_model.stage_start) else self.fip_model.mode
@@ -713,11 +731,47 @@ class Window(QMainWindow):
                 logging.warning(f"{mouse_id} is not in Slims. Double check id, and add to Slims if missing",
                                 extra={'tags': [self.warning_log_tag]})
             else:
-                logging.warning(f"Error loading mouse {mouse_id} curriculum loaded from Slims. {e}",
+                logging.warning(f"Error loading mouse {mouse_id} curriculum from Slims or schedule. {e}",
                                 extra={'tags': [self.warning_log_tag]})
         finally:
             self.load_slims_progress.hide()
             self.modelsChanged.emit()
+
+    def create_curriculum(self, mouse_id)->tuple[Curriculum,
+                                                 TrainerState,
+                                                 Metrics,
+                                                 list,
+                                                 models.behavior_session.SlimsBehaviorSession]:
+        """
+        Create curriculum based on schedule
+        :params mouse_id: mouse id string to load from slims
+        """
+
+        # define mapping between schedule and curriculums
+        curriculum_mapping = {"Uncoupled Unbaited 2.3.1rwdDelay159": "uncoupled_no_baiting_2p3",
+                              "Uncoupled Baited 2.3": "uncoupled_baiting_2p3",
+                              "Coupled Baited 2.3": "coupled_baiting_2p3"}
+
+        # gather keys from schedule
+        autotrain_curriculum_name = self._GetInfoFromSchedule(mouse_id, "Autotrain Curriculum Name")
+        curriculum_version = self._GetInfoFromSchedule(mouse_id, "Curriculum Version")
+
+        key = f"{autotrain_curriculum_name} {curriculum_version}"
+        if key not in curriculum_mapping.keys():
+            raise KeyError(f"Curriculum {key} as defined in the schedule is not a valid curriculum. "
+                           f"Valid curriculums are {curriculum_mapping.keys()}")
+
+        module = curriculum_mapping[key]
+        creation_factory_name = f"construct_{module}_curriculum"
+        curriculum = getattr(importlib.import_module(creation_factory_name), module)()
+
+        stages = curriculum.see_stages()
+
+        stage_mapping = ["warmup", "1", "2", "3", "4", "FINAL", "GRADUATED"]
+
+        trainer_state = TrainerState(stage=,
+                             curriculum=curriculum,
+                             is_on_curriculum=True)
 
     def write_session_to_slims(self, mouse_id):
         """
