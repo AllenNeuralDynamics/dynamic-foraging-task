@@ -21,6 +21,13 @@ from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import Optogenetics
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry
 
+from foraging_gui.metadata_mapper import (
+    task_parameters_to_tp_conversion,
+    session_to_tp_conversion,
+    fip_to_tp_conversion,
+    opto_to_tp_conversion
+)
+
 if PLATFORM == 'win32':
     from newscale.usbxpress import USBXpressLib, USBXpressDevice
 VID_NEWSCALE = 0x10c4
@@ -129,10 +136,11 @@ class GenerateTrials():
         self.GeneFinish = 1
         self.GetResponseFinish = 1
         self.Obj = {
-            self.task_logic.name: [],
-            AindBehaviorSessionModel.__name__: [],
-            self.opto_model.experiment_type: [],
-            self.fip_model.experiment_type: [],
+            # initialize TP_ keys through mapping functions
+            **task_parameters_to_tp_conversion(self.task_logic.task_parameters),
+            **session_to_tp_conversion(self.session_model),
+            **fip_to_tp_conversion(self.fip_model),
+            **opto_to_tp_conversion(self.opto_model),
             "left_valve_open_times": [],
             "right_valve_open_times": [],
             "multipliers": []
@@ -2027,17 +2035,15 @@ class GenerateTrials():
                 setattr(self, 'TP_' + child.objectName(), child.isChecked())
 
     def _SaveParameters(self):
-        # save task_logic model
-        self.Obj[self.task_logic.name].append(self.task_logic.model_dump_json())
+        # save models mapped to TP_ parameters
+        task_tp = task_parameters_to_tp_conversion(self.task_logic.task_parameters)
+        session_tp = session_to_tp_conversion(self.session_model)
+        fip_tp = fip_to_tp_conversion(self.fip_model)
+        opto_tp = opto_to_tp_conversion(self.opto_model)
 
-        # save session model
-        self.Obj[AindBehaviorSessionModel.__name__].append(self.session_model.model_dump_json())
-
-        #save opto model
-        self.Obj[self.opto_model.experiment_type].append(self.opto_model.model_dump_json())
-
-        # save fip model
-        self.Obj[self.fip_model.experiment_type].append(self.fip_model.model_dump_json())
+        for key, value in {**task_tp, **session_tp, **fip_tp, **opto_tp}.items():
+            if "TP_" == key[:2]:
+                self.Obj[key].append(value)
 
         for attr_name in dir(self):
             if attr_name.startswith('TP_'):
