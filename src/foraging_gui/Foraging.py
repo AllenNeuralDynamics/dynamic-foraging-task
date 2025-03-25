@@ -1057,6 +1057,15 @@ class Window(QMainWindow):
             pass
         else:
             self._StopCurrentSession()
+
+        # Turn off the camera recording in case it is on
+        self.Camera_dialog.StartRecording.setChecked(False)
+        # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging. 
+        if self.Camera_dialog.AutoControl.currentText()=='Yes' and self.Camera_dialog.StartPreview.isChecked():
+            self.Camera_dialog.StartPreview.setChecked(False)
+            # sleep for 1 second to make sure the trigger is off
+            time.sleep(1)
+
         if log_folder is None:
             # formal logging
             loggingtype=0
@@ -4170,13 +4179,6 @@ class Window(QMainWindow):
             try:
                 # Start logging if the formal logging is not started
                 if self.logging_type!=0:
-                    # Turn off the camera recording
-                    self.Camera_dialog.StartRecording.setChecked(False)
-                    # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging. 
-                    if self.Camera_dialog.AutoControl.currentText()=='Yes' and self.Camera_dialog.StartPreview.isChecked():
-                        self.Camera_dialog.StartPreview.setChecked(False)
-                        # sleep for 1 second to make sure the trigger is off
-                        time.sleep(1)
                     self.Ot_log_folder=self._restartlogging()
             except Exception as e:
                 if 'ConnectionAbortedError' in str(e):
