@@ -36,6 +36,7 @@ from PyQt5.QtCore import QThreadPool,Qt,QThread
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
+from typing import Literal
 from StageWidget.main import get_stage_widget
 
 import foraging_gui
@@ -49,6 +50,7 @@ from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScal
 from foraging_gui.stage import Stage
 from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.warning_widget import WarningWidget
+from foraging_gui.sound_button import SoundButton
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
@@ -184,12 +186,19 @@ class Window(QMainWindow):
         self.threadpool6=QThreadPool() # for saving data
         self.threadpool_workertimer=QThreadPool() # for timing
 
+        # initialize thread lock
+        self.data_lock = threading.Lock()
+
         # create bias indicator
         self.bias_n_size = 200
-        self.bias_indicator = BiasIndicator(x_range=self.bias_n_size)  # TODO: Where to store bias_threshold parameter? self.Settings?
+        self.bias_indicator = BiasIndicator(x_range=self.bias_n_size, data_lock=self.data_lock)
         self.bias_indicator.biasValue.connect(self.bias_calculated)  # update dashboard value
         self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         self.bias_thread = threading.Thread()   # dummy thread
+
+        # create sound button
+        self.sound_button = SoundButton(attenuation=int(self.SettingsBox[f"AttenuationLeft"]))
+        self.toolBar_3.addWidget(self.sound_button)
 
         # Set up more parameters
         self.FIP_started=False
@@ -332,7 +341,8 @@ class Window(QMainWindow):
 
         # create QTimer to deliver constant tone
         self.beep_loop = QtCore.QTimer(timeout=self.play_beep, interval=10)
-        self.action_Sound.toggled.connect(lambda checked: self.beep_loop.start() if checked else self.beep_loop.stop())
+        self.sound_button.toggled.connect(lambda checked: self.beep_loop.start() if checked else self.beep_loop.stop())
+        self.sound_button.attenuationChanged.connect(self.change_attenuation)
 
         self.actionMeta_Data.triggered.connect(self._Metadata)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
@@ -1205,10 +1215,10 @@ class Window(QMainWindow):
 
     def _GetApprovedAINDProjectNames(self):
         end_point = "http://aind-metadata-service/project_names"
-        timeout = 10
+        timeout = 30
         try:
             response = requests.get(end_point, timeout=timeout)
-        except TimeoutError as e:
+        except Exception as e:
             logging.error(f"Failed to fetch project names from endpoint. {e}")
             return []
         if response.ok:
@@ -2434,6 +2444,35 @@ class Window(QMainWindow):
         # clear messages
         self.Channel.receive()
 
+    def change_attenuation(self, value: int) -> None:
+        """
+        Change attenuation of for both right and left channels
+        :param value: value to set attenuation
+        """
+
+        beeping = self.beep_loop.isActive()
+
+        if beeping:
+            self.beep_loop.stop()
+
+        self.Channel3.set_attenuation_right(value)
+        self.Channel3.set_attenuation_left(value)
+
+        self.SettingsBox[f"AttenuationLeft"] = value
+        self.SettingsBox[f"AttenuationRight"] = value
+        # Writing to CSV
+        with open(self.SettingsBoxFile, "w", newline="") as file:
+            writer = csv.writer(file)
+            # Write each key-value pair as a row
+            for key, value in self.SettingsBox.items():
+                writer.writerow([key, value])
+
+        if beeping:
+            self.beep_loop.start()
+
+        # else:
+        #     self.Channel.receive()
+
     def _Metadata(self):
         '''Open the metadata dialog'''
         if self.OpenMetadata==0:
@@ -2809,16 +2848,17 @@ class Window(QMainWindow):
 
         # don't save the data if the load tag is 1
         if self.load_tag==0:
-            # save Json or mat
-            if self.SaveFile.endswith('.mat'):
-            # Save data to a .mat file
-                savemat(self.SaveFile, Obj)
-            elif self.SaveFile.endswith('par.json') and self.load_tag==0:
-                with open(self.SaveFile, "w") as outfile:
-                    json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
-            elif self.SaveFile.endswith('.json'):
-                with open(self.SaveFile, "w") as outfile:
-                    json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
+            with self.data_lock:
+                # save Json or mat
+                if self.SaveFile.endswith('.mat'):
+                # Save data to a .mat file
+                    savemat(self.SaveFile, Obj)
+                elif self.SaveFile.endswith('par.json') and self.load_tag==0:
+                    with open(self.SaveFile, "w") as outfile:
+                        json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
+                elif self.SaveFile.endswith('.json'):
+                    with open(self.SaveFile, "w") as outfile:
+                        json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
 
         # Toggle unsaved data to False
         if BackupSave==0:
@@ -3375,7 +3415,7 @@ class Window(QMainWindow):
         self.keyPressEvent() # Accept all updates
         self.load_tag=1
         self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
-        self._GetProjectName(mouse_id)
+        self._GetProjectName(self.behavior_session_model.subject)
     
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -3749,7 +3789,7 @@ class Window(QMainWindow):
             self.WeightAfter.setText('')
 
         # Reset GUI visuals
-        self.action_Sound.setEnabled(True)
+        self.sound_button.setEnabled(True)
         self.Save.setStyleSheet("color:black;background-color:None;")
         self.NewSession.setStyleSheet("background-color : green;")
         self.NewSession.setChecked(False)
@@ -4107,7 +4147,7 @@ class Window(QMainWindow):
                     return
 
             # disable sound button
-            self.action_Sound.setEnabled(False)
+            self.sound_button.setEnabled(False)
 
             # empty post weight after pass through checks in case user cancels run
             self.WeightAfter.setText('')
@@ -4148,6 +4188,7 @@ class Window(QMainWindow):
                 logging.info('Start button pressed: user continued session')
                 self.Start.setChecked(True)
                 return
+
             # If the photometry timer is running, stop it
             if self.finish_Timer==0:
                 self.ignore_timer=True
@@ -4159,7 +4200,8 @@ class Window(QMainWindow):
                     self.workertimer._stop()
 
             self.session_end_tasks()
-
+            self.sound_button.setEnabled(True)
+            
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
             self._StopCurrentSession()
@@ -4245,7 +4287,7 @@ class Window(QMainWindow):
             # clear bias indicator graph
             self.bias_indicator.clear()
             # create workers
-            worker1 = Worker(self.get_animal_response,self.Channel,self.Channel3,self.Channel4)
+            worker1 = Worker(self.GeneratedTrials._GetAnimalResponse, self.Channel,self.Channel3, self.data_lock)
             worker1.signals.finished.connect(self._thread_complete)
             workerLick = Worker(GeneratedTrials._get_irregular_timestamp,self.Channel2)
             workerLick.signals.finished.connect(self._thread_complete2)
@@ -4264,7 +4306,6 @@ class Window(QMainWindow):
             self.workerStartTrialLoop=workerStartTrialLoop
             self.workerStartTrialLoop1=workerStartTrialLoop1
             self.worker_save=worker_save
-            self.data_lock = threading.Lock()
         else:
             PlotM=self.PlotM
             worker1=self.worker1
@@ -4312,28 +4353,31 @@ class Window(QMainWindow):
         """
         Data cleanup and saving that needs to be done at end of session.
         """
+        if hasattr(self, 'GeneratedTrials'):
+            # If the session never generated any trials, then we don't need to perform these tasks
 
-        # fill out GenerateTrials B_Bias
-        last_bias = self.GeneratedTrials.B_Bias[-1]
-        b_bias_len = len(self.GeneratedTrials.B_Bias)
-        bias_filler = [last_bias] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_bias_len)
-        self.GeneratedTrials.B_Bias = np.concatenate((self.GeneratedTrials.B_Bias, bias_filler), axis=0)
+            # fill out GenerateTrials B_Bias
+            last_bias = self.GeneratedTrials.B_Bias[-1]
+            b_bias_len = len(self.GeneratedTrials.B_Bias)
+            bias_filler = [last_bias] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_bias_len)
+            self.GeneratedTrials.B_Bias = np.concatenate((self.GeneratedTrials.B_Bias, bias_filler), axis=0)
 
-        # fill out GenerateTrials B_Bias_CI
-        last_ci = self.GeneratedTrials.B_Bias_CI[-1]
-        b_ci_len = len(self.GeneratedTrials.B_Bias_CI)
-        ci_filler = [last_ci] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_ci_len)
-        if ci_filler != []:
-            self.GeneratedTrials.B_Bias_CI = np.concatenate((self.GeneratedTrials.B_Bias_CI, ci_filler), axis=0)
+            # fill out GenerateTrials B_Bias_CI
+            last_ci = self.GeneratedTrials.B_Bias_CI[-1]
+            b_ci_len = len(self.GeneratedTrials.B_Bias_CI)
+            ci_filler = [last_ci] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_ci_len)
+            if ci_filler != []:
+                self.GeneratedTrials.B_Bias_CI = np.concatenate((self.GeneratedTrials.B_Bias_CI, ci_filler), axis=0)
 
-        # stop lick interval calculation
-        self.GeneratedTrials.lick_interval_time.stop()  # stop lick interval calculation
+            # stop lick interval calculation
+            self.GeneratedTrials.lick_interval_time.stop()
 
         # validate behavior session model and document validation errors if any
         try:
             AindBehaviorSessionModel(**self.behavior_session_model.model_dump())
         except ValidationError as e:
             logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+
         # save behavior session model
         with open(self.behavior_session_modelJson, "w") as outfile:
             outfile.write(self.behavior_session_model.model_dump_json())
@@ -4460,17 +4504,19 @@ class Window(QMainWindow):
                     # add data to bias_indicator
                     if not self.bias_thread.is_alive():
                         logger.debug('Starting bias thread.')
-                        self.bias_thread = threading.Thread(target=self.calculate_bias,
-                                                       kwargs={'trial_num': len(formatted_history),
-                                                               'choice_history': choice_history,
-                                                               'reward_history': np.array(any_reward).astype(int)})
+                        self.bias_thread = threading.Thread(target=self.bias_indicator.calculate_bias,
+                                                            kwargs={'trial_num': len(formatted_history),
+                                                                    'choice_history': choice_history,
+                                                                    'reward_history': np.array(any_reward).astype(int),
+                                                                    'n_trial_back': 5,
+                                                                    'cv': 1})
                         self.bias_thread.start()
                     else:
                         logger.debug('Skipping bias calculation as previous is still in progress. ')
 
                 # save the data everytrial
                 if GeneratedTrials.CurrentSimulation==True:
-                    GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3,self.Channel4)
+                    GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3, self.data_lock)
                     self.ANewTrial=1
                     self.NewTrialRewardOrder=1
                 else:
@@ -4481,10 +4527,9 @@ class Window(QMainWindow):
                     GeneratedTrials._GenerateATrial(self.Channel4)
 
                 # Save data in a separate thread
-                with self.data_lock:
-                    if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
-                        self.previous_backup_completed=0
-                        self.threadpool6.start(worker_save)
+                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
+                    self.previous_backup_completed=0
+                    self.threadpool6.start(worker_save)
 
                 # show disk space
                 self._show_disk_space()
@@ -4532,18 +4577,11 @@ class Window(QMainWindow):
 
     def _perform_backup(self,BackupSave):
         # Backup save logic
-        with self.data_lock:
-            try:
-                self._Save(BackupSave=BackupSave)
-            except Exception as e:
-                logging.error('backup save failed: {}'.format(e))
+        try:
+            self._Save(BackupSave=BackupSave)
+        except Exception as e:
+            logging.error('backup save failed: {}'.format(e))
 
-    def get_animal_response(self, channel1, channel3, channel4):
-        """
-        Data locking thread for update animal response data
-        """
-        with self.data_lock:
-            self.GeneratedTrials._GetAnimalResponse(channel1, channel3, channel4)
 
     def bias_calculated(self, bias: float, confidence_interval: list[float, float], trial_number: int) -> None:
         """
@@ -4567,22 +4605,6 @@ class Window(QMainWindow):
             self.GeneratedTrials.B_Bias_CI[trial_number - 1:] = confidence_interval # set last value to newest bias CI
 
         self.GeneratedTrials.B_Bias[trial_number-1:] = bias
-
-    def calculate_bias(self, trial_num: int, choice_history: np.ndarray, reward_history:np.ndarray):
-        """
-        Calculate bias based on lick data
-        :param trial_num: Trial number of currently at
-        :param choice_history: Choice history (0 = left choice, 1 = right choice).
-        :param reward_history: Reward history (0 = unrewarded, 1 = rewarded).
-        """
-
-        with self.data_lock:
-            self.bias_indicator.calculate_bias(trial_num= trial_num,
-                                               choice_history= choice_history,
-                                               reward_history= np.array(reward_history).astype(int),
-                                               n_trial_back= 5,
-                                               cv=1)
-
 
     def _StartTrialLoop1(self,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial):
         logging.info('starting trial loop 1')
