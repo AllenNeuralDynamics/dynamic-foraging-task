@@ -24,6 +24,7 @@ from pathlib import Path
 from datetime import date, datetime, timezone, timedelta
 from aind_slims_api import SlimsClient
 from aind_slims_api import models
+import aind_data_access_api.document_db
 import serial
 import numpy as np
 import pandas as pd
@@ -241,10 +242,14 @@ class Window(QMainWindow):
         self._InitializeBonsai()
 
         # connect to Slims
-        self._ConnectSlims()
+        self.slims_client = self.connect_to_slims()
+
+        # connect to docdb
+        self.docdb_client = self.connect_to_docdb()
 
         # set up Trainer and initialize curriculum and trainer
-        self.trainer = DynamicForagingTrainerServer(slims_client=self.slims_client)
+        self.trainer = DynamicForagingTrainerServer(slims_client=self.slims_client,
+                                                    docdb_client=self.docdb_client)
         self.curriculum = None
         self.trainer_state = None
         self.metrics = None
@@ -675,11 +680,11 @@ class Window(QMainWindow):
             self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
             logging.info(f"Successfully fetched {mouse_id} from Slims.")
             logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
-            self.curriculum, self.trainer_state, self.metrics, atts, session = self.trainer.load_data(mouse_id)
+            self.curriculum, self.trainer_state, self.metrics, atts = self.trainer.load_data(mouse_id)
 
             if self.curriculum is None: # No session written to slims so create curriculum based on schedule
 
-                self.curriculum, self.trainer_state, self.metrics, atts, session = self.create_curriculum(mouse_id)
+                self.curriculum, self.trainer_state, self.metrics, atts = self.create_curriculum(mouse_id)
                 attachment_names =
                 logging.error(f"Cannot find or make a curriculum for mouse {mouse_id} since there is no session "
                               f"information in slims or schedule")
@@ -740,8 +745,7 @@ class Window(QMainWindow):
     def create_curriculum(self, mouse_id)->tuple[Curriculum,
                                                  TrainerState,
                                                  Metrics,
-                                                 list,
-                                                 models.behavior_session.SlimsBehaviorSession]:
+                                                 list]:
         """
         Create curriculum based on schedule
         :params mouse_id: mouse id string to load from slims
@@ -766,12 +770,65 @@ class Window(QMainWindow):
         curriculum = getattr(importlib.import_module(creation_factory_name), module)()
 
         stages = curriculum.see_stages()
-
         stage_mapping = ["warmup", "1", "2", "3", "4", "FINAL", "GRADUATED"]
+        stage = self._GetInfoFromSchedule(mouse_id, "Current Stage")
 
-        trainer_state = TrainerState(stage=,
+        trainer_state = TrainerState(stage=stages[stage_mapping.index(stage)],
                              curriculum=curriculum,
                              is_on_curriculum=True)
+
+        # create metrics from docdb
+        sessions = self.docdb_client.retrieve_docdb_records(
+            filter_query={"name": {"$regex": f"^behavior_{mouse_id}(?!.*processed).*"}}
+        )
+        session_total = len(sessions)
+        sessions = [session for session in sessions if session['session'] is not None]  # sort out none types
+        sessions.sort(key=lambda session: session['session']['session_start_time'])  # sort based on time
+        epochs = [session['session']['stimulus_epochs'][0] for session in sessions]
+        finished_trials = [epoch['trials_finished'] for epoch in epochs]
+        foraging_efficiency = [epoch['output_parameters']['performance']['foraging_efficiency'] for epoch in epochs]
+
+        metrics = DynamicForagingMetrics(
+            foraging_efficiency=foraging_efficiency,
+            finished_trials=finished_trials,
+            session_total=session_total,
+            session_at_current_stage=0  # TODO: Just a guess? I'm not sure how to know this with only session.json
+        )
+
+        # populate attachments
+        attachments = [trainer_state.stage.task.json()]
+
+
+        # session_attachment
+        experiment_mapping = {"Uncoupled Unbaited": "Uncoupled Without Baiting",
+                              "Uncoupled Baited": "Uncoupled Baiting",
+                              "Coupled Baited": "Coupled Baiting"}
+        attachments.append(AindBehaviorSessionModel(
+            experiment=experiment_mapping[autotrain_curriculum_name],
+            experimenter=[str(self._GetInfoFromSchedule(mouse_id, "Trainer"))],
+            date=self.session.date,
+            root_path=self.session_model.root_path,
+            subject=mouse_id,
+            experiment_version=foraging_gui.__version__,
+            notes=str(self._GetInfoFromSchedule(mouse_id, "RA Notes")),
+            commit_hash=subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip(),
+            allow_dirty_repo=
+            subprocess.check_output(['git', 'diff-index', '--name-only', 'HEAD']).decode('ascii').strip() != '',
+            skip_hardware_validation=True
+        ))
+
+        # fip attachment
+        if (mode := self._GetInfoFromSchedule(mouse_id, "FIP Mode")) is not float("nan"):
+            attachments.append(FiberPhotometry(
+                mode=mode,
+                stage_start=self._GetInfoFromSchedule(mouse_id, "FIP Mode")
+            ))
+
+        # opto attachment TODO: Ideally this comes from schedule but right now no info so populate based on current configuration
+        if self.opto_model.laser_colors != []:
+            attachments.append(self.opto_model)
+
+        return curriculum, trainer_state, metrics, attachments
 
     def write_session_to_slims(self, mouse_id):
         """
@@ -1613,20 +1670,20 @@ class Window(QMainWindow):
         self.Other_lick_spout_distance = self.Settings['lick_spout_distance_box' + str(self.box_number)]
         self.rig_name = '{}'.format(self.current_box)
 
-    def _ConnectSlims(self):
-        '''
+    def connect_to_slims(self) -> SlimsClient:
+        """
             Connect to Slims
-        '''
+        """
         try:
             logging.info('Attempting to connect to Slims')
-            self.slims_client = SlimsClient(username=os.environ['SLIMS_USERNAME'],
+            slims_client = SlimsClient(username=os.environ['SLIMS_USERNAME'],
                                             password=os.environ['SLIMS_PASSWORD'])
         except KeyError as e:
             raise KeyError('SLIMS_USERNAME and SLIMS_PASSWORD do not exist as '
                            f'environment variables on machine. Please add. {e}')
 
         try:
-            self.slims_client.fetch_model(models.SlimsMouseContent, barcode='00000000')
+            slims_client.fetch_model(models.SlimsMouseContent, barcode='00000000')
         except Exception as e:
             if 'Status 401 – Unauthorized' in str(e):  # catch error if username and password are incorrect
                 raise Exception(f'Exception trying to read from Slims: {e}.\n'
@@ -1636,6 +1693,20 @@ class Window(QMainWindow):
             elif 'No record found' not in str(e):  # bypass if mouse doesn't exist
                 raise Exception(f'Exception trying to read from Slims: {e}.\n')
         logging.info('Successfully connected to Slims')
+
+        return slims_client
+
+    def connect_to_docdb(self) -> aind_data_access_api.document_db.MetadataDbClient:
+        """
+        Connect to docdb for curriculum metrics
+        """
+
+        return aind_data_access_api.document_db.MetadataDbClient(
+            host='api.allenneuraldynamics.org',
+            database='metadata_index',
+            collection='data_assets'
+        )
+
 
     def _AddWaterLogResult(self, session: Session):
         '''
