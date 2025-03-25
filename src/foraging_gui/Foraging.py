@@ -19,7 +19,7 @@ import harp
 import threading
 import yaml
 import shutil
-import importlib
+from importlib import import_module
 from pathlib import Path
 from datetime import date, datetime, timezone, timedelta
 from aind_slims_api import SlimsClient
@@ -676,6 +676,7 @@ class Window(QMainWindow):
         """
 
         try:
+
             logging.info(f"Fetching {mouse_id} from Slims.")
             self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
             logging.info(f"Successfully fetched {mouse_id} from Slims.")
@@ -684,10 +685,10 @@ class Window(QMainWindow):
             self.curriculum, self.trainer_state, self.metrics, atts = self.trainer.load_data(mouse_id)
 
             if self.curriculum is None:     # No session written to slims so create curriculum based on schedule
-
+                logging.info(f"No session found on slims. Attempting to construct from schedule.")
                 self.curriculum, self.trainer_state, self.metrics, atts = self.create_curriculum(mouse_id)
                 attachment_names = ["TrainerState", AindBehaviorSessionModel.__name__,
-                                    *[model.experiment_type for model in atts[2:]]]
+                                    *[model["experiment_type"] for model in atts[2:]]]
                 logging.error(f"Cannot find or make a curriculum for mouse {mouse_id} since there is no session "
                               f"information in slims or schedule")
 
@@ -769,7 +770,8 @@ class Window(QMainWindow):
 
         module = curriculum_mapping[key]
         creation_factory_name = f"construct_{module}_curriculum"
-        curriculum = getattr(importlib.import_module(creation_factory_name), module)()
+        curriculum = getattr(import_module(f"aind_behavior_dynamic_foraging.CurriculumManager.curriculums.{module}"),
+                             creation_factory_name)()
 
         stages = curriculum.see_stages()
         stage_mapping = ["warmup", "1", "2", "3", "4", "FINAL", "GRADUATED"]
@@ -798,17 +800,18 @@ class Window(QMainWindow):
         )
 
         # populate attachments
-        attachments = [trainer_state.stage.task.json()]
+        attachments = [trainer_state.stage.task.model_dump()]
 
 
         # session_attachment
         experiment_mapping = {"Uncoupled Unbaited": "Uncoupled Without Baiting",
                               "Uncoupled Baited": "Uncoupled Baiting",
                               "Coupled Baited": "Coupled Baiting"}
+
         attachments.append(AindBehaviorSessionModel(
             experiment=experiment_mapping[autotrain_curriculum_name],
             experimenter=[str(self._GetInfoFromSchedule(mouse_id, "Trainer"))],
-            date=self.session.date,
+            date=self.session_model.date,
             root_path=self.session_model.root_path,
             subject=mouse_id,
             experiment_version=foraging_gui.__version__,
@@ -817,18 +820,19 @@ class Window(QMainWindow):
             allow_dirty_repo=
             subprocess.check_output(['git', 'diff-index', '--name-only', 'HEAD']).decode('ascii').strip() != '',
             skip_hardware_validation=True
-        ))
+        ).model_dump())
 
         # fip attachment
         if (mode := self._GetInfoFromSchedule(mouse_id, "FIP Mode")) is not float("nan"):
+            first_fip = self._GetInfoFromSchedule(mouse_id, "First FP Stage")
             attachments.append(FiberPhotometry(
                 mode=mode,
-                stage_start=self._GetInfoFromSchedule(mouse_id, "FIP Mode")
-            ))
+                stage_start="stage_1_warmup" if type(first_fip) != str else first_fip.lower()
+            ).model_dump())
 
         # opto attachment TODO: Ideally this comes from schedule but right now no info so populate based on current configuration
         if self.opto_model.laser_colors != []:
-            attachments.append(self.opto_model)
+            attachments.append(self.opto_model.model_dump())
 
         return curriculum, trainer_state, metrics, attachments
 
@@ -1440,7 +1444,7 @@ class Window(QMainWindow):
             return
 
     def _GetInfoFromSchedule(self, mouse_id, column):
-        mouse_id = str(mouse_id)
+        mouse_id = int(mouse_id)
         if not hasattr(self, 'schedule'):
             return None
         if mouse_id not in self.schedule['Mouse ID'].values:
@@ -2877,13 +2881,13 @@ class Window(QMainWindow):
         """
         Method to update all widget based on pydantic models
         """
-
-        self.task_widget.apply_schema(self.task_logic.task_parameters)
-        self.session_widget.apply_schema(self.session_model)
-        self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
-        self.fip_widget.apply_schema(self.fip_model)
-        if self.curriculum is not None:
-            self.on_curriculum.setVisible(True)
+        print(self.task_logic.task_parameters)
+        # self.task_widget.apply_schema(self.task_logic.task_parameters)
+        # self.session_widget.apply_schema(self.session_model)
+        # self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
+        # self.fip_widget.apply_schema(self.fip_model)
+        # if self.curriculum is not None:
+        #     self.on_curriculum.setVisible(True)
 
     def save_task_models(self):
         """
