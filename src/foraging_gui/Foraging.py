@@ -146,7 +146,7 @@ class Window(QMainWindow):
         self.FigureUpdateTooSlow = 0# if the FigureUpdateTooSlow is true, using different process to update figures
         self.ANewTrial = 1          # permission to start a new trial
         self.UpdateParameters = 1   # permission to update parameters
-        self.logging_type = -1    # -1, logging is not started; 0, temporary logging; 1, formal logging
+        self.logging_type = -1    # -1, logging is not started; 0, formal logging; 1, temporary logging
         self.previous_backup_completed = 1 # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.unsaved_data = False   # Setting unsaved data to False
         self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames
