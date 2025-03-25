@@ -679,13 +679,15 @@ class Window(QMainWindow):
             logging.info(f"Fetching {mouse_id} from Slims.")
             self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
             logging.info(f"Successfully fetched {mouse_id} from Slims.")
+
             logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
             self.curriculum, self.trainer_state, self.metrics, atts = self.trainer.load_data(mouse_id)
 
-            if self.curriculum is None: # No session written to slims so create curriculum based on schedule
+            if self.curriculum is None:     # No session written to slims so create curriculum based on schedule
 
                 self.curriculum, self.trainer_state, self.metrics, atts = self.create_curriculum(mouse_id)
-                attachment_names =
+                attachment_names = ["TrainerState", AindBehaviorSessionModel.__name__,
+                                    *[model.experiment_type for model in atts[2:]]]
                 logging.error(f"Cannot find or make a curriculum for mouse {mouse_id} since there is no session "
                               f"information in slims or schedule")
 
