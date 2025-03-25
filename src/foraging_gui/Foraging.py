@@ -9,7 +9,7 @@ import math
 import logging
 import requests
 from hashlib import md5
-from typing import Literal
+from typing import Literal, get_args
 from pydantic import BaseModel
 
 
@@ -675,77 +675,74 @@ class Window(QMainWindow):
         :params mouse_id: mouse id string to load from slims
         """
 
-        #try:
+        try:
+            logging.info(f"Fetching {mouse_id} from Slims.")
+            self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
+            logging.info(f"Successfully fetched {mouse_id} from Slims.")
 
-        logging.info(f"Fetching {mouse_id} from Slims.")
-        self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
-        logging.info(f"Successfully fetched {mouse_id} from Slims.")
+            logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
+            self.curriculum, self.trainer_state, self.metrics, atts, slims_session = self.trainer.load_data(mouse_id)
 
-        logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
-        self.curriculum, self.trainer_state, self.metrics, atts, slims_session = self.trainer.load_data(mouse_id)
+            if self.curriculum is None:     # No session written to slims so create curriculum based on schedule
+                logging.info(f"No session found on slims. Attempting to construct from schedule.")
+                self.curriculum, self.trainer_state, self.metrics, atts = self.create_curriculum(mouse_id)
+                attachment_names = ["TrainerState", AindBehaviorSessionModel.__name__,
+                                    *[model["experiment_type"] for model in atts[2:]]]
 
-        if self.curriculum is None:     # No session written to slims so create curriculum based on schedule
-            logging.info(f"No session found on slims. Attempting to construct from schedule.")
-            self.curriculum, self.trainer_state, self.metrics, atts = self.create_curriculum(mouse_id)
-            attachment_names = ["TrainerState", AindBehaviorSessionModel.__name__,
-                                *[model["experiment_type"] for model in atts[2:]]]
-            print(attachment_names)
-            logging.error(f"Cannot find or make a curriculum for mouse {mouse_id} since there is no session "
-                          f"information in slims or schedule")
+                logging.error(f"Cannot find or make a curriculum for mouse {mouse_id} since there is no session "
+                              f"information in slims or schedule")
 
-        else:  # format attachment list
-            attachment_names = [attachment.name for attachment in atts]     # populate attachment names
-            atts = [self.slims_client.fetch_attachment_content(att).json() for att in atts]
-        self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
+            else:  # format attachment list
+                attachment_names = [attachment.name for attachment in atts]     # populate attachment names
+                atts = [self.slims_client.fetch_attachment_content(att).json() for att in atts]
+            self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
 
 
-        # update session model with slims session information
-        session = atts[attachment_names.index(AindBehaviorSessionModel.__name__)]
-        slims_session_model = AindBehaviorSessionModel(**session)
-        self.session_model.experiment = slims_session_model.experiment
-        self.session_model.experimenter = slims_session_model.experimenter
-        self.session_model.subject = slims_session_model.subject
-        self.session_model.notes = slims_session_model.notes
+            # update session model with slims session information
+            session = atts[attachment_names.index(AindBehaviorSessionModel.__name__)]
+            slims_session_model = AindBehaviorSessionModel(**session)
+            self.session_model.experiment = slims_session_model.experiment
+            self.session_model.experimenter = slims_session_model.experimenter
+            self.session_model.subject = slims_session_model.subject
+            self.session_model.notes = slims_session_model.notes
 
-        # update opto_model
-        if self.opto_model.experiment_type in attachment_names:
-            opto = atts[attachment_names.index(self.opto_model.experiment_type)]
-            self.opto_model = Optogenetics(**opto)
+            # update opto_model
+            if self.opto_model.experiment_type in attachment_names:
+                opto = atts[attachment_names.index(self.opto_model.experiment_type)]
+                self.opto_model = Optogenetics(**opto)
 
-        # update fip_model
-        if self.fip_model.experiment_type in attachment_names:
-            logging.info(f"Applying fip model")
-            fip = atts[attachment_names.index(self.fip_model.experiment_type)]
-            self.fip_model = FiberPhotometry(**fip)
-            # check if current stage is past stage_start
-            print(list(STAGE_STARTS), self.trainer_state.stage.name, self.fip_model.stage_start)
-            self.fip_model.mode = None if list(STAGE_STARTS).index(self.trainer_state.stage.name) < \
-                                          list(STAGE_STARTS).index(self.fip_model.stage_start) else self.fip_model.mode
+            # update fip_model
+            if self.fip_model.experiment_type in attachment_names:
+                logging.info(f"Applying fip model")
+                fip = atts[attachment_names.index(self.fip_model.experiment_type)]
+                self.fip_model = FiberPhotometry(**fip)
+                # check if current stage is past stage_start
+                stage_starts = get_args(STAGE_STARTS)
+                self.fip_model.mode = None if stage_starts.index(self.trainer_state.stage.name) < \
+                                              stage_starts.index(self.fip_model.stage_start) else self.fip_model.mode
 
-        logging.info(f"Mouse {mouse_id} curriculum loaded from Slims.", extra={'tags': [self.warning_log_tag]})
-        self.label_curriculum_stage.setText(self.trainer_state.stage.name)
-        self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
+            logging.info(f"Mouse {mouse_id} curriculum loaded from Slims.", extra={'tags': [self.warning_log_tag]})
+            self.label_curriculum_stage.setText(self.trainer_state.stage.name)
+            self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
 
-        # enable or disable widget based on if session is on curriculum
-        self.task_widget.setEnabled(not slims_session.is_curriculum_suggestion)
-        self.session_widget.setEnabled(not slims_session.is_curriculum_suggestion)
-        self.Opto_dialog.opto_widget.setEnabled(not slims_session.is_curriculum_suggestion)
-        self.fip_widget.setEnabled(not slims_session.is_curriculum_suggestion)
+            # enable or disable widget based on if session is on curriculum
+            on_curriculum = True if slims_session is None else not slims_session.is_curriculum_suggestion
+            self.task_widget.setEnabled(on_curriculum)
 
-        # set state of on_curriculum check
-        self.on_curriculum.setChecked(slims_session.is_curriculum_suggestion)
-        self.on_curriculum.setEnabled(slims_session.is_curriculum_suggestion)
+            # set state of on_curriculum check
+            self.on_curriculum.setChecked(on_curriculum)
+            self.on_curriculum.setEnabled(on_curriculum)
 
-        # except Exception as e:
-        #     if 'No record found' in str(e):  # mouse doesn't exist
-        #         logging.warning(f"{mouse_id} is not in Slims. Double check id, and add to Slims if missing",
-        #                         extra={'tags': [self.warning_log_tag]})
-        #     else:
-        #         logging.warning(f"Error loading mouse {mouse_id} curriculum from Slims or schedule. {e}",
-        #                         extra={'tags': [self.warning_log_tag]})
-        # finally:
-        #     self.load_slims_progress.hide()
-        #     self.modelsChanged.emit()
+        except Exception as e:
+            if 'No record found' in str(e):  # mouse doesn't exist
+                logging.warning(f"{mouse_id} is not in Slims. Double check id, and add to Slims if missing",
+                                extra={'tags': [self.warning_log_tag]})
+            else:
+                logging.warning(f"Error loading mouse {mouse_id} curriculum from Slims or schedule. {e}",
+                                extra={'tags': [self.warning_log_tag]})
+        finally:
+            self.load_slims_progress.hide()
+            self.modelsChanged.emit()
 
     def create_curriculum(self, mouse_id)->tuple[Curriculum,
                                                  TrainerState,
@@ -2193,8 +2190,9 @@ class Window(QMainWindow):
                                   tp.reward_probability.base_reward_sum
             elif self.session_model.experiment in ['Uncoupled Baiting', 'Uncoupled Without Baiting']:
                 self.RewardProb = np.array(tp.uncoupled_reward)
+            prob_str = str(self.RewardProb) if type(self.RewardProb) != float else str(np.round(self.RewardProb, 2))
             reward_str = 'Reward pairs:\n' + \
-                         str(np.round(self.RewardProb, 2)).replace('\n', ',') + \
+                         prob_str.replace('\n', ',') + \
                          '\n\n' + \
                          'Current pair:\n'
             if hasattr(self, 'GeneratedTrials'):
@@ -2884,12 +2882,12 @@ class Window(QMainWindow):
         Method to update all widget based on pydantic models
         """
 
-        # self.task_widget.apply_schema(self.task_logic.task_parameters)
-        # self.session_widget.apply_schema(self.session_model)
-        # self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
-        # self.fip_widget.apply_schema(self.fip_model)
-        # if self.curriculum is not None:
-        #     self.on_curriculum.setVisible(True)
+        self.task_widget.apply_schema(self.task_logic.task_parameters)
+        self.session_widget.apply_schema(self.session_model)
+        self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
+        self.fip_widget.apply_schema(self.fip_model)
+        if self.curriculum is not None:
+            self.on_curriculum.setVisible(True)
 
     def save_task_models(self):
         """
