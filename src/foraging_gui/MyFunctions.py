@@ -1213,7 +1213,7 @@ class GenerateTrials():
                 self.win.StartExcitation.setChecked(False)
                 # delay stopping fib for 5 seconds
                 logging.info('Starting timer to stop excitation')
-                self.fip_stop_timer = QtCore.QTimer(timeout=self.win._StartExcitation, interval=5000)
+                #self.fip_stop_timer = QtCore.QTimer(timeout=self.win._StartExcitation, interval=5000)
                 self.fip_stop_timer.setSingleShot(True)
                 self.fip_stop_timer.start()
 

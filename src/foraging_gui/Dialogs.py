@@ -330,20 +330,20 @@ class WaterCalibrationDialog(QDialog):
                 child.setAutoDefault(False)
 
         # setup QTimers to keep lines open
-        self.left_open_timer = QTimer(timeout=lambda: self.reopen_valve('Left'), interval=10000)
-        self.right_open_timer = QTimer(timeout=lambda: self.reopen_valve('Right'), interval=10000)
+        #self.left_open_timer = QTimer(timeout=lambda: self.reopen_valve('Left'), interval=10000)
+        #self.right_open_timer = QTimer(timeout=lambda: self.reopen_valve('Right'), interval=10000)
 
         # setup QTimers to keep close lines after 5ml
-        self.left_close_timer = QTimer(timeout=lambda:  self.OpenLeft5ml.setChecked(False))  # trigger _ToggleValve call
-        self.right_close_timer = QTimer(timeout=lambda: self.OpenRight5ml.setChecked(False))
+        #self.left_close_timer = QTimer(timeout=lambda:  self.OpenLeft5ml.setChecked(False))  # trigger _ToggleValve call
+        #self.right_close_timer = QTimer(timeout=lambda: self.OpenRight5ml.setChecked(False))
 
         # setup Qtimers for updating text countdown
-        self.left_text_timer = QTimer(timeout=lambda:
-                      self.OpenLeft5ml.setText(f'Open left 5ml: {round(self.left_close_timer.remainingTime()/1000)}s'),
-                      interval=1000)
-        self.right_text_timer = QTimer(timeout=lambda:
-                     self.OpenRight5ml.setText(f'Open right 5ml: {round(self.right_close_timer.remainingTime()/1000)}s'),
-                     interval=1000)
+        #self.left_text_timer = QTimer(timeout=lambda:
+        #              self.OpenLeft5ml.setText(f'Open left 5ml: {round(self.left_close_timer.remainingTime()/1000)}s'),
+         #             interval=1000)
+        #self.right_text_timer = QTimer(timeout=lambda:
+        #             self.OpenRight5ml.setText(f'Open right 5ml: {round(self.right_close_timer.remainingTime()/1000)}s'),
+        #            interval=1000)
 
     def _connectSignalsSlots(self):
         self.SpotCheckLeft.clicked.connect(lambda: self._SpotCheck('Left'))
