@@ -178,6 +178,10 @@ class SlimsHandler:
             self.session_model.subject = slims_session_model.subject
             self.session_model.notes = slims_session_model.notes
 
+            # update operation_control model
+            oc_att = attachments[attachment_names.index(self.operation_control.name)]
+            self.operation_control = OperationalControl(**self.slims_client.fetch_attachment_content(oc_att).json())
+
             # update opto_model
             if self.opto_model.name in attachment_names:
                 opto_attachment = attachments[attachment_names.index(self.opto_model.name)]
@@ -188,11 +192,11 @@ class SlimsHandler:
                 self.log.info(f"Applying fip model")
                 fip_attachment = attachments[attachment_names.index(self.fip_model.name)]
                 self.fip_model = FiberPhotometry(**self.slims_client.fetch_attachment_content(fip_attachment).json())
+
                 # check if current stage is past stage_start and enable if so
                 stage_list = get_args(STAGE_STARTS)
                 self.fip_model.enabled = stage_list.index(self.trainer_state.stage.name) >= \
                                          stage_list.index(self.fip_model.stage_start)
-            
 
             self.log.info(f"Mouse {mouse_id} curriculum loaded from Slims.")
             self._loaded_mouse_id = mouse_id
@@ -203,7 +207,7 @@ class SlimsHandler:
             if 'No record found' in str(e):  # mouse doesn't exist
                 raise KeyError(f"{mouse_id} is not in Slims. Double check id, and add to Slims if missing")
             else:
-                Exception(f"Error loading mouse {mouse_id} curriculum loaded from Slims. {e}")
+                raise Exception(f"Error loading mouse {mouse_id} curriculum loaded from Slims. {e}")
 
     def write_session_to_slims(self, mouse_id: str,
                                on_curriculum: bool,
@@ -248,6 +252,13 @@ class SlimsHandler:
                 record=slims_model,
                 name=AindBehaviorSessionModel.__name__,
                 content=self.session_model.model_dump_json()
+            )
+
+            # add operational control model
+            self.slims_client.add_attachment_content(
+                record=slims_model,
+                name=self.operation_control.name,
+                content=self.operation_control.model_dump_json()
             )
 
             # add opto model

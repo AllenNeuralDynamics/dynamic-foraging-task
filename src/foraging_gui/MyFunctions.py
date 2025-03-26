@@ -126,13 +126,14 @@ class GenerateTrials():
         self.Obj = {
             self.task_logic.name: [],
             AindBehaviorSessionModel.__name__: [],
-            self.opto_model.experiment_type: [],
-            self.fip_model.experiment_type: [],
+            self.opto_model.name: [],
+            self.fip_model.name: [],
             "left_valve_open_times": [],
             "right_valve_open_times": [],
             "multipliers": []
         }
         self.selected_condition = None
+        self.warmup_on = self.task_logic.task_parameters.warmup is not None
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
 
@@ -301,10 +302,10 @@ class GenerateTrials():
 
     def _CheckWarmUp(self):
         '''Check if we should turn on warm up'''
-        if self.task_logic.task_parameters.warmup is None:
+        if self.warmup_on:
             return
-        warmup = self._get_warmup_state()
-        if warmup == 0:
+        self._get_warmup_state()
+        if not self.warmup_on:
             # Go to next block
             self.win.NextBlock.setChecked(True)
             logging.info('Warm up is turned off', extra={'tags': [self.win.warning_log_tag]})
@@ -331,15 +332,12 @@ class GenerateTrials():
                 abs(choice_ratio - 0.5) <= self.task_logic.task_parameters.warmup.max_choice_ratio_bias:
 
             # turn off the warm up
-            warmup = 0
-        else:
-            # turn on the warm up
-            warmup = 1
+            self.warmup_on = False
+
         # show current metrics of the warm up
         logging.info('Finish trial: ' + str(round(finish_trial, 2)) + '; Finish ratio: ' + str(round(finish_ratio, 2)) +
                      '; Choice ratio bias: ' + str(round(abs(choice_ratio - 0.5), 2)),
                      extra={'tags': [self.win.warning_log_tag]})
-        return warmup
 
     def _CheckBaitPermitted(self):
         '''Check if bait is permitted of the current trial'''
@@ -2014,10 +2012,10 @@ class GenerateTrials():
         self.Obj[AindBehaviorSessionModel.__name__].append(self.session_model.model_dump_json())
 
         #save opto model
-        self.Obj[self.opto_model.experiment_type].append(self.opto_model.model_dump_json())
+        self.Obj[self.opto_model.name].append(self.opto_model.model_dump_json())
 
         # save fip model
-        self.Obj[self.fip_model.experiment_type].append(self.fip_model.model_dump_json())
+        self.Obj[self.fip_model.name].append(self.fip_model.model_dump_json())
 
         for attr_name in dir(self):
             if attr_name.startswith('TP_'):

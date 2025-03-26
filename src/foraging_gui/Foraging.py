@@ -275,8 +275,8 @@ class Window(QMainWindow):
         # create slims handler to handle waterlog and curriculum management
         self.slims_handler = SlimsHandler(self.task_logic,
                                           self.session_model,
-                                          self.fip_model,
                                           self.opto_model,
+                                          self.fip_model,
                                           self.operation_control_model)
 
         # initialize mouse selector
@@ -536,19 +536,16 @@ class Window(QMainWindow):
 
             # enable or disable widget based on if session is on curriculum
             self.task_widget.setEnabled(not session.is_curriculum_suggestion)
-            self.session_widget.setEnabled(not session.is_curriculum_suggestion)
-            self.Opto_dialog.opto_widget.setEnabled(not session.is_curriculum_suggestion)
-            self.fip_widget.setEnabled(not session.is_curriculum_suggestion)
 
             # set state of on_curriculum check
             self.on_curriculum.setChecked(session.is_curriculum_suggestion)
             self.on_curriculum.setEnabled(session.is_curriculum_suggestion)
-            self.on_curriculum.setVisible(True)
 
             logging.info(f"Successfully loaded mouse {mouse_id}", extra={'tags': [self.warning_log_tag]})
 
         except Exception as e:
             logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+            self.Load.setEnabled(True)
 
         finally:
             self.load_slims_progress.hide()
@@ -567,6 +564,7 @@ class Window(QMainWindow):
                                                       self.GeneratedTrials.B_CurrentTrialN)
                 logging.info(f"Writing next session to Slims successful. Mouse {self.session_model.subject} will run on "
                              f"{trainer_state.stage.name} next session.", extra={'tags': [self.warning_log_tag]})
+                self.on_curriculum.isChecked(False)
                 self.on_curriculum.setVisible(False)
                 self.label_curriculum_stage.setText("")
 
@@ -2569,6 +2567,9 @@ class Window(QMainWindow):
         self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
         self.fip_widget.apply_schema(self.fip_model)
         self.operation_control_widget.apply_schema(self.operation_control_model)
+
+        # check if on_curriculum needs to be visible
+        self.on_curriculum.setVisible(self.on_curriculum.isChecked())
 
     def save_task_models(self):
         """
