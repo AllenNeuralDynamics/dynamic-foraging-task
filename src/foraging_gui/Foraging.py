@@ -20,8 +20,6 @@ import yaml
 import shutil
 from pathlib import Path
 from datetime import date, datetime, timezone, timedelta
-from aind_slims_api import SlimsClient
-from aind_slims_api import models
 import serial
 import numpy as np
 import pandas as pd
@@ -54,15 +52,13 @@ from foraging_gui.schema_widgets.session_parameters_widget import SessionParamet
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
-from aind_data_schema.core.session import Session
-from aind_data_schema_models.modalities import Modality
+from foraging_gui.slims_handler import SlimsHandler
 from aind_behavior_services.session import AindBehaviorSessionModel
 
 from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
     AindDynamicForagingTaskLogic,
     AindDynamicForagingTaskParameters,
     AutoWater,
-    AutoStop,
     AutoBlock,
     Warmup
 )
@@ -81,12 +77,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
 
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
     FiberPhotometry,
-    STAGE_STARTS
 )
-
-from aind_behavior_dynamic_foraging.CurriculumManager.trainer import DynamicForagingTrainerServer
-from aind_behavior_dynamic_foraging.CurriculumManager.metrics import DynamicForagingMetrics
-from aind_behavior_curriculum import Trainer
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear()  # clear handlers so console output can be configured
@@ -177,7 +168,6 @@ class Window(QMainWindow):
         self.task_logic = AindDynamicForagingTaskLogic(
             task_parameters=AindDynamicForagingTaskParameters(
                 auto_water=AutoWater(),
-                auto_stop=AutoStop(),
                 auto_block=AutoBlock(),
                 warmup=Warmup()
             )
@@ -233,15 +223,6 @@ class Window(QMainWindow):
         # Connect to Bonsai
         self._InitializeBonsai()
 
-        # connect to Slims
-        self._ConnectSlims()
-
-        # set up Trainer and initialize curriculum and trainer
-        self.trainer = DynamicForagingTrainerServer(slims_client=self.slims_client)
-        self.curriculum = None
-        self.trainer_state = None
-        self.metrics = None
-
         # Set up threads
         self.threadpool = QThreadPool()  # get animal response
         self.threadpool2 = QThreadPool()  # get animal lick
@@ -284,8 +265,14 @@ class Window(QMainWindow):
         self.Other_manual_water_right_volume = []  # the volume of manual water given by the right valve each time
         self.Other_manual_water_right_time = []  # the valve open time of manual water given by the right valve each time
 
+        # create slims handler to handle waterlog and curriculum management
+        self.slims_handler = SlimsHandler(self.task_logic,
+                                          self.session_model,
+                                          self.fip_model,
+                                          self.opto_model)
+
         # initialize mouse selector
-        slims_mice = self.slims_client.fetch_models(models.SlimsMouseContent)[-100:]  # grab 100 latest mice from slims
+        slims_mice = self.slims_handler.get_added_mice[-100:]  # grab 100 latest mice from slims
         self.mouse_selector_dialog = MouseSelectorDialog([mouse.barcode for mouse in slims_mice], self.box_letter)
 
         # create label giff to indicate mouse is being loaded
@@ -506,9 +493,8 @@ class Window(QMainWindow):
         self.mouse_selector_dialog.acceptedMouseID.connect(lambda: self.geometry().center())
         self.mouse_selector_dialog.acceptedMouseID.connect(lambda: self.Load.setEnabled(False))
         self.mouse_selector_dialog.acceptedMouseID.connect(self.load_slims_progress.show)
-        self.mouse_selector_dialog.acceptedMouseID.connect(lambda: threading.Thread(target=self.load_slims_mouse,
-                                                                                    kwargs={
-                                                                                        "mouse_id": self.mouse_selector_dialog.combo.currentText()}).start())
+        self.mouse_selector_dialog.acceptedMouseID.connect(lambda: threading.Thread(target=self.load_curriculum,
+                                                                                    kwargs={"mouse_id": self.mouse_selector_dialog.combo.currentText()}).start())
 
         # add validator for weight and water fields
         double_validator = QtGui.QDoubleValidator()
@@ -529,6 +515,57 @@ class Window(QMainWindow):
 
         # update model widgets if models have changed
         self.modelsChanged.connect(self.update_model_widgets)
+
+    def load_curriculum(self, mouse_id: str):
+        """
+            Load and apply curriculum from slims
+            :param mouse_id: mouse id to load
+        """
+
+        try:
+            trainer_state, session = self.slims_handler.load_mouse_curriculum(mouse_id)
+            self.label_curriculum_stage.setText(self.trainer_state.stage.name)
+            self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
+
+            # enable or disable widget based on if session is on curriculum
+            self.task_widget.setEnabled(not session.is_curriculum_suggestion)
+            self.session_widget.setEnabled(not session.is_curriculum_suggestion)
+            self.Opto_dialog.opto_widget.setEnabled(not session.is_curriculum_suggestion)
+            self.fip_widget.setEnabled(not session.is_curriculum_suggestion)
+
+            # set state of on_curriculum check
+            self.on_curriculum.setChecked(session.is_curriculum_suggestion)
+            self.on_curriculum.setEnabled(session.is_curriculum_suggestion)
+            self.on_curriculum.setVisible(True)
+
+            logging.info(f"Successfully loaded mouse {mouse_id}", extra={'tags': [self.warning_log_tag]})
+
+        except Exception as e:
+            logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+
+        finally:
+            self.load_slims_progress.hide()
+            self.modelsChanged.emit()
+
+    def write_curriculum(self):
+        """
+            Write curriculum to slims for next session
+        """
+        # add session to slims
+        if hasattr(self, "GeneratedTrials"):
+            try:
+                trainer_state = self.slims_handler.write_session_to_slims(self.session_model.subject,
+                                                      self.on_curriculum.isChecked(),
+                                                      self.GeneratedTrials.B_for_eff_optimal,
+                                                      self.GeneratedTrials.B_CurrentTrialN)
+                logging.info(f"Writing next session to Slims successful. Mouse {self.session_model.subject} will run on "
+                             f"{trainer_state.stage.name} next session.", extra={'tags': [self.warning_log_tag]})
+                self.on_curriculum.setVisible(False)
+                self.label_curriculum_stage.setText("")
+
+            except Exception as e:
+                logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+
 
     def _set_reference(self):
         '''
@@ -655,134 +692,6 @@ class Window(QMainWindow):
                 self.fip_widget.setEnabled(True)
                 self.Opto_dialog.opto_widget.setEnabled(True)
                 self.on_curriculum.setEnabled(False)
-
-
-    def load_slims_mouse(self, mouse_id: str):
-        """
-        Load in specified mouse from slims
-        :params mouse_id: mouse id string to load from slims
-        """
-
-        try:
-            logging.info(f"Fetching {mouse_id} from Slims.")
-            self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
-            logging.info(f"Successfully fetched {mouse_id} from Slims.")
-            logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
-            self.curriculum, self.trainer_state, self.metrics, attachments, session = self.trainer.load_data(mouse_id)
-            self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
-            attachment_names = [attachment.name for attachment in attachments]
-
-            # update session model with slims session information
-            ses_att = attachments[attachment_names.index(AindBehaviorSessionModel.__name__)]
-            slims_session_model = AindBehaviorSessionModel(**self.slims_client.fetch_attachment_content(ses_att).json())
-            self.session_model.experiment = slims_session_model.experiment
-            self.session_model.experimenter = slims_session_model.experimenter
-            self.session_model.subject = slims_session_model.subject
-            self.session_model.notes = slims_session_model.notes
-
-            # update opto_model
-            if self.opto_model.experiment_type in attachment_names:
-                opto_attachment = attachments[attachment_names.index(self.opto_model.experiment_type)]
-                self.opto_model = Optogenetics(**self.slims_client.fetch_attachment_content(opto_attachment).json())
-
-            # update fip_model
-            if self.fip_model.experiment_type in attachment_names:
-                logging.info(f"Applying fip model")
-                fip_attachment = attachments[attachment_names.index(self.fip_model.experiment_type)]
-                self.fip_model = FiberPhotometry(**self.slims_client.fetch_attachment_content(fip_attachment).json())
-                # check if current stage is past stage_start
-                self.fip_model.mode = None if STAGE_STARTS.index(self.trainer_state.stage.name) < \
-                                              STAGE_STARTS.index(self.fip_model.stage_start) else self.fip_model.mode
-
-            logging.info(f"Mouse {mouse_id} curriculum loaded from Slims.", extra={'tags': [self.warning_log_tag]})
-            self.label_curriculum_stage.setText(self.trainer_state.stage.name)
-            self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
-
-            # enable or disable widget based on if session is on curriculum
-            self.task_widget.setEnabled(not session.is_curriculum_suggestion)
-            self.session_widget.setEnabled(not session.is_curriculum_suggestion)
-            self.Opto_dialog.opto_widget.setEnabled(not session.is_curriculum_suggestion)
-            self.fip_widget.setEnabled(not session.is_curriculum_suggestion)
-
-            # set state of on_curriculum check
-            self.on_curriculum.setChecked(session.is_curriculum_suggestion)
-            self.on_curriculum.setEnabled(session.is_curriculum_suggestion)
-
-        except Exception as e:
-            if 'No record found' in str(e):  # mouse doesn't exist
-                logging.warning(f"{mouse_id} is not in Slims. Double check id, and add to Slims if missing",
-                                extra={'tags': [self.warning_log_tag]})
-            else:
-                logging.warning(f"Error loading mouse {mouse_id} curriculum loaded from Slims. {e}",
-                                extra={'tags': [self.warning_log_tag]})
-        finally:
-            self.load_slims_progress.hide()
-            self.modelsChanged.emit()
-
-    def write_session_to_slims(self, mouse_id):
-        """
-        Write next session to slims based on performance
-        :param mouse_id: mouse id string to load from slims
-        """
-
-        if self.metrics is not None and hasattr(self, "GeneratedTrials"):    # loaded mouse
-            # add current session to metrics
-            logging.info("Constructing new metrics.")
-            new_metrics = DynamicForagingMetrics(
-                foraging_efficiency=self.metrics.foraging_efficiency+[self.GeneratedTrials.B_for_eff_optimal],
-                finished_trials=self.metrics.finished_trials+[self.GeneratedTrials.B_CurrentTrialN],
-                session_total=self.metrics.session_total+1,
-                session_at_current_stage=self.metrics.session_at_current_stage+1
-            )
-
-            if self.on_curriculum.isChecked():
-                # evaluating trainer state
-                logging.info("Generating next session stage.")
-                next_trainer_state = Trainer(self.curriculum).evaluate(trainer_state=self.trainer_state,
-                                                                       metrics=new_metrics)
-            else:   # mouse is off curriculum so push trainer state used
-                self.trainer_state.stage.task = self.task_logic
-                next_trainer_state = self.trainer_state
-
-            logging.info("Writing trainer state to slims.")
-            slims_model = self.trainer.write_data(subject_id=mouse_id,
-                                                  curriculum=self.curriculum,
-                                                  trainer_state=next_trainer_state,
-                                                  date=datetime.now() if not hasattr(self, "session_model")
-                                                  else self.session_model.date,
-                                                  on_curriculum=self.on_curriculum.isChecked())
-            # add session model as an attachment
-            self.slims_client.add_attachment_content(
-                record=slims_model,
-                name=AindBehaviorSessionModel.__name__,
-                content=self.session_model.model_dump_json()
-            )
-
-            # add opto model if run
-            if self.opto_model.laser_colors != []:
-                self.slims_client.add_attachment_content(
-                    record=slims_model,
-                    name=self.opto_model.experiment_type,
-                    content=self.opto_model.model_dump_json()
-                )
-
-            if self.fip_model.mode is not None:
-                self.slims_client.add_attachment_content(
-                    record=slims_model,
-                    name=self.fip_model.experiment_type,
-                    content=self.fip_model.model_dump_json()
-                )
-
-            logging.info(f"Writing next session to Slims successful. "
-                         f"Mouse {mouse_id} will run on {next_trainer_state.stage.name} next session.",
-                         extra={'tags': [self.warning_log_tag]})
-
-        # reset load state
-        self.curriculum = None
-        self.trainer_state = None
-        self.metrics = None
-        self.on_curriculum.setVisible(False)
-        self.label_curriculum_stage.setText("")
 
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''
@@ -944,28 +853,6 @@ class Window(QMainWindow):
 
             # only check drop frames once each session
             self.to_check_drop_frames = 0
-
-    def _revert_to_previous_parameters(self):
-        '''reverse to previous parameters before warm up'''
-        # get parameters before the warm up is on
-        parameters = {}
-        for attr_name in dir(self):
-            if attr_name.startswith(
-                    'WarmupBackup_') and attr_name != 'WarmupBackup_' and attr_name != 'WarmupBackup_warmup':
-                parameters[attr_name.replace('WarmupBackup_', '')] = getattr(self, attr_name)
-        widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,
-                                                                                        QtWidgets.QLineEdit,
-                                                                                        QtWidgets.QTextEdit,
-                                                                                        QtWidgets.QComboBox,
-                                                                                        QtWidgets.QDoubleSpinBox,
-                                                                                        QtWidgets.QSpinBox))}
-        widget_dict['Task'] = self.Task
-        try:
-            for key in widget_dict.keys():
-                self._set_parameters(key, widget_dict, parameters)
-        except Exception as e:
-            # Catch the exception and log error information
-            logging.error(traceback.format_exc())
 
     def _CheckStageConnection(self):
         '''get the current position of the stage'''
@@ -1558,88 +1445,6 @@ class Window(QMainWindow):
         self.Other_go_cue_decibel = self.Settings['go_cue_decibel_box' + str(self.box_number)]
         self.Other_lick_spout_distance = self.Settings['lick_spout_distance_box' + str(self.box_number)]
         self.rig_name = '{}'.format(self.current_box)
-
-    def _ConnectSlims(self):
-        '''
-            Connect to Slims
-        '''
-        try:
-            logging.info('Attempting to connect to Slims')
-            self.slims_client = SlimsClient(username=os.environ['SLIMS_USERNAME'],
-                                            password=os.environ['SLIMS_PASSWORD'])
-        except KeyError as e:
-            raise KeyError('SLIMS_USERNAME and SLIMS_PASSWORD do not exist as '
-                           f'environment variables on machine. Please add. {e}')
-
-        try:
-            self.slims_client.fetch_model(models.SlimsMouseContent, barcode='00000000')
-        except Exception as e:
-            if 'Status 401 – Unauthorized' in str(e):  # catch error if username and password are incorrect
-                raise Exception(f'Exception trying to read from Slims: {e}.\n'
-                                f' Please check credentials:\n'
-                                f'Username: {os.environ["SLIMS_USERNAME"]}\n'
-                                f'Password: {os.environ["SLIMS_PASSWORD"]}')
-            elif 'No record found' not in str(e):  # bypass if mouse doesn't exist
-                raise Exception(f'Exception trying to read from Slims: {e}.\n')
-        logging.info('Successfully connected to Slims')
-
-    def _AddWaterLogResult(self, session: Session):
-        '''
-            Add WaterLogResult to slims based on current state of gui
-
-            :param session: Session object to pull water information from
-
-        '''
-
-        try:  # try and find mouse
-            logging.info(f'Attempting to fetch mouse {session.subject_id} from Slims')
-            mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
-        except Exception as e:
-            if 'No record found' in str(e):  # if no mouse found or validation errors on mouse
-                logging.warning(f'"No record found" error while trying to fetch mouse {session.subject_id}. '
-                                f'Will not log water.')
-                return
-            else:
-                logging.error(f'While fetching mouse {session.subject_id} model, unexpected error occurred.')
-                raise e
-
-        # extract water information
-        logging.info('Extracting water information from first stimulus epoch')
-        water_json = session.stimulus_epochs[0].output_parameters.water.items()
-        water = {k: v if not (isinstance(v, float) and math.isnan(v)) else None for k, v in water_json}
-
-        # extract software information
-        logging.info('Extracting software information from first data stream')
-        software = session.stimulus_epochs[0].software[0]
-
-        # create model
-        logging.info('Creating SlimsWaterlogResult based on session information.')
-        model = models.SlimsWaterlogResult(
-            mouse_pk=mouse.pk,
-            date=session.session_start_time,
-            weight_g=session.animal_weight_post,
-            operator=self.session_model.experimenter[0],
-            water_earned_ml=water['water_in_session_foraging'],
-            water_supplement_delivered_ml=water['water_after_session'],
-            water_supplement_recommended_ml=None,
-            total_water_ml=water['water_in_session_total'],
-            comments=session.notes,
-            workstation=session.rig_id,
-            sw_source=software.url,
-            sw_version=software.version,
-            test_pk=self.slims_client.fetch_pk("Test", test_name="test_waterlog"))
-
-        # check if mouse already has waterlog for at session time and if, so update model
-        logging.info(f'Fetching previous waterlog for mouse {session.subject_id}')
-        waterlog = self.slims_client.fetch_models(models.SlimsWaterlogResult, mouse_pk=mouse.pk, start=0, end=1)
-        if waterlog != [] and waterlog[0].date.strftime("%Y-%m-%d %H:%M:%S") == \
-                session.session_start_time.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"):
-            logging.info(f'Waterlog information already exists for this session. Updating waterlog in Slims.')
-            model.pk = waterlog[0].pk
-            self.slims_client.update_model(model=model)
-        else:
-            logging.info(f'Adding waterlog to Slims.')
-            self.slims_client.add_model(model)
 
     def _InitializeBonsai(self):
         '''
@@ -2603,7 +2408,7 @@ class Window(QMainWindow):
             if save_clicked:  # create water log result if weight after filled and uncheck save
                 if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.session_model.subject not in [
                     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']:
-                    self._AddWaterLogResult(session)
+                   self.slims_handler.add_waterlog_result(session)
                 self.bias_indicator.clear()  # prepare for new session
 
 
@@ -2755,8 +2560,6 @@ class Window(QMainWindow):
         self.session_widget.apply_schema(self.session_model)
         self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
         self.fip_widget.apply_schema(self.fip_model)
-        if self.curriculum is not None:
-            self.on_curriculum.setVisible(True)
 
     def save_task_models(self):
         """
@@ -3083,9 +2886,7 @@ class Window(QMainWindow):
                                               self.task_logic,
                                               self.session_model,
                                               self.opto_model,
-                                              self.fip_model,
-                                              self.curriculum,
-                                              self.trainer_state)
+                                              self.fip_model)
         # Iterate over all attributes of the GeneratedTrials object
         for attr_name in dir(self.GeneratedTrials):
             if attr_name in Obj.keys():
@@ -3460,7 +3261,7 @@ class Window(QMainWindow):
         self.on_curriculum.setEnabled(True)
 
         # add session to slims
-        self.write_session_to_slims(self.session_model.subject)
+        self.write_curriculum()
 
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully == 0:
@@ -3893,8 +3694,6 @@ class Window(QMainWindow):
                                              self.session_model,
                                              self.opto_model,
                                              self.fip_model,
-                                             self.curriculum,
-                                             self.trainer_state
                                              )
             self.GeneratedTrials = GeneratedTrials
             self.StartANewSession = 0
