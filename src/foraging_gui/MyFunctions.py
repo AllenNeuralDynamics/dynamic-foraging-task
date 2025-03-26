@@ -109,8 +109,9 @@ class GenerateTrials():
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
 
-        # create timer to calculate lick intervals every 10 minutes
-        self.lick_interval_time = QtCore.QTimer(timeout=self.calculate_inter_lick_intervals, interval=600000)
+        self.lick_interval_time = QtCore.QTimer(self)
+        self.lick_interval_time.timeout.connect(self.calculate_inter_lick_intervals)
+        self.lick_interval_time.start(600000)  # interval in milliseconds (600000ms = 10 minutes)
 
     def _GenerateATrial(self,Channel4):
         self.finish_select_par=0
