@@ -1183,6 +1183,24 @@ class Window(QMainWindow):
         if mouse_id not in self.schedule['Mouse ID'].values:
             return None
         return self.schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
+    
+    def _GetProtocol(self, mouse_id):
+        logging.info('Getting protocol')
+        protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
+        if (protocol is None) or (protocol == ''):
+            logging.info('Protocol not on schedule, using default: 2414')
+            if not self.Settings['add_default_project_name']:
+                return
+            else:
+                protocol = 2414
+ 
+        self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol'] = str(int(protocol))
+        self.Metadata_dialog._update_metadata(
+            update_rig_metadata=False,
+            update_session_metadata=True
+        )
+        logging.info('Setting IACUC Protocol: {}'.format(protocol))
+
 
     def _GetProjectName(self, mouse_id):
         logging.info('Getting Project name')
@@ -3103,6 +3121,7 @@ class Window(QMainWindow):
         self.Experimenter.setText(experimenter)
         self.ID.returnPressed.emit()
         self._GetProjectName(mouse_id)
+        self._GetProtocol(mouse_id)
         self.TargetRatio.setText('0.85')
         self.keyPressEvent(allow_reset=True)
 
@@ -3416,6 +3435,7 @@ class Window(QMainWindow):
         self.load_tag=1
         self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
         self._GetProjectName(self.behavior_session_model.subject)
+        self._GetProject(self.behavior_session_model.subject)
     
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -4159,18 +4179,7 @@ class Window(QMainWindow):
 
             # disable metadata fields
             self._set_metadata_enabled(False)
-
-            # Set IACUC protocol in metadata based on schedule
-            protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
-            if protocol is not None:
-                self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol'] = str(int(protocol))
-                self.Metadata_dialog._update_metadata(
-                    update_rig_metadata=False,
-                    update_session_metadata=True
-                )
-                logging.info('Setting IACUC Protocol: {}'.format(protocol))
             self.session_run = True   # session has been started
-
             self.keyPressEvent(allow_reset=True)
 
         else:
