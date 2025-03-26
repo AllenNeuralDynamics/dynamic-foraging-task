@@ -1185,13 +1185,17 @@ class Window(QMainWindow):
         return self.schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
     
     def _GetProtocol(self, mouse_id):
+        if not self.Settings['check_schedule']:
+            logging.info('not setting protocol because check_schedule=False')
+            return
         logging.info('Getting protocol')
         protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
         if (protocol is None) or (protocol == '') or (np.isnan(protocol)):
-            logging.info('Protocol not on schedule, using default: 2414')
             if not self.Settings['add_default_project_name']:
+                logging.info('Protocol not on schedule, not using default because add_default_project_name=False')
                 return
             else:
+                logging.info('Protocol not on schedule, using default: 2414')
                 protocol = 2414
  
         self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol'] = str(int(protocol))
@@ -1203,6 +1207,9 @@ class Window(QMainWindow):
 
 
     def _GetProjectName(self, mouse_id):
+        if not self.Settings['check_schedule']
+            logging.info('not setting project name because check_schedule=False')
+            return
         logging.info('Getting Project name')
         project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
         add_default = True 
