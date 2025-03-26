@@ -727,7 +727,7 @@ class Window(QMainWindow):
 
             # enable or disable widget based on if session is on curriculum
             on_curriculum = True if slims_session is None else not slims_session.is_curriculum_suggestion
-            self.task_widget.setEnabled(on_curriculum)
+            self.task_widget.setEnabled(not on_curriculum)
 
             # set state of on_curriculum check
             self.on_curriculum.setChecked(on_curriculum)

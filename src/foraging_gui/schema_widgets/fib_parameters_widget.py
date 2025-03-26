@@ -55,6 +55,7 @@ class FIBParametersWidget(SchemaWidgetBase):
         super().apply_schema(*args, **kwargs)
         for widget in self.schema_fields_widgets.values():
             widget.setEnabled(self.schema.mode is not None)
+        self.fip_schema_check_box.setChecked(self.schema.mode is not None)
 
     def _set_widget_text(self, name, value):
         """Set widget text if widget is QLineEdit or QCombobox
