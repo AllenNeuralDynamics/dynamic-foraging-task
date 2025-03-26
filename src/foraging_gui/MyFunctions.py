@@ -20,6 +20,7 @@ from aind_behavior_dynamic_foraging import AindDynamicForagingTaskLogic
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import Optogenetics
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry
+from aind_behavior_dynamic_foraging.DataSchemas.operation_control import OperationalControl
 
 if PLATFORM == 'win32':
     from newscale.usbxpress import USBXpressLib, USBXpressDevice
@@ -33,7 +34,7 @@ class GenerateTrials():
                  session_model: AindBehaviorSessionModel,
                  opto_model: Optogenetics,
                  fip_model: FiberPhotometry,
-                ):
+                 operation_control_model: OperationalControl):
 
         self.win = win
         # set model attributes
@@ -41,6 +42,7 @@ class GenerateTrials():
         self.session_model = session_model
         self.opto_model = opto_model
         self.fip_model = fip_model
+        self.operation_control_model = operation_control_model
 
         self.B_LeftLickIntervalPercent = None  # percentage of left lick intervals under 100ms
         self.B_RightLickIntervalPercent = None  # percentage of right lick intervals under 100ms
@@ -272,12 +274,12 @@ class GenerateTrials():
         """
 
         if self.opto_model.session_control is not None:
-            session_control_block_length = self.task_logic.task_parameters.auto_stop.max_trial * \
+            session_control_block_length = self.operation_control_model.auto_stop.max_trial * \
                                            self.opto_model.session_control.session_fraction
             initial_state = 1 if self.opto_model.session_control.optogenetic_start else 0
 
-            calculated_state = np.zeros(self.task_logic.task_parameters.auto_stop.max_trial)
-            numbers = np.arange(self.task_logic.task_parameters.auto_stop.max_trial)
+            calculated_state = np.zeros(self.operation_control_model.auto_stop.max_trial)
+            numbers = np.arange(self.operation_control_model.auto_stop.max_trial)
             numbers_floor = np.floor(numbers / session_control_block_length)
             # Find odd values: A value is odd if value % 2 != 0
             odd_values_mask = (numbers_floor % 2 != 0)
@@ -1314,11 +1316,11 @@ class GenerateTrials():
 
     def _CheckStop(self):
         '''Stop if there are many ingoral trials or if the maximam trial is exceeded MaxTrial'''
-        tp = self.task_logic.task_parameters
-        stop_ignore = round(tp.auto_stop.ignore_win * tp.auto_stop.ignore_ratio_threshold)
-        max_trial = tp.auto_stop.max_trial - 2  # trial number starts from 0
-        max_time = tp.auto_stop.max_time * 60  # convert minutes to seconds
-        min_time = tp.auto_stop.min_time * 60
+        oc = self.operation_control_model
+        stop_ignore = round(oc.auto_stop.ignore_win * oc.auto_stop.ignore_ratio_threshold)
+        max_trial = oc.auto_stop.max_trial - 2  # trial number starts from 0
+        max_time = oc.auto_stop.max_time * 60  # convert minutes to seconds
+        min_time = oc.auto_stop.min_time * 60
         if hasattr(self, 'BS_CurrentRunningTime'):
             pass
         else:
@@ -1332,14 +1334,14 @@ class GenerateTrials():
         auto_rewards = np.array([any(x) for x in np.column_stack(self.B_AutoWaterTrial.astype(bool))])
         non_auto_reward = self.B_AnimalResponseHistory[np.where(~auto_rewards.astype(bool))]  # isolate non-auto-reward
         if self.BS_CurrentRunningTime / 60 >= min_time and len(
-                np.where(non_auto_reward[-tp.auto_stop.ignore_win:] == 2)[0]) >= stop_ignore:
+                np.where(non_auto_reward[-oc.auto_stop.ignore_win:] == 2)[0]) >= stop_ignore:
             stop = True
-            threshold = tp.auto_stop.ignore_ratio_threshold * 100
+            threshold = oc.auto_stop.ignore_ratio_threshold * 100
             msg = f'Stopping the session because the mouse has ignored at least ' \
-                  f'{threshold}% of {tp.auto_stop.ignore_win} ' \
+                  f'{threshold}% of {oc.auto_stop.ignore_win} ' \
                   f'consecutive trials'
             warning_label_text = 'Stop because ignore trials exceed or equal: ' + \
-                                 f'{threshold}% of {tp.auto_stop.ignore_win}'
+                                 f'{threshold}% of {oc.auto_stop.ignore_win}'
         elif self.B_CurrentTrialN > max_trial:
             stop = True
             msg = 'Stopping the session because the mouse has reached the maximum trial count: {}'.format(max_trial)

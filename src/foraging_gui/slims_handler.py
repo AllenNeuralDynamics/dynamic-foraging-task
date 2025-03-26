@@ -12,6 +12,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
     FiberPhotometry,
     STAGE_STARTS
 )
+from aind_behavior_dynamic_foraging.DataSchemas.operation_control import OperationalControl
 from aind_slims_api import SlimsClient
 from aind_slims_api import models
 from aind_data_schema.core.session import Session
@@ -20,6 +21,7 @@ import os
 import math
 from time import timezone
 from datetime import datetime
+from typing import get_args
 
 
 class SlimsHandler:
@@ -31,6 +33,7 @@ class SlimsHandler:
                  session_model: AindBehaviorSessionModel,
                  opto_model: Optogenetics,
                  fip_model: FiberPhotometry,
+                 operation_control: OperationalControl,
                  username: str = None,
                  password: str = None):
         """
@@ -49,6 +52,7 @@ class SlimsHandler:
         self.session_model = session_model
         self.opto_model = opto_model
         self.fip_model = fip_model
+        self.operation_control = operation_control
 
         # connect to Slims
         self.slims_client = self.connect_to_slims(username, password)
@@ -175,18 +179,20 @@ class SlimsHandler:
             self.session_model.notes = slims_session_model.notes
 
             # update opto_model
-            if self.opto_model.experiment_type in attachment_names:
-                opto_attachment = attachments[attachment_names.index(self.opto_model.experiment_type)]
+            if self.opto_model.name in attachment_names:
+                opto_attachment = attachments[attachment_names.index(self.opto_model.name)]
                 self.opto_model = Optogenetics(**self.slims_client.fetch_attachment_content(opto_attachment).json())
 
             # update fip_model
-            if self.fip_model.experiment_type in attachment_names:
+            if self.fip_model.name in attachment_names:
                 self.log.info(f"Applying fip model")
-                fip_attachment = attachments[attachment_names.index(self.fip_model.experiment_type)]
+                fip_attachment = attachments[attachment_names.index(self.fip_model.name)]
                 self.fip_model = FiberPhotometry(**self.slims_client.fetch_attachment_content(fip_attachment).json())
-                # check if current stage is past stage_start
-                self.fip_model.mode = None if STAGE_STARTS.index(self.trainer_state.stage.name) < \
-                                              STAGE_STARTS.index(self.fip_model.stage_start) else self.fip_model.mode
+                # check if current stage is past stage_start and enable if so
+                stage_list = get_args(STAGE_STARTS)
+                self.fip_model.enabled = stage_list.index(self.trainer_state.stage.name) >= \
+                                         stage_list.index(self.fip_model.stage_start)
+            
 
             self.log.info(f"Mouse {mouse_id} curriculum loaded from Slims.")
             self._loaded_mouse_id = mouse_id
@@ -244,18 +250,21 @@ class SlimsHandler:
                 content=self.session_model.model_dump_json()
             )
 
-            # add opto model if run
+            # add opto model
             if self.opto_model.laser_colors != []:
                 self.slims_client.add_attachment_content(
                     record=slims_model,
-                    name=self.opto_model.experiment_type,
+                    name=self.opto_model.name,
                     content=self.opto_model.model_dump_json()
                 )
 
-            if self.fip_model.mode is not None:
+            # Add fip model
+            stage_list = get_args(STAGE_STARTS)
+            if self.fip_model.enabled or stage_list.index(self.trainer_state.stage.name) < \
+                    stage_list.index(self.fip_model.stage_start):
                 self.slims_client.add_attachment_content(
                     record=slims_model,
-                    name=self.fip_model.experiment_type,
+                    name=self.fip_model.name,
                     content=self.fip_model.model_dump_json()
                 )
 

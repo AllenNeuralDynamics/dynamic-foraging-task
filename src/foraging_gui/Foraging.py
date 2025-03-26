@@ -27,7 +27,7 @@ from pykeepass import PyKeePass
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
-from PyQt5.QtWidgets import QFileDialog, QVBoxLayout, QGridLayout, QLabel, QProgressDialog, QDialog
+from PyQt5.QtWidgets import QFileDialog, QVBoxLayout, QGridLayout, QLabel
 from PyQt5 import QtWidgets, QtGui, QtCore, uic
 from PyQt5.QtCore import QThreadPool, Qt, QThread, QTimer
 from pyOSC3.OSC3 import OSCStreamingClient
@@ -49,6 +49,7 @@ from foraging_gui.warning_widget import WarningWidget
 from foraging_gui.schema_widgets.behavior_parameters_widget import BehaviorParametersWidget
 from foraging_gui.schema_widgets.fib_parameters_widget import FIBParametersWidget
 from foraging_gui.schema_widgets.session_parameters_widget import SessionParametersWidget
+from foraging_gui.schema_widgets.operation_control_widget import OperationControlWidget
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
@@ -75,9 +76,9 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
     SessionControl
 )
 
-from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
-    FiberPhotometry,
-)
+from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry
+
+from aind_behavior_dynamic_foraging.DataSchemas.operation_control import OperationalControl
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear()  # clear handlers so console output can be configured
@@ -145,7 +146,7 @@ class Window(QMainWindow):
         # Load User interface
         self._LoadUI()
 
-        # create AINDBehaviorSession model to be used and referenced for session info
+        # create AINDBehaviorSession model and widget to be used and referenced for session info
         self.session_model = AindBehaviorSessionModel(
             experiment="Coupled Baiting",
             experimenter=["the ghost in the shell"],
@@ -165,6 +166,7 @@ class Window(QMainWindow):
             self.session_param_layout.insertWidget(i, widget)
         self.notes_layout.insertWidget(0, self.session_widget.schema_fields_widgets["notes"])
 
+        # create AindDynamicForagingTaskLogic model and widget to be used and referenced for session info
         self.task_logic = AindDynamicForagingTaskLogic(
             task_parameters=AindDynamicForagingTaskParameters(
                 auto_water=AutoWater(),
@@ -188,11 +190,14 @@ class Window(QMainWindow):
         self.right_valve_open_time = 0.03
         self.task_widget.volumeChanged.connect(self.update_valve_open_time)
 
+        # create OperationControl model and widget to be used and referenced for session info
+        self.operation_control_model = OperationalControl()
+        self.operation_control_widget = OperationControlWidget(self.operation_control_model)
+
         # add fip schema widget
-        self.fip_model = FiberPhotometry()
+        self.fip_model = FiberPhotometry(enabled=False)
         self.fip_widget = FIBParametersWidget(self.fip_model)
-        for i, widget in enumerate([self.fip_widget.fip_schema_check_box] +
-                                   list(self.fip_widget.schema_fields_widgets.values())):
+        for i, widget in enumerate(list(self.fip_widget.schema_fields_widgets.values())):
             self.fip_layout.insertWidget(i, widget)
             self.fip_layout.insertWidget(i, widget)
 
@@ -265,14 +270,17 @@ class Window(QMainWindow):
         self.Other_manual_water_right_volume = []  # the volume of manual water given by the right valve each time
         self.Other_manual_water_right_time = []  # the valve open time of manual water given by the right valve each time
 
+        self._Optogenetics()  # open the optogenetics panel and initialize opto model
+
         # create slims handler to handle waterlog and curriculum management
         self.slims_handler = SlimsHandler(self.task_logic,
                                           self.session_model,
                                           self.fip_model,
-                                          self.opto_model)
+                                          self.opto_model,
+                                          self.operation_control_model)
 
         # initialize mouse selector
-        slims_mice = self.slims_handler.get_added_mice[-100:]  # grab 100 latest mice from slims
+        slims_mice = self.slims_handler.get_added_mice()[-100:]  # grab 100 latest mice from slims
         self.mouse_selector_dialog = MouseSelectorDialog([mouse.barcode for mouse in slims_mice], self.box_letter)
 
         # create label giff to indicate mouse is being loaded
@@ -283,7 +291,6 @@ class Window(QMainWindow):
         self.load_slims_progress.setWindowFlag(Qt.FramelessWindowHint)
         self.load_slims_progress.setMovie(movie)
 
-        self._Optogenetics()  # open the optogenetics panel
         self._LaserCalibration()  # to open the laser calibration panel
         self._WaterCalibration()  # to open the water calibration panel
         self._Camera()
@@ -301,7 +308,7 @@ class Window(QMainWindow):
         self.ManualWaterVolume = [0, 0]
         self._StopPhotometry()  # Make sure photoexcitation is stopped
 
-        # create QTimer to flash start button color
+        # create QTimer to flash start Fbutton color
         self.start_flash = QTimer(timeout=self.toggle_save_color, interval=500)
         self.is_purple = False
 
@@ -524,7 +531,7 @@ class Window(QMainWindow):
 
         try:
             trainer_state, session = self.slims_handler.load_mouse_curriculum(mouse_id)
-            self.label_curriculum_stage.setText(self.trainer_state.stage.name)
+            self.label_curriculum_stage.setText(trainer_state.stage.name)
             self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
 
             # enable or disable widget based on if session is on curriculum
@@ -616,7 +623,8 @@ class Window(QMainWindow):
                 logging.error(traceback.format_exc())
                 self.StartEphysRecording.setChecked(False)
                 QMessageBox.warning(self, 'Connection Error',
-                                    'Failed to connect to Open Ephys. Please check: \n1) the correct ip address is included in the settings json file. \n2) the Open Ephys software is open.')
+                                    'Failed to connect to Open Ephys. Please check: \n1) the correct ip address is '
+                                    'included in the settings json file. \n2) the Open Ephys software is open.')
         else:
             try:
                 if EphysControl.get_status()['mode'] != 'RECORD':
@@ -2560,6 +2568,7 @@ class Window(QMainWindow):
         self.session_widget.apply_schema(self.session_model)
         self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
         self.fip_widget.apply_schema(self.fip_model)
+        self.operation_control_widget.apply_schema(self.operation_control_model)
 
     def save_task_models(self):
         """
@@ -2576,13 +2585,16 @@ class Window(QMainWindow):
         # validate behavior task logic model and document validation errors if any
         self.validate_and_save_model(AindDynamicForagingTaskLogic, self.task_logic, task_model_path)
 
+        # validate operation_control_model and document validation errors if any
+        self.validate_and_save_model(OperationalControl, self.operation_control_model, task_model_path)
+
         # check if opto ran
         if self.opto_model.laser_colors != []:
             opto_model_path = os.path.join(self.session_model.root_path, f'behavior_optogenetics_model_{id_name}.json')
             self.validate_and_save_model(Optogenetics, self.opto_model, opto_model_path)
 
         # check if fip ran
-        if self.fip_model.mode is not None:
+        if self.fip_model.enabled:
             fip_model_path = os.path.join(self.session_model.root_path,
                                           f'behavior_fiber_photometry_model_{id_name}.json')
             self.validate_and_save_model(FiberPhotometry, self.fip_model, fip_model_path)
@@ -2886,7 +2898,8 @@ class Window(QMainWindow):
                                               self.task_logic,
                                               self.session_model,
                                               self.opto_model,
-                                              self.fip_model)
+                                              self.fip_model,
+                                              self.operation_control_model)
         # Iterate over all attributes of the GeneratedTrials object
         for attr_name in dir(self.GeneratedTrials):
             if attr_name in Obj.keys():
@@ -3535,7 +3548,7 @@ class Window(QMainWindow):
             elif self.session_model.allow_dirty_repo is None:
                 logging.error('Could not check for untracked local changes')
 
-            if self.fip_model.mode is not None and (not self.FIP_started):
+            if self.fip_model.enabled and (not self.FIP_started):
                 reply = QMessageBox.critical(self,
                                              'Box {}, Start'.format(self.box_letter),
                                              'Photometry is set to "on", but the FIP workflow has not been started',
@@ -3545,7 +3558,7 @@ class Window(QMainWindow):
                 return
 
             # Check if photometry excitation is running or not
-            if self.fip_model.mode is not None and (not self.StartExcitation.isChecked()):
+            if self.fip_model.enabled and (not self.StartExcitation.isChecked()):
                 logging.warning('photometry is set to "on", but excitation is not running')
 
                 reply = QMessageBox.question(self,
@@ -3694,7 +3707,7 @@ class Window(QMainWindow):
                                              self.session_model,
                                              self.opto_model,
                                              self.fip_model,
-                                             )
+                                             self.operation_control_model)
             self.GeneratedTrials = GeneratedTrials
             self.StartANewSession = 0
             PlotM = PlotV(win=self, GeneratedTrials=GeneratedTrials, width=5, height=4)
@@ -3771,7 +3784,7 @@ class Window(QMainWindow):
             worker_save = self.worker_save
 
         # collecting the base signal for photometry. Only run once
-        if self.Start.isChecked() and self.fip_model.mode is not None and self.PhotometryRun == 0:
+        if self.Start.isChecked() and self.fip_model.enabled and self.PhotometryRun == 0:
             logging.info('Starting photometry baseline timer')
             self.finish_Timer = 0
             self.PhotometryRun = 1

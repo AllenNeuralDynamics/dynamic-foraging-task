@@ -2253,7 +2253,7 @@ Double dipping:
                          <item>
                           <widget class="QPushButton" name="StartFIP">
                            <property name="sizePolicy">
-                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
                              <horstretch>0</horstretch>
                              <verstretch>0</verstretch>
                             </sizepolicy>
@@ -2269,7 +2269,7 @@ Double dipping:
                          <item>
                           <widget class="QPushButton" name="StartExcitation">
                            <property name="sizePolicy">
-                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
                              <horstretch>0</horstretch>
                              <verstretch>0</verstretch>
                             </sizepolicy>
@@ -2285,7 +2285,7 @@ Double dipping:
                          <item>
                           <widget class="QPushButton" name="StartBleaching">
                            <property name="sizePolicy">
-                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
                              <horstretch>0</horstretch>
                              <verstretch>0</verstretch>
                             </sizepolicy>
@@ -2300,7 +2300,7 @@ Double dipping:
                          </item>
                          <item>
                           <widget class="QWidget" name="fip_widget">
-                           <layout class="QHBoxLayout" name="fip_layout">
+                           <layout class="QVBoxLayout" name="fip_layout">
                            </layout>
                           </widget>
                          </item>

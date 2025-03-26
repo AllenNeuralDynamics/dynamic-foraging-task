@@ -29,7 +29,7 @@ class OptoParametersWidget(SchemaWidgetBase):
         super().__init__(schema)
 
         # delete widgets unrelated to session
-        self.schema_fields_widgets["experiment_type"].hide()
+        self.schema_fields_widgets["name"].hide()
 
         # add or remove laser colors
         for laser, widget in self.laser_colors_widgets.items():
