@@ -1207,7 +1207,7 @@ class Window(QMainWindow):
 
 
     def _GetProjectName(self, mouse_id):
-        if not self.Settings['check_schedule']
+        if not self.Settings['check_schedule']:
             logging.info('not setting project name because check_schedule=False')
             return
         logging.info('Getting Project name')
