@@ -50,7 +50,8 @@ def _get_field(obj, field_list, reject_list=[None, np.nan,'',[]], index=None, de
                     has_field=1
             if has_field==0:
                 continue
-            if value in reject_list:
+            reject = type(value) != np.float64 and value in reject_list or type(value) == np.float64 and value.size == 0
+            if reject:
                 continue
             if index is None:
                 return value
