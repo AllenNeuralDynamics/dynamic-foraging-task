@@ -50,8 +50,7 @@ def _get_field(obj, field_list, reject_list=[None, np.nan,'',[]], index=None, de
                     has_field=1
             if has_field==0:
                 continue
-            print(type(value))
-            if (type(value) == np.ndarray and value.size == 0) or (type(value) != np.ndarray and value in reject_list):
+            if value in reject_list:
                 continue
             if index is None:
                 return value
