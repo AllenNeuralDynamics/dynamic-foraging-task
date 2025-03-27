@@ -695,15 +695,20 @@ class Window(QMainWindow):
 
     def off_curriculum(self, checked) -> None:
         """
-        Function to handle going off curriculum.
-        :param checked: if on_curriculum checkbox is checked or not
+            Function to handle going off curriculum.
+            :param checked: if on_curriculum checkbox is checked or not
         """
 
         if not checked:     # user wants to go off curriculum
-            reply = QMessageBox.question(self, 'Off Curriculum', 'You are going off curriculum. Are you absolutely sure'
-                                                                 ' you would like to do this? Once you do this, there '
-                                                                 'is no going back. This could really annoying.',
-                                         QMessageBox.No, QMessageBox.Yes)
+            msg = QMessageBox()
+            msg.setWindowTitle("Off Curriculum")
+            msg.setText("You are going off curriculum. Are you absolutely sure you would like to do this? "
+                            "Once you do this, there is no going back. This could be really annoying.")
+            msg.setStyleSheet("QLabel{font-size: 18px; font-weight: bold;}")  # Apply to text
+            msg.setIcon(QMessageBox.Question)
+            msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            reply = msg.exec_()
+
             if reply == QMessageBox.No:
                 self.on_curriculum.setChecked(True)
             else:
@@ -1134,7 +1139,6 @@ class Window(QMainWindow):
             self.CreateNewFolder = 0
             log_folder = self.HarpFolder
             self.unsaved_data = True
-            #self.Save.setStyleSheet("color: white;background-color : mediumorchid")
             self.start_flash.start()
         else:
             # temporary logging
@@ -2473,7 +2477,6 @@ class Window(QMainWindow):
                 QMessageBox.warning(self, '',
                                     'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
                 self.unsaved_data = True
-                #self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
                 self.start_flash.start()
 
             self.Save.setChecked(False)  # uncheck button
@@ -2575,7 +2578,7 @@ class Window(QMainWindow):
         """
         Method to update all widget based on pydantic models
         """
-       
+
         self.task_widget.apply_schema(self.task_logic.task_parameters)
         self.session_widget.apply_schema(self.session_model)
         self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
