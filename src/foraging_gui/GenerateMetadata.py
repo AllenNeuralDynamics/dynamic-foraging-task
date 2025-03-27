@@ -20,6 +20,7 @@ from aind_data_schema_models.platforms import Platform
 from aind_data_schema_models.pid_names import PIDName
 from aind_data_schema.components.coordinates import RelativePosition, Translation3dTransform, Rotation3dTransform,Axis,AxisName
 
+from aind_behavior_services.session import AindBehaviorSessionModel
 
 from aind_data_schema.core.session import (
     Coordinates3d,
@@ -62,8 +63,14 @@ class generate_metadata:
         json file to the metadata folder
 
     '''
-    def __init__(self, json_file=None, Obj=None, dialog_metadata_file=None,dialog_metadata=None, output_folder=None):
-        
+    def __init__(self, session_model: AindBehaviorSessionModel,
+                 json_file=None,
+                 Obj=None,
+                 dialog_metadata_file=None,
+                 dialog_metadata=None,
+                 output_folder=None,
+                 ):
+        self.session_model = session_model
         self.session_metadata_success=False
         self.rig_metadata_success=False
 
@@ -1073,10 +1080,10 @@ class generate_metadata:
         '''
         self.behavior_software=[]
         try:
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            os.chdir(script_dir)  # Change to the directory of the current script
+            # script_dir = os.path.dirname(os.path.abspath(__file__))
+            # os.chdir(script_dir)  # Change to the directory of the current script
             # Get information about task repository
-            commit_ID = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
+            commit_ID = self.session_model.commit_hash #subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
             current_branch = subprocess.check_output(['git','branch','--show-current']).decode('ascii').strip()
             version=foraging_gui.__version__
         except Exception as e:
