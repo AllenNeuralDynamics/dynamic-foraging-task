@@ -273,11 +273,7 @@ class Window(QMainWindow):
         self._Optogenetics()  # open the optogenetics panel and initialize opto model
 
         # create slims handler to handle waterlog and curriculum management
-        self.slims_handler = SlimsHandler(self.task_logic,
-                                          self.session_model,
-                                          self.opto_model,
-                                          self.fip_model,
-                                          self.operation_control_model)
+        self.slims_handler = SlimsHandler()
 
         # initialize mouse selector
         slims_mice = self.slims_handler.get_added_mice()[-100:]  # grab 100 latest mice from slims
@@ -530,16 +526,29 @@ class Window(QMainWindow):
         """
 
         try:
-            trainer_state, session = self.slims_handler.load_mouse_curriculum(mouse_id)
+            trainer_state, slims_session, task, sess, opto, fip, oc = self.slims_handler.load_mouse_curriculum(mouse_id)
+
+            # update models
+            self.task_logic = task
+            self.operation_control_model = oc
+            self.opto_model = opto if opto else self.opto_model
+            self.fip_model = fip if fip else self.fip_model
+
+            # update session model only partially
+            self.session_model.experiment = sess.experiment
+            self.session_model.experimenter = sess.experimenter
+            self.session_model.subject = sess.subject
+            self.session_model.notes = sess.notes
+
             self.label_curriculum_stage.setText(trainer_state.stage.name)
             self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
 
             # enable or disable widget based on if session is on curriculum
-            self.task_widget.setEnabled(not session.is_curriculum_suggestion)
+            self.task_widget.setEnabled(not slims_session.is_curriculum_suggestion)
 
             # set state of on_curriculum check
-            self.on_curriculum.setChecked(session.is_curriculum_suggestion)
-            self.on_curriculum.setEnabled(session.is_curriculum_suggestion)
+            self.on_curriculum.setChecked(slims_session.is_curriculum_suggestion)
+            self.on_curriculum.setEnabled(slims_session.is_curriculum_suggestion)
 
             logging.info(f"Successfully loaded mouse {mouse_id}", extra={'tags': [self.warning_log_tag]})
 
@@ -559,12 +568,17 @@ class Window(QMainWindow):
         if hasattr(self, "GeneratedTrials"):
             try:
                 trainer_state = self.slims_handler.write_session_to_slims(self.session_model.subject,
-                                                      self.on_curriculum.isChecked(),
-                                                      self.GeneratedTrials.B_for_eff_optimal,
-                                                      self.GeneratedTrials.B_CurrentTrialN)
-                logging.info(f"Writing next session to Slims successful. Mouse {self.session_model.subject} will run on "
-                             f"{trainer_state.stage.name} next session.", extra={'tags': [self.warning_log_tag]})
-                self.on_curriculum.isChecked(False)
+                                                                          self.on_curriculum.isChecked(),
+                                                                          self.GeneratedTrials.B_for_eff_optimal,
+                                                                          self.GeneratedTrials.B_CurrentTrialN,
+                                                                          self.task_logic,
+                                                                          self.session_model,
+                                                                          self.opto_model,
+                                                                          self.fip_model,
+                                                                          self.operation_control_model)
+                logging.info(f"Writing next session to Slims successful. Mouse {self.session_model.subject} will run"
+                             f" on {trainer_state.stage.name} next session.", extra={'tags': [self.warning_log_tag]})
+                self.on_curriculum.setChecked(False)
                 self.on_curriculum.setVisible(False)
                 self.label_curriculum_stage.setText("")
 
@@ -2561,7 +2575,7 @@ class Window(QMainWindow):
         """
         Method to update all widget based on pydantic models
         """
-
+       
         self.task_widget.apply_schema(self.task_logic.task_parameters)
         self.session_widget.apply_schema(self.session_model)
         self.Opto_dialog.opto_widget.apply_schema(self.opto_model)

@@ -302,7 +302,7 @@ class GenerateTrials():
 
     def _CheckWarmUp(self):
         '''Check if we should turn on warm up'''
-        if self.warmup_on:
+        if not self.warmup_on:
             return
         self._get_warmup_state()
         if not self.warmup_on:

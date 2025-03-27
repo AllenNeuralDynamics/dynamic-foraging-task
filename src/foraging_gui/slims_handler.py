@@ -29,30 +29,15 @@ class SlimsHandler:
     Class to handle communication from slims to write waterlogs and curriculums
     """
 
-    def __init__(self, task_logic: AindDynamicForagingTaskLogic,
-                 session_model: AindBehaviorSessionModel,
-                 opto_model: Optogenetics,
-                 fip_model: FiberPhotometry,
-                 operation_control: OperationalControl,
+    def __init__(self,
                  username: str = None,
                  password: str = None):
         """
-        :param task_logic: pydantic model that details the parameters used to run the behavior in a session
-        :param session_model: pydantic model that details the parameters used to run session
-        :param opto_model: pydantic model that details the parameters used to the optogenetics in a session
-        :param fip_model: pydantic model that details the parameters used to the fip in a session
         :param username: Optional slims username. Will default to SLIMS_USERNAME environment variable if not provided
         :param password: Optional slims password. Will default to SLIMS_PASSWORD environment variable if not provided
         """
 
         self.log = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-
-        # set model attributes
-        self.task_logic = task_logic
-        self.session_model = session_model
-        self.opto_model = opto_model
-        self.fip_model = fip_model
-        self.operation_control = operation_control
 
         # connect to Slims
         self.slims_client = self.connect_to_slims(username, password)
@@ -154,10 +139,16 @@ class SlimsHandler:
         return self.slims_client.fetch_models(models.SlimsMouseContent)
 
     def load_mouse_curriculum(self, mouse_id: str) -> tuple[DynamicForagingTrainerState,
-                                                            models.behavior_session.SlimsBehaviorSession]:
+                                                            models.behavior_session.SlimsBehaviorSession,
+                                                            AindDynamicForagingTaskLogic,
+                                                            AindBehaviorSessionModel,
+                                                            Optogenetics or None,
+                                                            FiberPhotometry or None,
+                                                            OperationalControl]:
         """
             Load in specified mouse from slims
             :params mouse_id: mouse id string to load from slims
+            :returns trainer state, slims behavior session, and pydantic associated with mouse
         """
 
         try:
@@ -167,41 +158,42 @@ class SlimsHandler:
 
             self.log.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
             self.curriculum, self.trainer_state, self.metrics, attachments, session = self.trainer.load_data(mouse_id)
-            self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
+            task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
+
             attachment_names = [attachment.name for attachment in attachments]
 
             # update session model with slims session information
             ses_att = attachments[attachment_names.index(AindBehaviorSessionModel.__name__)]
-            slims_session_model = AindBehaviorSessionModel(**self.slims_client.fetch_attachment_content(ses_att).json())
-            self.session_model.experiment = slims_session_model.experiment
-            self.session_model.experimenter = slims_session_model.experimenter
-            self.session_model.subject = slims_session_model.subject
-            self.session_model.notes = slims_session_model.notes
+            session_model = AindBehaviorSessionModel(**self.slims_client.fetch_attachment_content(ses_att).json())
 
             # update operation_control model
-            oc_att = attachments[attachment_names.index(self.operation_control.name)]
-            self.operation_control = OperationalControl(**self.slims_client.fetch_attachment_content(oc_att).json())
+            oc_att = attachments[attachment_names.index(OperationalControl.__name__)]
+            operation_control = OperationalControl(**self.slims_client.fetch_attachment_content(oc_att).json())
 
             # update opto_model
-            if self.opto_model.name in attachment_names:
-                opto_attachment = attachments[attachment_names.index(self.opto_model.name)]
-                self.opto_model = Optogenetics(**self.slims_client.fetch_attachment_content(opto_attachment).json())
+            if Optogenetics.__name__ in attachment_names:
+                opto_attachment = attachments[attachment_names.index(Optogenetics.__name__)]
+                opto_model = Optogenetics(**self.slims_client.fetch_attachment_content(opto_attachment).json())
+            else:
+                opto_model = None
 
             # update fip_model
-            if self.fip_model.name in attachment_names:
+            if FiberPhotometry.__name__ in attachment_names:
                 self.log.info(f"Applying fip model")
-                fip_attachment = attachments[attachment_names.index(self.fip_model.name)]
-                self.fip_model = FiberPhotometry(**self.slims_client.fetch_attachment_content(fip_attachment).json())
+                fip_attachment = attachments[attachment_names.index(FiberPhotometry.__name__)]
+                fip_model = FiberPhotometry(**self.slims_client.fetch_attachment_content(fip_attachment).json())
 
                 # check if current stage is past stage_start and enable if so
                 stage_list = get_args(STAGE_STARTS)
-                self.fip_model.enabled = stage_list.index(self.trainer_state.stage.name) >= \
-                                         stage_list.index(self.fip_model.stage_start)
+                fip_model.enabled = stage_list.index(self.trainer_state.stage.name) >= \
+                                    stage_list.index(fip_model.stage_start)
+            else:
+                fip_model = None
 
             self.log.info(f"Mouse {mouse_id} curriculum loaded from Slims.")
             self._loaded_mouse_id = mouse_id
 
-            return self.trainer_state, session
+            return self.trainer_state, session, task_logic, session_model, opto_model, fip_model, operation_control
 
         except Exception as e:
             if 'No record found' in str(e):  # mouse doesn't exist
@@ -212,13 +204,25 @@ class SlimsHandler:
     def write_session_to_slims(self, mouse_id: str,
                                on_curriculum: bool,
                                foraging_efficiency: float,
-                               finished_trials: int) -> DynamicForagingTrainerState:
+                               finished_trials: int,
+                               task_logic: AindDynamicForagingTaskLogic,
+                               session_model: AindBehaviorSessionModel,
+                               opto_model: Optogenetics,
+                               fip_model: FiberPhotometry,
+                               operation_control_model: OperationalControl
+                               ) -> DynamicForagingTrainerState:
         """
-        Write next session to slims based on performance
-        :param mouse_id: mouse id string to load from slims
-        :param on_curriculum: if mouse is on curriculum or not
-        :param foraging_efficiency: foraging efficiency of session
-        :param finished_trials: finished trials in session
+            Write next session to slims based on performance
+            :param mouse_id: mouse id string to load from slims
+            :param on_curriculum: if mouse is on curriculum or not
+            :param foraging_efficiency: foraging efficiency of session
+            :param finished_trials: finished trials in session
+            :params task_logic: task_logic model associated with session
+            :params session_model: session model associated with session
+            :params opto_model: optogentics model associated with session
+            :params fip_model: fiber photometry model associated with session
+            :params operation_control_model: Operation state of session
+            :returns trainer state of next session
         """
 
         if self.metrics is not None and mouse_id == self._loaded_mouse_id:  # loaded mouse
@@ -237,46 +241,45 @@ class SlimsHandler:
                 next_trainer_state = Trainer(self.curriculum).evaluate(trainer_state=self.trainer_state,
                                                                        metrics=new_metrics)
             else:  # mouse is off curriculum so push trainer state used
-                self.trainer_state.stage.task = self.task_logic
+                self.trainer_state.stage.task = task_logic
                 next_trainer_state = self.trainer_state
 
             self.log.info("Writing trainer state to slims.")
             slims_model = self.trainer.write_data(subject_id=mouse_id,
                                                   curriculum=self.curriculum,
                                                   trainer_state=next_trainer_state,
-                                                  date=datetime.now() if not hasattr(self, "session_model")
-                                                  else self.session_model.date,
+                                                  date=session_model.date,
                                                   on_curriculum=on_curriculum)
             # add session model as an attachment
             self.slims_client.add_attachment_content(
                 record=slims_model,
                 name=AindBehaviorSessionModel.__name__,
-                content=self.session_model.model_dump_json()
+                content=session_model.model_dump_json()
             )
 
             # add operational control model
             self.slims_client.add_attachment_content(
                 record=slims_model,
-                name=self.operation_control.name,
-                content=self.operation_control.model_dump_json()
+                name=operation_control_model.name,
+                content=operation_control_model.model_dump_json()
             )
 
             # add opto model
-            if self.opto_model.laser_colors != []:
+            if opto_model.laser_colors != []:
                 self.slims_client.add_attachment_content(
                     record=slims_model,
-                    name=self.opto_model.name,
-                    content=self.opto_model.model_dump_json()
+                    name=opto_model.name,
+                    content=opto_model.model_dump_json()
                 )
 
             # Add fip model
             stage_list = get_args(STAGE_STARTS)
-            if self.fip_model.enabled or stage_list.index(self.trainer_state.stage.name) < \
-                    stage_list.index(self.fip_model.stage_start):
+            if fip_model.enabled or stage_list.index(self.trainer_state.stage.name) < \
+                    stage_list.index(fip_model.stage_start):
                 self.slims_client.add_attachment_content(
                     record=slims_model,
-                    name=self.fip_model.name,
-                    content=self.fip_model.model_dump_json()
+                    name=fip_model.name,
+                    content=fip_model.model_dump_json()
                 )
 
             self.log.info(f"Writing next session to Slims successful. "
@@ -291,4 +294,4 @@ class SlimsHandler:
         elif mouse_id != self._loaded_mouse_id:
             raise ValueError(f"Loaded mouse {self._loaded_mouse_id} does not match the input mouse id {mouse_id}")
 
-        return self.trainer_state
+        return next_trainer_state
