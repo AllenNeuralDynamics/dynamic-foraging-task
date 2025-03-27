@@ -179,7 +179,6 @@ class Window(QMainWindow):
                                [[6, 1], [3, 1], [1, 1]]]
         self.task_widget = BehaviorParametersWidget(self.task_logic.task_parameters,
                                                     reward_families=self.RewardFamilies)
-        self.task_parameter_scroll_area.setWidget(self.task_widget)
         self.task_widget.taskUpdated.connect(self.update_session_task)
         self.update_session_task("coupled")     # initialize to coupled
         # update reward pairs when task has changed
@@ -193,6 +192,14 @@ class Window(QMainWindow):
         # create OperationControl model and widget to be used and referenced for session info
         self.operation_control_model = OperationalControl()
         self.operation_control_widget = OperationControlWidget(self.operation_control_model)
+
+        # create layout for task and operation widget
+        layout = QVBoxLayout()
+        layout.addWidget(self.operation_control_widget)
+        layout.addWidget(self.task_widget)
+        widget = QtWidgets.QWidget()
+        widget.setLayout(layout)
+        self.task_parameter_scroll_area.setWidget(widget)
 
         # add fip schema widget
         self.fip_model = FiberPhotometry(enabled=False)

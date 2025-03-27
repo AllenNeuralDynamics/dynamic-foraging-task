@@ -1,9 +1,7 @@
 from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase, add_border, create_widget
 from aind_behavior_dynamic_foraging.DataSchemas.operation_control import OperationalControl
-from datetime import datetime
-from PyQt5.QtWidgets import QTextEdit, QLabel
-from PyQt5.QtGui import QIntValidator
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QVBoxLayout
+
 
 class OperationControlWidget(SchemaWidgetBase):
 
@@ -17,6 +15,7 @@ class OperationControlWidget(SchemaWidgetBase):
 
         # hide unnecessary widgets
         self.schema_fields_widgets["stage_position"].hide()
+        self.schema_fields_widgets["name"].hide()
 
         # add range for auto stop widgets
         getattr(self, "auto_stop.ignore_ratio_threshold_widget").setRange(0, 1)
