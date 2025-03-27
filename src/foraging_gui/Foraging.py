@@ -148,7 +148,7 @@ class Window(QMainWindow):
         self.FigureUpdateTooSlow = 0# if the FigureUpdateTooSlow is true, using different process to update figures
         self.ANewTrial = 1          # permission to start a new trial
         self.UpdateParameters = 1   # permission to update parameters
-        self.logging_type = -1    # -1, logging is not started; 0, temporary logging; 1, formal logging
+        self.logging_type = -1    # -1, logging is not started; 0, formal logging; 1, temporary logging
         self.previous_backup_completed = 1 # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.unsaved_data = False   # Setting unsaved data to False
         self.to_check_drop_frames = 1 # 1, to check drop frames during saving data; 0, not to check drop frames
@@ -1067,6 +1067,15 @@ class Window(QMainWindow):
             pass
         else:
             self._StopCurrentSession()
+
+        # Turn off the camera recording in case it is on
+        self.Camera_dialog.StartRecording.setChecked(False)
+        # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging. 
+        if self.Camera_dialog.AutoControl.currentText()=='Yes' and self.Camera_dialog.StartPreview.isChecked():
+            self.Camera_dialog.StartPreview.setChecked(False)
+            # sleep for 1 second to make sure the trigger is off
+            time.sleep(1)
+
         if log_folder is None:
             # formal logging
             loggingtype=0
@@ -3534,7 +3543,8 @@ class Window(QMainWindow):
                 logging.warning('FIP workflow already started, user restarts',extra={'tags': [self.warning_log_tag]})
 
         # Start logging
-        self.Ot_log_folder=self._restartlogging()
+        if self.logging_type!=0:
+            self.Ot_log_folder=self._restartlogging()
 
         # Start the FIP workflow
         try:
@@ -4209,15 +4219,8 @@ class Window(QMainWindow):
         if self.StartANewSession==1 and self.ANewTrial==1:
             # start a new logging
             try:
-                # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
-                if (not (self.Camera_dialog.StartRecording.isChecked() and self.Camera_dialog.AutoControl.currentText()=='No')) and (not self.FIP_started):
-                    # Turn off the camera recording
-                    self.Camera_dialog.StartRecording.setChecked(False)
-                    # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging. 
-                    if self.Camera_dialog.AutoControl.currentText()=='Yes' and self.Camera_dialog.StartPreview.isChecked():
-                        self.Camera_dialog.StartPreview.setChecked(False)
-                        # sleep for 1 second to make sure the trigger is off
-                        time.sleep(1)
+                # Start logging if the formal logging is not started
+                if self.logging_type!=0:
                     self.Ot_log_folder=self._restartlogging()
             except Exception as e:
                 if 'ConnectionAbortedError' in str(e):
