@@ -50,6 +50,7 @@ def _get_field(obj, field_list, reject_list=[None, np.nan,'',[]], index=None, de
                     has_field=1
             if has_field==0:
                 continue
+            print(type(value), value)
             if value in reject_list:
                 continue
             if index is None:
