@@ -2822,7 +2822,7 @@ class Window(QMainWindow):
             self.Metadata_dialog._save_metadata_dialog_parameters()
             Obj['meta_data_dialog'] = self.Metadata_dialog.meta_data
             # generate the metadata file
-            generated_metadata=generate_metadata(Obj=Obj)
+            generated_metadata=generate_metadata(session_model=self.behavior_session_model,Obj=Obj)
             session = generated_metadata._session()
 
             if BackupSave==0:
