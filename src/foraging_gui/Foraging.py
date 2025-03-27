@@ -4527,9 +4527,9 @@ class Window(QMainWindow):
                     GeneratedTrials._GenerateATrial(self.Channel4)
 
                 # Save data in a separate thread
-                if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
-                    self.previous_backup_completed=0
-                    self.threadpool6.start(worker_save)
+                #if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
+                #    self.previous_backup_completed=0
+                #    self.threadpool6.start(worker_save)
 
                 # show disk space
                 self._show_disk_space()
