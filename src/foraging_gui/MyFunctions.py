@@ -726,7 +726,7 @@ class GenerateTrials():
     def foraging_eff_no_baiting(self,reward_rate, p_Ls, p_Rs, random_number_L=None, random_number_R=None):  # Calculate foraging efficiency (only for 2lp)
         '''Calculating the foraging efficiency of no baiting tasks (Code is from Han)'''    
         # --- Optimal-aver (use optimal expectation as 100% efficiency) ---
-        for_eff_optimal = float(reward_rate / np.nanmean(np.max([p_Ls, p_Rs], axis=0)))
+        for_eff_optimal = reward_rate / np.nanmean(np.max([p_Ls, p_Rs], axis=0))
         
         if random_number_L is None:
             return for_eff_optimal, np.nan
@@ -752,7 +752,7 @@ class GenerateTrials():
                 m_star = np.floor(np.log(1-p_max)/np.log(1-p_min))
                 p_stars[i] = p_max + (1-(1-p_min)**(m_star + 1)-p_max**2)/(m_star+1)
 
-        for_eff_optimal = float(reward_rate / np.nanmean(p_stars))
+        for_eff_optimal = reward_rate / np.nanmean(p_stars)
         
         if random_number_L is None:
             return for_eff_optimal, np.nan
