@@ -19,8 +19,7 @@ from aind_data_schema.core.session import Session
 import logging
 import os
 import math
-from time import timezone
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import get_args
 
 
@@ -109,7 +108,7 @@ class SlimsHandler:
             mouse_pk=mouse.pk,
             date=session.session_start_time,
             weight_g=session.animal_weight_post,
-            operator=self.session_model.experimenter[0],
+            operator=session.experimenter_full_name[0],
             water_earned_ml=water['water_in_session_foraging'],
             water_supplement_delivered_ml=water['water_after_session'],
             water_supplement_recommended_ml=None,
