@@ -379,47 +379,69 @@
             <item>
              <layout class="QVBoxLayout" name="session_param_layout">
               <item>
-               <widget class="QLabel" name="label_auto_train_stage">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>10</pointsize>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">color: purple;</string>
-                </property>
-                <property name="text">
-                 <string>off curriculum</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
-                </property>
-                <property name="margin">
-                 <number>0</number>
-                </property>
-                <property name="indent">
-                 <number>0</number>
-                </property>
+               <widget class="QWidget" name="curriculum_widget">
+                <layout class="QHBoxLayout" name="curriculum_layout">
+                 <item>
+                 <widget class="QCheckBox" name="on_curriculum">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                     <horstretch>5</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>On Curriculum</string>
+                   </property>
+                   <property name="visible">
+                    <bool>false</bool>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                 <widget class="QLabel" name="label_curriculum_stage">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>10</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: purple;</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
+                  </property>
+                  <property name="margin">
+                   <number>0</number>
+                  </property>
+                  <property name="indent">
+                   <number>0</number>
+                  </property>
+                  </widget>
+                 </item>
+                </layout>
                </widget>
               </item>
               <item>
@@ -2137,7 +2159,7 @@ Double dipping:
             <attribute name="title">
              <string>Parameters</string>
             </attribute>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <layout class="QHBoxLayout" name="task_parameter_layout">
              <item>
               <widget class="QScrollArea" name="task_parameter_scroll_area">
                <property name="verticalScrollBarPolicy">
@@ -2190,157 +2212,162 @@ Double dipping:
                    <layout class="QHBoxLayout" name="horizontalLayout_15">
                     <item>
                      <layout class="QGridLayout" name="gridLayout_6">
-                      <item row="2" column="1">
-                       <widget class="QPushButton" name="StartFIP">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
+                      <item row="0" column="0">
+                       <widget class="QGroupBox" name="optogenetics_group_box">
+                        <property name="title">
+                         <string>Optogenetics </string>
                         </property>
-                        <property name="text">
-                         <string>Start FIP workflow</string>
-                        </property>
-                        <property name="checkable">
-                         <bool>true</bool>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="2" column="3">
-                       <widget class="QPushButton" name="StartExcitation">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>Start excitation</string>
-                        </property>
-                        <property name="checkable">
-                         <bool>true</bool>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="2" column="4">
-                       <widget class="QPushButton" name="StartBleaching">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="text">
-                         <string>Start bleaching</string>
-                        </property>
-                        <property name="checkable">
-                         <bool>true</bool>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="3" column="3">
-                       <widget class="QWidget" name="fip_widget">
-                        <layout class="QVBoxLayout" name="fip_layout">
+                        <layout class="QHBoxLayout" name="opto_layout">
+                         <property name="alignment">
+                             <set>Qt::AlignLeft</set>
+                         </property>
+                         <item>
+                          <widget class="QComboBox" name="OptogeneticsB">-->
+                           <property name="maximumSize">
+                            <size>
+                             <width>120</width>
+                             <height>30</height>
+                            </size>
+                           </property>
+                           <item>
+                            <property name="text">
+                             <string>off</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>on</string>
+                            </property>
+                           </item>
+                          </widget>
+                         </item>
                         </layout>
                        </widget>
                       </item>
-                      <item row="0" column="0">
-                       <widget class="QLabel" name="label_55">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
+                      <item row="1" column="0">
+                       <widget class="QGroupBox" name="fip_group_box">
+                        <property name="title">
+                         <string>FIP </string>
                         </property>
-                        <property name="text">
-                         <string>optogenetics =</string>
-                        </property>
-                        <property name="textFormat">
-                         <enum>Qt::AutoText</enum>
-                        </property>
-                        <property name="alignment">
-                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                        </property>
+                        <layout class="QHBoxLayout" name="fip_group_layout">
+                         <item>
+                          <widget class="QPushButton" name="StartFIP">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="text">
+                            <string>Start FIP workflow</string>
+                           </property>
+                           <property name="checkable">
+                            <bool>true</bool>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QPushButton" name="StartExcitation">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="text">
+                            <string>Start excitation</string>
+                           </property>
+                           <property name="checkable">
+                            <bool>true</bool>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QPushButton" name="StartBleaching">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="text">
+                            <string>Start bleaching</string>
+                           </property>
+                           <property name="checkable">
+                            <bool>true</bool>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QWidget" name="fip_widget">
+                           <layout class="QVBoxLayout" name="fip_layout">
+                           </layout>
+                          </widget>
+                         </item>
+                        </layout>
                        </widget>
                       </item>
-                      <item row="0" column="1" colspan="2">
-                       <widget class="QComboBox" name="OptogeneticsB">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
+                      <item row="2" column="0">
+                       <widget class="QGroupBox" name="ephys_group_box">
+                        <property name="title">
+                         <string>Ephys </string>
                         </property>
-                        <property name="minimumSize">
-                         <size>
-                          <width>50</width>
-                          <height>0</height>
-                         </size>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>10000</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <item>
-                         <property name="text">
-                          <string>off</string>
-                         </property>
-                        </item>
-                        <item>
-                         <property name="text">
-                          <string>on</string>
-                         </property>
-                        </item>
-                       </widget>
-                      </item>
-                      <item row="4" column="1">
-                       <widget class="QPushButton" name="StartEphysRecording">
-                        <property name="text">
-                         <string>Start ephys recording</string>
-                        </property>
-                        <property name="checkable">
-                         <bool>true</bool>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="4" column="4">
-                       <widget class="QComboBox" name="OpenEphysRecordingType">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="editable">
-                         <bool>false</bool>
-                        </property>
-                        <item>
-                         <property name="text">
-                          <string>Behavior</string>
-                         </property>
-                        </item>
-                        <item>
-                         <property name="text">
-                          <string>Surface finding</string>
-                         </property>
-                        </item>
-                        <item>
-                         <property name="text">
-                          <string>Opto tagging</string>
-                         </property>
-                        </item>
-                        <item>
-                         <property name="text">
-                          <string>Testing</string>
-                         </property>
-                        </item>
-                        <item>
-                         <property name="text">
-                          <string>NA</string>
-                         </property>
-                        </item>
+                        <layout class="QHBoxLayout" name="ephys_layout">
+                         <item>
+                          <widget class="QPushButton" name="StartEphysRecording">
+                           <property name="maximumSize">
+                            <size>
+                             <width>120</width>
+                             <height>30</height>
+                            </size>
+                           </property>
+                           <property name="text">
+                            <string>Start ephys recording</string>
+                           </property>
+                           <property name="checkable">
+                            <bool>true</bool>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QComboBox" name="OpenEphysRecordingType">
+                           <property name="maximumSize">
+                            <size>
+                             <width>120</width>
+                             <height>30</height>
+                            </size>
+                           </property>
+                           <property name="editable">
+                            <bool>false</bool>
+                           </property>
+                           <item>
+                            <property name="text">
+                             <string>Behavior</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Surface finding</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Opto tagging</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Testing</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>NA</string>
+                            </property>
+                           </item>
+                          </widget>
+                         </item>
+                        </layout>
                        </widget>
                       </item>
                      </layout>

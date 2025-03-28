@@ -3,7 +3,6 @@ from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
     AindDynamicForagingTaskLogic,
     AindDynamicForagingTaskParameters,
     AutoWater,
-    AutoStop,
     AutoBlock,
     Warmup,
     RewardN
@@ -32,7 +31,6 @@ class BehaviorParametersWidget(SchemaWidgetBase):
         getattr(self, "auto_block.switch_thr_widget").setRange(0, 1)
         getattr(self, "warmup.max_choice_ratio_bias_widget").setRange(0, 1)
         getattr(self, "warmup.min_finish_ratio_widget").setRange(0, 1)
-        getattr(self, "auto_stop.ignore_ratio_threshold_widget").setRange(0, 1)
         getattr(self, "reward_probability.family_widget").setRange(1, len(self.reward_families[:]))
         getattr(self, "reward_probability.pairs_n_widget").setMinimum(1)
 
@@ -157,8 +155,8 @@ class BehaviorParametersWidget(SchemaWidgetBase):
 
         value = self.path_get(self.schema, name.split("."))
         if dict not in type(value).__mro__ and list not in type(value).__mro__ and BaseModel not in type(value).__mro__:  # not a dictionary or list like value
-            if value is None and hasattr(self, name+"_check_box"):   # optional type so uncheck widget
-               getattr(self, name+"_check_box").setChecked(False)
+            if hasattr(self, name + "_check_box"):  # optional type
+                getattr(self, name + "_check_box").setChecked(not value is None)
             else:
                 self._set_widget_text(name, value)
         elif dict in type(value).__mro__ or BaseModel in type(value).__mro__:
@@ -186,7 +184,6 @@ if __name__ == "__main__":
     task_model = AindDynamicForagingTaskLogic(
         task_parameters=AindDynamicForagingTaskParameters(
             auto_water=AutoWater(),
-            auto_stop=AutoStop(),
             auto_block=AutoBlock(),
             warmup=Warmup()
         ),
@@ -201,6 +198,7 @@ if __name__ == "__main__":
 
     task_model.task_parameters.block_parameters.min = 10
     task_model.task_parameters.auto_water = None
+    task_model.task_parameters.warmup = None
     task_widget.apply_schema(task_model.task_parameters)
 
     sys.exit(app.exec_())

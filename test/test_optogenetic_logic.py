@@ -20,7 +20,6 @@ from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
     AindDynamicForagingTaskLogic,
     AindDynamicForagingTaskParameters,
     AutoWater,
-    AutoStop,
     AutoBlock,
     Warmup
 )
@@ -60,7 +59,6 @@ class TestOptogeneticLogic(unittest.TestCase):
         self.task_model = self.task_logic = AindDynamicForagingTaskLogic(
             task_parameters=AindDynamicForagingTaskParameters(
                 auto_water=AutoWater(),
-                auto_stop=AutoStop(),
                 auto_block=AutoBlock(),
                 warmup=Warmup()
             )

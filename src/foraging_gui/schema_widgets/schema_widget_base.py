@@ -229,11 +229,12 @@ class SchemaWidgetBase(QMainWindow):
         else:
             self.log.warning(f"{name} doesn't correspond to a widget")
 
-    def apply_schema(self, schema: BaseModel = None):
+    def apply_schema(self, schema: BaseModel):
         """
         Convenience function to apply new schema
         """
-        self.schema = schema if not schema else self.schema
+
+        self.schema = schema
         for name in self.schema.model_dump().keys():
             try:
                 self.update_field_widget(name)
@@ -368,7 +369,6 @@ if __name__ == "__main__":
         AindDynamicForagingTaskLogic,
         AindDynamicForagingTaskParameters,
         AutoWater,
-        AutoStop,
         AutoBlock,
         Warmup
     )
@@ -384,7 +384,6 @@ if __name__ == "__main__":
     task_model = AindDynamicForagingTaskLogic(
         task_parameters=AindDynamicForagingTaskParameters(
             auto_water=AutoWater(),
-            auto_stop=AutoStop(),
             auto_block=AutoBlock(),
             warmup=Warmup()
         ),
