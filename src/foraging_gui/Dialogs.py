@@ -19,11 +19,8 @@ from PyQt5.QtCore import QThreadPool, Qt, QAbstractTableModel, QTimer, pyqtSigna
 
 from foraging_gui.MyFunctions import Worker
 from foraging_gui.Visualization import PlotWaterCalibration
-from aind_auto_train.schema.curriculum import DynamicForagingCurriculum
 from foraging_gui.schema_widgets.opto_parameters_widget import OptoParametersWidget
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import Optogenetics
-
-codebase_curriculum_schema_version = DynamicForagingCurriculum.model_fields['curriculum_schema_version'].default
 
 logger = logging.getLogger(__name__)
 

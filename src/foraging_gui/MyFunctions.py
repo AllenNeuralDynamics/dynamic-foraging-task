@@ -141,16 +141,8 @@ class GenerateTrials():
             "TP_LeftValue": [],  # left valve open times
             "TP_RightValue": [],
             "multipliers": [],
-            "AutoTrain": False,
-            "TP_AutoTrain": [],
             "TP_Laser_calibration": [],
             "TP_LatestCalibrationDate": [],
-            "TP_auto_train_curriculum_name": [],
-            "TP_auto_train_curriculum_schema_version": [],
-            "TP_auto_train_curriculum_version": [],
-            "TP_auto_train_engaged": [],
-            "TP_auto_train_stage": [],
-            "TP_auto_train_stage_overridden": [],
             "TP_laser_1_calibration_power": [],
             "TP_laser_1_calibration_voltage": [],
             "TP_laser_1_target": [],
@@ -2068,16 +2060,7 @@ class GenerateTrials():
         self.Obj["TP_RightValue"].append(self.win.right_valve_open_time)
         self.Obj["multipliers"].append(.8 if self.task_logic.task_parameters.auto_water is None
                                        else self.task_logic.task_parameters.auto_water.multiplier)
-        # add auto train parameters
-        self.Obj["AutoTrain"] = self.curriculum is not None
-        self.Obj["TP_AutoTrain"].append(self.curriculum is not None)
-        self.Obj["TP_auto_train_curriculum_name"].append(getattr(self.curriculum, 'name', None))
-        self.Obj["TP_auto_train_curriculum_schema_version"].append(self.task_logic.version)
-        self.Obj["TP_auto_train_curriculum_version"].append(getattr(self.curriculum, 'version', None))
-        self.Obj["TP_auto_train_engaged"].append(self.curriculum is not None)
-        self.Obj["TP_auto_train_engaged"].append(getattr(self.trainer_state, 'stage', None))
-        self.Obj["TP_auto_train_stage_overridden"].append(not self.win.on_curriculum.isChecked() if self.curriculum is
-                                                                                                    not None else None)
+
         # add opto parameters
         self.Obj["TP_Laser_calibration"].append(self.win.Opto_dialog.Laser_calibration.currentText())
         self.Obj["TP_LatestCalibrationDate"].append(self.win.Opto_dialog.LatestCalibrationDate.text())
