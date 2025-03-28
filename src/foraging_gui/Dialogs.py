@@ -1969,6 +1969,7 @@ class MetadataDialog(QDialog):
     def _set_widgets_value(self, widget_dict, metadata):
         '''set the widgets value'''
         for key, value in widget_dict.items():
+            print(str(key) + ' ' + str(value)) ## TODO DEBUG
             if key in metadata:
                 if isinstance(value, QtWidgets.QLineEdit):
                     value.setText(metadata[key])

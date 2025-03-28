@@ -3423,7 +3423,7 @@ class Window(QMainWindow):
                     print(Obj['meta_data_dialog']['session_metadata']) ## TODO DEBUG
                     self.Metadata_dialog.meta_data['session_metadata'] = Obj['meta_data_dialog']['session_metadata']
                 self.Metadata_dialog._update_metadata()
-                print(self.Metadata_dialog ) ## TODO DEBUG
+                print(self.Metadata_dialog.meta_data['session_metadata'] ) ## TODO DEBUG
 
             # show session list related to that animal
             tag=self._show_sessions()
