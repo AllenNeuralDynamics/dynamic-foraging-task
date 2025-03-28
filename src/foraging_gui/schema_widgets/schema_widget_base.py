@@ -369,7 +369,6 @@ if __name__ == "__main__":
         AindDynamicForagingTaskLogic,
         AindDynamicForagingTaskParameters,
         AutoWater,
-        AutoStop,
         AutoBlock,
         Warmup
     )
@@ -385,7 +384,6 @@ if __name__ == "__main__":
     task_model = AindDynamicForagingTaskLogic(
         task_parameters=AindDynamicForagingTaskParameters(
             auto_water=AutoWater(),
-            auto_stop=AutoStop(),
             auto_block=AutoBlock(),
             warmup=Warmup()
         ),

@@ -3,7 +3,6 @@ from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
     AindDynamicForagingTaskLogic,
     AindDynamicForagingTaskParameters,
     AutoWater,
-    AutoStop,
     AutoBlock,
     Warmup,
     RewardN
@@ -32,7 +31,6 @@ class BehaviorParametersWidget(SchemaWidgetBase):
         getattr(self, "auto_block.switch_thr_widget").setRange(0, 1)
         getattr(self, "warmup.max_choice_ratio_bias_widget").setRange(0, 1)
         getattr(self, "warmup.min_finish_ratio_widget").setRange(0, 1)
-        getattr(self, "auto_stop.ignore_ratio_threshold_widget").setRange(0, 1)
         getattr(self, "reward_probability.family_widget").setRange(1, len(self.reward_families[:]))
         getattr(self, "reward_probability.pairs_n_widget").setMinimum(1)
 
@@ -186,7 +184,6 @@ if __name__ == "__main__":
     task_model = AindDynamicForagingTaskLogic(
         task_parameters=AindDynamicForagingTaskParameters(
             auto_water=AutoWater(),
-            auto_stop=AutoStop(),
             auto_block=AutoBlock(),
             warmup=Warmup()
         ),

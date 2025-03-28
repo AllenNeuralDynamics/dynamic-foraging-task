@@ -32,7 +32,7 @@ from pykeepass import PyKeePass
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
-from PyQt5.QtWidgets import QFileDialog, QVBoxLayout, QGridLayout, QLabel, QProgressDialog, QDialog
+from PyQt5.QtWidgets import QFileDialog, QVBoxLayout, QGridLayout, QLabel
 from PyQt5 import QtWidgets, QtGui, QtCore, uic
 from PyQt5.QtCore import QThreadPool, Qt, QThread, QTimer
 from pyOSC3.OSC3 import OSCStreamingClient
@@ -54,18 +54,17 @@ from foraging_gui.warning_widget import WarningWidget
 from foraging_gui.schema_widgets.behavior_parameters_widget import BehaviorParametersWidget
 from foraging_gui.schema_widgets.fib_parameters_widget import FIBParametersWidget
 from foraging_gui.schema_widgets.session_parameters_widget import SessionParametersWidget
+from foraging_gui.schema_widgets.operation_control_widget import OperationControlWidget
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
-from aind_data_schema.core.session import Session
-from aind_data_schema_models.modalities import Modality
+from foraging_gui.slims_handler import SlimsHandler
 from aind_behavior_services.session import AindBehaviorSessionModel
 
 from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
     AindDynamicForagingTaskLogic,
     AindDynamicForagingTaskParameters,
     AutoWater,
-    AutoStop,
     AutoBlock,
     Warmup
 )
@@ -82,19 +81,9 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
     SessionControl
 )
 
-from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
-    FiberPhotometry,
-    STAGE_STARTS
-)
+from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry
 
-from aind_behavior_dynamic_foraging.CurriculumManager.trainer import (
-    DynamicForagingTrainerServer,
-    Curriculum,
-    Metrics,
-    TrainerState,
-)
-from aind_behavior_dynamic_foraging.CurriculumManager.metrics import DynamicForagingMetrics
-from aind_behavior_curriculum import Trainer
+from aind_behavior_dynamic_foraging.DataSchemas.operation_control import OperationalControl
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear()  # clear handlers so console output can be configured
@@ -162,7 +151,7 @@ class Window(QMainWindow):
         # Load User interface
         self._LoadUI()
 
-        # create AINDBehaviorSession model to be used and referenced for session info
+        # create AINDBehaviorSession model and widget to be used and referenced for session info
         self.session_model = AindBehaviorSessionModel(
             experiment="Coupled Baiting",
             experimenter=["the ghost in the shell"],
@@ -182,10 +171,10 @@ class Window(QMainWindow):
             self.session_param_layout.insertWidget(i, widget)
         self.notes_layout.insertWidget(0, self.session_widget.schema_fields_widgets["notes"])
 
+        # create AindDynamicForagingTaskLogic model and widget to be used and referenced for session info
         self.task_logic = AindDynamicForagingTaskLogic(
             task_parameters=AindDynamicForagingTaskParameters(
                 auto_water=AutoWater(),
-                auto_stop=AutoStop(),
                 auto_block=AutoBlock(),
                 warmup=Warmup()
             )
@@ -195,7 +184,6 @@ class Window(QMainWindow):
                                [[6, 1], [3, 1], [1, 1]]]
         self.task_widget = BehaviorParametersWidget(self.task_logic.task_parameters,
                                                     reward_families=self.RewardFamilies)
-        self.task_parameter_scroll_area.setWidget(self.task_widget)
         self.task_widget.taskUpdated.connect(self.update_session_task)
         self.update_session_task("coupled")     # initialize to coupled
         # update reward pairs when task has changed
@@ -206,11 +194,22 @@ class Window(QMainWindow):
         self.right_valve_open_time = 0.03
         self.task_widget.volumeChanged.connect(self.update_valve_open_time)
 
+        # create OperationControl model and widget to be used and referenced for session info
+        self.operation_control_model = OperationalControl()
+        self.operation_control_widget = OperationControlWidget(self.operation_control_model)
+
+        # create layout for task and operation widget
+        layout = QVBoxLayout()
+        layout.addWidget(self.operation_control_widget)
+        layout.addWidget(self.task_widget)
+        widget = QtWidgets.QWidget()
+        widget.setLayout(layout)
+        self.task_parameter_scroll_area.setWidget(widget)
+
         # add fip schema widget
-        self.fip_model = FiberPhotometry()
+        self.fip_model = FiberPhotometry(enabled=False)
         self.fip_widget = FIBParametersWidget(self.fip_model)
-        for i, widget in enumerate([self.fip_widget.fip_schema_check_box] +
-                                   list(self.fip_widget.schema_fields_widgets.values())):
+        for i, widget in enumerate(list(self.fip_widget.schema_fields_widgets.values())):
             self.fip_layout.insertWidget(i, widget)
             self.fip_layout.insertWidget(i, widget)
 
@@ -242,14 +241,10 @@ class Window(QMainWindow):
         self._InitializeBonsai()
 
         # connect to Slims
-        self.slims_client = self.connect_to_slims()
-
-        # connect to docdb
-        self.docdb_client = self.connect_to_docdb()
+        self._ConnectSlims()
 
         # set up Trainer and initialize curriculum and trainer
-        self.trainer = DynamicForagingTrainerServer(slims_client=self.slims_client,
-                                                    docdb_client=self.docdb_client)
+        self.trainer = DynamicForagingTrainerServer(slims_client=self.slims_client)
         self.curriculum = None
         self.trainer_state = None
         self.metrics = None
@@ -296,8 +291,13 @@ class Window(QMainWindow):
         self.Other_manual_water_right_volume = []  # the volume of manual water given by the right valve each time
         self.Other_manual_water_right_time = []  # the valve open time of manual water given by the right valve each time
 
+        self._Optogenetics()  # open the optogenetics panel and initialize opto model
+
+        # create slims handler to handle waterlog and curriculum management
+        self.slims_handler = SlimsHandler()
+
         # initialize mouse selector
-        slims_mice = self.slims_client.fetch_models(models.SlimsMouseContent)[-100:]  # grab 100 latest mice from slims
+        slims_mice = self.slims_handler.get_added_mice()[-100:]  # grab 100 latest mice from slims
         self.mouse_selector_dialog = MouseSelectorDialog([mouse.barcode for mouse in slims_mice], self.box_letter)
 
         # create label giff to indicate mouse is being loaded
@@ -308,7 +308,6 @@ class Window(QMainWindow):
         self.load_slims_progress.setWindowFlag(Qt.FramelessWindowHint)
         self.load_slims_progress.setMovie(movie)
 
-        self._Optogenetics()  # open the optogenetics panel
         self._LaserCalibration()  # to open the laser calibration panel
         self._WaterCalibration()  # to open the water calibration panel
         self._Camera()
@@ -326,7 +325,7 @@ class Window(QMainWindow):
         self.ManualWaterVolume = [0, 0]
         self._StopPhotometry()  # Make sure photoexcitation is stopped
 
-        # create QTimer to flash start button color
+        # create QTimer to flash start Fbutton color
         self.start_flash = QTimer(timeout=self.toggle_save_color, interval=500)
         self.is_purple = False
 
@@ -518,9 +517,8 @@ class Window(QMainWindow):
         self.mouse_selector_dialog.acceptedMouseID.connect(lambda: self.geometry().center())
         self.mouse_selector_dialog.acceptedMouseID.connect(lambda: self.Load.setEnabled(False))
         self.mouse_selector_dialog.acceptedMouseID.connect(self.load_slims_progress.show)
-        self.mouse_selector_dialog.acceptedMouseID.connect(lambda: threading.Thread(target=self.load_slims_mouse,
-                                                                                    kwargs={
-                                                                                        "mouse_id": self.mouse_selector_dialog.combo.currentText()}).start())
+        self.mouse_selector_dialog.acceptedMouseID.connect(lambda: threading.Thread(target=self.load_curriculum,
+                                                                                    kwargs={"mouse_id": self.mouse_selector_dialog.combo.currentText()}).start())
 
         # add validator for weight and water fields
         double_validator = QtGui.QDoubleValidator()
@@ -542,207 +540,71 @@ class Window(QMainWindow):
         # update model widgets if models have changed
         self.modelsChanged.connect(self.update_model_widgets)
 
-    def _set_reference(self):
-        '''
-        set the reference point for lick spout position in the metadata dialog
-        '''
-        # get the current position of the stage
-        current_positions = self._GetPositions()
-        # set the reference point for lick spout position in the metadata dialog
-        if current_positions is not None:
-            self.Metadata_dialog._set_reference(current_positions)
-
-    def _StartEphysRecording(self):
-        '''
-            Start/stop ephys recording
-
-        '''
-        if self.open_ephys_machine_ip_address == '':
-            QMessageBox.warning(self, 'Connection Error',
-                                'Empty ip address for Open Ephys Computer. Please check the settings file.')
-            self.StartEphysRecording.setChecked(False)
-            self._toggle_color(self.StartEphysRecording)
-            return
-
-        if (self.Start.isChecked() or self.ANewTrial == 0) and self.StartEphysRecording.isChecked():
-            reply = QMessageBox.question(self, '', 'Behavior has started! Do you want to start ephys recording?',
-                                         QMessageBox.No | QMessageBox.No, QMessageBox.Yes)
-            if reply == QMessageBox.Yes:
-                pass
-            elif reply == QMessageBox.No:
-                self.StartEphysRecording.setChecked(False)
-                self._toggle_color(self.StartEphysRecording)
-                return
-
-        EphysControl = EphysRecording(open_ephys_machine_ip_address=self.open_ephys_machine_ip_address,
-                                      mouse_id=self.session_model.subject)
-        if self.StartEphysRecording.isChecked():
-            try:
-                if EphysControl.get_status()['mode'] == 'RECORD':
-                    QMessageBox.warning(self, '', 'Open Ephys is already recording! Please stop the recording first.')
-                    self.StartEphysRecording.setChecked(False)
-                    self._toggle_color(self.StartEphysRecording)
-                    return
-                EphysControl.start_open_ephys_recording()
-                self.openephys_start_recording_time = str(datetime.now())
-                QMessageBox.warning(self, '',
-                                    f'Open Ephys has started recording!\n Recording type: {self.OpenEphysRecordingType.currentText()}')
-            except Exception as e:
-                logging.error(traceback.format_exc())
-                self.StartEphysRecording.setChecked(False)
-                QMessageBox.warning(self, 'Connection Error',
-                                    'Failed to connect to Open Ephys. Please check: \n1) the correct ip address is included in the settings json file. \n2) the Open Ephys software is open.')
-        else:
-            try:
-                if EphysControl.get_status()['mode'] != 'RECORD':
-                    QMessageBox.warning(self, '', 'Open Ephys is not recording! Please start the recording first.')
-                    self.StartEphysRecording.setChecked(False)
-                    self._toggle_color(self.StartEphysRecording)
-                    return
-
-                if self.Start.isChecked() or self.ANewTrial == 0:
-                    reply = QMessageBox.question(self, '',
-                                                 'The behavior hasn’t stopped yet! Do you want to stop ephys recording?',
-                                                 QMessageBox.No | QMessageBox.No, QMessageBox.Yes)
-                    if reply == QMessageBox.Yes:
-                        pass
-                    elif reply == QMessageBox.No:
-                        self.StartEphysRecording.setChecked(True)
-                        self._toggle_color(self.StartEphysRecording)
-                        return
-
-                self.openephys_stop_recording_time = str(datetime.now())
-                response = EphysControl.get_open_ephys_recording_configuration()
-                response['openephys_start_recording_time'] = self.openephys_start_recording_time
-                response['openephys_stop_recording_time'] = self.openephys_stop_recording_time
-                response['recording_type'] = self.OpenEphysRecordingType.currentText()
-                self.open_ephys.append(response)
-                self.unsaved_data = True
-                #self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
-                self.start_flash.start()
-                EphysControl.stop_open_ephys_recording()
-                QMessageBox.warning(self, '', 'Open Ephys has stopped recording! Please save the data again!')
-            except Exception as e:
-                logging.error(traceback.format_exc())
-                QMessageBox.warning(self, 'Connection Error',
-                                    'Failed to stop Open Ephys recording. Please check: \n1) the open ephys software is still running')
-        self._toggle_color(self.StartEphysRecording)
-
-    def _toggle_color(self, widget, check_color="background-color : green;", unchecked_color="background-color : none"):
-        '''
-        Toggle the color of the widget.
-
-        Parameters
-        ----------
-        widget : QtWidgets.QWidget
-
-            If Checked, sets the color to green. If unchecked, sets the color to None.
-
-        Returns
-        -------
-        None
-        '''
-
-        if widget.isChecked():
-            widget.setStyleSheet(check_color)
-        else:
-            widget.setStyleSheet(unchecked_color)
-
-    def off_curriculum(self, checked) -> None:
+    def load_curriculum(self, mouse_id: str):
         """
-        Function to handle going off curriculum.
-        :param checked: if on_curriculum checkbox is checked or not
-        """
-
-        if not checked:     # user wants to go off curriculum
-            reply = QMessageBox.question(self, 'Off Curriculum', 'You are going off curriculum. Are you absolutely sure'
-                                                                 ' you would like to do this? Once you do this, there '
-                                                                 'is no going back. This could really annoying.',
-                                         QMessageBox.No, QMessageBox.Yes)
-            if reply == QMessageBox.No:
-                self.on_curriculum.setChecked(True)
-            else:
-                self.task_widget.setEnabled(True)
-                self.session_widget.setEnabled(True)
-                self.fip_widget.setEnabled(True)
-                self.Opto_dialog.opto_widget.setEnabled(True)
-                self.on_curriculum.setEnabled(False)
-
-
-    def load_slims_mouse(self, mouse_id: str):
-        """
-        Load in specified mouse from slims
-        :params mouse_id: mouse id string to load from slims
+            Load and apply curriculum from slims
+            :param mouse_id: mouse id to load
         """
 
         try:
-            logging.info(f"Fetching {mouse_id} from Slims.")
-            self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
-            logging.info(f"Successfully fetched {mouse_id} from Slims.")
+            trainer_state, slims_session, task, sess, opto, fip, oc = self.slims_handler.load_mouse_curriculum(mouse_id)
 
-            logging.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
-            self.curriculum, self.trainer_state, self.metrics, atts, slims_session = self.trainer.load_data(mouse_id)
+            # update models
+            self.task_logic = task
+            self.operation_control_model = oc
+            self.opto_model = opto if opto else self.opto_model
+            self.fip_model = fip if fip else self.fip_model
 
-            if self.curriculum is None:     # No session written to slims so create curriculum based on schedule
-                logging.info(f"No session found on slims. Attempting to construct from schedule.")
-                self.curriculum, self.trainer_state, self.metrics, atts = self.create_curriculum(mouse_id)
-                attachment_names = ["TrainerState", AindBehaviorSessionModel.__name__,
-                                    *[model["experiment_type"] for model in atts[2:]]]
+            # update session model only partially
+            self.session_model.experiment = sess.experiment
+            self.session_model.experimenter = sess.experimenter
+            self.session_model.subject = sess.subject
+            self.session_model.notes = sess.notes
 
-                logging.error(f"Cannot find or make a curriculum for mouse {mouse_id} since there is no session "
-                              f"information in slims or schedule")
-
-            else:  # format attachment list
-                attachment_names = [attachment.name for attachment in atts]     # populate attachment names
-                atts = [self.slims_client.fetch_attachment_content(att).json() for att in atts]
-            self.task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
-
-
-            # update session model with slims session information
-            session = atts[attachment_names.index(AindBehaviorSessionModel.__name__)]
-            slims_session_model = AindBehaviorSessionModel(**session)
-            self.session_model.experiment = slims_session_model.experiment
-            self.session_model.experimenter = slims_session_model.experimenter
-            self.session_model.subject = slims_session_model.subject
-            self.session_model.notes = slims_session_model.notes
-
-            # update opto_model
-            if self.opto_model.experiment_type in attachment_names:
-                opto = atts[attachment_names.index(self.opto_model.experiment_type)]
-                self.opto_model = Optogenetics(**opto)
-
-            # update fip_model
-            if self.fip_model.experiment_type in attachment_names:
-                logging.info(f"Applying fip model")
-                fip = atts[attachment_names.index(self.fip_model.experiment_type)]
-                self.fip_model = FiberPhotometry(**fip)
-                # check if current stage is past stage_start
-                stage_starts = get_args(STAGE_STARTS)
-                self.fip_model.mode = None if stage_starts.index(self.trainer_state.stage.name) < \
-                                              stage_starts.index(self.fip_model.stage_start) else self.fip_model.mode
-
-            logging.info(f"Mouse {mouse_id} curriculum loaded from Slims.", extra={'tags': [self.warning_log_tag]})
-            self.label_curriculum_stage.setText(self.trainer_state.stage.name)
+            self.label_curriculum_stage.setText(trainer_state.stage.name)
             self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
 
             # enable or disable widget based on if session is on curriculum
-            on_curriculum = True if slims_session is None else not slims_session.is_curriculum_suggestion
-            self.task_widget.setEnabled(not on_curriculum)
+            self.task_widget.setEnabled(not slims_session.is_curriculum_suggestion)
 
             # set state of on_curriculum check
-            self.on_curriculum.setChecked(on_curriculum)
-            self.on_curriculum.setEnabled(on_curriculum)
+            self.on_curriculum.setChecked(slims_session.is_curriculum_suggestion)
+            self.on_curriculum.setEnabled(slims_session.is_curriculum_suggestion)
+
+            logging.info(f"Successfully loaded mouse {mouse_id}", extra={'tags': [self.warning_log_tag]})
 
         except Exception as e:
-            if 'No record found' in str(e):  # mouse doesn't exist
-                logging.warning(f"{mouse_id} is not in Slims. Double check id, and add to Slims if missing",
-                                extra={'tags': [self.warning_log_tag]})
-            else:
-                logging.warning(f"Error loading mouse {mouse_id} curriculum from Slims or schedule. {e}",
-                                extra={'tags': [self.warning_log_tag]})
+            logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+            self.Load.setEnabled(True)
+
         finally:
             self.load_slims_progress.hide()
             self.modelsChanged.emit()
+
+    def write_curriculum(self):
+        """
+            Write curriculum to slims for next session
+        """
+        # add session to slims
+        if hasattr(self, "GeneratedTrials"):
+            try:
+                trainer_state = self.slims_handler.write_session_to_slims(self.session_model.subject,
+                                                                          self.on_curriculum.isChecked(),
+                                                                          self.GeneratedTrials.B_for_eff_optimal,
+                                                                          self.GeneratedTrials.B_CurrentTrialN,
+                                                                          self.task_logic,
+                                                                          self.session_model,
+                                                                          self.opto_model,
+                                                                          self.fip_model,
+                                                                          self.operation_control_model)
+                logging.info(f"Writing next session to Slims successful. Mouse {self.session_model.subject} will run"
+                             f" on {trainer_state.stage.name} next session.", extra={'tags': [self.warning_log_tag]})
+                self.on_curriculum.setChecked(False)
+                self.on_curriculum.setVisible(False)
+                self.label_curriculum_stage.setText("")
+
+            except Exception as e:
+                logging.error(str(e), extra={'tags': [self.warning_log_tag]})
 
     def create_curriculum(self, mouse_id)->tuple[Curriculum,
                                                  TrainerState,
@@ -835,70 +697,138 @@ class Window(QMainWindow):
 
         return curriculum, trainer_state, metrics, attachments
 
-    def write_session_to_slims(self, mouse_id):
+    def _set_reference(self):
+        '''
+        set the reference point for lick spout position in the metadata dialog
+        '''
+        # get the current position of the stage
+        current_positions = self._GetPositions()
+        # set the reference point for lick spout position in the metadata dialog
+        if current_positions is not None:
+            self.Metadata_dialog._set_reference(current_positions)
+
+    def _StartEphysRecording(self):
+        '''
+            Start/stop ephys recording
+
+        '''
+        if self.open_ephys_machine_ip_address == '':
+            QMessageBox.warning(self, 'Connection Error',
+                                'Empty ip address for Open Ephys Computer. Please check the settings file.')
+            self.StartEphysRecording.setChecked(False)
+            self._toggle_color(self.StartEphysRecording)
+            return
+
+        if (self.Start.isChecked() or self.ANewTrial == 0) and self.StartEphysRecording.isChecked():
+            reply = QMessageBox.question(self, '', 'Behavior has started! Do you want to start ephys recording?',
+                                         QMessageBox.No | QMessageBox.No, QMessageBox.Yes)
+            if reply == QMessageBox.Yes:
+                pass
+            elif reply == QMessageBox.No:
+                self.StartEphysRecording.setChecked(False)
+                self._toggle_color(self.StartEphysRecording)
+                return
+
+        EphysControl = EphysRecording(open_ephys_machine_ip_address=self.open_ephys_machine_ip_address,
+                                      mouse_id=self.session_model.subject)
+        if self.StartEphysRecording.isChecked():
+            try:
+                if EphysControl.get_status()['mode'] == 'RECORD':
+                    QMessageBox.warning(self, '', 'Open Ephys is already recording! Please stop the recording first.')
+                    self.StartEphysRecording.setChecked(False)
+                    self._toggle_color(self.StartEphysRecording)
+                    return
+                EphysControl.start_open_ephys_recording()
+                self.openephys_start_recording_time = str(datetime.now())
+                QMessageBox.warning(self, '',
+                                    f'Open Ephys has started recording!\n Recording type: {self.OpenEphysRecordingType.currentText()}')
+            except Exception as e:
+                logging.error(traceback.format_exc())
+                self.StartEphysRecording.setChecked(False)
+                QMessageBox.warning(self, 'Connection Error',
+                                    'Failed to connect to Open Ephys. Please check: \n1) the correct ip address is '
+                                    'included in the settings json file. \n2) the Open Ephys software is open.')
+        else:
+            try:
+                if EphysControl.get_status()['mode'] != 'RECORD':
+                    QMessageBox.warning(self, '', 'Open Ephys is not recording! Please start the recording first.')
+                    self.StartEphysRecording.setChecked(False)
+                    self._toggle_color(self.StartEphysRecording)
+                    return
+
+                if self.Start.isChecked() or self.ANewTrial == 0:
+                    reply = QMessageBox.question(self, '',
+                                                 'The behavior hasn’t stopped yet! Do you want to stop ephys recording?',
+                                                 QMessageBox.No | QMessageBox.No, QMessageBox.Yes)
+                    if reply == QMessageBox.Yes:
+                        pass
+                    elif reply == QMessageBox.No:
+                        self.StartEphysRecording.setChecked(True)
+                        self._toggle_color(self.StartEphysRecording)
+                        return
+
+                self.openephys_stop_recording_time = str(datetime.now())
+                response = EphysControl.get_open_ephys_recording_configuration()
+                response['openephys_start_recording_time'] = self.openephys_start_recording_time
+                response['openephys_stop_recording_time'] = self.openephys_stop_recording_time
+                response['recording_type'] = self.OpenEphysRecordingType.currentText()
+                self.open_ephys.append(response)
+                self.unsaved_data = True
+                #self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+                self.start_flash.start()
+                EphysControl.stop_open_ephys_recording()
+                QMessageBox.warning(self, '', 'Open Ephys has stopped recording! Please save the data again!')
+            except Exception as e:
+                logging.error(traceback.format_exc())
+                QMessageBox.warning(self, 'Connection Error',
+                                    'Failed to stop Open Ephys recording. Please check: \n1) the open ephys software is still running')
+        self._toggle_color(self.StartEphysRecording)
+
+    def _toggle_color(self, widget, check_color="background-color : green;", unchecked_color="background-color : none"):
+        '''
+        Toggle the color of the widget.
+
+        Parameters
+        ----------
+        widget : QtWidgets.QWidget
+
+            If Checked, sets the color to green. If unchecked, sets the color to None.
+
+        Returns
+        -------
+        None
+        '''
+
+        if widget.isChecked():
+            widget.setStyleSheet(check_color)
+        else:
+            widget.setStyleSheet(unchecked_color)
+
+    def off_curriculum(self, checked) -> None:
         """
-        Write next session to slims based on performance
-        :param mouse_id: mouse id string to load from slims
+            Function to handle going off curriculum.
+            :param checked: if on_curriculum checkbox is checked or not
         """
 
-        if self.metrics is not None and hasattr(self, "GeneratedTrials"):    # loaded mouse
-            # add current session to metrics
-            logging.info("Constructing new metrics.")
-            new_metrics = DynamicForagingMetrics(
-                foraging_efficiency=self.metrics.foraging_efficiency+[self.GeneratedTrials.B_for_eff_optimal],
-                finished_trials=self.metrics.finished_trials+[self.GeneratedTrials.B_CurrentTrialN],
-                session_total=self.metrics.session_total+1,
-                session_at_current_stage=self.metrics.session_at_current_stage+1
-            )
+        if not checked:     # user wants to go off curriculum
+            msg = QMessageBox()
+            msg.setWindowTitle("Off Curriculum")
+            msg.setText("You are going off curriculum. Are you absolutely sure you would like to do this? "
+                        "<span style='color: mediumorchid;'>Once you do this, there is no going back. </span><br>"
+                        "This could be really annoying.")
+            msg.setStyleSheet("QLabel{font-size: 25px; font-weight: bold;}")  # Apply to text
+            msg.setIcon(QMessageBox.Question)
+            msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            reply = msg.exec_()
 
-            if self.on_curriculum.isChecked():
-                # evaluating trainer state
-                logging.info("Generating next session stage.")
-                next_trainer_state = Trainer(self.curriculum).evaluate(trainer_state=self.trainer_state,
-                                                                       metrics=new_metrics)
-            else:   # mouse is off curriculum so push trainer state used
-                self.trainer_state.stage.task = self.task_logic
-                next_trainer_state = self.trainer_state
-
-            logging.info("Writing trainer state to slims.")
-            slims_model = self.trainer.write_data(subject_id=mouse_id,
-                                                  curriculum=self.curriculum,
-                                                  trainer_state=next_trainer_state,
-                                                  date=datetime.now() if not hasattr(self, "session_model")
-                                                  else self.session_model.date,
-                                                  on_curriculum=self.on_curriculum.isChecked())
-            # add session model as an attachment
-            self.slims_client.add_attachment_content(
-                record=slims_model,
-                name=AindBehaviorSessionModel.__name__,
-                content=self.session_model.model_dump_json()
-            )
-
-            # add opto model if run
-            if self.opto_model.laser_colors != []:
-                self.slims_client.add_attachment_content(
-                    record=slims_model,
-                    name=self.opto_model.experiment_type,
-                    content=self.opto_model.model_dump_json()
-                )
-
-            if self.fip_model.mode is not None:
-                self.slims_client.add_attachment_content(
-                    record=slims_model,
-                    name=self.fip_model.experiment_type,
-                    content=self.fip_model.model_dump_json()
-                )
-
-            logging.info(f"Writing next session to Slims successful. "
-                         f"Mouse {mouse_id} will run on {next_trainer_state.stage.name} next session.",
-                         extra={'tags': [self.warning_log_tag]})
-
-        # reset load state
-        self.curriculum = None
-        self.trainer_state = None
-        self.metrics = None
-        self.on_curriculum.setVisible(False)
-        self.label_curriculum_stage.setText("")
+            if reply == QMessageBox.No:
+                self.on_curriculum.setChecked(True)
+            else:
+                self.task_widget.setEnabled(True)
+                self.session_widget.setEnabled(True)
+                self.fip_widget.setEnabled(True)
+                self.Opto_dialog.opto_widget.setEnabled(True)
+                self.on_curriculum.setEnabled(False)
 
     def _session_list(self):
         '''show all sessions of the current animal and load the selected session by drop down list'''
@@ -1060,28 +990,6 @@ class Window(QMainWindow):
 
             # only check drop frames once each session
             self.to_check_drop_frames = 0
-
-    def _revert_to_previous_parameters(self):
-        '''reverse to previous parameters before warm up'''
-        # get parameters before the warm up is on
-        parameters = {}
-        for attr_name in dir(self):
-            if attr_name.startswith(
-                    'WarmupBackup_') and attr_name != 'WarmupBackup_' and attr_name != 'WarmupBackup_warmup':
-                parameters[attr_name.replace('WarmupBackup_', '')] = getattr(self, attr_name)
-        widget_dict = {w.objectName(): w for w in self.TrainingParameters.findChildren((QtWidgets.QPushButton,
-                                                                                        QtWidgets.QLineEdit,
-                                                                                        QtWidgets.QTextEdit,
-                                                                                        QtWidgets.QComboBox,
-                                                                                        QtWidgets.QDoubleSpinBox,
-                                                                                        QtWidgets.QSpinBox))}
-        widget_dict['Task'] = self.Task
-        try:
-            for key in widget_dict.keys():
-                self._set_parameters(key, widget_dict, parameters)
-        except Exception as e:
-            # Catch the exception and log error information
-            logging.error(traceback.format_exc())
 
     def _CheckStageConnection(self):
         '''get the current position of the stage'''
@@ -1343,7 +1251,6 @@ class Window(QMainWindow):
             self.CreateNewFolder = 0
             log_folder = self.HarpFolder
             self.unsaved_data = True
-            #self.Save.setStyleSheet("color: white;background-color : mediumorchid")
             self.start_flash.start()
         else:
             # temporary logging
@@ -1674,102 +1581,6 @@ class Window(QMainWindow):
         self.Other_go_cue_decibel = self.Settings['go_cue_decibel_box' + str(self.box_number)]
         self.Other_lick_spout_distance = self.Settings['lick_spout_distance_box' + str(self.box_number)]
         self.rig_name = '{}'.format(self.current_box)
-
-    def connect_to_slims(self) -> SlimsClient:
-        """
-            Connect to Slims
-        """
-        try:
-            logging.info('Attempting to connect to Slims')
-            slims_client = SlimsClient(username=os.environ['SLIMS_USERNAME'],
-                                            password=os.environ['SLIMS_PASSWORD'])
-        except KeyError as e:
-            raise KeyError('SLIMS_USERNAME and SLIMS_PASSWORD do not exist as '
-                           f'environment variables on machine. Please add. {e}')
-
-        try:
-            slims_client.fetch_model(models.SlimsMouseContent, barcode='00000000')
-        except Exception as e:
-            if 'Status 401 – Unauthorized' in str(e):  # catch error if username and password are incorrect
-                raise Exception(f'Exception trying to read from Slims: {e}.\n'
-                                f' Please check credentials:\n'
-                                f'Username: {os.environ["SLIMS_USERNAME"]}\n'
-                                f'Password: {os.environ["SLIMS_PASSWORD"]}')
-            elif 'No record found' not in str(e):  # bypass if mouse doesn't exist
-                raise Exception(f'Exception trying to read from Slims: {e}.\n')
-        logging.info('Successfully connected to Slims')
-
-        return slims_client
-
-    def connect_to_docdb(self) -> aind_data_access_api.document_db.MetadataDbClient:
-        """
-        Connect to docdb for curriculum metrics
-        """
-
-        return aind_data_access_api.document_db.MetadataDbClient(
-            host='api.allenneuraldynamics.org',
-            database='metadata_index',
-            collection='data_assets'
-        )
-
-
-    def _AddWaterLogResult(self, session: Session):
-        '''
-            Add WaterLogResult to slims based on current state of gui
-
-            :param session: Session object to pull water information from
-
-        '''
-
-        try:  # try and find mouse
-            logging.info(f'Attempting to fetch mouse {session.subject_id} from Slims')
-            mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
-        except Exception as e:
-            if 'No record found' in str(e):  # if no mouse found or validation errors on mouse
-                logging.warning(f'"No record found" error while trying to fetch mouse {session.subject_id}. '
-                                f'Will not log water.')
-                return
-            else:
-                logging.error(f'While fetching mouse {session.subject_id} model, unexpected error occurred.')
-                raise e
-
-        # extract water information
-        logging.info('Extracting water information from first stimulus epoch')
-        water_json = session.stimulus_epochs[0].output_parameters.water.items()
-        water = {k: v if not (isinstance(v, float) and math.isnan(v)) else None for k, v in water_json}
-
-        # extract software information
-        logging.info('Extracting software information from first data stream')
-        software = session.stimulus_epochs[0].software[0]
-
-        # create model
-        logging.info('Creating SlimsWaterlogResult based on session information.')
-        model = models.SlimsWaterlogResult(
-            mouse_pk=mouse.pk,
-            date=session.session_start_time,
-            weight_g=session.animal_weight_post,
-            operator=self.session_model.experimenter[0],
-            water_earned_ml=water['water_in_session_foraging'],
-            water_supplement_delivered_ml=water['water_after_session'],
-            water_supplement_recommended_ml=None,
-            total_water_ml=water['water_in_session_total'],
-            comments=session.notes,
-            workstation=session.rig_id,
-            sw_source=software.url,
-            sw_version=software.version,
-            test_pk=self.slims_client.fetch_pk("Test", test_name="test_waterlog"))
-
-        # check if mouse already has waterlog for at session time and if, so update model
-        logging.info(f'Fetching previous waterlog for mouse {session.subject_id}')
-        waterlog = self.slims_client.fetch_models(models.SlimsWaterlogResult, mouse_pk=mouse.pk, start=0, end=1)
-        if waterlog != [] and waterlog[0].date.strftime("%Y-%m-%d %H:%M:%S") == \
-                session.session_start_time.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"):
-            logging.info(f'Waterlog information already exists for this session. Updating waterlog in Slims.')
-            model.pk = waterlog[0].pk
-            self.slims_client.update_model(model=model)
-        else:
-            logging.info(f'Adding waterlog to Slims.')
-            self.slims_client.add_model(model)
 
     def _InitializeBonsai(self):
         '''
@@ -2734,7 +2545,7 @@ class Window(QMainWindow):
             if save_clicked:  # create water log result if weight after filled and uncheck save
                 if self.BaseWeight.text() != '' and self.WeightAfter.text() != '' and self.session_model.subject not in [
                     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']:
-                    self._AddWaterLogResult(session)
+                   self.slims_handler.add_waterlog_result(session)
                 self.bias_indicator.clear()  # prepare for new session
 
 
@@ -2779,7 +2590,6 @@ class Window(QMainWindow):
                 QMessageBox.warning(self, '',
                                     'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
                 self.unsaved_data = True
-                #self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
                 self.start_flash.start()
 
             self.Save.setChecked(False)  # uncheck button
@@ -2886,8 +2696,10 @@ class Window(QMainWindow):
         self.session_widget.apply_schema(self.session_model)
         self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
         self.fip_widget.apply_schema(self.fip_model)
-        if self.curriculum is not None:
-            self.on_curriculum.setVisible(True)
+        self.operation_control_widget.apply_schema(self.operation_control_model)
+
+        # check if on_curriculum needs to be visible
+        self.on_curriculum.setVisible(self.on_curriculum.isChecked())
 
     def save_task_models(self):
         """
@@ -2904,13 +2716,16 @@ class Window(QMainWindow):
         # validate behavior task logic model and document validation errors if any
         self.validate_and_save_model(AindDynamicForagingTaskLogic, self.task_logic, task_model_path)
 
+        # validate operation_control_model and document validation errors if any
+        self.validate_and_save_model(OperationalControl, self.operation_control_model, task_model_path)
+
         # check if opto ran
         if self.opto_model.laser_colors != []:
             opto_model_path = os.path.join(self.session_model.root_path, f'behavior_optogenetics_model_{id_name}.json')
             self.validate_and_save_model(Optogenetics, self.opto_model, opto_model_path)
 
         # check if fip ran
-        if self.fip_model.mode is not None:
+        if self.fip_model.enabled:
             fip_model_path = os.path.join(self.session_model.root_path,
                                           f'behavior_fiber_photometry_model_{id_name}.json')
             self.validate_and_save_model(FiberPhotometry, self.fip_model, fip_model_path)
@@ -3215,8 +3030,7 @@ class Window(QMainWindow):
                                               self.session_model,
                                               self.opto_model,
                                               self.fip_model,
-                                              self.curriculum,
-                                              self.trainer_state)
+                                              self.operation_control_model)
         # Iterate over all attributes of the GeneratedTrials object
         for attr_name in dir(self.GeneratedTrials):
             if attr_name in Obj.keys():
@@ -3591,7 +3405,7 @@ class Window(QMainWindow):
         self.on_curriculum.setEnabled(True)
 
         # add session to slims
-        self.write_session_to_slims(self.session_model.subject)
+        self.write_curriculum()
 
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully == 0:
@@ -3865,7 +3679,7 @@ class Window(QMainWindow):
             elif self.session_model.allow_dirty_repo is None:
                 logging.error('Could not check for untracked local changes')
 
-            if self.fip_model.mode is not None and (not self.FIP_started):
+            if self.fip_model.enabled and (not self.FIP_started):
                 reply = QMessageBox.critical(self,
                                              'Box {}, Start'.format(self.box_letter),
                                              'Photometry is set to "on", but the FIP workflow has not been started',
@@ -3875,7 +3689,7 @@ class Window(QMainWindow):
                 return
 
             # Check if photometry excitation is running or not
-            if self.fip_model.mode is not None and (not self.StartExcitation.isChecked()):
+            if self.fip_model.enabled and (not self.StartExcitation.isChecked()):
                 logging.warning('photometry is set to "on", but excitation is not running')
 
                 reply = QMessageBox.question(self,
@@ -4024,9 +3838,7 @@ class Window(QMainWindow):
                                              self.session_model,
                                              self.opto_model,
                                              self.fip_model,
-                                             self.curriculum,
-                                             self.trainer_state
-                                             )
+                                             self.operation_control_model)
             self.GeneratedTrials = GeneratedTrials
             self.StartANewSession = 0
             PlotM = PlotV(win=self, GeneratedTrials=GeneratedTrials, width=5, height=4)
@@ -4103,7 +3915,7 @@ class Window(QMainWindow):
             worker_save = self.worker_save
 
         # collecting the base signal for photometry. Only run once
-        if self.Start.isChecked() and self.fip_model.mode is not None and self.PhotometryRun == 0:
+        if self.Start.isChecked() and self.fip_model.enabled and self.PhotometryRun == 0:
             logging.info('Starting photometry baseline timer')
             self.finish_Timer = 0
             self.PhotometryRun = 1

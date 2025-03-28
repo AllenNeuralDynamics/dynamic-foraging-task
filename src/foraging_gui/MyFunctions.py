@@ -20,6 +20,7 @@ from aind_behavior_dynamic_foraging import AindDynamicForagingTaskLogic
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import Optogenetics
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry
+from aind_behavior_dynamic_foraging.DataSchemas.operation_control import OperationalControl
 
 if PLATFORM == 'win32':
     from newscale.usbxpress import USBXpressLib, USBXpressDevice
@@ -33,9 +34,7 @@ class GenerateTrials():
                  session_model: AindBehaviorSessionModel,
                  opto_model: Optogenetics,
                  fip_model: FiberPhotometry,
-                 curriculum=None,
-                 trainer_state=None,
-                 ):
+                 operation_control_model: OperationalControl):
 
         self.win = win
         # set model attributes
@@ -43,11 +42,7 @@ class GenerateTrials():
         self.session_model = session_model
         self.opto_model = opto_model
         self.fip_model = fip_model
-
-        # set curriculum attributes
-        self.curriculum = curriculum
-        self.trainer_state = trainer_state
-
+        self.operation_control_model = operation_control_model
 
         self.B_LeftLickIntervalPercent = None  # percentage of left lick intervals under 100ms
         self.B_RightLickIntervalPercent = None  # percentage of right lick intervals under 100ms
@@ -131,13 +126,14 @@ class GenerateTrials():
         self.Obj = {
             self.task_logic.name: [],
             AindBehaviorSessionModel.__name__: [],
-            self.opto_model.experiment_type: [],
-            self.fip_model.experiment_type: [],
+            self.opto_model.name: [],
+            self.fip_model.name: [],
             "left_valve_open_times": [],
             "right_valve_open_times": [],
             "multipliers": []
         }
         self.selected_condition = None
+        self.warmup_on = self.task_logic.task_parameters.warmup is not None
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
 
@@ -279,12 +275,12 @@ class GenerateTrials():
         """
 
         if self.opto_model.session_control is not None:
-            session_control_block_length = self.task_logic.task_parameters.auto_stop.max_trial * \
+            session_control_block_length = self.operation_control_model.auto_stop.max_trial * \
                                            self.opto_model.session_control.session_fraction
             initial_state = 1 if self.opto_model.session_control.optogenetic_start else 0
 
-            calculated_state = np.zeros(self.task_logic.task_parameters.auto_stop.max_trial)
-            numbers = np.arange(self.task_logic.task_parameters.auto_stop.max_trial)
+            calculated_state = np.zeros(self.operation_control_model.auto_stop.max_trial)
+            numbers = np.arange(self.operation_control_model.auto_stop.max_trial)
             numbers_floor = np.floor(numbers / session_control_block_length)
             # Find odd values: A value is odd if value % 2 != 0
             odd_values_mask = (numbers_floor % 2 != 0)
@@ -306,21 +302,13 @@ class GenerateTrials():
 
     def _CheckWarmUp(self):
         '''Check if we should turn on warm up'''
-        if self.task_logic.task_parameters.warmup is None:
+        if not self.warmup_on:
             return
-        warmup = self._get_warmup_state()
-        if warmup == 0:
-            # update task logic with new trainer state
-            self.task_logic = self.trainer_state.stage.task
-            self.win.task_widget.setEnabled(True)
-            self.win.task_widget.apply_schema(self.task_logic.task_parameters)
-            self.win.task_widget.setEnabled(False)
+        self._get_warmup_state()
+        if not self.warmup_on:
+            # Go to next block
             self.win.NextBlock.setChecked(True)
             logging.info('Warm up is turned off', extra={'tags': [self.win.warning_log_tag]})
-
-            #update label
-            self.win.label_curriculum_stage.setText(self.trainer_state.stage.name)
-            self.win.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
 
     def _get_warmup_state(self):
         '''calculate the metrics related to the warm up and decide if we should turn on the warm up'''
@@ -343,23 +331,13 @@ class GenerateTrials():
                 finish_ratio >= self.task_logic.task_parameters.warmup.min_finish_ratio and \
                 abs(choice_ratio - 0.5) <= self.task_logic.task_parameters.warmup.max_choice_ratio_bias:
 
-            if self.curriculum is not None:
-                logging.info("Updating curriculum")
-                # find next transition from warmup state
-                next_stage = self.curriculum.graph.nodes[1]
-                self.trainer_state = DynamicForagingTrainerState(curriculum=self.curriculum,
-                                                                 stage=next_stage,
-                                                                 is_on_curriculum=True)
             # turn off the warm up
-            warmup = 0
-        else:
-            # turn on the warm up
-            warmup = 1
+            self.warmup_on = False
+
         # show current metrics of the warm up
         logging.info('Finish trial: ' + str(round(finish_trial, 2)) + '; Finish ratio: ' + str(round(finish_ratio, 2)) +
                      '; Choice ratio bias: ' + str(round(abs(choice_ratio - 0.5), 2)),
                      extra={'tags': [self.win.warning_log_tag]})
-        return warmup
 
     def _CheckBaitPermitted(self):
         '''Check if bait is permitted of the current trial'''
@@ -1336,11 +1314,11 @@ class GenerateTrials():
 
     def _CheckStop(self):
         '''Stop if there are many ingoral trials or if the maximam trial is exceeded MaxTrial'''
-        tp = self.task_logic.task_parameters
-        stop_ignore = round(tp.auto_stop.ignore_win * tp.auto_stop.ignore_ratio_threshold)
-        max_trial = tp.auto_stop.max_trial - 2  # trial number starts from 0
-        max_time = tp.auto_stop.max_time * 60  # convert minutes to seconds
-        min_time = tp.auto_stop.min_time * 60
+        oc = self.operation_control_model
+        stop_ignore = round(oc.auto_stop.ignore_win * oc.auto_stop.ignore_ratio_threshold)
+        max_trial = oc.auto_stop.max_trial - 2  # trial number starts from 0
+        max_time = oc.auto_stop.max_time * 60  # convert minutes to seconds
+        min_time = oc.auto_stop.min_time * 60
         if hasattr(self, 'BS_CurrentRunningTime'):
             pass
         else:
@@ -1354,14 +1332,14 @@ class GenerateTrials():
         auto_rewards = np.array([any(x) for x in np.column_stack(self.B_AutoWaterTrial.astype(bool))])
         non_auto_reward = self.B_AnimalResponseHistory[np.where(~auto_rewards.astype(bool))]  # isolate non-auto-reward
         if self.BS_CurrentRunningTime / 60 >= min_time and len(
-                np.where(non_auto_reward[-tp.auto_stop.ignore_win:] == 2)[0]) >= stop_ignore:
+                np.where(non_auto_reward[-oc.auto_stop.ignore_win:] == 2)[0]) >= stop_ignore:
             stop = True
-            threshold = tp.auto_stop.ignore_ratio_threshold * 100
+            threshold = oc.auto_stop.ignore_ratio_threshold * 100
             msg = f'Stopping the session because the mouse has ignored at least ' \
-                  f'{threshold}% of {tp.auto_stop.ignore_win} ' \
+                  f'{threshold}% of {oc.auto_stop.ignore_win} ' \
                   f'consecutive trials'
             warning_label_text = 'Stop because ignore trials exceed or equal: ' + \
-                                 f'{threshold}% of {tp.auto_stop.ignore_win}'
+                                 f'{threshold}% of {oc.auto_stop.ignore_win}'
         elif self.B_CurrentTrialN > max_trial:
             stop = True
             msg = 'Stopping the session because the mouse has reached the maximum trial count: {}'.format(max_trial)
@@ -2034,10 +2012,10 @@ class GenerateTrials():
         self.Obj[AindBehaviorSessionModel.__name__].append(self.session_model.model_dump_json())
 
         #save opto model
-        self.Obj[self.opto_model.experiment_type].append(self.opto_model.model_dump_json())
+        self.Obj[self.opto_model.name].append(self.opto_model.model_dump_json())
 
         # save fip model
-        self.Obj[self.fip_model.experiment_type].append(self.fip_model.model_dump_json())
+        self.Obj[self.fip_model.name].append(self.fip_model.model_dump_json())
 
         for attr_name in dir(self):
             if attr_name.startswith('TP_'):
