@@ -3420,10 +3420,8 @@ class Window(QMainWindow):
             # load metadata to the metadata dialog
             if 'meta_data_dialog' in Obj:
                 if 'session_metadata' in Obj['meta_data_dialog']:
-                    print(Obj['meta_data_dialog']['session_metadata']) ## TODO DEBUG
                     self.Metadata_dialog.meta_data['session_metadata'] = Obj['meta_data_dialog']['session_metadata']
                 self.Metadata_dialog._update_metadata()
-                print(self.Metadata_dialog.meta_data['session_metadata'] ) ## TODO DEBUG
 
             # show session list related to that animal
             tag=self._show_sessions()
@@ -3443,8 +3441,8 @@ class Window(QMainWindow):
         self.keyPressEvent() # Accept all updates
         self.load_tag=1
         self.ID.returnPressed.emit() # Mimic the return press event to auto-engage AutoTrain
-        #self._GetProjectName(self.behavior_session_model.subject) ## TODO DEBUG
-        #self._GetProtocol(self.behavior_session_model.subject) ## TODO DEBUG
+        self._GetProjectName(self.behavior_session_model.subject)
+        self._GetProtocol(self.behavior_session_model.subject) 
     
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
