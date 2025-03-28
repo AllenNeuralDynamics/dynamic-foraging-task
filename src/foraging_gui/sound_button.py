@@ -1,14 +1,15 @@
-from PyQt5.QtWidgets import QSpinBox, QWidget, QGridLayout, QLabel, QToolButton, QWidgetAction, QMenu
+from PyQt5.Qt import QMouseEvent, Qt, pyqtSignal
 from PyQt5.QtGui import QIcon
-from PyQt5.Qt import pyqtSignal, Qt, QMouseEvent
+from PyQt5.QtWidgets import (QGridLayout, QLabel, QMenu, QSpinBox, QToolButton,
+                             QWidget, QWidgetAction)
+
 
 class SoundButton(QToolButton):
     """Button to allow user to play go cue and change volume"""
 
     attenuationChanged = pyqtSignal(int)
 
-    def __init__(self,
-                 attenuation: int = 0):
+    def __init__(self, attenuation: int = 0):
 
         super().__init__()
 
@@ -40,9 +41,12 @@ class SoundButton(QToolButton):
         self.setMenu(self.menu)
         self.setPopupMode(QToolButton.MenuButtonPopup)
 
+
 if __name__ == "__main__":
     import sys
-    from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QToolButton
+
+    from PyQt5.QtWidgets import (QApplication, QMainWindow, QToolBar,
+                                 QToolButton)
 
     # Initialize the application
     app = QApplication(sys.argv)

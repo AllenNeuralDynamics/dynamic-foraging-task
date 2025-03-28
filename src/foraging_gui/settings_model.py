@@ -1,6 +1,6 @@
-from pydantic import BaseModel
-from pydantic import Field
 from typing import Literal, Optional
+
+from pydantic import BaseModel, Field
 
 
 class BonsaiSettingsModel(BaseModel):
