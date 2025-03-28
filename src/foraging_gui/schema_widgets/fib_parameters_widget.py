@@ -12,70 +12,23 @@ class FIBParametersWidget(SchemaWidgetBase):
     Widget to expose task logic for fiber photometry sessions
     """
 
-    schemaToggled = pyqtSignal()
 
     def __init__(self, schema: FiberPhotometry):
 
         super().__init__(schema)
-        self.schema_fields_widgets["experiment_type"].hide()
-        self.schema_fields_widgets["stage_start"].hide()
+        self.schema_fields_widgets["name"].hide()
+        self.enabled_widget.toggled.connect(self.toggle_enabled)
+        self.toggle_enabled(self.schema.enabled)
 
-        # make entire fip schema optional
-        # hide or show auto_water
-        widget = self.centralWidget()
-        label = QLabel("FIP Enabled")
-        self.fip_schema_check_box = QCheckBox()
-        self.fip_schema_check_box.toggled.connect(self.toggle_schema)
-        self.fip_schema_check_box.setChecked(False)
-        self.toggle_schema(False)
-        widget.layout().insertWidget(0, create_widget("H", label, self.fip_schema_check_box))
-
-    def toggle_schema(self, enabled):
+    def toggle_enabled(self, enabled):
         """
-        Allow schema to be None type to indicate if session is run with FIP or not
+            Disable widgets if enabled is False
         """
 
-        if enabled:
-            self.schema.mode = "Normal"
-            self.apply_schema(self.schema)
-        else:
-            self.schema.mode = None
-
-        for widget in self.schema_fields_widgets.values():
+        for key, widget in self.schema_fields_widgets.items():
+            if key == "enabled":
+                continue
             widget.setEnabled(enabled)
-        self.schemaToggled.emit()
-
-    def apply_schema(self, *args, **kwargs):
-        """
-        toggle schema on if applied
-        """
-
-        for widget in self.schema_fields_widgets.values():
-            widget.setEnabled(True)
-        super().apply_schema(*args, **kwargs)
-        for widget in self.schema_fields_widgets.values():
-            widget.setEnabled(self.schema.mode is not None)
-
-    def _set_widget_text(self, name, value):
-        """Set widget text if widget is QLineEdit or QCombobox
-        :param name: widget name to set text to
-        :param value: value of text"""
-        if hasattr(self, f"{name}_widget"):
-            widget = getattr(self, f"{name}_widget")
-            widget.blockSignals(True)  # block signal indicating change since changing internally
-            if type(widget) in [QLineEdit]:
-                widget.setText(str(value))
-            elif type(widget) in [QSpinBox, QDoubleSpinBox, QSlider]:
-                widget.setValue(value)
-            elif type(widget) == QComboBox:
-                value_type = type(self.path_get(self.schema, name.split("."))) if name != "mode" else str
-                value = value.name if type(value_type) == enum.EnumMeta else value_type(value)
-                widget.setCurrentText(str(value))
-            elif hasattr(widget, 'setChecked'):
-                widget.setChecked(value)
-            widget.blockSignals(False)
-        else:
-            self.log.warning(f"{name} doesn't correspond to a widget")
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication
@@ -93,7 +46,6 @@ if __name__ == "__main__":
     task_model = FiberPhotometry()
     task_widget = FIBParametersWidget(task_model)
     task_widget.ValueChangedInside.connect(lambda name: print(task_model))
-    task_widget.schemaToggled.connect(lambda: print(task_model))
     task_widget.show()
 
     task_model.mode = "Axon"
