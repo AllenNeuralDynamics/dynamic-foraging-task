@@ -154,14 +154,14 @@ class GenerateTrials():
         self._CheckAutoWater()
 
         # --- Handle reward schedule ---
-        if self.session_model.experiment in ['Coupled Baiting', 'Coupled Without Baiting', 'RewardN']:
+        if self.task_logic.task_parameters.uncoupled_reward is None:
             # -- Use the old logic --
             # check block transition and set self.B_ANewBlock
             self._check_coupled_block_transition()
             if any(self.B_ANewBlock == 1):
                 # assign the next block's reward prob to self.B_CurrentRewardProb
                 self._generate_next_coupled_block()
-        elif self.session_model.experiment in ['Uncoupled Baiting', 'Uncoupled Without Baiting']:
+        else:
             # -- Use Han's standalone class --
             if self.B_CurrentTrialN == -1 or \
                     not hasattr(self, 'uncoupled_blocks'):  # Or the user start uncoupled in the midde of the session
@@ -1028,14 +1028,14 @@ class GenerateTrials():
         '''Show session/trial related information in the information section'''
         # show reward pairs and current reward probability
         try:
-            if (self.session_model.experiment in ['Coupled Baiting', 'Coupled Without Baiting', 'RewardN']):
+            if self.task_logic.task_parameters.uncoupled_reward is None:
                 self.win.ShowRewardPairs.setText('Reward pairs:\n'
                                                  + str(np.round(self.RewardProb, 2)).replace('\n', ',')
                                                  + '\n\n'
                                                  + 'Current pair:\n'
                                                  + str(np.round(
                     self.B_RewardProHistory[:, self.B_CurrentTrialN], 2)))
-            elif (self.session_model.experiment in ['Uncoupled Baiting', 'Uncoupled Without Baiting']):
+            else:
                 self.win.ShowRewardPairs.setText('Reward pairs:\n'
                                                  + str(np.round(self.RewardProbPoolUncoupled, 2)).replace('\n', ',')
                                                  + '\n\n'
@@ -1762,10 +1762,10 @@ class GenerateTrials():
     def _add_one_trial(self):
         # to decide if we should add one trial to the block length on both sides
         if self.task_logic.task_parameters.no_response_trial_addition:
-            if self.session_model.experiment in ['Uncoupled Baiting', 'Uncoupled Without Baiting']:
+            if self.task_logic.task_parameters.uncoupled_reward is not None:
                 for i, side in enumerate(['L', 'R']):
                     self.uncoupled_blocks.block_ends[side][-1] = self.uncoupled_blocks.block_ends[side][-1] + 1
-            elif self.session_model.experiment in ['Coupled Baiting', 'Coupled Without Baiting']:
+            else:
                 for i, side in enumerate(['L', 'R']):
                     self.BlockLenHistory[i][-1] = self.BlockLenHistory[i][-1] + 1
 

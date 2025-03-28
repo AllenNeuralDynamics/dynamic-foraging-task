@@ -59,7 +59,8 @@ from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_slims_api.models.behavior_session import SlimsBehaviorSession
 from aind_behavior_dynamic_foraging.CurriculumManager.trainer import (
     DynamicForagingTrainerState,
-    DynamicForagingMetrics
+    TrainerState,
+    DynamicForagingMetrics,
 )
 
 from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
@@ -531,19 +532,24 @@ class Window(QMainWindow):
         # update model widgets if models have changed
         self.modelsChanged.connect(self.update_model_widgets)
 
-    def load_curriculum(self, mouse_id: str):
+    def load_curriculum(self, mouse_id: str) -> None:
         """
             Load and apply curriculum from slims
             :param mouse_id: mouse id to load
         """
+
+        continue_load = self._NewSession()
+
+        if not continue_load:
+            return
 
         try:
             # check slims for curriculum
             trainer_state, slims_session, task, sess, opto, fip, oc = self.slims_handler.load_mouse_curriculum(mouse_id)
 
             if trainer_state is None:  # no curriculum in slims for this mouse
-                self.log.info(f"Attempting to create curriculum for mouse {mouse_id} from schedule.")
-
+                logging.info(f"Attempting to create curriculum for mouse {mouse_id} from schedule.")
+                trainer_state, slims_session, task, sess, opto, fip, oc = self.create_curriculum(mouse_id)
 
             # update models
             self.task_logic = task
@@ -595,6 +601,7 @@ class Window(QMainWindow):
                               "Coupled Baited 2.3": "coupled_baiting_2p3"}
 
         # gather keys from schedule
+        logging.info("Gathering curriculum keys from schedule.")
         autotrain_curriculum_name = self._GetInfoFromSchedule(mouse_id, "Autotrain Curriculum Name")
         curriculum_version = self._GetInfoFromSchedule(mouse_id, "Curriculum Version")
 
@@ -604,6 +611,7 @@ class Window(QMainWindow):
                            f"Valid curriculums are {curriculum_mapping.keys()}")
 
         # import and instantiate curriculum
+        logging.info("Importing and instantiating curriculum")
         module = curriculum_mapping[key]
         creation_factory_name = f"construct_{module}_curriculum"
         curriculum = getattr(import_module(f"aind_behavior_dynamic_foraging.CurriculumManager.curriculums.{module}"),
@@ -613,9 +621,10 @@ class Window(QMainWindow):
         stages = curriculum.see_stages()
         stage_mapping = ["warmup", "1", "2", "3", "4", "FINAL", "GRADUATED"]
         stage = self._GetInfoFromSchedule(mouse_id, "Current Stage")
-        ts = DynamicForagingTrainerState(stage=stages[stage_mapping.index(stage)],
-                                                    curriculum=curriculum,
-                                                    is_on_curriculum=True)
+        logging.info("Creating trainer state")
+        ts = TrainerState(stage=stages[stage_mapping.index(stage)],
+                          curriculum=curriculum,
+                          is_on_curriculum=True)
 
         # create metrics from docdb
         sessions = self.slims_handler.trainer.docdb_client.retrieve_docdb_records(
@@ -627,7 +636,7 @@ class Window(QMainWindow):
         epochs = [session['session']['stimulus_epochs'][0] for session in sessions]
         finished_trials = [epoch['trials_finished'] for epoch in epochs]
         foraging_efficiency = [epoch['output_parameters']['performance']['foraging_efficiency'] for epoch in epochs]
-
+        logging.info("Creating metrics.")
         metrics = DynamicForagingMetrics(
             foraging_efficiency=foraging_efficiency,
             finished_trials=finished_trials,
@@ -636,6 +645,7 @@ class Window(QMainWindow):
         )
 
         # set loaded mouse in slims handler to be able to write after session
+        logging.info("Creating metrics.")
         self.slims_handler.set_loaded_mouse(mouse_id, metrics, ts, curriculum)
 
         # update session model
@@ -643,9 +653,10 @@ class Window(QMainWindow):
                               "Uncoupled Baited": "Uncoupled Baiting",
                               "Coupled Baited": "Coupled Baiting"}
         self.session_model.experiment = experiment_mapping[autotrain_curriculum_name]
-        self.session_model.experimenter = [self._GetInfoFromSchedule(mouse_id, "Trainer")]
+        self.session_model.experimenter = [str(self._GetInfoFromSchedule(mouse_id, "Trainer"))]
         self.session_model.subject = mouse_id
-        self.session_model.notes = self._GetInfoFromSchedule(mouse_id, "RA Notes")
+        self.session_model.notes = "" if math.isnan(self._GetInfoFromSchedule(mouse_id, "RA Notes")) \
+            else str(self._GetInfoFromSchedule(mouse_id, "RA Notes"))
 
         # update fip model
         if (mode := self._GetInfoFromSchedule(mouse_id, "FIP Mode")) is not float("nan"):
@@ -667,8 +678,8 @@ class Window(QMainWindow):
         """
             Write curriculum to slims for next session
         """
-        # add session to slims
-        if hasattr(self, "GeneratedTrials"):
+        # add session to slims if there are trials and mouse loaded
+        if hasattr(self, "GeneratedTrials") and self.slims_handler.curriculum is not None:
             try:
                 trainer_state = self.slims_handler.write_loaded_mouse(self.session_model.subject,
                                                                           self.on_curriculum.isChecked(),
@@ -1341,7 +1352,7 @@ class Window(QMainWindow):
             return
 
     def _GetInfoFromSchedule(self, mouse_id, column):
-        mouse_id = str(mouse_id)
+        mouse_id = int(mouse_id)
         if not hasattr(self, 'schedule'):
             return None
         if mouse_id not in self.schedule['Mouse ID'].values:
@@ -1992,8 +2003,9 @@ class Window(QMainWindow):
                                   tp.reward_probability.base_reward_sum
             elif self.session_model.experiment in ['Uncoupled Baiting', 'Uncoupled Without Baiting']:
                 self.RewardProb = np.array(tp.uncoupled_reward)
+            str_reward = str(self.RewardProb) if type(self.RewardProb) != float else str(np.round(self.RewardProb, 2))
             reward_str = 'Reward pairs:\n' + \
-                         str(np.round(self.RewardProb, 2)).replace('\n', ',') + \
+                         str_reward.replace('\n', ',') + \
                          '\n\n' + \
                          'Current pair:\n'
             if hasattr(self, 'GeneratedTrials'):

@@ -216,7 +216,7 @@ class SlimsHandler:
             :param trainer_state: trainer state to set as loaded
             :param curriculum: curriculum to set as loaded
         """
-
+        self.log.info(f"Setting loaded mouse to {mouse_id}")
         self._loaded_mouse_id = mouse_id
         self.metrics = metrics
         self.trainer_state = trainer_state
@@ -228,6 +228,7 @@ class SlimsHandler:
         """
 
         # reset load state
+        self.log.info(f"Clearing mouse to {self._loaded_mouse_id}")
         self.curriculum = None
         self.trainer_state = None
         self.metrics = None
