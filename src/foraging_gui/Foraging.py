@@ -3239,7 +3239,7 @@ class Window(QMainWindow):
             self.Obj = Obj
 
             widget_dict={}
-            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','centralwidget','Metadata_dialog','TrainingParameters']
+            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog','centralwidget','TrainingParameters']
             for dialog_name in dialogs:
                 if hasattr(self, dialog_name):
                     widget_types = (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit,
@@ -3262,7 +3262,6 @@ class Window(QMainWindow):
                             CurrentObj=Obj['LaserCalibration_dialog']
                         elif widget.parent().objectName()=='MetaData':
                             CurrentObj=Obj['Metadata_dialog']
-                            logging.info('DEBUG DEBUG here') ## TODO
                         else:
                             CurrentObj=Obj.copy()
                     except Exception as e:
