@@ -710,8 +710,9 @@ class Window(QMainWindow):
             msg = QMessageBox()
             msg.setWindowTitle("Off Curriculum")
             msg.setText("You are going off curriculum. Are you absolutely sure you would like to do this? "
-                            "Once you do this, there is no going back. This could be really annoying.")
-            msg.setStyleSheet("QLabel{font-size: 18px; font-weight: bold;}")  # Apply to text
+                        "<span style='color: mediumorchid;'>Once you do this, there is no going back. </span><br>"
+                        "This could be really annoying.")
+            msg.setStyleSheet("QLabel{font-size: 25px; font-weight: bold;}")  # Apply to text
             msg.setIcon(QMessageBox.Question)
             msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
             reply = msg.exec_()
