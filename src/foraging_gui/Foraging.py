@@ -3262,6 +3262,7 @@ class Window(QMainWindow):
                             CurrentObj=Obj['LaserCalibration_dialog']
                         elif widget.parent().objectName()=='MetaData':
                             CurrentObj=Obj['Metadata_dialog']
+                            logging.info('DEBUG DEBUG here') ## TODO
                         else:
                             CurrentObj=Obj.copy()
                     except Exception as e:
