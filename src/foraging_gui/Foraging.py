@@ -32,7 +32,7 @@ from scipy.io import savemat, loadmat
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
 from PyQt5.QtWidgets import QFileDialog,QVBoxLayout, QGridLayout, QLabel
 from PyQt5 import QtWidgets,QtGui,QtCore, uic
-from PyQt5.QtCore import QThreadPool,Qt,QThread
+from PyQt5.QtCore import QThreadPool,Qt,QThread,pyqtSlot
 from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
@@ -178,13 +178,7 @@ class Window(QMainWindow):
         self._ConnectSlims()
 
         # Set up threads 
-        self.threadpool=QThreadPool() # get animal response
-        self.threadpool2=QThreadPool() # get animal lick
-        self.threadpool3=QThreadPool() # visualization
-        self.threadpool4=QThreadPool() # for generating a new trial
-        self.threadpool5=QThreadPool() # for starting the trial loop
-        self.threadpool6=QThreadPool() # for saving data
-        self.threadpool_workertimer=QThreadPool() # for timing
+        self.threadpool=QThreadPool.globalInstance() # get animal response
 
         # initialize thread lock
         self.data_lock = threading.Lock()
@@ -3866,29 +3860,36 @@ class Window(QMainWindow):
                         stall_iteration+=1
                         logging.info('trial stalled {} minutes, user did not force stopped trials'.format(elapsed_time))
 
-    def _thread_complete(self):
+    @pyqtSlot()
+    def _handle_trial_finished(self):
         '''complete of a trial'''
         if self.NewTrialRewardOrder==0:
             self.GeneratedTrials._GenerateATrial(self.Channel4)
         self.ANewTrial=1
 
+
+    @pyqtSlot()
     def _thread_complete2(self):
         '''complete of receive licks'''
         self.ToReceiveLicks=1
 
-    def _thread_complete3(self):
+    @pyqtSlot()
+    def _handle_draw_finished(self):
         '''complete of update figures'''
         self.ToUpdateFigure=1
 
-    def _thread_complete4(self):
+    @pyqtSlot()
+    def _handle_trial_generation_finished(self):
         '''complete of generating a trial'''
         self.ToGenerateATrial=1
 
-    def _thread_complete6(self):
+    @pyqtSlot()
+    def _handle_backup_finished(self):
         '''complete of save data'''
         self.previous_backup_completed=1
 
-    def _thread_complete_timer(self):
+    @pyqtSlot()
+    def _handle_timer_finished(self):
         '''complete of _Timer'''
         if not self.ignore_timer:
             self.finish_Timer=1
@@ -4288,24 +4289,21 @@ class Window(QMainWindow):
             self.bias_indicator.clear()
             # create workers
             worker1 = Worker(self.GeneratedTrials._GetAnimalResponse, self.Channel,self.Channel3, self.data_lock)
-            worker1.signals.finished.connect(self._thread_complete)
+            worker1.signals.finished.connect(self._handle_trial_finished)
             workerLick = Worker(GeneratedTrials._get_irregular_timestamp,self.Channel2)
             workerLick.signals.finished.connect(self._thread_complete2)
             workerPlot = Worker(PlotM._Update,GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
-            workerPlot.signals.finished.connect(self._thread_complete3)
+            workerPlot.signals.finished.connect(self._handle_draw_finished)
             workerGenerateAtrial = Worker(GeneratedTrials._GenerateATrial,self.Channel4)
-            workerGenerateAtrial.signals.finished.connect(self._thread_complete4)
+            workerGenerateAtrial.signals.finished.connect(self._handle_trial_generation_finished)
             workerStartTrialLoop = Worker(self._StartTrialLoop,GeneratedTrials,worker1,workerPlot,workerGenerateAtrial)
             workerStartTrialLoop1 = Worker(self._StartTrialLoop1,GeneratedTrials)
-            worker_save = Worker(self._perform_backup,BackupSave=1)
-            worker_save.signals.finished.connect(self._thread_complete6)
             self.worker1=worker1
             self.workerLick=workerLick
             self.workerPlot=workerPlot
             self.workerGenerateAtrial=workerGenerateAtrial
             self.workerStartTrialLoop=workerStartTrialLoop
             self.workerStartTrialLoop1=workerStartTrialLoop1
-            self.worker_save=worker_save
         else:
             PlotM=self.PlotM
             worker1=self.worker1
@@ -4314,7 +4312,6 @@ class Window(QMainWindow):
             workerGenerateAtrial=self.workerGenerateAtrial
             workerStartTrialLoop=self.workerStartTrialLoop
             workerStartTrialLoop1=self.workerStartTrialLoop1
-            worker_save=self.worker_save
 
         # collecting the base signal for photometry. Only run once
         if self.Start.isChecked() and self.PhotometryB.currentText()=='on' and self.PhotometryRun==0:
@@ -4333,7 +4330,7 @@ class Window(QMainWindow):
                 self.workertimer = TimerWorker()
                 self.workertimer_thread = QThread()
                 self.workertimer.progress.connect(self._update_photometery_timer)
-                self.workertimer.finished.connect(self._thread_complete_timer)
+                self.workertimer.finished.connect(self._handle_timer_finished)
                 self.Time.connect(self.workertimer._Timer)
                 self.workertimer.moveToThread(self.workertimer_thread)
                 self.workertimer_thread.start()
@@ -4341,7 +4338,7 @@ class Window(QMainWindow):
             self.Time.emit(int(np.floor(float(self.baselinetime.text())*60)))
             logging.info('Running photometry baseline', extra={'tags': [self.warning_log_tag]})
 
-        self._StartTrialLoop(GeneratedTrials,worker1,worker_save)
+        self._StartTrialLoop(GeneratedTrials,worker1)
 
         if self.actionDrawing_after_stopping.isChecked()==True:
             try:
@@ -4414,7 +4411,7 @@ class Window(QMainWindow):
         else:
             logging.info(f'No active session logger')
 
-    def _StartTrialLoop(self,GeneratedTrials,worker1,worker_save):
+    def _StartTrialLoop(self,GeneratedTrials,worker1):
         if self.Start.isChecked():
             logging.info('starting trial loop')
         else:
@@ -4529,7 +4526,9 @@ class Window(QMainWindow):
                 # Save data in a separate thread
                 if GeneratedTrials.B_CurrentTrialN>0 and self.previous_backup_completed==1 and self.save_each_trial and GeneratedTrials.CurrentSimulation==False:
                     self.previous_backup_completed=0
-                    self.threadpool6.start(worker_save)
+                    worker_save = Worker(self._perform_backup,auto_delete=True,BackupSave=1)
+                    worker_save.signals.finished.connect(self._handle_backup_finished)
+                    self.threadpool.start(worker_save)
 
                 # show disk space
                 self._show_disk_space()
@@ -4629,7 +4628,7 @@ class Window(QMainWindow):
                 else:
                     if self.ToUpdateFigure==1:
                         self.ToUpdateFigure=0
-                        self.threadpool3.start(workerPlot)
+                        self.threadpool.start(workerPlot)
                 #get the response of the animal using a different thread
                 self.threadpool.start(worker1)
                 '''
@@ -4647,7 +4646,7 @@ class Window(QMainWindow):
                     GeneratedTrials._GenerateATrial(self.Channel4)
                 else:
                     self.ToGenerateATrial=0
-                    self.threadpool4.start(workerGenerateAtrial)
+                    self.threadpool.start(workerGenerateAtrial)
 
     def _OptogeneticsB(self):
         ''' optogenetics control in the main window'''

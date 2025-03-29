@@ -365,6 +365,7 @@ class GenerateTrials():
         '''Generate the next block reward probability and block length (coupled task only)'''
         # determine the reward probability of the next trial based on tasks
         self.RewardPairs=self.B_RewardFamilies[int(self.TP_RewardFamily)-1][:int(self.TP_RewardPairsN)]
+        @pyqtSlot()
         self.RewardProb=np.array(self.RewardPairs)/np.expand_dims(np.sum(self.RewardPairs,axis=1),axis=1)*float(self.TP_BaseRewardSum)
         # get the reward probabilities pool
         RewardProbPool=np.append(self.RewardProb,np.fliplr(self.RewardProb),axis=0)
@@ -2030,11 +2031,12 @@ class Worker(QtCore.QRunnable):
     :param callback: The function callback to run on this worker thread. Supplied args and
                      kwargs will be passed through to the runner.
     :type callback: function
+    :param auto_delete: True if the thread should be deleted when finished, default is False
     :param args: Arguments to pass to the callback function
     :param kwargs: Keywords to pass to the callback function
 
     '''
-    def __init__(self, fn, *args, **kwargs):
+    def __init__(self, fn, auto_delete=False, *args, **kwargs):
         super(Worker, self).__init__()
 
         # Store constructor arguments (re-used for processing)
@@ -2042,7 +2044,7 @@ class Worker(QtCore.QRunnable):
         self.args = args
         self.kwargs = kwargs
         self.signals = WorkerSignals()
-        self.setAutoDelete(False) 
+        self.setAutoDelete(auto_delete)
         # Add the callback to our kwargs
 
     @QtCore.pyqtSlot()
