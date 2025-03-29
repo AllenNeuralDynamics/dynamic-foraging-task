@@ -1460,12 +1460,37 @@ class Window(QMainWindow):
             return None
         if mouse_id not in self.schedule["Mouse ID"].values:
             return None
-        return self.schedule.query("`Mouse ID` == @mouse_id").iloc[0][column]
+        return self.schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
+    
+    def _GetProtocol(self, mouse_id):
+        if not self.Settings['check_schedule']:
+            logging.info('not setting protocol because check_schedule=False')
+            return
+        logging.info('Getting protocol')
+        protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
+        if (protocol is None) or (protocol == '') or (np.isnan(protocol)):
+            if not self.Settings['add_default_project_name']:
+                logging.info('Protocol not on schedule, not using default because add_default_project_name=False')
+                return
+            else:
+                logging.info('Protocol not on schedule, using default: 2414')
+                protocol = 2414
+ 
+        self.Metadata_dialog.meta_data['session_metadata']['IACUCProtocol'] = str(int(protocol))
+        self.Metadata_dialog._update_metadata(
+            update_rig_metadata=False,
+            update_session_metadata=True
+        )
+        logging.info('Setting IACUC Protocol: {}'.format(protocol))
+
 
     def _GetProjectName(self, mouse_id):
-        logging.info("Getting Project name")
-        project_name = self._GetInfoFromSchedule(mouse_id, "Project Name")
-        add_default = True
+        if not self.Settings['check_schedule']:
+            logging.info('not setting project name because check_schedule=False')
+            return
+        logging.info('Getting Project name')
+        project_name = self._GetInfoFromSchedule(mouse_id, 'Project Name')
+        add_default = True 
 
         # Check if this is a valid project name
         if project_name is None:
@@ -4044,6 +4069,7 @@ class Window(QMainWindow):
         self.Experimenter.setText(experimenter)
         self.ID.returnPressed.emit()
         self._GetProjectName(mouse_id)
+        self._GetProtocol(mouse_id)
         self.TargetRatio.setText("0.85")
         self.keyPressEvent(allow_reset=True)
 
@@ -4491,7 +4517,7 @@ class Window(QMainWindow):
         self.load_tag = 1
         self.ID.returnPressed.emit()  # Mimic the return press event to auto-engage AutoTrain
         self._GetProjectName(self.behavior_session_model.subject)
-
+        self._GetProtocol(self.behavior_session_model.subject) 
     def _LoadVisualization(self):
         """To visulize the training when loading a session"""
         self.ToInitializeVisual = 1
@@ -5492,19 +5518,7 @@ class Window(QMainWindow):
 
             # disable metadata fields
             self._set_metadata_enabled(False)
-
-            # Set IACUC protocol in metadata based on schedule
-            protocol = self._GetInfoFromSchedule(mouse_id, "Protocol")
-            if protocol is not None:
-                self.Metadata_dialog.meta_data["session_metadata"]["IACUCProtocol"] = (
-                    str(int(protocol))
-                )
-                self.Metadata_dialog._update_metadata(
-                    update_rig_metadata=False, update_session_metadata=True
-                )
-                logging.info("Setting IACUC Protocol: {}".format(protocol))
-            self.session_run = True  # session has been started
-
+            self.session_run = True   # session has been started
             self.keyPressEvent(allow_reset=True)
 
         else:

@@ -2634,7 +2634,6 @@ class MetadataDialog(QDialog):
             "EphysProbes",
             "RigMetadataFile",
             "StickMicroscopes",
-            "ProjectName",
         ]
         widget_dict = {
             w.objectName(): w
