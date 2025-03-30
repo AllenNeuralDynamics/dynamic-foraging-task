@@ -35,8 +35,6 @@ from aind_data_schema.core.session import (
     TriggerType,
 )
 from aind_data_schema_models.modalities import Modality
-from aind_data_schema_models.organizations import Organization
-from aind_data_schema_models.pid_names import PIDName
 from aind_data_schema_models.platforms import Platform
 from aind_data_schema_models.units import (
     FrequencyUnit,
@@ -921,7 +919,7 @@ class generate_metadata:
                 "LightEmittingDiode",
                 "Light emitting diode",
             ]:
-                if current_light_source["notes"] != None:
+                if current_light_source["notes"] is not None:
                     if "camera" in current_light_source["notes"]:
                         continue
                 self.fib_light_sources_config.append(
@@ -944,7 +942,7 @@ class generate_metadata:
         Make the audio stimulus metadata
         """
         self.behavior_stimulus = []
-        if self.has_behavior_data == False:
+        if self.has_behavior_data is False:
             logging.info("No behavior data stream detected!")
             return
 
@@ -1375,7 +1373,7 @@ class generate_metadata:
         Make the behavior stream metadata
         """
 
-        if self.has_behavior_data == False:
+        if self.has_behavior_data is False:
             self.behavior_streams = []
             logging.info("No behavior data detected!")
             return
@@ -1487,7 +1485,6 @@ class generate_metadata:
                 RecentLaserCalibration = self.Obj["LaserCalibrationResults"][
                     latest_calibration_date
                 ]
-            no_calibration = False
             if not RecentLaserCalibration == {}:
                 if color in RecentLaserCalibration.keys():
                     for Protocol in RecentLaserCalibration[color]:
@@ -1602,12 +1599,6 @@ class generate_metadata:
                                     "Power": power,
                                 }
                             )
-                    else:
-                        no_calibration = True
-                else:
-                    no_calibration = True
-            else:
-                no_calibration = True
 
     def _get_laser_names_from_rig_metadata(self, Obj=None):
         """
@@ -1625,7 +1616,7 @@ class generate_metadata:
 
     def _FindLatestCalibrationDate(self, Laser):
         """find the latest calibration date for the selected laser"""
-        if not ("LaserCalibrationResults" in self.Obj):
+        if "LaserCalibrationResults" not in self.Obj:
             logging.info(
                 "LaserCalibrationResults is not included in self.Obj."
             )

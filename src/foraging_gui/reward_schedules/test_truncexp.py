@@ -16,14 +16,23 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 
 def draw_dist_and_harzard(
-    samples, title, ax_dist, ax_hazard, ax_dist_all, ax_hazard_all, inset_ax_all, color
+    samples,
+    title,
+    ax_dist,
+    ax_hazard,
+    ax_dist_all,
+    ax_hazard_all,
+    inset_ax_all,
+    color,
 ):
     hist, xx, _ = ax_dist.hist(samples, 100, density=True, color=color)
     hazard = hist / np.flip(np.flip(hist).cumsum())
 
     # Histogram
     ax_dist.set(title=title, ylim=(0, max(hist) * 1.5), ylabel="Density")
-    ax_dist.axvline(samples.mean(), c="r", label=f"mean = {samples.mean():.2f}")
+    ax_dist.axvline(
+        samples.mean(), c="r", label=f"mean = {samples.mean():.2f}"
+    )
     ax_dist.axvline(
         np.median(samples), c="k", label=f"median = {np.median(samples):.2f}"
     )
@@ -42,7 +51,10 @@ def draw_dist_and_harzard(
 
     # Overlay cumulative distribution
     ax_dist_all.plot(
-        xx[:-1], hist.cumsum() / hist.sum(), label=title.split("\n")[0], color=color
+        xx[:-1],
+        hist.cumsum() / hist.sum(),
+        label=title.split("\n")[0],
+        color=color,
     )
 
     # Overlay hazard function
