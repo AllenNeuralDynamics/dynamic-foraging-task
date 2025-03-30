@@ -200,25 +200,25 @@ class PlotV(FigureCanvas):
         LeftChoice_Rewarded = np.where(
             np.logical_and(
                 self.B_AnimalResponseHistory == 0,
-                self.B_RewardedHistory[0] == True,
+                self.B_RewardedHistory[0] is True,
             )
         )
-        LeftChoice_UnRewarded = np.where(
+        np.where(
             np.logical_and(
                 self.B_AnimalResponseHistory == 0,
-                self.B_RewardedHistory[0] == False,
+                self.B_RewardedHistory[0] is False,
             )
         )
         RightChoice_Rewarded = np.where(
             np.logical_and(
                 self.B_AnimalResponseHistory == 1,
-                self.B_RewardedHistory[1] == True,
+                self.B_RewardedHistory[1] is True,
             )
         )
-        RightChoice_UnRewarded = np.where(
+        np.where(
             np.logical_and(
                 self.B_AnimalResponseHistory == 1,
-                self.B_RewardedHistory[1] == False,
+                self.B_RewardedHistory[1] is False,
             )
         )
 
@@ -277,8 +277,8 @@ class PlotV(FigureCanvas):
         NoResponse = np.where(self.B_AnimalResponseHistory == 2)
 
         if self.B_BaitHistory.shape[1] > self.B_AnimalResponseHistory.shape[0]:
-            LeftBait = np.where(self.B_BaitHistory[0][:-1] == True)
-            RightBait = np.where(self.B_BaitHistory[1][:-1] == True)
+            LeftBait = np.where(self.B_BaitHistory[0][:-1])
+            RightBait = np.where(self.B_BaitHistory[1][:-1])
             # plot the upcoming trial start time
             if self.B_CurrentTrialN > 0:
                 NewTrialStart = np.array(self.B_BTime[-1])
@@ -305,7 +305,7 @@ class PlotV(FigureCanvas):
                 color="k",
                 alpha=0.3,
             )
-            if self.B_BaitHistory[0][-1] == True:
+            if self.B_BaitHistory[0][-1]:
                 self.ax1.plot(
                     NewTrialStart2,
                     -0.2,
@@ -314,7 +314,7 @@ class PlotV(FigureCanvas):
                     markersize=self.MarkerSize,
                     alpha=0.4,
                 )
-            if self.B_BaitHistory[1][-1] == True:
+            if self.B_BaitHistory[1][-1]:
                 self.ax1.plot(
                     NewTrialStart2,
                     1.2,
@@ -352,8 +352,8 @@ class PlotV(FigureCanvas):
                     markersize=self.MarkerSize,
                 )
         else:
-            LeftBait = np.where(self.B_BaitHistory[0] == True)
-            RightBait = np.where(self.B_BaitHistory[1] == True)
+            LeftBait = np.where(self.B_BaitHistory[0])
+            RightBait = np.where(self.B_BaitHistory[1])
 
         if np.size(self.B_AutoLeftWaterStartTime) != 0:
             self.ax1.plot(
@@ -856,7 +856,7 @@ class PlotLickDistribution(FigureCanvas):
         self.ax3.set_title("Left to right licks", fontsize=8)
         self.ax4.set_title("Right to left licks", fontsize=8)
         self.ax5.set_title("All licks", fontsize=8)
-        if GeneratedTrials == None:
+        if GeneratedTrials is None:
             return
         # Custom x-axis values
         custom_x_values = np.linspace(-0.3, 0.3, 100)

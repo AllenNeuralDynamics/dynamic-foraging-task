@@ -1,11 +1,10 @@
 import queue
 import time
 
+import io_commands as io
 from newscale.interfaces import USBInterface
 from newscale.multistage import PoEXYZStage, USBXYZStage
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
-
-import io_commands as io
 
 TIME_SLEEP = 0.03
 
@@ -59,9 +58,9 @@ class IOWorker(QObject):
 
     def clear_queues(self):
         while not self.qslow.empty():
-            cmd = self.qslow.get()
+            self.qslow.get()
         while not self.qfast.empty():
-            gcmd = self.qfast.get()
+            self.qfast.get()
 
     def halt(self):
         self.halt_requested = True

@@ -406,7 +406,7 @@ class GenerateTrials:
                 self.BaitPermitted = False
         else:
             self.BaitPermitted = True
-        if self.BaitPermitted == False:
+        if self.BaitPermitted is False:
             logging.warning(
                 "The active side has no reward due to consecutive \nselections("
                 + str(MaxCLen)
@@ -806,10 +806,10 @@ class GenerateTrials:
             self.BS_CurrentBlockTrialN[i] = length[-1]
             index[i] = indexN[-1]
         self.BS_RewardedTrialN_CurrentLeftBlock = np.sum(
-            B_RewardedHistory[0][index[0][0] : index[0][1] + 1] == True
+            B_RewardedHistory[0][index[0][0] : index[0][1] + 1] is True
         )
         self.BS_RewardedTrialN_CurrentRightBlock = np.sum(
-            B_RewardedHistory[1][index[1][0] : index[1][1] + 1] == True
+            B_RewardedHistory[1][index[1][0] : index[1][1] + 1] is True
         )
         self.AllRewardThisBlock = (
             self.BS_RewardedTrialN_CurrentLeftBlock
@@ -844,7 +844,7 @@ class GenerateTrials:
             self.BS_RespondedRate = np.nan
         else:
             self.BS_RespondedRate = self.BS_FinisheTrialN / self.BS_AllTrialN
-        self.BS_RewardTrialN = np.sum(self.B_RewardedHistory == True)
+        self.BS_RewardTrialN = np.sum(self.B_RewardedHistory is True)
         B_RewardedHistory = self.B_RewardedHistory.copy()
         # auto reward is considered as reward
         Ind = range(len(self.B_RewardedHistory[0]))
@@ -852,8 +852,8 @@ class GenerateTrials:
             B_RewardedHistory[i] = np.logical_or(
                 self.B_RewardedHistory[i], self.B_AutoWaterTrial[i][Ind]
             )
-        self.BS_RewardN = np.sum(B_RewardedHistory[0] == True) + np.sum(
-            B_RewardedHistory[1] == True
+        self.BS_RewardN = np.sum(B_RewardedHistory[0] is True) + np.sum(
+            B_RewardedHistory[1] is True
         )
 
         (
@@ -892,8 +892,8 @@ class GenerateTrials:
             + BS_auto_water_left
             + BS_auto_water_right
         )
-        self.BS_LeftRewardTrialN = np.sum(self.B_RewardedHistory[0] == True)
-        self.BS_RightRewardTrialN = np.sum(self.B_RewardedHistory[1] == True)
+        self.BS_LeftRewardTrialN = np.sum(self.B_RewardedHistory[0] is True)
+        self.BS_RightRewardTrialN = np.sum(self.B_RewardedHistory[1] is True)
         self.BS_LeftChoiceN = np.sum(self.B_AnimalResponseHistory == 0)
         self.BS_RightChoiceN = np.sum(self.B_AnimalResponseHistory == 1)
         self.BS_OverallRewardRate = self.BS_RewardTrialN / (
@@ -1094,7 +1094,7 @@ class GenerateTrials:
 
     def _LickSta(self, Trials=None):
         """Perform lick stats for the input trials"""
-        if Trials == None:  # could receive multiple trials
+        if Trials is None:  # could receive multiple trials
             Trials = self.B_CurrentTrialN - 1
         # combine all of the left and right licks
         self.AllLicksInd = np.concatenate(
@@ -2152,9 +2152,9 @@ class GenerateTrials:
                             extra={"tags": [self.win.warning_log_tag]},
                         )
                     elif (
-                        np.all(B_RewardedHistory[0][-UnrewardedN:] == False)
+                        np.all(B_RewardedHistory[0][-UnrewardedN:] is False)
                         and np.all(
-                            B_RewardedHistory[1][-UnrewardedN:] == False
+                            B_RewardedHistory[1][-UnrewardedN:] is False
                         )
                         and np.shape(B_RewardedHistory[0])[0] >= UnrewardedN
                     ):
@@ -2509,7 +2509,7 @@ class GenerateTrials:
             self.CurrentAutoRewardTrial = [0, 0]
             if self.TP_AutoWaterType == "Natural":
                 for i in range(len(self.CurrentBait)):
-                    if self.CurrentBait[i] == True:
+                    if self.CurrentBait[i]:
                         self.CurrentAutoRewardTrial[i] = 1
             if self.TP_AutoWaterType == "Both":
                 self.CurrentAutoRewardTrial = [1, 1]
@@ -2534,7 +2534,7 @@ class GenerateTrials:
         )
 
         self._CheckSimulationSession()
-        if self.CurrentSimulation == False:  # run simulation if it's true
+        if self.CurrentSimulation is False:  # run simulation if it's true
             # send optogenetics waveform of the upcoming trial if this is an optogenetics trial
             if self.B_LaserOnTrial[self.B_CurrentTrialN] == 1:
                 if self.CLP_LaserStart == "Trial start":
@@ -2571,7 +2571,7 @@ class GenerateTrials:
                             ).tolist()
                         )[1:-1]
                     )
-                FinishOfWaveForm = Channel4.receive()
+                Channel4.receive()
             else:
                 Channel1.PassGoCue(int(0))
                 Channel1.PassRewardOutcome(int(0))
@@ -2598,8 +2598,8 @@ class GenerateTrials:
     def _CheckSimulationSession(self):
         """To check if this is a simulation session"""
         if (
-            self.win.actionWin_stay_lose_switch.isChecked() == True
-            or self.win.actionRandom_choice.isChecked() == True
+            self.win.actionWin_stay_lose_switch.isChecked() is True
+            or self.win.actionRandom_choice.isChecked() is True
         ):
             self.CurrentSimulation = True
             self.B_SimulationSession.append(True)
@@ -2611,7 +2611,7 @@ class GenerateTrials:
         """Simulate animal's response"""
 
         # win stay, lose switch forager
-        if self.win.actionWin_stay_lose_switch.isChecked() == True:
+        if self.win.actionWin_stay_lose_switch.isChecked():
             if self.B_CurrentTrialN >= 2:
                 if np.random.random(1) < 0.1:  # no response
                     self.B_AnimalCurrentResponse = 2
@@ -2636,7 +2636,7 @@ class GenerateTrials:
             else:
                 self.B_AnimalCurrentResponse = random.choice(range(2))
         # random forager
-        elif self.win.actionRandom_choice.isChecked() == True:
+        elif self.win.actionRandom_choice.isChecked():
             if np.random.random(1) < 0.1:  # no response
                 self.B_AnimalCurrentResponse = 2
             else:
@@ -2646,22 +2646,22 @@ class GenerateTrials:
             self.B_CurrentRewarded[0] = False
             self.B_CurrentRewarded[1] = False
             self._add_one_trial()
-        elif self.B_AnimalCurrentResponse == 0 and self.CurrentBait[0] == True:
+        elif self.B_AnimalCurrentResponse == 0 and self.CurrentBait[0]:
             self.B_Baited[0] = False
             self.B_CurrentRewarded[1] = False
             self.B_CurrentRewarded[0] = True
         elif (
-            self.B_AnimalCurrentResponse == 0 and self.CurrentBait[0] == False
+            self.B_AnimalCurrentResponse == 0 and self.CurrentBait[0] is False
         ):
             self.B_Baited[0] = False
             self.B_CurrentRewarded[0] = False
             self.B_CurrentRewarded[1] = False
-        elif self.B_AnimalCurrentResponse == 1 and self.CurrentBait[1] == True:
+        elif self.B_AnimalCurrentResponse == 1 and self.CurrentBait[1]:
             self.B_Baited[1] = False
             self.B_CurrentRewarded[0] = False
             self.B_CurrentRewarded[1] = True
         elif (
-            self.B_AnimalCurrentResponse == 1 and self.CurrentBait[1] == False
+            self.B_AnimalCurrentResponse == 1 and self.CurrentBait[1] is False
         ):
             self.B_Baited[1] = False
             self.B_CurrentRewarded[0] = False
@@ -2755,7 +2755,7 @@ class GenerateTrials:
     def _GetAnimalResponse(self, Channel1, Channel3, data_lock):
         """Get the animal's response"""
         self._CheckSimulationSession()
-        if self.CurrentSimulation == True:
+        if self.CurrentSimulation:
             self._SimulateResponse()
             return
         # set the valve time of auto water
@@ -3036,7 +3036,7 @@ class GenerateTrials:
     def _DeletePreviousLicks(self, Channel2):
         """Delete licks from the previous session"""
         while not Channel2.msgs.empty():
-            Rec = Channel2.receive()
+            Channel2.receive()
 
     # get training parameters
     def _GetTrainingParameters(self, win):

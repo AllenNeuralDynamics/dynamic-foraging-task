@@ -37,7 +37,10 @@ class UncoupledBlocks:
         self.rwd_tally = {"L": 0, "R": 0}
         self.trial_now = -1  # Index of trial number, starting from 0
 
-        self.block_ends = {"L": [], "R": []}  # Trial number on which each block ends
+        self.block_ends = {
+            "L": [],
+            "R": [],
+        }  # Trial number on which each block ends
         self.block_rwd_prob = {"L": [], "R": []}  # Reward probability
         self.block_ind = {
             "L": 0,
@@ -65,14 +68,19 @@ class UncoupledBlocks:
 
         # Avoid both blocks have the lowest reward prob
         while np.all(
-            [x[0] == np.min(self.rwd_prob_array) for x in self.block_rwd_prob.values()]
+            [
+                x[0] == np.min(self.rwd_prob_array)
+                for x in self.block_rwd_prob.values()
+            ]
         ):
-            self.block_rwd_prob[np.random.choice(["L", "R"])][0] = np.random.choice(
-                self.rwd_prob_array
+            self.block_rwd_prob[np.random.choice(["L", "R"])][0] = (
+                np.random.choice(self.rwd_prob_array)
             )  # Random change one side to another prob
 
         # Start with block stagger: the lower side makes the first block switch earlier
-        smaller_side = min(self.block_rwd_prob, key=lambda x: self.block_rwd_prob[x][0])
+        smaller_side = min(
+            self.block_rwd_prob, key=lambda x: self.block_rwd_prob[x][0]
+        )
         self.block_ends[smaller_side][0] -= self.block_stagger
 
         self.block_effective_ind = 1  # Effective block ind
@@ -88,18 +96,23 @@ class UncoupledBlocks:
 
         if self.block_ind[side] == 0:  # The first block
             self.block_ends[side].append(random_block_len)
-            self.block_rwd_prob[side].append(np.random.choice(self.rwd_prob_array))
+            self.block_rwd_prob[side].append(
+                np.random.choice(self.rwd_prob_array)
+            )
 
         else:  # Not the first block
             self.block_ends[side].append(
-                random_block_len + self.block_ends[side][self.block_ind[side] - 1]
+                random_block_len
+                + self.block_ends[side][self.block_ind[side] - 1]
             )
 
             # If this side has higher prob for too long, force it to be the lowest
             if check_higher_in_a_row:
                 # For each effective block, update number of times each side >= the other side
                 this_prev = self.block_rwd_prob[side][self.block_ind[side] - 1]
-                other_now = self.block_rwd_prob[other_side][self.block_ind[other_side]]
+                other_now = self.block_rwd_prob[other_side][
+                    self.block_ind[other_side]
+                ]
                 if this_prev > other_now:
                     self.rwd_tally[side] += 1
                     self.rwd_tally[other_side] = 0
@@ -123,18 +136,26 @@ class UncoupledBlocks:
                         np.random.choice(self.rwd_prob_array)
                     )
             else:
-                self.block_rwd_prob[side].append(np.random.choice(self.rwd_prob_array))
+                self.block_rwd_prob[side].append(
+                    np.random.choice(self.rwd_prob_array)
+                )
 
             # Don't repeat the previous rwd prob
             # (this will not mess up with the "forced" case since the previous block cannot be the lowest prob in the first place)
-            while self.block_rwd_prob[side][-2] == self.block_rwd_prob[side][-1]:
-                self.block_rwd_prob[side][-1] = np.random.choice(self.rwd_prob_array)
+            while (
+                self.block_rwd_prob[side][-2] == self.block_rwd_prob[side][-1]
+            ):
+                self.block_rwd_prob[side][-1] = np.random.choice(
+                    self.rwd_prob_array
+                )
 
             # If the other side is already at the lowest prob AND this side just generates the same
             # (either through "forced" case or not), push the previous lowest side to a higher prob
             if check_both_lowest and self.block_rwd_prob[side][
                 -1
-            ] == self.block_rwd_prob[other_side][-1] == min(self.rwd_prob_array):
+            ] == self.block_rwd_prob[other_side][-1] == min(
+                self.rwd_prob_array
+            ):
                 # Stagger this side
                 self.block_ends[side][-1] -= self.block_stagger
 
@@ -147,7 +168,9 @@ class UncoupledBlocks:
                     other_side
                 ] += 1  # Two sides change at the same time, no need to add block_effective_ind twice
                 self.generate_next_block(
-                    other_side, check_higher_in_a_row=False, check_both_lowest=False
+                    other_side,
+                    check_higher_in_a_row=False,
+                    check_both_lowest=False,
                 )  # Just generate new block, no need to do checks
         return msg
 
@@ -195,17 +218,25 @@ class UncoupledBlocks:
                     self.block_effective_ind += 1
                     msg = (
                         self.generate_next_block(
-                            s, check_higher_in_a_row=True, check_both_lowest=True
+                            s,
+                            check_higher_in_a_row=True,
+                            check_both_lowest=True,
                         )
                         + "\n"
                     )
 
         # Fill new value
         for s in ["L", "R"]:
-            self.trial_rwd_prob[s].append(self.block_rwd_prob[s][self.block_ind[s]])
+            self.trial_rwd_prob[s].append(
+                self.block_rwd_prob[s][self.block_ind[s]]
+            )
 
         # Anti-persev
-        if not self.hold_this_block and self.persev_add and len(self.choice_history):
+        if (
+            not self.hold_this_block
+            and self.persev_add
+            and len(self.choice_history)
+        ):
             msg = msg + self.auto_shape_perseverance()
         else:
             for s in ["L", "R"]:
@@ -241,18 +272,29 @@ class UncoupledBlocks:
             for s, col in zip(["L", "R"], ["r", "b"]):
                 [
                     ax.axvline(
-                        x + (0.1 if s == "R" else 0), 0, 1, color=col, ls="--", lw=0.5
+                        x + (0.1 if s == "R" else 0),
+                        0,
+                        1,
+                        color=col,
+                        ls="--",
+                        lw=0.5,
                     )
                     for x in self.block_ends[s]
                 ]
-                [ax.plot(x, 1.2, marker=">", color=col) for x in self.force_by_tally[s]]
+                [
+                    ax.plot(x, 1.2, marker=">", color=col)
+                    for x in self.force_by_tally[s]
+                ]
                 [
                     ax.plot(x, 1.1, marker="v", color=col)
                     for x in self.force_by_both_lowest[s]
                 ]
 
             for s, col, pos, m in zip(
-                ["L", "R", "ignored"], ["r", "b", "k"], [0, 1, 0.95], ["|", "|", "x"]
+                ["L", "R", "ignored"],
+                ["r", "b", "k"],
+                [0, 1, 0.95],
+                ["|", "|", "x"],
             ):
                 this_choice = np.where(np.array(self.choice_history) == s)
                 ax.plot(this_choice, [pos] * len(this_choice), m, color=col)
@@ -266,16 +308,22 @@ class UncoupledBlocks:
             )
 
         for s, col in zip(["L", "R"], ["r", "b"]):
-            ax[0].plot(self.trial_rwd_prob[s], col, marker=".", alpha=0.5, lw=2)
+            ax[0].plot(
+                self.trial_rwd_prob[s], col, marker=".", alpha=0.5, lw=2
+            )
         annotate_block(ax[0])
 
         ax[1].plot(
-            np.array(self.trial_rwd_prob["L"]) + np.array(self.trial_rwd_prob["R"]),
+            np.array(self.trial_rwd_prob["L"])
+            + np.array(self.trial_rwd_prob["R"]),
             label="sum",
         )
         ax[1].plot(
             np.array(self.trial_rwd_prob["R"])
-            / (np.array(self.trial_rwd_prob["L"]) + np.array(self.trial_rwd_prob["R"])),
+            / (
+                np.array(self.trial_rwd_prob["L"])
+                + np.array(self.trial_rwd_prob["R"])
+            ),
             label="R/(L+R)",
         )
         ax[1].legend()
@@ -295,7 +343,9 @@ if __name__ == "__main__":
         run protocol here
         """
         reward_schedule.add_choice(
-            ["L", "R", "ignored"][np.random.choice([0] * 100 + [1] * 20 + [2] * 1)]
+            ["L", "R", "ignored"][
+                np.random.choice([0] * 100 + [1] * 20 + [2] * 1)
+            ]
         )
 
         reward_schedule.hold_this_block = 500 < reward_schedule.trial_now < 700
