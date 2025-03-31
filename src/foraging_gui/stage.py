@@ -58,9 +58,9 @@ class IOWorker(QObject):
 
     def clear_queues(self):
         while not self.qslow.empty():
-            cmd = self.qslow.get()
+            self.qslow.get()
         while not self.qfast.empty():
-            gcmd = self.qfast.get()
+            self.qfast.get()
 
     def halt(self):
         self.halt_requested = True

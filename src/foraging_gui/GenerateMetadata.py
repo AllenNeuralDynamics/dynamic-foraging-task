@@ -36,8 +36,6 @@ from aind_data_schema.core.session import (
     TriggerType,
 )
 from aind_data_schema_models.modalities import Modality
-from aind_data_schema_models.organizations import Organization
-from aind_data_schema_models.pid_names import PIDName
 from aind_data_schema_models.platforms import Platform
 from aind_data_schema_models.units import (
     FrequencyUnit,
@@ -830,7 +828,7 @@ class generate_metadata:
                 detectors=self.fib_detectors,
                 fiber_connections=self.fiber_connections,
                 software=self.behavior_software,
-                notes=f'Fib modality: fib mode: {self.Obj["fiber_mode"]}',
+                notes=f"Fib modality: fib mode: {self.Obj['fiber_mode']}",
             )
         )
 
@@ -924,7 +922,7 @@ class generate_metadata:
                 "LightEmittingDiode",
                 "Light emitting diode",
             ]:
-                if current_light_source["notes"] != None:
+                if current_light_source["notes"] is not None:
                     if "camera" in current_light_source["notes"]:
                         continue
                 self.fib_light_sources_config.append(
@@ -947,7 +945,7 @@ class generate_metadata:
         Make the audio stimulus metadata
         """
         self.behavior_stimulus = []
-        if self.has_behavior_data == False:
+        if self.has_behavior_data is False:
             logging.info("No behavior data stream detected!")
             return
 
@@ -1378,7 +1376,7 @@ class generate_metadata:
         Make the behavior stream metadata
         """
 
-        if self.has_behavior_data == False:
+        if self.has_behavior_data is False:
             self.behavior_streams = []
             logging.info("No behavior data detected!")
             return
@@ -1409,12 +1407,10 @@ class generate_metadata:
         """
         self.behavior_software = []
         try:
-            # script_dir = os.path.dirname(os.path.abspath(__file__))
-            # os.chdir(script_dir)  # Change to the directory of the current script
             # Get information about task repository
             commit_ID = (
                 self.session_model.commit_hash
-            )  # subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
+            )
             current_branch = (
                 subprocess.check_output(["git", "branch", "--show-current"])
                 .decode("ascii")
@@ -1433,7 +1429,7 @@ class generate_metadata:
         self.behavior_software.append(
             Software(
                 name="dynamic-foraging-task",
-                version=f'behavior branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}    version:{self.Obj["version"]}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}',
+                version=f"behavior branch:{self.Obj['current_branch']}   commit ID:{self.Obj['commit_ID']}    version:{self.Obj['version']}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}",
                 url=self.Obj["repo_url"],
             )
         )
@@ -1449,7 +1445,7 @@ class generate_metadata:
         self._parse_opto_calibration()
         self.opto_calibration = []
         for current_calibration in self.parsed_optocalibration:
-            description = f'Optogenetic calibration for {current_calibration["laser name"]} {current_calibration["Color"]} Laser_{current_calibration["Laser tag"]}. Protocol: {current_calibration["Protocol"]}. Frequency: {current_calibration["Frequency"]}.'
+            description = f"Optogenetic calibration for {current_calibration['laser name']} {current_calibration['Color']} Laser_{current_calibration['Laser tag']}. Protocol: {current_calibration['Protocol']}. Frequency: {current_calibration['Frequency']}."
             self.opto_calibration.append(
                 Calibration(
                     calibration_date=datetime.strptime(
@@ -1486,7 +1482,6 @@ class generate_metadata:
                 RecentLaserCalibration = self.Obj["LaserCalibrationResults"][
                     latest_calibration_date
                 ]
-            no_calibration = False
             if not RecentLaserCalibration == {}:
                 if color in RecentLaserCalibration.keys():
                     for Protocol in RecentLaserCalibration[color]:
@@ -1601,12 +1596,6 @@ class generate_metadata:
                                     "Power": power,
                                 }
                             )
-                    else:
-                        no_calibration = True
-                else:
-                    no_calibration = True
-            else:
-                no_calibration = True
 
     def _get_laser_names_from_rig_metadata(self, Obj=None):
         """
@@ -1624,7 +1613,7 @@ class generate_metadata:
 
     def _FindLatestCalibrationDate(self, Laser):
         """find the latest calibration date for the selected laser"""
-        if not ("LaserCalibrationResults" in self.Obj):
+        if "LaserCalibrationResults" not in self.Obj:
             logging.info(
                 "LaserCalibrationResults is not included in self.Obj."
             )
@@ -1871,7 +1860,6 @@ class generate_metadata:
 
 
 if __name__ == "__main__":
-
     generate_metadata(
         json_file=r"Y:\753126\behavior_753126_2024-10-07_10-14-07\behavior\753126_2024-10-07_10-14-07.json",
         output_folder=r"H:\test",

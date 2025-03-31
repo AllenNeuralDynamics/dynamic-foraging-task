@@ -1,4 +1,4 @@
-from PyQt5.Qt import QMouseEvent, Qt, pyqtSignal
+from PyQt5.Qt import pyqtSignal
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QGridLayout,
@@ -17,7 +17,6 @@ class SoundButton(QToolButton):
     attenuationChanged = pyqtSignal(int)
 
     def __init__(self, attenuation: int = 0):
-
         super().__init__()
 
         self.setIcon(QIcon(r"resources/speaker.png"))

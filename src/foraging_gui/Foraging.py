@@ -1,4 +1,3 @@
-import copy
 import csv
 import json
 import logging
@@ -16,8 +15,6 @@ import webbrowser
 from datetime import date, datetime, timedelta, timezone
 from hashlib import md5
 from pathlib import Path
-from random import randint
-from typing import Literal
 
 import harp
 import logging_loki
@@ -29,7 +26,6 @@ import yaml
 from aind_auto_train.schema.task import TrainingStage
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_data_schema.core.session import Session
-from aind_data_schema_models.modalities import Modality
 from aind_slims_api import SlimsClient, models
 from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar,
@@ -199,9 +195,8 @@ class Window(QMainWindow):
         self.FigureUpdateTooSlow = 0  # if the FigureUpdateTooSlow is true, using different process to update figures
         self.ANewTrial = 1  # permission to start a new trial
         self.UpdateParameters = 1  # permission to update parameters
-        self.logging_type = (
-            -1
-        )  # -1, logging is not started; 0, temporary logging; 1, formal logging
+        # -1, logging is not started; 0, formal logging; 1, temporary logging
+        self.logging_type = -1
         self.previous_backup_completed = 1  # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.unsaved_data = False  # Setting unsaved data to False
         self.to_check_drop_frames = 1  # 1, to check drop frames during saving data; 0, not to check drop frames
@@ -215,15 +210,15 @@ class Window(QMainWindow):
             self._load_stage()
         except IOError as e:
             msg = (
-                f"ERROR...<br>"
-                f"Dear scientist, please perform the following to document this issue:<br>"
-                f"    1) Create comment here: <a href=https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/925>Github Link</a><br>"
-                f"    2) In the comment list the following information:<br> "
-                f"            - Date and time of error<br>"
-                f"            - Box info (ex. 6D)<br>"
-                f"            - Attach logs (found in  C:\\Users\\svc_aind_behavior\\Documents\\foraging_gui_logs). Please add the two most recent files<br>"
-                f"            - Short description of the last thing done on the GUI before the error. (ex. overnight bleaching, closed gui, opened gui - error)<br>"
-                f"Thank you, with your efforts hopefully we can vanquish this error and never see it again...<br>"
+                "ERROR...<br>"
+                "Dear scientist, please perform the following to document this issue:<br>"
+                "    1) Create comment here: <a href=https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/925>Github Link</a><br>"
+                "    2) In the comment list the following information:<br> "
+                "            - Date and time of error<br>"
+                "            - Box info (ex. 6D)<br>"
+                "            - Attach logs (found in  C:\\Users\\svc_aind_behavior\\Documents\\foraging_gui_logs). Please add the two most recent files<br>"
+                "            - Short description of the last thing done on the GUI before the error. (ex. overnight bleaching, closed gui, opened gui - error)<br>"
+                "Thank you, with your efforts hopefully we can vanquish this error and never see it again...<br>"
             )
             show_msg_box(
                 "Stage Widget Error", "Stage Widget Error Diagnostic Help", msg
@@ -263,7 +258,7 @@ class Window(QMainWindow):
 
         # create sound button
         self.sound_button = SoundButton(
-            attenuation=int(self.SettingsBox[f"AttenuationLeft"])
+            attenuation=int(self.SettingsBox["AttenuationLeft"])
         )
         self.toolBar_3.addWidget(self.sound_button)
 
@@ -291,18 +286,14 @@ class Window(QMainWindow):
         self.load_tag = (
             0  # 1, a session has been loaded; 0, no session has been loaded
         )
-        self.Other_manual_water_left_volume = (
-            []
-        )  # the volume of manual water given by the left valve each time
-        self.Other_manual_water_left_time = (
-            []
-        )  # the valve open time of manual water given by the left valve each time
-        self.Other_manual_water_right_volume = (
-            []
-        )  # the volume of manual water given by the right valve each time
-        self.Other_manual_water_right_time = (
-            []
-        )  # the valve open time of manual water given by the right valve each time
+        # the volume of manual water given by the left valve each time
+        self.Other_manual_water_left_volume = []
+        # the valve open time of manual water given by the left valve each time
+        self.Other_manual_water_left_time = []
+        # the volume of manual water given by the right valve each time
+        self.Other_manual_water_right_volume = []
+        # the valve open time of manual water given by the right valve each time
+        self.Other_manual_water_right_time = []
 
         self._Optogenetics()  # open the optogenetics panel
         self._LaserCalibration()  # to open the laser calibration panel
@@ -367,7 +358,7 @@ class Window(QMainWindow):
         """Show the disk space of the current computer"""
         total, used, free = shutil.disk_usage(self.default_saveFolder)
         self.diskspace.setText(
-            f"Used space: {used/1024**3:.2f}GB    Free space: {free/1024**3:.2f}GB"
+            f"Used space: {used / 1024**3:.2f}GB    Free space: {free / 1024**3:.2f}GB"
         )
         self.DiskSpaceProgreeBar.setValue(int(used / total * 100))
         if free / 1024**3 < 100 or used / total > 0.9:
@@ -375,7 +366,7 @@ class Window(QMainWindow):
                 f"QProgressBar::chunk {{background-color: {self.default_warning_color};}}"
             )
             logging.warning(
-                f"Low disk space  Used space: {used/1024**3:.2f}GB    Free space: {free/1024**3:.2f}GB"
+                f"Low disk space  Used space: {used / 1024**3:.2f}GB    Free space: {free / 1024**3:.2f}GB"
             )
         else:
             self.DiskSpaceProgreeBar.setStyleSheet(
@@ -709,7 +700,7 @@ class Window(QMainWindow):
                     "",
                     f"Open Ephys has started recording!\n Recording type: {self.OpenEphysRecordingType.currentText()}",
                 )
-            except Exception as e:
+            except Exception:
                 logging.error(traceback.format_exc())
                 self.StartEphysRecording.setChecked(False)
                 QMessageBox.warning(
@@ -768,7 +759,7 @@ class Window(QMainWindow):
                     "",
                     "Open Ephys has stopped recording! Please save the data again!",
                 )
-            except Exception as e:
+            except Exception:
                 logging.error(traceback.format_exc())
                 QMessageBox.warning(
                     self,
@@ -1131,7 +1122,7 @@ class Window(QMainWindow):
         try:
             for key in widget_dict.keys():
                 self._set_parameters(key, widget_dict, parameters)
-        except Exception as e:
+        except Exception:
             # Catch the exception and log error information
             logging.error(traceback.format_exc())
 
@@ -1144,7 +1135,7 @@ class Window(QMainWindow):
         if hasattr(self, "current_stage") and self.current_stage.connected:
             logging.info("Checking stage connection")
             current_stage = self.current_stage
-            current_position = current_stage.get_position()
+            current_stage.get_position()
             if not current_stage.connected:
                 logging.error("lost stage connection")
                 self._no_stage()
@@ -1211,7 +1202,7 @@ class Window(QMainWindow):
             elif axis == "z":
                 relative_postition = (0, 0, step)
             self._UpdatePosition(current_position, relative_postition)
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
 
     def _MoveXP(self):
@@ -1348,7 +1339,7 @@ class Window(QMainWindow):
             instance.set_timeout(1)
             instance.set_baudrate(250000)
             self.current_stage = Stage(serial=instance)
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
             self._no_stage()
         else:
@@ -1374,7 +1365,7 @@ class Window(QMainWindow):
                 subprocess.Popen(
                     "title Box{}".format(self.box_letter), shell=True
                 )
-            except Exception as e:
+            except Exception:
                 logging.error(traceback.format_exc())
                 logging.warning(
                     "Please open bonsai!",
@@ -1410,13 +1401,13 @@ class Window(QMainWindow):
         """
             If trials have already been generated, then after reconnection to bonsai
             trial generation loops indefinitiely. See issue #166. I cannot understand
-            the root cause, so I am warning users to start a new session. 
+            the root cause, so I am warning users to start a new session.
         """
         if self.InitializeBonsaiSuccessfully == 1 and hasattr(
             self, "GeneratedTrials"
         ):
             msg = "Reconnected to Bonsai. Start a new session before running more trials"
-            reply = QMessageBox.information(
+            QMessageBox.information(
                 self,
                 "Box {}, Reconnect Bonsai".format(self.box_letter),
                 msg,
@@ -1431,6 +1422,18 @@ class Window(QMainWindow):
             pass
         else:
             self._StopCurrentSession()
+
+        # Turn off the camera recording in case it is on
+        self.Camera_dialog.StartRecording.setChecked(False)
+        # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging.
+        if (
+            self.Camera_dialog.AutoControl.currentText() == "Yes"
+            and self.Camera_dialog.StartPreview.isChecked()
+        ):
+            self.Camera_dialog.StartPreview.setChecked(False)
+            # sleep for 1 second to make sure the trigger is off
+            time.sleep(1)
+
         if log_folder is None:
             # formal logging
             loggingtype = 0
@@ -1572,7 +1575,36 @@ class Window(QMainWindow):
             return None
         return self.schedule.query("`Mouse ID` == @mouse_id").iloc[0][column]
 
+    def _GetProtocol(self, mouse_id):
+        if not self.Settings["check_schedule"]:
+            logging.info("not setting protocol because check_schedule=False")
+            return
+        logging.info("Getting protocol")
+        protocol = self._GetInfoFromSchedule(mouse_id, "Protocol")
+        if (protocol is None) or (protocol == "") or (np.isnan(protocol)):
+            if not self.Settings["add_default_project_name"]:
+                logging.info(
+                    "Protocol not on schedule, not using default because add_default_project_name=False"
+                )
+                return
+            else:
+                logging.info("Protocol not on schedule, using default: 2414")
+                protocol = 2414
+
+        self.Metadata_dialog.meta_data["session_metadata"]["IACUCProtocol"] = (
+            str(int(protocol))
+        )
+        self.Metadata_dialog._update_metadata(
+            update_rig_metadata=False, update_session_metadata=True
+        )
+        logging.info("Setting IACUC Protocol: {}".format(protocol))
+
     def _GetProjectName(self, mouse_id):
+        if not self.Settings["check_schedule"]:
+            logging.info(
+                "not setting project name because check_schedule=False"
+            )
+            return
         logging.info("Getting Project name")
         project_name = self._GetInfoFromSchedule(mouse_id, "Project Name")
         add_default = True
@@ -1868,7 +1900,6 @@ class Window(QMainWindow):
 
         # Also stream log info to the console if enabled
         if self.Settings["show_log_info_in_console"]:
-
             handler = logging.StreamHandler()
             # Using the same format and level as the root logger
             handler.setFormatter(logger.root.handlers[0].formatter)
@@ -1917,8 +1948,8 @@ class Window(QMainWindow):
                 raise Exception(
                     f"Exception trying to read from Slims: {e}.\n"
                     f" Please check credentials:\n"
-                    f'Username: {os.environ["SLIMS_USERNAME"]}\n'
-                    f'Password: {os.environ["SLIMS_PASSWORD"]}'
+                    f"Username: {os.environ['SLIMS_USERNAME']}\n"
+                    f"Password: {os.environ['SLIMS_PASSWORD']}"
                 )
             elif "No record found" not in str(
                 e
@@ -2003,12 +2034,12 @@ class Window(QMainWindow):
             "%Y-%m-%d %H:%M:%S"
         ):
             logging.info(
-                f"Waterlog information already exists for this session. Updating waterlog in Slims."
+                "Waterlog information already exists for this session. Updating waterlog in Slims."
             )
             model.pk = waterlog[0].pk
             self.slims_client.update_model(model=model)
         else:
-            logging.info(f"Adding waterlog to Slims.")
+            logging.info("Adding waterlog to Slims.")
             self.slims_client.add_model(model)
 
     def _InitializeBonsai(self):
@@ -2198,21 +2229,21 @@ class Window(QMainWindow):
         """Open the video folder"""
         try:
             subprocess.Popen(["explorer", self.VideoFolder])
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
 
     def _OpenMetadataDialogFolder(self):
         """Open the metadata dialog folder"""
         try:
             subprocess.Popen(["explorer", self.metadata_dialog_folder])
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
 
     def _OpenRigMetadataFolder(self):
         """Open the rig metadata folder"""
         try:
             subprocess.Popen(["explorer", self.rig_metadata_folder])
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
 
     def _load_most_recent_rig_json(self, error_if_none=True):
@@ -2262,7 +2293,6 @@ class Window(QMainWindow):
         return rig_json, rig_json_path
 
     def _LoadRigJson(self):
-
         # User can skip this step if they make rig metadata themselves
         if not self.Settings["create_rig_metadata"]:
             logging.info(
@@ -2334,7 +2364,7 @@ class Window(QMainWindow):
         """Open the setting folder"""
         try:
             subprocess.Popen(["explorer", self.SettingFolder])
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
 
     def _ForceSave(self):
@@ -2455,7 +2485,7 @@ class Window(QMainWindow):
                     (float(widget1.text()) - self.latest_fitting[valve][1])
                     / self.latest_fitting[valve][0]
                 )
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
 
     def _GetLatestFitting(self, FittingResults):
@@ -2498,7 +2528,7 @@ class Window(QMainWindow):
         """Open the logging folder"""
         try:
             subprocess.Popen(["explorer", self.Ot_log_folder])
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
 
     def _startTemporaryLogging(self):
@@ -2529,7 +2559,7 @@ class Window(QMainWindow):
                 value = np.array([parameters[key]])
                 loading_parameters_type = 0
             # sometimes we only have training parameters, no behavior parameters
-            except Exception as e:
+            except Exception:
                 logging.error(traceback.format_exc())
                 value = parameters[key]
                 loading_parameters_type = 1
@@ -2631,9 +2661,9 @@ class Window(QMainWindow):
         allow_reset (bool) allows the Baseweight etc. parameters to be reset to the empty string
         """
         try:
-            if self.actionTime_distribution.isChecked() == True:
+            if self.actionTime_distribution.isChecked() is True:
                 self.PlotTime._Update(self)
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
 
         # move newscale stage
@@ -2650,7 +2680,7 @@ class Window(QMainWindow):
                         float(self.PositionY.text()),
                         float(self.PositionZ.text()),
                     )
-                except Exception as e:
+                except Exception:
                     logging.error(traceback.format_exc())
         # Get the parameters before change
         if (
@@ -2782,7 +2812,7 @@ class Window(QMainWindow):
                     # check for empty string condition
                     try:
                         float(child.text())
-                    except Exception as e:
+                    except Exception:
                         # Invalid float. Do not change the parameter, reset back to previous value
                         logging.warning(
                             "Cannot convert input to float: {}, '{}'".format(
@@ -2860,7 +2890,7 @@ class Window(QMainWindow):
             ):
                 if (
                     child.objectName() in ["qt_spinbox_lineedit", None, ""]
-                    or child.isEnabled() == False
+                    or child.isEnabled() is False
                 ):  # I don't understand where the qt_spinbox_lineedit comes from.
                     continue
                 if (
@@ -2938,7 +2968,7 @@ class Window(QMainWindow):
                         try:
                             # it's valid float
                             float(child.text())
-                        except Exception as e:
+                        except Exception:
                             # logging.error(traceback.format_exc())
                             # Invalid float. Do not change the parameter
                             if child.objectName() in [
@@ -2980,7 +3010,7 @@ class Window(QMainWindow):
                     else:
                         child.setStyleSheet("color: black;")
                         child.setStyleSheet("background-color: white;")
-                except Exception as e:
+                except Exception:
                     # logging.error(traceback.format_exc())
                     pass
 
@@ -3004,7 +3034,7 @@ class Window(QMainWindow):
                         )
                     )
                 return 1
-            except Exception as e:
+            except Exception:
                 logging.error(traceback.format_exc())
                 return 0
         if (
@@ -3022,7 +3052,7 @@ class Window(QMainWindow):
                     return 0
                 else:
                     return 1
-            except Exception as e:
+            except Exception:
                 logging.error(traceback.format_exc())
                 return 0
         if child.objectName() == "UncoupledReward":
@@ -3043,7 +3073,7 @@ class Window(QMainWindow):
                 # create a numpy array from the list of numbers
                 self.RewardProb = np.array(num_list)
                 return 1
-            except Exception as e:
+            except Exception:
                 logging.error(traceback.format_exc())
                 return 0
         else:
@@ -3085,12 +3115,10 @@ class Window(QMainWindow):
     def _Task(self):
         """hide and show some fields based on the task type"""
         self.label_43.setStyleSheet(
-            "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);"
-            "border: none;"
+            "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;"
         )
         self.ITIIncrease.setStyleSheet(
-            "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);"
-            "border: none;"
+            "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;"
         )
         self._Randomness()
 
@@ -3116,14 +3144,10 @@ class Window(QMainWindow):
             self.label_11.setStyleSheet("color: black;")
             self.label_14.setStyleSheet("color: black;")
             self.BlockBeta.setStyleSheet(
-                "color: black;" "border: 1px solid gray;"
+                "color: black;border: 1px solid gray;"
             )
-            self.BlockMin.setStyleSheet(
-                "color: black;" "border: 1px solid gray;"
-            )
-            self.BlockMax.setStyleSheet(
-                "color: black;" "border: 1px solid gray;"
-            )
+            self.BlockMin.setStyleSheet("color: black;border: 1px solid gray;")
+            self.BlockMax.setStyleSheet("color: black;border: 1px solid gray;")
 
             self.label_27.setEnabled(False)
             self.InitiallyInactiveN.setEnabled(False)
@@ -3173,14 +3197,10 @@ class Window(QMainWindow):
             self.label_11.setStyleSheet("color: black;")
             self.label_14.setStyleSheet("color: black;")
             self.BlockBeta.setStyleSheet(
-                "color: black;" "border: 1px solid gray;"
+                "color: black;border: 1px solid gray;"
             )
-            self.BlockMin.setStyleSheet(
-                "color: black;" "border: 1px solid gray;"
-            )
-            self.BlockMax.setStyleSheet(
-                "color: black;" "border: 1px solid gray;"
-            )
+            self.BlockMin.setStyleSheet("color: black;border: 1px solid gray;")
+            self.BlockMax.setStyleSheet("color: black;border: 1px solid gray;")
 
             self.label_27.setEnabled(False)
             self.InitiallyInactiveN.setEnabled(False)
@@ -3262,7 +3282,7 @@ class Window(QMainWindow):
             self.InitiallyInactiveN.setEnabled(True)
             self.label_27.setStyleSheet("color: black;")
             self.InitiallyInactiveN.setStyleSheet(
-                "color: black;" "border: 1px solid gray;"
+                "color: black;border: 1px solid gray;"
             )
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(403, 128, 80, 20))
             # change name of min reward each block
@@ -3347,7 +3367,7 @@ class Window(QMainWindow):
                         self.ShowRewardPairs_2.setText(
                             self.ShowRewardPairs.text()
                         )
-        except Exception as e:
+        except Exception:
             # Catch the exception and log error information
             logging.warning(traceback.format_exc())
 
@@ -3428,7 +3448,7 @@ class Window(QMainWindow):
         if self.OpenOptogenetics == 0:
             self.Opto_dialog = OptogeneticsDialog(MainWindow=self)
             self.OpenOptogenetics = 1
-        if self.action_Optogenetics.isChecked() == True:
+        if self.action_Optogenetics.isChecked() is True:
             self.Opto_dialog.show()
         else:
             self.Opto_dialog.hide()
@@ -3438,7 +3458,7 @@ class Window(QMainWindow):
         if self.OpenCamera == 0:
             self.Camera_dialog = CameraDialog(MainWindow=self)
             self.OpenCamera = 1
-        if self.action_Camera.isChecked() == True:
+        if self.action_Camera.isChecked() is True:
             self.Camera_dialog.show()
         else:
             self.Camera_dialog.hide()
@@ -3466,8 +3486,8 @@ class Window(QMainWindow):
         self.Channel3.set_attenuation_right(value)
         self.Channel3.set_attenuation_left(value)
 
-        self.SettingsBox[f"AttenuationLeft"] = value
-        self.SettingsBox[f"AttenuationRight"] = value
+        self.SettingsBox["AttenuationLeft"] = value
+        self.SettingsBox["AttenuationRight"] = value
         # Writing to CSV
         with open(self.SettingsBoxFile, "w", newline="") as file:
             writer = csv.writer(file)
@@ -3486,7 +3506,7 @@ class Window(QMainWindow):
         if self.OpenMetadata == 0:
             self.Metadata_dialog = MetadataDialog(MainWindow=self)
             self.OpenMetadata = 1
-        if self.actionMeta_Data.isChecked() == True:
+        if self.actionMeta_Data.isChecked() is True:
             self.Metadata_dialog.show()
         else:
             self.Metadata_dialog.hide()
@@ -3497,7 +3517,7 @@ class Window(QMainWindow):
                 MainWindow=self
             )
             self.OpenWaterCalibration = 1
-        if self.action_Calibration.isChecked() == True:
+        if self.action_Calibration.isChecked() is True:
             self.WaterCalibration_dialog.show()
         else:
             self.WaterCalibration_dialog.hide()
@@ -3508,7 +3528,7 @@ class Window(QMainWindow):
                 MainWindow=self
             )
             self.OpenLaserCalibration = 1
-        if self.actionLaser_Calibration.isChecked() == True:
+        if self.actionLaser_Calibration.isChecked() is True:
             self.LaserCalibration_dialog.show()
         else:
             self.LaserCalibration_dialog.hide()
@@ -3523,7 +3543,7 @@ class Window(QMainWindow):
             self.TimeDistribution_dialog.setWindowTitle(
                 "Simulated time distribution"
             )
-        if self.actionTime_distribution.isChecked() == True:
+        if self.actionTime_distribution.isChecked() is True:
             self.TimeDistribution_dialog.show()
         else:
             self.TimeDistribution_dialog.hide()
@@ -3547,7 +3567,7 @@ class Window(QMainWindow):
             self.TimeDistribution_ToInitializeVisual = 0
         try:
             self.PlotTime._Update(self)
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
 
     def _LickSta(self):
@@ -3556,7 +3576,7 @@ class Window(QMainWindow):
             self.LickSta_dialog = LickStaDialog(MainWindow=self)
             self.LickSta = 1
             self.LickSta_dialog.setWindowTitle("Licks statistics")
-        if self.actionLicks_sta.isChecked() == True:
+        if self.actionLicks_sta.isChecked() is True:
             self.LickSta_dialog.show()
         else:
             self.LickSta_dialog.hide()
@@ -3585,7 +3605,7 @@ class Window(QMainWindow):
         try:
             if hasattr(self, "GeneratedTrials"):
                 self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
 
     def _about(self):
@@ -3828,7 +3848,7 @@ class Window(QMainWindow):
                                         Obj[attr_name] = Value
                                 else:
                                     Obj[attr_name] = Value
-                            except Exception as e:
+                            except Exception:
                                 logging.info(
                                     f"{attr_name} is not a real scalar, save it as it is."
                                 )
@@ -3959,10 +3979,8 @@ class Window(QMainWindow):
             Obj["generate_rig_metadata_success"] = (
                 generated_metadata.rig_metadata_success
             )
-
-            if (
-                save_clicked
-            ):  # create water log result if weight after filled and uncheck save
+            # create water log result if weight after filled and uncheck save
+            if save_clicked:
                 if (
                     self.BaseWeight.text() != ""
                     and self.WeightAfter.text() != ""
@@ -4062,7 +4080,7 @@ class Window(QMainWindow):
             self._get_folder_structure_new()
             self.behavior_session_model.session_name = (
                 f"behavior_{self.behavior_session_model.subject}_"
-                f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
+                f"{self.behavior_session_model.date.strftime('%Y-%m-%d_%H-%M-%S')}"
             )
         else:
             self._parse_folder_structure()
@@ -4116,7 +4134,7 @@ class Window(QMainWindow):
         # includes subject and date of session
         session_name = self.behavior_session_model.session_name = (
             f"behavior_{self.behavior_session_model.subject}_"
-            f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
+            f"{self.behavior_session_model.date.strftime('%Y-%m-%d_%H-%M-%S')}"
         )
         id_name = session_name.split("behavior_")[-1]
         self.SessionFolder = os.path.join(
@@ -4150,7 +4168,7 @@ class Window(QMainWindow):
         # session_name includes subject and date of session
         session_name = self.behavior_session_model.session_name = (
             f"behavior_{self.behavior_session_model.subject}_"
-            f'{self.behavior_session_model.date.strftime("%Y-%m-%d_%H-%M-%S")}'
+            f"{self.behavior_session_model.date.strftime('%Y-%m-%d_%H-%M-%S')}"
         )
         id_name = session_name.split("behavior_")[-1]
         self.SessionFolder = os.path.join(
@@ -4379,6 +4397,7 @@ class Window(QMainWindow):
         self.Experimenter.setText(experimenter)
         self.ID.returnPressed.emit()
         self._GetProjectName(mouse_id)
+        self._GetProtocol(mouse_id)
         self.TargetRatio.setText("0.85")
         self.keyPressEvent(allow_reset=True)
 
@@ -4592,7 +4611,7 @@ class Window(QMainWindow):
                             CurrentObj = Obj["Metadata_dialog"]
                         else:
                             CurrentObj = Obj.copy()
-                    except Exception as e:
+                    except Exception:
                         logging.error(traceback.format_exc())
                         continue
                     if key in CurrentObj:
@@ -4741,13 +4760,13 @@ class Window(QMainWindow):
                             or isinstance(widget, QtWidgets.QPushButton)
                         ):
                             widget.clear()
-            except Exception as e:
+            except Exception:
                 # Catch the exception and print error information
                 logging.error(traceback.format_exc())
             try:
                 # visualization when loading the data
                 self._LoadVisualization()
-            except Exception as e:
+            except Exception:
                 # Catch the exception and print error information
                 logging.error(traceback.format_exc())
                 # delete GeneratedTrials
@@ -4808,7 +4827,7 @@ class Window(QMainWindow):
                         self.stage_widget.stage_model.update_position(
                             positions
                         )
-                        step_size = (
+                        (
                             self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
                         )
                 elif (
@@ -4832,7 +4851,7 @@ class Window(QMainWindow):
                 else:
                     pass
 
-            except Exception as e:
+            except Exception:
                 logging.error(traceback.format_exc())
 
             # load metadata to the metadata dialog
@@ -4864,6 +4883,7 @@ class Window(QMainWindow):
         self.load_tag = 1
         self.ID.returnPressed.emit()  # Mimic the return press event to auto-engage AutoTrain
         self._GetProjectName(self.behavior_session_model.subject)
+        self._GetProtocol(self.behavior_session_model.subject)
 
     def _LoadVisualization(self):
         """To visulize the training when loading a session"""
@@ -4887,7 +4907,7 @@ class Window(QMainWindow):
                         value = np.array(value)
                     # Set the attribute in the GeneratedTrials object
                     setattr(self.GeneratedTrials, attr_name, value)
-                except Exception as e:
+                except Exception:
                     logging.error(traceback.format_exc())
         if self.GeneratedTrials.B_AnimalResponseHistory.size == 0:
             del self.GeneratedTrials
@@ -5036,7 +5056,8 @@ class Window(QMainWindow):
                 )
 
         # Start logging
-        self.Ot_log_folder = self._restartlogging()
+        if self.logging_type != 0:
+            self.Ot_log_folder = self._restartlogging()
 
         # Start the FIP workflow
         try:
@@ -5077,14 +5098,13 @@ class Window(QMainWindow):
             )
 
     def _StartExcitation(self):
-
         if self.Teensy_COM == "":
             logging.warning(
                 "No Teensy COM configured for this box, cannot start excitation",
                 extra={"tags": [self.warning_log_tag]},
             )
             msg = "No Teensy COM configured for this box, cannot start excitation"
-            reply = QMessageBox.information(
+            QMessageBox.information(
                 self,
                 "Box {}, StartExcitation".format(self.box_letter),
                 msg,
@@ -5119,7 +5139,7 @@ class Window(QMainWindow):
                     "Error: starting excitation!",
                     extra={"tags": [self.warning_log_tag]},
                 )
-                reply = QMessageBox.critical(
+                QMessageBox.critical(
                     self,
                     "Box {}, Start excitation:".format(self.box_letter),
                     "error when starting excitation: {}".format(e),
@@ -5149,7 +5169,7 @@ class Window(QMainWindow):
                     "Error stopping excitation!",
                     extra={"tags": [self.warning_log_tag]},
                 )
-                reply = QMessageBox.critical(
+                QMessageBox.critical(
                     self,
                     "Box {}, Start excitation:".format(self.box_letter),
                     "error when stopping excitation: {}".format(e),
@@ -5162,7 +5182,6 @@ class Window(QMainWindow):
         return 1
 
     def _StartBleaching(self):
-
         if self.Teensy_COM == "":
             logging.warning(
                 "No Teensy COM configured for this box, cannot start bleaching",
@@ -5249,7 +5268,7 @@ class Window(QMainWindow):
                 msgbox.setStandardButtons(QMessageBox.Ok)
                 button = msgbox.button(QMessageBox.Ok)
                 button.setText("Stop bleaching")
-                bttn = msgbox.exec_()
+                msgbox.exec_()
 
                 # Stop Bleaching
                 self.StartBleaching.setChecked(False)
@@ -5261,7 +5280,7 @@ class Window(QMainWindow):
                 # Trigger Teensy with the above specified exp mode
                 ser.write(b"s")
                 ser.close()
-            except Exception as e:
+            except Exception:
                 logging.error(traceback.format_exc())
                 logging.warning("Error: stop bleaching!")
 
@@ -5344,7 +5363,7 @@ class Window(QMainWindow):
         try:
             self.Channel.StopLogging("s")
             self.logging_type = -1  # logging has stopped
-        except Exception as e:
+        except Exception:
             logging.warning("Bonsai connection is closed")
             logging.warning(
                 "Lost bonsai connection",
@@ -5353,7 +5372,6 @@ class Window(QMainWindow):
             self.InitializeBonsaiSuccessfully = 0
 
     def _NewSession(self):
-
         logging.info("New Session pressed")
         # If we have unsaved data, prompt to save
         if (self.ToInitializeVisual == 0) and (self.unsaved_data):
@@ -5460,7 +5478,6 @@ class Window(QMainWindow):
             pass
 
     def _StopCurrentSession(self):
-
         logging.info("Stopping current trials")
 
         # stop the current session
@@ -5925,19 +5942,7 @@ class Window(QMainWindow):
 
             # disable metadata fields
             self._set_metadata_enabled(False)
-
-            # Set IACUC protocol in metadata based on schedule
-            protocol = self._GetInfoFromSchedule(mouse_id, "Protocol")
-            if protocol is not None:
-                self.Metadata_dialog.meta_data["session_metadata"][
-                    "IACUCProtocol"
-                ] = str(int(protocol))
-                self.Metadata_dialog._update_metadata(
-                    update_rig_metadata=False, update_session_metadata=True
-                )
-                logging.info("Setting IACUC Protocol: {}".format(protocol))
             self.session_run = True  # session has been started
-
             self.keyPressEvent(allow_reset=True)
 
         else:
@@ -5979,24 +5984,8 @@ class Window(QMainWindow):
         if self.StartANewSession == 1 and self.ANewTrial == 1:
             # start a new logging
             try:
-                # Do not start a new session if the camera is already open, this means the session log has been started or the existing session has not been completed.
-                if (
-                    not (
-                        self.Camera_dialog.StartRecording.isChecked()
-                        and self.Camera_dialog.AutoControl.currentText()
-                        == "No"
-                    )
-                ) and (not self.FIP_started):
-                    # Turn off the camera recording
-                    self.Camera_dialog.StartRecording.setChecked(False)
-                    # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging.
-                    if (
-                        self.Camera_dialog.AutoControl.currentText() == "Yes"
-                        and self.Camera_dialog.StartPreview.isChecked()
-                    ):
-                        self.Camera_dialog.StartPreview.setChecked(False)
-                        # sleep for 1 second to make sure the trigger is off
-                        time.sleep(1)
+                # Start logging if the formal logging is not started
+                if self.logging_type != 0:
                     self.Ot_log_folder = self._restartlogging()
             except Exception as e:
                 if "ConnectionAbortedError" in str(e):
@@ -6173,12 +6162,12 @@ class Window(QMainWindow):
 
         self._StartTrialLoop(GeneratedTrials, worker1, worker_save)
 
-        if self.actionDrawing_after_stopping.isChecked() == True:
+        if self.actionDrawing_after_stopping.isChecked() is True:
             try:
                 self.PlotM._Update(
                     GeneratedTrials=GeneratedTrials, Channel=self.Channel2
                 )
-            except Exception as e:
+            except Exception:
                 logging.error(traceback.format_exc())
 
     def session_end_tasks(self):
@@ -6260,7 +6249,7 @@ class Window(QMainWindow):
             logger.root.removeHandler(self.session_log_handler)
             self.session_log_handler = None
         else:
-            logging.info(f"No active session logger")
+            logging.info("No active session logger")
 
     def _StartTrialLoop(self, GeneratedTrials, worker1, worker_save):
         if self.Start.isChecked():
@@ -6274,14 +6263,12 @@ class Window(QMainWindow):
         stall_duration = 5 * 60
 
         while self.Start.isChecked():
-
             QApplication.processEvents()
             if (
                 self.ANewTrial == 1
                 and self.Start.isChecked()
                 and self.finish_Timer == 1
             ):
-
                 # Reset stall timer
                 last_trial_start = time.time()
                 stall_iteration = 1
@@ -6356,7 +6343,7 @@ class Window(QMainWindow):
                         self.Start.setStyleSheet("background-color : none")
                         break
                 # receive licks and update figures
-                if self.actionDrawing_after_stopping.isChecked() == False:
+                if self.actionDrawing_after_stopping.isChecked() is False:
                     self.PlotM._Update(
                         GeneratedTrials=GeneratedTrials, Channel=self.Channel2
                     )
@@ -6420,7 +6407,7 @@ class Window(QMainWindow):
                         )
 
                 # save the data everytrial
-                if GeneratedTrials.CurrentSimulation == True:
+                if GeneratedTrials.CurrentSimulation is True:
                     GeneratedTrials._GetAnimalResponse(
                         self.Channel, self.Channel3, self.data_lock
                     )
@@ -6438,7 +6425,7 @@ class Window(QMainWindow):
                     GeneratedTrials.B_CurrentTrialN > 0
                     and self.previous_backup_completed == 1
                     and self.save_each_trial
-                    and GeneratedTrials.CurrentSimulation == False
+                    and GeneratedTrials.CurrentSimulation is False
                 ):
                     self.previous_backup_completed = 0
                     self.threadpool6.start(worker_save)
@@ -6877,7 +6864,7 @@ class Window(QMainWindow):
                 ExtraWater = float(self.SuggestedWater.text())
             TotalWater = ExtraWater + water_in_session
             self.TotalWater.setText(str(np.round(TotalWater, 3)))
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
 
     def create_auto_train_dialog(self):
@@ -6942,18 +6929,29 @@ class Window(QMainWindow):
 
         logging.info("Generating upload manifest")
         try:
-            # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
-            # Random offset reduces strain on downstream servers getting many requests at once
             date_format = "%Y-%m-%d_%H-%M-%S"
-            schedule = (
-                self.behavior_session_model.date.strftime(date_format).split(
-                    "_"
-                )[0]
-                + "_20-30-00"
-            )
-            schedule_time = datetime.strptime(
-                schedule, date_format
-            ) + timedelta(seconds=np.random.randint(30 * 60))
+            if (
+                self.behavior_session_model.date.strftime("%H-%M-%S")
+                < "17-30-00"
+            ):
+                # Session started before 5:30
+                # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
+                # Random offset reduces strain on downstream servers getting many requests at once
+                schedule = (
+                    self.behavior_session_model.date.strftime(
+                        date_format
+                    ).split("_")[0]
+                    + "_20-30-00"
+                )
+                schedule_time = datetime.strptime(
+                    schedule, date_format
+                ) + timedelta(seconds=np.random.randint(30 * 60))
+            else:
+                # Session started after 5:30
+                # upload time is current time plus 3 hours plus a random offset
+                schedule_time = self.behavior_session_model.date + timedelta(
+                    hours=3, seconds=np.random.randin(30 * 60)
+                )
             capsule_id = "0ae9703f-9012-4d0b-ad8d-b6a00858b80d"
             mount = "FIP"
 
@@ -7296,7 +7294,6 @@ def log_subprocess_output(process, prefix):
 
 
 if __name__ == "__main__":
-
     # Determine which box we are using, and whether to start bonsai IDE
     start_bonsai_ide = True
     if len(sys.argv) == 1:

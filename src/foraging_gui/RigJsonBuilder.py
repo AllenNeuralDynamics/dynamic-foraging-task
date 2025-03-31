@@ -1,14 +1,12 @@
 import json
 import logging
-import os
 import re
-from datetime import date, datetime, timezone
+from datetime import date, datetime
 
 import aind_data_schema.components.coordinates as c
 import aind_data_schema.components.devices as d
 import aind_data_schema.core.rig as r
 import numpy as np
-import serial.tools.list_ports as list_ports
 from aind_data_schema_models.modalities import Modality
 from aind_data_schema_models.organizations import Organization
 from aind_data_schema_models.units import SizeUnit
@@ -61,7 +59,6 @@ def build_rig_json(
 
 
 def build_rig_json_core(settings, water_calibration, laser_calibration):
-
     # Set up
     ###########################################################################
     logging.info("building rig json")
