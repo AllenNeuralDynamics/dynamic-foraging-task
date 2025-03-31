@@ -39,7 +39,12 @@ class RigClient:
 
     def msg_handler(self, address, *args):
         msg = OSCMessage(address, args)
-        CurrentMessage = [msg.address, args[1][0], msg.values()[2], msg.values()[3]]
+        CurrentMessage = [
+            msg.address,
+            args[1][0],
+            msg.values()[2],
+            msg.values()[3],
+        ]
         self.msgs.put([msg, args])
         msg_str = str(CurrentMessage)
         self.last_message_time = time.time()

@@ -6,28 +6,44 @@ import subprocess
 from datetime import datetime
 
 import numpy as np
-from aind_data_schema.components.coordinates import (Axis, AxisName,
-                                                     RelativePosition,
-                                                     Rotation3dTransform,
-                                                     Translation3dTransform)
+from aind_data_schema.components.coordinates import (
+    Axis,
+    AxisName,
+    RelativePosition,
+    Rotation3dTransform,
+    Translation3dTransform,
+)
 from aind_data_schema.components.devices import Calibration, SpoutSide
 from aind_data_schema.components.stimulus import AuditoryStimulation
-from aind_data_schema.core.session import (Coordinates3d, DetectorConfig,
-                                           DomeModule, FiberConnectionConfig,
-                                           LaserConfig,
-                                           LightEmittingDiodeConfig,
-                                           ManipulatorModule,
-                                           RewardDeliveryConfig,
-                                           RewardSolution, RewardSpoutConfig,
-                                           Session, Software, SpeakerConfig,
-                                           StimulusEpoch, StimulusModality,
-                                           Stream, TriggerType)
+from aind_data_schema.core.session import (
+    Coordinates3d,
+    DetectorConfig,
+    DomeModule,
+    FiberConnectionConfig,
+    LaserConfig,
+    LightEmittingDiodeConfig,
+    ManipulatorModule,
+    RewardDeliveryConfig,
+    RewardSolution,
+    RewardSpoutConfig,
+    Session,
+    Software,
+    SpeakerConfig,
+    StimulusEpoch,
+    StimulusModality,
+    Stream,
+    TriggerType,
+)
 from aind_data_schema_models.modalities import Modality
 from aind_data_schema_models.organizations import Organization
 from aind_data_schema_models.pid_names import PIDName
 from aind_data_schema_models.platforms import Platform
-from aind_data_schema_models.units import (FrequencyUnit, PowerUnit, SizeUnit,
-                                           SoundIntensityUnit)
+from aind_data_schema_models.units import (
+    FrequencyUnit,
+    PowerUnit,
+    SizeUnit,
+    SoundIntensityUnit,
+)
 
 import foraging_gui
 from foraging_gui.TransferToNWB import _get_field
@@ -64,7 +80,6 @@ class generate_metadata:
         dialog_metadata=None,
         output_folder=None,
     ):
-
         self.session_metadata_success = False
         self.rig_metadata_success = False
 
@@ -82,7 +97,9 @@ class generate_metadata:
         else:
             self.Obj = Obj
             if "TrainingFolder" in self.Obj:
-                self.session_folder = os.path.dirname(self.Obj["TrainingFolder"])
+                self.session_folder = os.path.dirname(
+                    self.Obj["TrainingFolder"]
+                )
             else:
                 self.session_folder = "session folder is unknown"
         logging.info("processing:" + self.session_folder)
@@ -116,7 +133,8 @@ class generate_metadata:
             + str(self.session_metadata_success)
         )
         logging.info(
-            "Rig metadata generated successfully: " + str(self.rig_metadata_success)
+            "Rig metadata generated successfully: "
+            + str(self.rig_metadata_success)
         )
 
     def _mapper(self):
@@ -142,7 +160,10 @@ class generate_metadata:
                 "LED 460-1": {"color": "Blue", "laser_tag": 1},
                 "LED 460-2": {"color": "Blue", "laser_tag": 2},
             },  # led name in the rig metadata and the corresponding color used in the behavior GUI
-            "laser_tags": [1, 2],  # laser tags corresponding to Laser_1 and Laser_2
+            "laser_tags": [
+                1,
+                2,
+            ],  # laser tags corresponding to Laser_1 and Laser_2
             "sides": ["Left", "Right"],  # lick spouts
             "camera_list": [
                 "SideCameraLeft",
@@ -309,7 +330,9 @@ class generate_metadata:
         # save copy as rig.json
         rig_metadata_full_path = os.path.join(self.output_folder, "rig.json")
         with open(rig_metadata_full_path, "w") as f:
-            json.dump(self.Obj["meta_data_dialog"]["rig_metadata"], f, indent=4)
+            json.dump(
+                self.Obj["meta_data_dialog"]["rig_metadata"], f, indent=4
+            )
             self.rig_metadata_success = True
 
     def _handle_edge_cases(self):
@@ -341,7 +364,9 @@ class generate_metadata:
         # Possible reason: 1) the behavior data is not started in the session.
         if "B_AnimalResponseHistory" not in self.Obj:
             self.has_behavior_data = False
-            logging.info("No animal response history to log in session metadata")
+            logging.info(
+                "No animal response history to log in session metadata"
+            )
         else:
             self.has_behavior_data = True
 
@@ -356,15 +381,21 @@ class generate_metadata:
                 == ""
             )
             or (
-                self.Obj["meta_data_dialog"]["session_metadata"]["LickSpoutReferenceX"]
+                self.Obj["meta_data_dialog"]["session_metadata"][
+                    "LickSpoutReferenceX"
+                ]
                 == ""
             )
             or (
-                self.Obj["meta_data_dialog"]["session_metadata"]["LickSpoutReferenceY"]
+                self.Obj["meta_data_dialog"]["session_metadata"][
+                    "LickSpoutReferenceY"
+                ]
                 == ""
             )
             or (
-                self.Obj["meta_data_dialog"]["session_metadata"]["LickSpoutReferenceZ"]
+                self.Obj["meta_data_dialog"]["session_metadata"][
+                    "LickSpoutReferenceZ"
+                ]
                 == ""
             )
         ):
@@ -427,7 +458,9 @@ class generate_metadata:
             keys=["rig_metadata_file"],
             default_value="",
         )
-        self._initialize_fields(dic=self.Obj, keys=["MetadataFolder"], default_value="")
+        self._initialize_fields(
+            dic=self.Obj, keys=["MetadataFolder"], default_value=""
+        )
 
         # Missing field Other_go_cue_decibel is not recorded in the behavior json file.
         # Possible reason: 1) the go cue decibel is not set in the foraging settings file. 2) old version of the software.
@@ -494,7 +527,8 @@ class generate_metadata:
             )
             self.trials_rewarded = np.count_nonzero(
                 np.logical_or(
-                    self.Obj["B_RewardedHistory"][0], self.Obj["B_RewardedHistory"][1]
+                    self.Obj["B_RewardedHistory"][0],
+                    self.Obj["B_RewardedHistory"][1],
                 )
             )
             self.total_reward_consumed_in_session = float(
@@ -504,14 +538,18 @@ class generate_metadata:
         # Wrong format of WeightAfter
         # Remove all the non-numeric characters except the dot in the WeightAfter
         if self.Obj["WeightAfter"] != "":
-            self.Obj["WeightAfter"] = self.Obj["WeightAfter"].replace("..", ".")
-            self.Obj["WeightAfter"] = re.sub(r"[^\.\d]", "", self.Obj["WeightAfter"])
+            self.Obj["WeightAfter"] = self.Obj["WeightAfter"].replace(
+                "..", "."
+            )
+            self.Obj["WeightAfter"] = re.sub(
+                r"[^\.\d]", "", self.Obj["WeightAfter"]
+            )
 
         # Typo
         if "PtotocolID" in self.Obj["meta_data_dialog"]["session_metadata"]:
-            self.Obj["meta_data_dialog"]["session_metadata"]["ProtocolID"] = self.Obj[
-                "meta_data_dialog"
-            ]["session_metadata"]["PtotocolID"]
+            self.Obj["meta_data_dialog"]["session_metadata"]["ProtocolID"] = (
+                self.Obj["meta_data_dialog"]["session_metadata"]["PtotocolID"]
+            )
 
         # Get the lick detector
         if "AINDLickDetector" not in self.Obj["settings_box"]:
@@ -580,9 +618,9 @@ class generate_metadata:
             "reward_consumed_unit": "microliter",
             "calibrations": self.calibration,
             "data_streams": self.data_streams,
-            "mouse_platform_name": self.Obj["meta_data_dialog"]["rig_metadata"][
-                "mouse_platform"
-            ]["name"],
+            "mouse_platform_name": self.Obj["meta_data_dialog"][
+                "rig_metadata"
+            ]["mouse_platform"]["name"],
             "active_mouse_platform": False,
             "protocol_id": [
                 self.Obj["meta_data_dialog"]["session_metadata"]["ProtocolID"]
@@ -597,9 +635,13 @@ class generate_metadata:
             session_params["stimulus_epochs"] = self.stimulus
 
         if self.Obj["WeightAfter"] != "":
-            session_params["animal_weight_post"] = float(self.Obj["WeightAfter"])
+            session_params["animal_weight_post"] = float(
+                self.Obj["WeightAfter"]
+            )
         if self.Obj["BaseWeight"] != "":
-            session_params["animal_weight_prior"] = float(self.Obj["BaseWeight"])
+            session_params["animal_weight_prior"] = float(
+                self.Obj["BaseWeight"]
+            )
         session = Session(**session_params)
         session.write_standard_file(output_directory=self.output_folder)
         self.session_metadata_success = True
@@ -628,20 +670,25 @@ class generate_metadata:
                 self.ophys_streams[0].stream_end_time,
             )
             self.data_streams[0].daq_names = (
-                self.data_streams[0].daq_names + self.ophys_streams[0].daq_names
+                self.data_streams[0].daq_names
+                + self.ophys_streams[0].daq_names
             )
             self.data_streams[0].light_sources = (
-                self.data_streams[0].light_sources + self.ophys_streams[0].light_sources
+                self.data_streams[0].light_sources
+                + self.ophys_streams[0].light_sources
             )
             self.data_streams[0].detectors = (
-                self.data_streams[0].detectors + self.ophys_streams[0].detectors
+                self.data_streams[0].detectors
+                + self.ophys_streams[0].detectors
             )
             self.data_streams[0].fiber_connections = (
                 self.data_streams[0].fiber_connections
                 + self.ophys_streams[0].fiber_connections
             )
             self.data_streams[0].notes = (
-                str(self.data_streams[0].notes) + ";" + str(self.ophys_streams[0].notes)
+                str(self.data_streams[0].notes)
+                + ";"
+                + str(self.ophys_streams[0].notes)
             )
             self.data_streams[0].software = self.ophys_streams[0].software
 
@@ -662,17 +709,21 @@ class generate_metadata:
                 self.ephys_streams[0].stream_end_time,
             )
             self.data_streams[0].daq_names = (
-                self.data_streams[0].daq_names + self.ephys_streams[0].daq_names
+                self.data_streams[0].daq_names
+                + self.ephys_streams[0].daq_names
             )
             self.data_streams[0].ephys_modules = (
-                self.data_streams[0].ephys_modules + self.ephys_streams[0].ephys_modules
+                self.data_streams[0].ephys_modules
+                + self.ephys_streams[0].ephys_modules
             )
             self.data_streams[0].stick_microscopes = (
                 self.data_streams[0].stick_microscopes
                 + self.ephys_streams[0].stick_microscopes
             )
             self.data_streams[0].notes = (
-                str(self.data_streams[0].notes) + ";" + str(self.ephys_streams[0].notes)
+                str(self.data_streams[0].notes)
+                + ";"
+                + str(self.ephys_streams[0].notes)
             )
 
         # combine other ephys streams
@@ -681,13 +732,17 @@ class generate_metadata:
             self.data_streams2 = self.ephys_streams[1]
             for ephys_stream in self.ephys_streams[2:]:
                 self.data_streams2.stream_start_time = min(
-                    self.data_streams2.stream_start_time, ephys_stream.stream_start_time
+                    self.data_streams2.stream_start_time,
+                    ephys_stream.stream_start_time,
                 )
                 self.data_streams2.stream_end_time = max(
-                    self.data_streams2.stream_end_time, ephys_stream.stream_end_time
+                    self.data_streams2.stream_end_time,
+                    ephys_stream.stream_end_time,
                 )
                 self.data_streams2.notes = (
-                    str(self.data_streams2.notes) + ";" + str(ephys_stream.notes)
+                    str(self.data_streams2.notes)
+                    + ";"
+                    + str(ephys_stream.notes)
                 )
         if self.data_streams2 != []:
             self.data_streams.append(self.data_streams2)
@@ -760,17 +815,19 @@ class generate_metadata:
             Stream(
                 stream_modalities=[Modality.FIB],
                 stream_start_time=datetime.strptime(
-                    self.Obj["fiber_photometry_start_time"], "%Y-%m-%d %H:%M:%S.%f"
+                    self.Obj["fiber_photometry_start_time"],
+                    "%Y-%m-%d %H:%M:%S.%f",
                 ),
                 stream_end_time=datetime.strptime(
-                    self.Obj["fiber_photometry_end_time"], "%Y-%m-%d %H:%M:%S.%f"
+                    self.Obj["fiber_photometry_end_time"],
+                    "%Y-%m-%d %H:%M:%S.%f",
                 ),
                 daq_names=self.name_mapper["fiber_photometry_daq_names"],
                 light_sources=self.fib_light_sources_config,
                 detectors=self.fib_detectors,
                 fiber_connections=self.fiber_connections,
                 software=self.behavior_software,
-                notes=f'Fib modality: fib mode: {self.Obj["fiber_mode"]}',
+                notes=f"Fib modality: fib mode: {self.Obj['fiber_mode']}",
             )
         )
 
@@ -815,7 +872,9 @@ class generate_metadata:
 
         # this is not complete.
         self.fiber_connections = []
-        for patch_cord in self.Obj["meta_data_dialog"]["rig_metadata"]["patch_cords"]:
+        for patch_cord in self.Obj["meta_data_dialog"]["rig_metadata"][
+            "patch_cords"
+        ]:
             self.fiber_connections.append(
                 FiberConnectionConfig(
                     patch_cord_name=patch_cord["name"],
@@ -854,9 +913,9 @@ class generate_metadata:
         get the light sources config for fiber photometry
         """
         self.fib_light_sources_config = []
-        for current_light_source in self.Obj["meta_data_dialog"]["rig_metadata"][
-            "light_sources"
-        ]:
+        for current_light_source in self.Obj["meta_data_dialog"][
+            "rig_metadata"
+        ]["light_sources"]:
             # caution: the light sources for the photometry are selected based on the device type, and excludes LED with camera included in the notes (LED for camera illumination). This may be wrong for some rigs.
             if current_light_source["device_type"] in [
                 "LightEmittingDiode",
@@ -945,17 +1004,23 @@ class generate_metadata:
         # Old name "ExtraWater" goes first because old json has a wrong Suggested Water
         water_after_session = float(
             _get_field(
-                self.Obj, field_list=["ExtraWater", "SuggestedWater"], default=np.nan
+                self.Obj,
+                field_list=["ExtraWater", "SuggestedWater"],
+                default=np.nan,
             )
         )
         water_day_total = float(_get_field(self.Obj, "TotalWater"))
         water_in_session_total = water_day_total - water_after_session
-        water_in_session_manual = water_in_session_total - water_in_session_foraging
+        water_in_session_manual = (
+            water_in_session_total - water_in_session_foraging
+        )
 
         output_parameters = {
             "meta": {
                 "box": _get_field(self.Obj, ["box", "Tower"]),
-                "session_run_time_in_min": _get_field(self.Obj, "Other_RunningTime"),
+                "session_run_time_in_min": _get_field(
+                    self.Obj, "Other_RunningTime"
+                ),
             },
             "water": {
                 "water_in_session_foraging": water_in_session_foraging,
@@ -965,7 +1030,9 @@ class generate_metadata:
                 "water_day_total": water_day_total,
             },
             "performance": {
-                "foraging_efficiency": _get_field(self.Obj, "B_for_eff_optimal"),
+                "foraging_efficiency": _get_field(
+                    self.Obj, "B_for_eff_optimal"
+                ),
                 "foraging_efficiency_with_actual_random_seed": _get_field(
                     self.Obj, "B_for_eff_optimal_random_seed"
                 ),
@@ -995,7 +1062,9 @@ class generate_metadata:
             "RightValue_volume",
         ]
         reward_probability = self._get_reward_probability()
-        task_parameters = {key: value for key, value in self.Obj.items() if key in keys}
+        task_parameters = {
+            key: value for key, value in self.Obj.items() if key in keys
+        }
         task_parameters["reward_probability"] = reward_probability
 
         return task_parameters
@@ -1004,7 +1073,10 @@ class generate_metadata:
         """
         Get the reward probability
         """
-        if self.Obj["Task"] in ["Uncoupled Baiting", "Uncoupled Without Baiting"]:
+        if self.Obj["Task"] in [
+            "Uncoupled Baiting",
+            "Uncoupled Without Baiting",
+        ]:
             # Get reward prob pool from the input string (e.g., ["0.1", "0.5", "0.9"])
             return self.Obj["UncoupledReward"]
         elif self.Obj["Task"] in [
@@ -1031,7 +1103,9 @@ class generate_metadata:
         """
         self.optogenetics_stimulus = []
         if "B_SelectedCondition" not in self.Obj:
-            logging.info("B_SelectedCondition is not included in the self.Obj!")
+            logging.info(
+                "B_SelectedCondition is not included in the self.Obj!"
+            )
             return
         a = np.array(self.Obj["B_SelectedCondition"])
         self.Obj["B_SelectedCondition"] = a.astype(int)
@@ -1078,9 +1152,9 @@ class generate_metadata:
         """
         Get the wavelength and wavelength unit for the light source
         """
-        for current_stimulus_device in self.Obj["meta_data_dialog"]["rig_metadata"][
-            "light_sources"
-        ]:
+        for current_stimulus_device in self.Obj["meta_data_dialog"][
+            "rig_metadata"
+        ]["light_sources"]:
             if current_stimulus_device["name"] == light_source:
                 return current_stimulus_device["wavelength"]
 
@@ -1098,7 +1172,9 @@ class generate_metadata:
                 current_color = self.Obj[f"TP_Laser_{current_condition}"][i]
             else:
                 # new format
-                current_color = self.Obj[f"TP_LaserColor_{current_condition}"][i]
+                current_color = self.Obj[f"TP_LaserColor_{current_condition}"][
+                    i
+                ]
             current_location = self.Obj[f"TP_Location_{current_condition}"][i]
             if current_location == "Both":
                 light_sources.append({"color": current_color, "laser_tag": 1})
@@ -1113,7 +1189,9 @@ class generate_metadata:
                 self.light_names_used_in_session.append(
                     [
                         key
-                        for key, value in self.name_mapper["laser_name_mapper"].items()
+                        for key, value in self.name_mapper[
+                            "laser_name_mapper"
+                        ].items()
                         if value == light_source
                     ][0]
                 )
@@ -1122,12 +1200,16 @@ class generate_metadata:
                 self.light_names_used_in_session.append(
                     [
                         key
-                        for key, value in self.name_mapper["led_name_mapper"].items()
+                        for key, value in self.name_mapper[
+                            "led_name_mapper"
+                        ].items()
                         if value == light_source
                     ][0]
                 )
 
-        self.light_names_used_in_session = list(set(self.light_names_used_in_session))
+        self.light_names_used_in_session = list(
+            set(self.light_names_used_in_session)
+        )
 
     def _get_ephys_stream(self):
         """
@@ -1149,11 +1231,16 @@ class generate_metadata:
             return
         self._get_stick_microscope()
         for current_recording in self.Obj["open_ephys"]:
-            if "openephys_start_recording_time" not in current_recording.keys():
+            if (
+                "openephys_start_recording_time"
+                not in current_recording.keys()
+            ):
                 start_time = self.Obj["Other_SessionStartTime"]
                 end_time = self.Obj["Other_CurrentTime"]
             else:
-                start_time = current_recording["openephys_start_recording_time"]
+                start_time = current_recording[
+                    "openephys_start_recording_time"
+                ]
                 end_time = current_recording["openephys_stop_recording_time"]
             self.ephys_streams.append(
                 Stream(
@@ -1161,7 +1248,9 @@ class generate_metadata:
                     stream_start_time=datetime.strptime(
                         start_time, "%Y-%m-%d %H:%M:%S.%f"
                     ),
-                    stream_end_time=datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S.%f"),
+                    stream_end_time=datetime.strptime(
+                        end_time, "%Y-%m-%d %H:%M:%S.%f"
+                    ),
                     daq_names=daq_names,
                     ephys_modules=self.ephys_modules,
                     stick_microscopes=self.stick_microscopes,
@@ -1179,15 +1268,15 @@ class generate_metadata:
             self.stick_microscopes.append(
                 DomeModule(
                     assembly_name=stick_microscope,
-                    rotation_angle=self.Obj["meta_data_dialog"]["session_metadata"][
-                        "microscopes"
-                    ][stick_microscope]["Stick_RotationAngle"],
+                    rotation_angle=self.Obj["meta_data_dialog"][
+                        "session_metadata"
+                    ]["microscopes"][stick_microscope]["Stick_RotationAngle"],
                     arc_angle=self.Obj["meta_data_dialog"]["session_metadata"][
                         "microscopes"
                     ][stick_microscope]["Stick_ArcAngle"],
-                    module_angle=self.Obj["meta_data_dialog"]["session_metadata"][
-                        "microscopes"
-                    ][stick_microscope]["Stick_ModuleAngle"],
+                    module_angle=self.Obj["meta_data_dialog"][
+                        "session_metadata"
+                    ]["microscopes"][stick_microscope]["Stick_ModuleAngle"],
                     notes="Did not calibrate.",
                 )
             )
@@ -1200,22 +1289,25 @@ class generate_metadata:
         self.ephys_modules = []
         self.stmulus_device_names = []
         for ind_probe, probe in enumerate(self.probe_names):
-            if probe in self.Obj["meta_data_dialog"]["session_metadata"]["probes"]:
+            if (
+                probe
+                in self.Obj["meta_data_dialog"]["session_metadata"]["probes"]
+            ):
                 self.ephys_modules.append(
                     ManipulatorModule(
-                        rotation_angle=self.Obj["meta_data_dialog"]["session_metadata"][
-                            "probes"
-                        ][probe]["RotationAngle"],
-                        arc_angle=self.Obj["meta_data_dialog"]["session_metadata"][
-                            "probes"
-                        ][probe]["ArcAngle"],
-                        module_angle=self.Obj["meta_data_dialog"]["session_metadata"][
-                            "probes"
-                        ][probe]["ModuleAngle"],
-                        assembly_name=self._find_assembly_names(probe),
-                        primary_targeted_structure=self.Obj["meta_data_dialog"][
+                        rotation_angle=self.Obj["meta_data_dialog"][
                             "session_metadata"
-                        ]["probes"][probe]["ProbeTarget"],
+                        ]["probes"][probe]["RotationAngle"],
+                        arc_angle=self.Obj["meta_data_dialog"][
+                            "session_metadata"
+                        ]["probes"][probe]["ArcAngle"],
+                        module_angle=self.Obj["meta_data_dialog"][
+                            "session_metadata"
+                        ]["probes"][probe]["ModuleAngle"],
+                        assembly_name=self._find_assembly_names(probe),
+                        primary_targeted_structure=self.Obj[
+                            "meta_data_dialog"
+                        ]["session_metadata"]["probes"][probe]["ProbeTarget"],
                         manipulator_coordinates=Coordinates3d(
                             x=self.Obj["meta_data_dialog"]["session_metadata"][
                                 "probes"
@@ -1315,7 +1407,9 @@ class generate_metadata:
         self.behavior_software = []
         try:
             script_dir = os.path.dirname(os.path.abspath(__file__))
-            os.chdir(script_dir)  # Change to the directory of the current script
+            os.chdir(
+                script_dir
+            )  # Change to the directory of the current script
             # Get information about task repository
             commit_ID = (
                 subprocess.check_output(["git", "rev-parse", "HEAD"])
@@ -1340,7 +1434,7 @@ class generate_metadata:
         self.behavior_software.append(
             Software(
                 name="dynamic-foraging-task",
-                version=f'behavior branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}    version:{self.Obj["version"]}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}',
+                version=f"behavior branch:{self.Obj['current_branch']}   commit ID:{self.Obj['commit_ID']}    version:{self.Obj['version']}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}",
                 url=self.Obj["repo_url"],
             )
         )
@@ -1356,15 +1450,18 @@ class generate_metadata:
         self._parse_opto_calibration()
         self.opto_calibration = []
         for current_calibration in self.parsed_optocalibration:
-            description = f'Optogenetic calibration for {current_calibration["laser name"]} {current_calibration["Color"]} Laser_{current_calibration["Laser tag"]}. Protocol: {current_calibration["Protocol"]}. Frequency: {current_calibration["Frequency"]}.'
+            description = f"Optogenetic calibration for {current_calibration['laser name']} {current_calibration['Color']} Laser_{current_calibration['Laser tag']}. Protocol: {current_calibration['Protocol']}. Frequency: {current_calibration['Frequency']}."
             self.opto_calibration.append(
                 Calibration(
                     calibration_date=datetime.strptime(
-                        current_calibration["latest_calibration_date"], "%Y-%m-%d"
+                        current_calibration["latest_calibration_date"],
+                        "%Y-%m-%d",
                     ).date(),
                     device_name=current_calibration["laser name"],
                     description=description,
-                    input={"input voltage (v)": current_calibration["Voltage"]},
+                    input={
+                        "input voltage (v)": current_calibration["Voltage"]
+                    },
                     output={"laser power (mw)": current_calibration["Power"]},
                 )
             )
@@ -1380,7 +1477,9 @@ class generate_metadata:
             if laser not in self.name_mapper["laser_name_mapper"]:
                 continue
             color = self.name_mapper["laser_name_mapper"][laser]["color"]
-            laser_tag = self.name_mapper["laser_name_mapper"][laser]["laser_tag"]
+            laser_tag = self.name_mapper["laser_name_mapper"][laser][
+                "laser_tag"
+            ]
             latest_calibration_date = self._FindLatestCalibrationDate(color)
             if latest_calibration_date == "NA":
                 RecentLaserCalibration = {}
@@ -1393,7 +1492,9 @@ class generate_metadata:
                 if color in RecentLaserCalibration.keys():
                     for Protocol in RecentLaserCalibration[color]:
                         if Protocol == "Sine":
-                            for Frequency in RecentLaserCalibration[color][Protocol]:
+                            for Frequency in RecentLaserCalibration[color][
+                                Protocol
+                            ]:
                                 voltage = []
                                 power = []
                                 if (
@@ -1402,24 +1503,30 @@ class generate_metadata:
                                         Frequency
                                     ]
                                 ):
-                                    current_calibration = RecentLaserCalibration[color][
-                                        Protocol
-                                    ][Frequency][f"Laser_{laser_tag}"][
-                                        "LaserPowerVoltage"
-                                    ]
+                                    current_calibration = (
+                                        RecentLaserCalibration[color][
+                                            Protocol
+                                        ][Frequency][f"Laser_{laser_tag}"][
+                                            "LaserPowerVoltage"
+                                        ]
+                                    )
                                 else:
                                     if laser_tag == 1:
-                                        current_calibration = RecentLaserCalibration[
-                                            color
-                                        ][Protocol][Frequency]["Left"][
-                                            "LaserPowerVoltage"
-                                        ]
+                                        current_calibration = (
+                                            RecentLaserCalibration[color][
+                                                Protocol
+                                            ][Frequency]["Left"][
+                                                "LaserPowerVoltage"
+                                            ]
+                                        )
                                     elif laser_tag == 2:
-                                        current_calibration = RecentLaserCalibration[
-                                            color
-                                        ][Protocol][Frequency]["Right"][
-                                            "LaserPowerVoltage"
-                                        ]
+                                        current_calibration = (
+                                            RecentLaserCalibration[color][
+                                                Protocol
+                                            ][Frequency]["Right"][
+                                                "LaserPowerVoltage"
+                                            ]
+                                        )
                                 if current_calibration == []:
                                     continue
                                 for i in range(len(current_calibration)):
@@ -1429,7 +1536,9 @@ class generate_metadata:
                                     voltage.append(laser_voltage_power[0])
                                     power.append(laser_voltage_power[1])
                                 voltage, power = zip(
-                                    *sorted(zip(voltage, power), key=lambda x: x[0])
+                                    *sorted(
+                                        zip(voltage, power), key=lambda x: x[0]
+                                    )
                                 )
                                 self.parsed_optocalibration.append(
                                     {
@@ -1450,26 +1559,36 @@ class generate_metadata:
                                 f"Laser_{laser_tag}"
                                 in RecentLaserCalibration[color][Protocol]
                             ):
-                                current_calibration = RecentLaserCalibration[color][
-                                    Protocol
-                                ][f"Laser_{laser_tag}"]["LaserPowerVoltage"]
+                                current_calibration = RecentLaserCalibration[
+                                    color
+                                ][Protocol][f"Laser_{laser_tag}"][
+                                    "LaserPowerVoltage"
+                                ]
                             else:
                                 if laser_tag == 1:
-                                    current_calibration = RecentLaserCalibration[color][
-                                        Protocol
-                                    ]["Left"]["LaserPowerVoltage"]
+                                    current_calibration = (
+                                        RecentLaserCalibration[color][
+                                            Protocol
+                                        ]["Left"]["LaserPowerVoltage"]
+                                    )
                                 elif laser_tag == 2:
-                                    current_calibration = RecentLaserCalibration[color][
-                                        Protocol
-                                    ]["Right"]["LaserPowerVoltage"]
+                                    current_calibration = (
+                                        RecentLaserCalibration[color][
+                                            Protocol
+                                        ]["Right"]["LaserPowerVoltage"]
+                                    )
                             if current_calibration == []:
                                 continue
                             for i in range(len(current_calibration)):
-                                laser_voltage_power = eval(str(current_calibration[i]))
+                                laser_voltage_power = eval(
+                                    str(current_calibration[i])
+                                )
                                 voltage.append(laser_voltage_power[0])
                                 power.append(laser_voltage_power[1])
                             voltage, power = zip(
-                                *sorted(zip(voltage, power), key=lambda x: x[0])
+                                *sorted(
+                                    zip(voltage, power), key=lambda x: x[0]
+                                )
                             )
                             self.parsed_optocalibration.append(
                                 {
@@ -1497,7 +1616,9 @@ class generate_metadata:
         self.laser_names = []
         if Obj is None:
             Obj = self.Obj
-        for light_source in Obj["meta_data_dialog"]["rig_metadata"]["light_sources"]:
+        for light_source in Obj["meta_data_dialog"]["rig_metadata"][
+            "light_sources"
+        ]:
             if light_source["device_type"] in ["Laser", "LightEmittingDiode"]:
                 self.laser_names.append(light_source["name"])
         return self.laser_names
@@ -1505,7 +1626,9 @@ class generate_metadata:
     def _FindLatestCalibrationDate(self, Laser):
         """find the latest calibration date for the selected laser"""
         if not ("LaserCalibrationResults" in self.Obj):
-            logging.info("LaserCalibrationResults is not included in self.Obj.")
+            logging.info(
+                "LaserCalibrationResults is not included in self.Obj."
+            )
             return "NA"
         Dates = []
         for Date in self.Obj["LaserCalibrationResults"]:
@@ -1546,10 +1669,14 @@ class generate_metadata:
                     device_name=device_name,
                     description=description,
                     input={
-                        "valve open time (s)": self.parsed_watercalibration[side]["X"]
+                        "valve open time (s)": self.parsed_watercalibration[
+                            side
+                        ]["X"]
                     },
                     output={
-                        "water volume (ul)": self.parsed_watercalibration[side]["Y"]
+                        "water volume (ul)": self.parsed_watercalibration[
+                            side
+                        ]["Y"]
                     },
                 )
             )
@@ -1562,7 +1689,9 @@ class generate_metadata:
         sorted_dates = sorted(
             self.WaterCalibrationResults.keys(), key=self._custom_sort_key
         )
-        self.RecentWaterCalibration = self.WaterCalibrationResults[sorted_dates[-1]]
+        self.RecentWaterCalibration = self.WaterCalibrationResults[
+            sorted_dates[-1]
+        ]
         self.RecentWaterCalibrationDate = sorted_dates[-1]
 
         sides = self.name_mapper["sides"]
@@ -1602,7 +1731,9 @@ class generate_metadata:
         if "B_StagePositions" in self.Obj.keys():
             start_position = [
                 self.Obj["B_StagePositions"][-1]["x"],
-                self.Obj["B_StagePositions"][-1].get("y", None),  # newscale stage
+                self.Obj["B_StagePositions"][-1].get(
+                    "y", None
+                ),  # newscale stage
                 self.Obj["B_StagePositions"][-1].get("y1", None),  # aind-stage
                 self.Obj["B_StagePositions"][-1].get("y2", None),  # aind-stage
                 self.Obj["B_StagePositions"][-1]["z"],
@@ -1667,7 +1798,9 @@ class generate_metadata:
                 ),
             ]
         else:
-            logging.error("Object does not have stage positions to create metadata.")
+            logging.error(
+                "Object does not have stage positions to create metadata."
+            )
             return
 
         if len(reference_spout_position) == 3:  # newscale stage
@@ -1680,10 +1813,12 @@ class generate_metadata:
             )
         else:  # aind stage
             left_lick_spout_reference_position = [
-                reference_spout_position[i] - start_position[i] for i in [0, 1, 3]
+                reference_spout_position[i] - start_position[i]
+                for i in [0, 1, 3]
             ]
             right_lick_spout_reference_position = [
-                reference_spout_position[i] - start_position[i] for i in [0, 2, 3]
+                reference_spout_position[i] - start_position[i]
+                for i in [0, 2, 3]
             ]
 
         self.reward_delivery = RewardDeliveryConfig(
@@ -1696,7 +1831,9 @@ class generate_metadata:
                             Translation3dTransform(
                                 translation=left_lick_spout_reference_position.tolist()
                             ),
-                            Rotation3dTransform(rotation=[1, 0, 0, 0, 1, 0, 0, 0, 1]),
+                            Rotation3dTransform(
+                                rotation=[1, 0, 0, 0, 1, 0, 0, 0, 1]
+                            ),
                         ],
                         device_origin=device_oringin,
                         device_axes=[
@@ -1715,7 +1852,9 @@ class generate_metadata:
                             Translation3dTransform(
                                 translation=right_lick_spout_reference_position.tolist()
                             ),
-                            Rotation3dTransform(rotation=[1, 0, 0, 0, 1, 0, 0, 0, 1]),
+                            Rotation3dTransform(
+                                rotation=[1, 0, 0, 0, 1, 0, 0, 0, 1]
+                            ),
                         ],
                         device_origin=device_oringin,
                         device_axes=[
@@ -1733,7 +1872,6 @@ class generate_metadata:
 
 
 if __name__ == "__main__":
-
     generate_metadata(
         json_file=r"Y:\753126\behavior_753126_2024-10-07_10-14-07\behavior\753126_2024-10-07_10-14-07.json",
         output_folder=r"H:\test",

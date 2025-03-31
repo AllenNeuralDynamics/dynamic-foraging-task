@@ -105,7 +105,9 @@ class GenerateTrials:
         self.B_session_control_state = []
         self.B_opto_error = []
         self.NextWaveForm = 1  # waveform stored for later use
-        self.CurrentWaveForm = 1  # the current waveform to trigger the optogenetics
+        self.CurrentWaveForm = (
+            1  # the current waveform to trigger the optogenetics
+        )
         self.Start_Delay_LeftLicks = []
         self.Start_Delay_RightLicks = []
         self.Delay_GoCue_LeftLicks = []
@@ -149,20 +151,29 @@ class GenerateTrials:
         self._CheckAutoWater()
 
         # --- Handle reward schedule ---
-        if self.TP_Task in ["Coupled Baiting", "Coupled Without Baiting", "RewardN"]:
+        if self.TP_Task in [
+            "Coupled Baiting",
+            "Coupled Without Baiting",
+            "RewardN",
+        ]:
             # -- Use the old logic --
             # check block transition and set self.B_ANewBlock
             self._check_coupled_block_transition()
             if any(self.B_ANewBlock == 1):
                 # assign the next block's reward prob to self.B_CurrentRewardProb
                 self._generate_next_coupled_block()
-        elif self.TP_Task in ["Uncoupled Baiting", "Uncoupled Without Baiting"]:
+        elif self.TP_Task in [
+            "Uncoupled Baiting",
+            "Uncoupled Without Baiting",
+        ]:
             # -- Use Han's standalone class --
             if self.B_CurrentTrialN == -1 or not hasattr(
                 self, "uncoupled_blocks"
             ):  # Or the user start uncoupled in the midde of the session
                 # Get uncoupled task settings
-                self.RewardProbPoolUncoupled = self._get_uncoupled_reward_prob_pool()
+                self.RewardProbPoolUncoupled = (
+                    self._get_uncoupled_reward_prob_pool()
+                )
 
                 # Initialize the UncoupledBlocks object and generate the first trial
                 self.uncoupled_blocks = UncoupledBlocks(
@@ -177,16 +188,18 @@ class GenerateTrials:
             else:
                 # Add animal's last choice and generate the next trial
                 self.uncoupled_blocks.add_choice(
-                    ["L", "R", "ignored"][int(self.B_AnimalResponseHistory[-1])]
+                    ["L", "R", "ignored"][
+                        int(self.B_AnimalResponseHistory[-1])
+                    ]
                 )
                 _, msg_uncoupled_block = self.uncoupled_blocks.next_trial()
 
             # Extract parameters from the UncoupledBlocks object
             for i, side in enumerate(["L", "R"]):
                 # Update self.B_CurrentRewardProb from trial_rwd_prob
-                self.B_CurrentRewardProb[i] = self.uncoupled_blocks.trial_rwd_prob[
-                    side
-                ][-1]
+                self.B_CurrentRewardProb[i] = (
+                    self.uncoupled_blocks.trial_rwd_prob[side][-1]
+                )
 
                 # Update self.BlockLenHistory from diff(block_ends)
                 # Note we don't need override_block_len here since all
@@ -307,7 +320,9 @@ class GenerateTrials:
         # Get reward prob pool from the input string (e.g., ["0.1", "0.5", "0.9"])
         input_string = self.win.UncoupledReward.text()
         # remove any square brackets and spaces from the string
-        input_string = input_string.replace("[", "").replace("]", "").replace(",", " ")
+        input_string = (
+            input_string.replace("[", "").replace("]", "").replace(",", " ")
+        )
         # split the remaining string into a list of individual numbers
         num_list = input_string.split()
         # convert each number in the list to a float
@@ -330,7 +345,8 @@ class GenerateTrials:
             self.win._NextBlock()
             self.win.UpdateParameters = 1
             logging.info(
-                "Warm up is turned off", extra={"tags": [self.win.warning_log_tag]}
+                "Warm up is turned off",
+                extra={"tags": [self.win.warning_log_tag]},
             )
 
     def _get_warmup_state(self):
@@ -358,7 +374,8 @@ class GenerateTrials:
         if (
             finish_trial >= float(self.TP_warm_min_trial)
             and finish_ratio >= float(self.TP_warm_min_finish_ratio)
-            and abs(choice_ratio - 0.5) <= float(self.TP_warm_max_choice_ratio_bias)
+            and abs(choice_ratio - 0.5)
+            <= float(self.TP_warm_max_choice_ratio_bias)
         ):
             # turn off the warm up
             warmup = 0
@@ -417,7 +434,8 @@ class GenerateTrials:
         max_index = np.argmax(B_RewardProHistory[:, -1])
         # get the consecutive choice of the active side
         length, indexN = self._consecutive_length(
-            self.B_AnimalResponseHistory[index[0][0] : index[0][1] + 1], max_index
+            self.B_AnimalResponseHistory[index[0][0] : index[0][1] + 1],
+            max_index,
         )
         # reset to 0 during the first trial of block transition
         if (
@@ -434,26 +452,36 @@ class GenerateTrials:
     def _generate_next_coupled_block(self):
         """Generate the next block reward probability and block length (coupled task only)"""
         # determine the reward probability of the next trial based on tasks
-        self.RewardPairs = self.B_RewardFamilies[int(self.TP_RewardFamily) - 1][
-            : int(self.TP_RewardPairsN)
-        ]
+        self.RewardPairs = self.B_RewardFamilies[
+            int(self.TP_RewardFamily) - 1
+        ][: int(self.TP_RewardPairsN)]
         self.RewardProb = (
             np.array(self.RewardPairs)
             / np.expand_dims(np.sum(self.RewardPairs, axis=1), axis=1)
             * float(self.TP_BaseRewardSum)
         )
         # get the reward probabilities pool
-        RewardProbPool = np.append(self.RewardProb, np.fliplr(self.RewardProb), axis=0)
+        RewardProbPool = np.append(
+            self.RewardProb, np.fliplr(self.RewardProb), axis=0
+        )
         if self.B_RewardProHistory.size != 0:
             # exclude the previous reward probabilities
             RewardProbPool = RewardProbPool[
-                np.any(RewardProbPool != self.B_RewardProHistory[:, -1], axis=1)
+                np.any(
+                    RewardProbPool != self.B_RewardProHistory[:, -1], axis=1
+                )
             ]
             # exclude blocks with the same identity/order (forced change of block identity (L->R; R->L))
-            if self.B_RewardProHistory[0, -1] != self.B_RewardProHistory[1, -1]:
+            if (
+                self.B_RewardProHistory[0, -1]
+                != self.B_RewardProHistory[1, -1]
+            ):
                 RewardProbPool = RewardProbPool[
                     (RewardProbPool[:, 0] > RewardProbPool[:, 1])
-                    != (self.B_RewardProHistory[0, -1] > self.B_RewardProHistory[1, -1])
+                    != (
+                        self.B_RewardProHistory[0, -1]
+                        > self.B_RewardProHistory[1, -1]
+                    )
                 ]
         # Remove duplicates
         RewardProbPool = np.unique(RewardProbPool, axis=0)
@@ -471,7 +499,9 @@ class GenerateTrials:
             )
         elif self.TP_Randomness == "Even":
             self.BlockLen = np.array(
-                np.random.randint(float(self.TP_BlockMin), float(self.TP_BlockMax) + 1)
+                np.random.randint(
+                    float(self.TP_BlockMin), float(self.TP_BlockMax) + 1
+                )
             )
         if self.BlockLen > float(self.TP_BlockMax):
             self.BlockLen = int(self.TP_BlockMax)
@@ -483,7 +513,8 @@ class GenerateTrials:
         # get the ITI time and delay time
         if self.TP_Randomness == "Exponential":
             self.CurrentITI = float(
-                np.random.exponential(float(self.TP_ITIBeta), 1) + float(self.TP_ITIMin)
+                np.random.exponential(float(self.TP_ITIBeta), 1)
+                + float(self.TP_ITIMin)
             )
         elif self.TP_Randomness == "Even":
             self.CurrentITI = random.uniform(
@@ -540,7 +571,9 @@ class GenerateTrials:
 
         # Get the number of reward trials in the current block
         if self.B_CurrentTrialN >= 0:
-            self._get_current_block_reward(1, CountAutoWater=1, UpdateBlockLen=1)
+            self._get_current_block_reward(
+                1, CountAutoWater=1, UpdateBlockLen=1
+            )
         else:
             # If this is the first trial of the block, set self.AllRewardThisBlock to -1
             self.AllRewardThisBlock = -1
@@ -593,7 +626,9 @@ class GenerateTrials:
             if CurrentEffectiveBlockLen > len(ChoiceFraction):
                 self.AdvancedBlockSwitchPermitted = 1
                 return
-            ChoiceFractionCurrentBlock = ChoiceFraction[-CurrentEffectiveBlockLen:]
+            ChoiceFractionCurrentBlock = ChoiceFraction[
+                -CurrentEffectiveBlockLen:
+            ]
             # decide the current high rewrad side and threshold(for 2 reward probability)
             Delta = abs(
                 (self.B_CurrentRewardProb[0] - self.B_CurrentRewardProb[1])
@@ -619,8 +654,8 @@ class GenerateTrials:
                 )
             )
             OkPoints[Ind] = 1
-            consecutive_lengths, consecutive_indices = self._consecutive_length(
-                OkPoints, 1
+            consecutive_lengths, consecutive_indices = (
+                self._consecutive_length(OkPoints, 1)
             )
             if consecutive_lengths.size == 0:
                 self.AdvancedBlockSwitchPermitted = 0
@@ -684,7 +719,9 @@ class GenerateTrials:
         """Get the trial length of the current block"""
         self.CurrentBlockLen = []
         for i in range(len(self.B_RewardProHistory)):
-            if np.all(self.B_RewardProHistory[i] == self.B_CurrentRewardProb[i]):
+            if np.all(
+                self.B_RewardProHistory[i] == self.B_CurrentRewardProb[i]
+            ):
                 self.CurrentBlockLen.append(self.B_RewardProHistory.shape[1])
             else:
                 self.CurrentBlockLen.append(
@@ -692,7 +729,8 @@ class GenerateTrials:
                     - 1
                     - np.max(
                         np.where(
-                            self.B_RewardProHistory[i] != self.B_CurrentRewardProb[i]
+                            self.B_RewardProHistory[i]
+                            != self.B_CurrentRewardProb[i]
                         )
                     )
                 )
@@ -707,7 +745,9 @@ class GenerateTrials:
         # running average of response fraction
         for i in range(len(self.B_AnimalResponseHistory)):
             if i >= kernel_size - 1:
-                if all(np.isnan(ResponseHistoryT[i + 1 - kernel_size : i + 1])):
+                if all(
+                    np.isnan(ResponseHistoryT[i + 1 - kernel_size : i + 1])
+                ):
                     ResponseHistoryF[i + 1 - kernel_size] = np.nan
                 else:
                     ResponseHistoryF[i + 1 - kernel_size] = np.nanmean(
@@ -747,7 +787,8 @@ class GenerateTrials:
                 Ind = range(len(self.B_RewardedHistory[0]))
                 for i in range(len(self.B_RewardedHistory)):
                     B_RewardedHistory[i] = np.logical_or(
-                        self.B_RewardedHistory[i], self.B_AutoWaterTrial[i][Ind]
+                        self.B_RewardedHistory[i],
+                        self.B_AutoWaterTrial[i][Ind],
                     )
             elif self.TP_IncludeAutoReward == "no":
                 # auto reward is not considered as reward (auto reward is considered reward only when the animal makes a choice). Reward is determined by the animal's response history and the bait history
@@ -840,7 +881,10 @@ class GenerateTrials:
         self.BS_auto_water = [BS_auto_water_left, BS_auto_water_right]
         self.BS_earned_reward = [BS_earned_reward_left, BS_earned_reward_right]
         self.BS_AutoWater_N = [BS_AutoWater_N_left, BS_AutoWater_N_right]
-        self.BS_EarnedReward_N = [BS_EarnedReward_N_left, BS_EarnedReward_N_right]
+        self.BS_EarnedReward_N = [
+            BS_EarnedReward_N_left,
+            BS_EarnedReward_N_right,
+        ]
 
         self.BS_TotalReward = (
             BS_earned_reward_left
@@ -852,7 +896,9 @@ class GenerateTrials:
         self.BS_RightRewardTrialN = np.sum(self.B_RewardedHistory[1] == True)
         self.BS_LeftChoiceN = np.sum(self.B_AnimalResponseHistory == 0)
         self.BS_RightChoiceN = np.sum(self.B_AnimalResponseHistory == 1)
-        self.BS_OverallRewardRate = self.BS_RewardTrialN / (self.B_CurrentTrialN + 1)
+        self.BS_OverallRewardRate = self.BS_RewardTrialN / (
+            self.B_CurrentTrialN + 1
+        )
         if self.BS_LeftChoiceN == 0:
             self.BS_LeftChoiceRewardRate = np.nan
         else:
@@ -889,7 +935,11 @@ class GenerateTrials:
             if self.TP_Task in ["Coupled Baiting", "Uncoupled Baiting"]:
                 self.B_for_eff_optimal, self.B_for_eff_optimal_random_seed = (
                     self.foraging_eff(
-                        reward_rate, p_Ls, p_Rs, random_number_L, random_number_R
+                        reward_rate,
+                        p_Ls,
+                        p_Rs,
+                        random_number_L,
+                        random_number_R,
                     )
                 )
             elif self.TP_Task in [
@@ -898,7 +948,11 @@ class GenerateTrials:
             ]:
                 self.B_for_eff_optimal, self.B_for_eff_optimal_random_seed = (
                     self.foraging_eff_no_baiting(
-                        reward_rate, p_Ls, p_Rs, random_number_L, random_number_R
+                        reward_rate,
+                        p_Ls,
+                        p_Rs,
+                        random_number_L,
+                        random_number_R,
                     )
                 )
             else:
@@ -926,17 +980,26 @@ class GenerateTrials:
         return BS_AutoWater, BS_EarnedReward, BS_AutoWater_N, BS_EarnedReward_N
 
     def foraging_eff_no_baiting(
-        self, reward_rate, p_Ls, p_Rs, random_number_L=None, random_number_R=None
+        self,
+        reward_rate,
+        p_Ls,
+        p_Rs,
+        random_number_L=None,
+        random_number_R=None,
     ):  # Calculate foraging efficiency (only for 2lp)
         """Calculating the foraging efficiency of no baiting tasks (Code is from Han)"""
         # --- Optimal-aver (use optimal expectation as 100% efficiency) ---
-        for_eff_optimal = float(reward_rate / np.nanmean(np.max([p_Ls, p_Rs], axis=0)))
+        for_eff_optimal = float(
+            reward_rate / np.nanmean(np.max([p_Ls, p_Rs], axis=0))
+        )
 
         if random_number_L is None:
             return for_eff_optimal, np.nan
 
         # --- Optimal-actual (uses the actual random numbers by simulation)
-        reward_refills = np.vstack([p_Ls >= random_number_L, p_Rs >= random_number_R])
+        reward_refills = np.vstack(
+            [p_Ls >= random_number_L, p_Rs >= random_number_R]
+        )
         optimal_choices = np.argmax(
             [p_Ls, p_Rs], axis=0
         )  # Greedy choice, assuming the agent knows the groundtruth
@@ -951,7 +1014,12 @@ class GenerateTrials:
         return for_eff_optimal, for_eff_optimal_random_seed
 
     def foraging_eff(
-        self, reward_rate, p_Ls, p_Rs, random_number_L=None, random_number_R=None
+        self,
+        reward_rate,
+        p_Ls,
+        p_Rs,
+        random_number_L=None,
+        random_number_R=None,
     ):  # Calculate foraging efficiency (only for 2lp)
         """Calculating the foraging efficiency of baiting tasks (Code is from Han)"""
         # --- Optimal-aver (use optimal expectation as 100% efficiency) ---
@@ -963,9 +1031,9 @@ class GenerateTrials:
                 p_stars[i] = p_max
             else:
                 m_star = np.floor(np.log(1 - p_max) / np.log(1 - p_min))
-                p_stars[i] = p_max + (1 - (1 - p_min) ** (m_star + 1) - p_max**2) / (
-                    m_star + 1
-                )
+                p_stars[i] = p_max + (
+                    1 - (1 - p_min) ** (m_star + 1) - p_max**2
+                ) / (m_star + 1)
 
         for_eff_optimal = float(reward_rate / np.nanmean(p_stars))
 
@@ -973,7 +1041,9 @@ class GenerateTrials:
             return for_eff_optimal, np.nan
 
         # --- Optimal-actual (uses the actual random numbers by simulation)
-        block_trans = np.where(np.diff(np.hstack([np.inf, p_Ls, np.inf])))[0].tolist()
+        block_trans = np.where(np.diff(np.hstack([np.inf, p_Ls, np.inf])))[
+            0
+        ].tolist()
         reward_refills = [p_Ls >= random_number_L, p_Rs >= random_number_R]
         reward_optimal_random_seed = 0
 
@@ -1028,9 +1098,14 @@ class GenerateTrials:
             Trials = self.B_CurrentTrialN - 1
         # combine all of the left and right licks
         self.AllLicksInd = np.concatenate(
-            (np.zeros(len(self.B_LeftLickTime)), np.ones(len(self.B_RightLickTime)))
+            (
+                np.zeros(len(self.B_LeftLickTime)),
+                np.ones(len(self.B_RightLickTime)),
+            )
         )
-        self.AllLicksTime = np.concatenate((self.B_LeftLickTime, self.B_RightLickTime))
+        self.AllLicksTime = np.concatenate(
+            (self.B_LeftLickTime, self.B_RightLickTime)
+        )
         # get the sort index
         sort_index = np.argsort(self.AllLicksTime)
         # sort the lick times
@@ -1050,8 +1125,12 @@ class GenerateTrials:
                 ) & (self.AllLicksTimeSorted < CurrentGoCue_NextStart[1])
                 Ind_GoCue_NextStart_Left = Ind_GoCue_NextStart & LeftLicksInd
                 Ind_GoCue_NextStart_Right = Ind_GoCue_NextStart & RightLicksInd
-                self.GoCue_NextStart_LeftLicks.append(sum(Ind_GoCue_NextStart_Left))
-                self.GoCue_NextStart_RightLicks.append(sum(Ind_GoCue_NextStart_Right))
+                self.GoCue_NextStart_LeftLicks.append(
+                    sum(Ind_GoCue_NextStart_Left)
+                )
+                self.GoCue_NextStart_RightLicks.append(
+                    sum(Ind_GoCue_NextStart_Right)
+                )
                 # double dipping
                 GoCue_NextStart_DD = self._GetDoubleDipping(
                     self.AllLicksIndSorted[Ind_GoCue_NextStart]
@@ -1060,21 +1139,29 @@ class GenerateTrials:
                 self.DD_TrialsN_GoCue_NextStart = sum(
                     np.array(self.GoCue_NextStart_DD) != 0
                 )
-                self.DDRate_GoCue_NextStart = self.DD_TrialsN_GoCue_NextStart / len(
-                    self.GoCue_NextStart_DD
+                self.DDRate_GoCue_NextStart = (
+                    self.DD_TrialsN_GoCue_NextStart
+                    / len(self.GoCue_NextStart_DD)
                 )
                 # double dipping per finish trial
                 Len = len(self.GoCue_NextStart_DD)
-                RespondedTrial = np.where(self.B_AnimalResponseHistory[:Len] != 2)[0]
+                RespondedTrial = np.where(
+                    self.B_AnimalResponseHistory[:Len] != 2
+                )[0]
                 if RespondedTrial.size > 0:
                     self.DD_PerTrial_GoCue_NextStart = np.round(
                         sum(np.array(self.GoCue_NextStart_DD)[RespondedTrial])
-                        / len(np.array(self.GoCue_NextStart_DD)[RespondedTrial]),
+                        / len(
+                            np.array(self.GoCue_NextStart_DD)[RespondedTrial]
+                        ),
                         2,
                     )
                 else:
                     self.DD_PerTrial_GoCue_NextStart = "nan"
-            CurrentStart_GoCue = (self.B_TrialStartTime[i], self.B_GoCueTime[i])
+            CurrentStart_GoCue = (
+                self.B_TrialStartTime[i],
+                self.B_GoCueTime[i],
+            )
             if self.B_DelayStartTime[i] in [None, -999]:
                 CurrentStart_Delay = (
                     self.B_TrialStartTime[i],
@@ -1086,21 +1173,27 @@ class GenerateTrials:
                     self.B_TrialStartTime[i],
                     self.B_DelayStartTime[i],
                 )  # using the first delay start time
-                CurrentDelay_GoCue = (self.B_DelayStartTime[i], self.B_GoCueTime[i])
-            CurrentGoCue_GoCue1 = (self.B_GoCueTime[i], self.B_GoCueTime[i] + 1)
+                CurrentDelay_GoCue = (
+                    self.B_DelayStartTime[i],
+                    self.B_GoCueTime[i],
+                )
+            CurrentGoCue_GoCue1 = (
+                self.B_GoCueTime[i],
+                self.B_GoCueTime[i] + 1,
+            )
             # licks in different intervals
-            Ind_Start_GoCue = (self.AllLicksTimeSorted >= CurrentStart_GoCue[0]) & (
-                self.AllLicksTimeSorted < CurrentStart_GoCue[1]
-            )
-            Ind_Start_Delay = (self.AllLicksTimeSorted >= CurrentStart_Delay[0]) & (
-                self.AllLicksTimeSorted < CurrentStart_Delay[1]
-            )
-            Ind_Delay_GoCue = (self.AllLicksTimeSorted >= CurrentDelay_GoCue[0]) & (
-                self.AllLicksTimeSorted < CurrentDelay_GoCue[1]
-            )
-            Ind_GoCue_GoCue1 = (self.AllLicksTimeSorted >= CurrentGoCue_GoCue1[0]) & (
-                self.AllLicksTimeSorted < CurrentGoCue_GoCue1[1]
-            )
+            Ind_Start_GoCue = (
+                self.AllLicksTimeSorted >= CurrentStart_GoCue[0]
+            ) & (self.AllLicksTimeSorted < CurrentStart_GoCue[1])
+            Ind_Start_Delay = (
+                self.AllLicksTimeSorted >= CurrentStart_Delay[0]
+            ) & (self.AllLicksTimeSorted < CurrentStart_Delay[1])
+            Ind_Delay_GoCue = (
+                self.AllLicksTimeSorted >= CurrentDelay_GoCue[0]
+            ) & (self.AllLicksTimeSorted < CurrentDelay_GoCue[1])
+            Ind_GoCue_GoCue1 = (
+                self.AllLicksTimeSorted >= CurrentGoCue_GoCue1[0]
+            ) & (self.AllLicksTimeSorted < CurrentGoCue_GoCue1[1])
             Ind_Start_GoCue_Left = Ind_Start_GoCue & LeftLicksInd
             Ind_Start_GoCue_Right = Ind_Start_GoCue & RightLicksInd
             Ind_Start_Delay_Left = (
@@ -1158,14 +1251,17 @@ class GenerateTrials:
                 np.array(self.Start_GoCue_RightLicks) != 0,
             )
         )
-        self.EarlyLickingRate_Start_Delay = self.EarlyLickingTrialsN_Start_Delay / len(
-            self.Start_Delay_LeftLicks
+        self.EarlyLickingRate_Start_Delay = (
+            self.EarlyLickingTrialsN_Start_Delay
+            / len(self.Start_Delay_LeftLicks)
         )
-        self.EarlyLickingRate_Delay_GoCue = self.EarlyLickingTrialsN_Delay_GoCue / len(
-            self.Delay_GoCue_LeftLicks
+        self.EarlyLickingRate_Delay_GoCue = (
+            self.EarlyLickingTrialsN_Delay_GoCue
+            / len(self.Delay_GoCue_LeftLicks)
         )
-        self.EarlyLickingRate_Start_GoCue = self.EarlyLickingTrialsN_Start_GoCue / len(
-            self.Start_GoCue_LeftLicks
+        self.EarlyLickingRate_Start_GoCue = (
+            self.EarlyLickingTrialsN_Start_GoCue
+            / len(self.Start_GoCue_LeftLicks)
         )
         # fraction of double dipping trials in different time interval
         self.DD_TrialsN_Start_Delay = sum(np.array(self.Start_Delay_DD) != 0)
@@ -1173,12 +1269,18 @@ class GenerateTrials:
         self.DD_TrialsN_GoCue_GoCue1 = sum(np.array(self.GoCue_GoCue1_DD) != 0)
         self.DD_TrialsN_Start_CoCue = sum(np.array(self.Start_GoCue_DD) != 0)
 
-        self.DDRate_Start_Delay = self.DD_TrialsN_Start_Delay / len(self.Start_Delay_DD)
-        self.DDRate_Delay_GoCue = self.DD_TrialsN_Delay_GoCue / len(self.Delay_GoCue_DD)
+        self.DDRate_Start_Delay = self.DD_TrialsN_Start_Delay / len(
+            self.Start_Delay_DD
+        )
+        self.DDRate_Delay_GoCue = self.DD_TrialsN_Delay_GoCue / len(
+            self.Delay_GoCue_DD
+        )
         self.DDRate_GoCue_GoCue1 = self.DD_TrialsN_GoCue_GoCue1 / len(
             self.GoCue_GoCue1_DD
         )
-        self.DDRate_Start_CoCue = self.DD_TrialsN_Start_CoCue / len(self.Start_GoCue_DD)
+        self.DDRate_Start_CoCue = self.DD_TrialsN_Start_CoCue / len(
+            self.Start_GoCue_DD
+        )
 
         # double dipping per finish trial
         Len = len(self.Start_GoCue_DD)
@@ -1252,7 +1354,9 @@ class GenerateTrials:
                 self.win.same_side_lick_interval.setText("")
 
             # calculate cross side interval and frac
-            right_dummy = np.ones(right.shape)  # array used to assign lick direction
+            right_dummy = np.ones(
+                right.shape
+            )  # array used to assign lick direction
             left_dummy = np.negative(np.ones(left.shape))
 
             # 2d arrays pairing each time with a 1 (right) or -1 (left)
@@ -1262,7 +1366,8 @@ class GenerateTrials:
             # e.g. [[-1, 10], [1, 15], [-1, 20], [1, 25]...]. Ones added to assign lick side to times
             merged_sorted = np.array(
                 sorted(
-                    np.concatenate((stacked_right, stacked_left)), key=lambda x: x[1]
+                    np.concatenate((stacked_right, stacked_left)),
+                    key=lambda x: x[1],
                 )
             )
 
@@ -1316,20 +1421,37 @@ class GenerateTrials:
                     + str(np.round(self.RewardProb, 2)).replace("\n", ",")
                     + "\n\n"
                     + "Current pair:\n"
-                    + str(np.round(self.B_RewardProHistory[:, self.B_CurrentTrialN], 2))
+                    + str(
+                        np.round(
+                            self.B_RewardProHistory[:, self.B_CurrentTrialN], 2
+                        )
+                    )
                 )
                 if self.win.default_ui == "ForagingGUI.ui":
-                    self.win.ShowRewardPairs_2.setText(self.win.ShowRewardPairs.text())
-            elif self.TP_Task in ["Uncoupled Baiting", "Uncoupled Without Baiting"]:
+                    self.win.ShowRewardPairs_2.setText(
+                        self.win.ShowRewardPairs.text()
+                    )
+            elif self.TP_Task in [
+                "Uncoupled Baiting",
+                "Uncoupled Without Baiting",
+            ]:
                 self.win.ShowRewardPairs.setText(
                     "Reward pairs:\n"
-                    + str(np.round(self.RewardProbPoolUncoupled, 2)).replace("\n", ",")
+                    + str(np.round(self.RewardProbPoolUncoupled, 2)).replace(
+                        "\n", ","
+                    )
                     + "\n\n"
                     + "Current pair:\n"
-                    + str(np.round(self.B_RewardProHistory[:, self.B_CurrentTrialN], 2))
+                    + str(
+                        np.round(
+                            self.B_RewardProHistory[:, self.B_CurrentTrialN], 2
+                        )
+                    )
                 )
                 if self.win.default_ui == "ForagingGUI.ui":
-                    self.win.ShowRewardPairs_2.setText(self.win.ShowRewardPairs.text())
+                    self.win.ShowRewardPairs_2.setText(
+                        self.win.ShowRewardPairs.text()
+                    )
         except Exception as e:
             logging.error(str(e))
 
@@ -1385,7 +1507,7 @@ class GenerateTrials:
                     f"Responded trial: {self.BS_FinisheTrialN}/{self.BS_AllTrialN} ({self.BS_RespondedRate:.2f})\n"
                     f"Reward Trial: {self.BS_RewardTrialN}/{self.BS_AllTrialN} ({self.BS_OverallRewardRate:.2f})\n"
                     f"Earned Reward: {sum(self.BS_earned_reward) / 1000:.3f} mL\n"
-                    f"Water in session: {self.win.water_in_session if self.B_CurrentTrialN>=0 else 0:.3f} mL"
+                    f"Water in session: {self.win.water_in_session if self.B_CurrentTrialN >= 0 else 0:.3f} mL"
                 )
             self.win.label_info_performance_essential_1.setText(
                 self.win.info_performance_essential_1
@@ -1394,7 +1516,11 @@ class GenerateTrials:
             # right side in the GUI
             self.win.info_performance_essential_2 = (
                 "Foraging eff: "
-                + (f"{self.B_for_eff_optimal:.2f}" if self.B_CurrentTrialN >= 2 else "")
+                + (
+                    f"{self.B_for_eff_optimal:.2f}"
+                    if self.B_CurrentTrialN >= 2
+                    else ""
+                )
                 + "\n"
                 "Foraging eff (r.s.): "
                 + (
@@ -1902,7 +2028,10 @@ class GenerateTrials:
         warning_label_text = ""
         # Check for reasons to stop early
         auto_rewards = np.array(
-            [any(x) for x in np.column_stack(self.B_AutoWaterTrial.astype(bool))]
+            [
+                any(x)
+                for x in np.column_stack(self.B_AutoWaterTrial.astype(bool))
+            ]
         )
         non_auto_reward = self.B_AnimalResponseHistory[
             np.where(~auto_rewards.astype(bool))
@@ -1930,7 +2059,8 @@ class GenerateTrials:
                 self.TP_MaxTrial
             )
             warning_label_text = (
-                "Stop because maximum trials exceed or equal: " + self.TP_MaxTrial
+                "Stop because maximum trials exceed or equal: "
+                + self.TP_MaxTrial
             )
         elif self.BS_CurrentRunningTime > MaxTime:
             stop = True
@@ -1938,13 +2068,17 @@ class GenerateTrials:
                 self.TP_MaxTime
             )
             warning_label_text = (
-                "Stop because running time exceeds or equals: " + self.TP_MaxTime + "m"
+                "Stop because running time exceeds or equals: "
+                + self.TP_MaxTime
+                + "m"
             )
         else:
             stop = False
 
         # Update the warning label text/color
-        logging.warning(warning_label_text, extra={"tags": [self.win.warning_log_tag]})
+        logging.warning(
+            warning_label_text, extra={"tags": [self.win.warning_log_tag]}
+        )
 
         # If we should stop trials, uncheck the start button
         if stop:
@@ -1955,7 +2089,9 @@ class GenerateTrials:
             self.message_box.setIcon(QtWidgets.QMessageBox.Warning)
             self.message_box.setText(msg)
             self.message_box.addButton(QtWidgets.QMessageBox.Ok)
-            self.message_box.setWindowTitle("Box {}".format(self.win.box_letter))
+            self.message_box.setWindowTitle(
+                "Box {}".format(self.win.box_letter)
+            )
             self.message_box.setModal(False)
             self.message_box.show()
 
@@ -1986,7 +2122,8 @@ class GenerateTrials:
                 )
             elif IgnoredN <= 0:
                 logging.warning(
-                    "Auto water because ignored trials exceed: " + self.TP_Ignored,
+                    "Auto water because ignored trials exceed: "
+                    + self.TP_Ignored,
                     extra={"tags": [self.win.warning_log_tag]},
                 )
                 self.CurrentAutoReward = 1
@@ -2000,11 +2137,13 @@ class GenerateTrials:
                     Ind = range(len(self.B_RewardedHistory[0]))
                     for i in range(len(self.B_RewardedHistory)):
                         B_RewardedHistory[i] = np.logical_or(
-                            self.B_RewardedHistory[i], self.B_AutoWaterTrial[i][Ind]
+                            self.B_RewardedHistory[i],
+                            self.B_AutoWaterTrial[i][Ind],
                         )
                     if (
                         np.all(self.B_AnimalResponseHistory[-IgnoredN:] == 2)
-                        and np.shape(self.B_AnimalResponseHistory)[0] >= IgnoredN
+                        and np.shape(self.B_AnimalResponseHistory)[0]
+                        >= IgnoredN
                     ):
                         self.CurrentAutoReward = 1
                         logging.warning(
@@ -2014,7 +2153,9 @@ class GenerateTrials:
                         )
                     elif (
                         np.all(B_RewardedHistory[0][-UnrewardedN:] == False)
-                        and np.all(B_RewardedHistory[1][-UnrewardedN:] == False)
+                        and np.all(
+                            B_RewardedHistory[1][-UnrewardedN:] == False
+                        )
                         and np.shape(B_RewardedHistory[0])[0] >= UnrewardedN
                     ):
                         self.CurrentAutoReward = 1
@@ -2059,7 +2200,10 @@ class GenerateTrials:
         ) and self.CLP_LaserEnd == "NA":
             # the duration is determined by Duration
             self.CLP_CurrentDuration = self.CLP_Duration
-        elif self.CLP_LaserStart == "Trial start" and self.CLP_LaserEnd == "Go cue":
+        elif (
+            self.CLP_LaserStart == "Trial start"
+            and self.CLP_LaserEnd == "Go cue"
+        ):
             # the duration is determined by CurrentITI, CurrentDelay, self.CLP_OffsetStart, self.CLP_OffsetEnd
             # only positive CLP_OffsetStart is allowed
             if self.CLP_OffsetStart < 0:
@@ -2071,11 +2215,16 @@ class GenerateTrials:
             self.CLP_CurrentDuration = (
                 self.CurrentITI - self.CLP_OffsetStart + self.CLP_OffsetEnd
             )
-        elif self.CLP_LaserStart == "Go cue" and self.CLP_LaserEnd == "Trial start":
+        elif (
+            self.CLP_LaserStart == "Go cue"
+            and self.CLP_LaserEnd == "Trial start"
+        ):
             # The duration is inaccurate as it doesn't account for time outside of bonsai (can be solved in Bonsai)
             # the duration is determined by TP_ResponseTime, self.CLP_OffsetStart, self.CLP_OffsetEnd
             self.CLP_CurrentDuration = (
-                float(self.TP_ResponseTime) - self.CLP_OffsetStart + self.CLP_OffsetEnd
+                float(self.TP_ResponseTime)
+                - self.CLP_OffsetStart
+                + self.CLP_OffsetEnd
             )
         else:
             pass
@@ -2089,8 +2238,8 @@ class GenerateTrials:
             setattr(self, "WaveFormLocation_" + str(i + 1), self.my_wave)
             setattr(
                 self,
-                f"Location{i+1}_Size",
-                getattr(self, f"WaveFormLocation_{i+1}").size,
+                f"Location{i + 1}_Size",
+                getattr(self, f"WaveFormLocation_{i + 1}").size,
             )
 
     def _ProduceWaveForm(self, Amplitude):
@@ -2126,34 +2275,45 @@ class GenerateTrials:
         elif self.CLP_Protocol == "Pulse":
             if self.CLP_PulseDur == "NA":
                 logging.warning(
-                    "Pulse duration is NA!", extra={"tags": [self.win.warning_log_tag]}
+                    "Pulse duration is NA!",
+                    extra={"tags": [self.win.warning_log_tag]},
                 )
                 self.CLP_PulseDur = 0
                 self.my_wave = np.empty(0)
                 self.opto_error_tag = 1
             elif self.CLP_Frequency == "":
                 logging.warning(
-                    "Pulse frequency is NA!", extra={"tags": [self.win.warning_log_tag]}
+                    "Pulse frequency is NA!",
+                    extra={"tags": [self.win.warning_log_tag]},
                 )
                 self.CLP_Frequency = 0
                 self.my_wave = np.empty(0)
                 self.opto_error_tag = 1
             else:
                 self.CLP_PulseDur = float(self.CLP_PulseDur)
-                PointsEachPulse = int(self.CLP_SampleFrequency * self.CLP_PulseDur)
+                PointsEachPulse = int(
+                    self.CLP_SampleFrequency * self.CLP_PulseDur
+                )
                 PulseIntervalPoints = int(
-                    1 / self.CLP_Frequency * self.CLP_SampleFrequency - PointsEachPulse
+                    1 / self.CLP_Frequency * self.CLP_SampleFrequency
+                    - PointsEachPulse
                 )
                 if PulseIntervalPoints < 0:
                     logging.warning(
                         "Pulse frequency and pulse duration are not compatible!",
                         extra={"tags": [self.win.warning_log_tag]},
                     )
-                TotalPoints = int(self.CLP_SampleFrequency * self.CLP_CurrentDuration)
-                PulseNumber = np.floor(self.CLP_CurrentDuration * self.CLP_Frequency)
+                TotalPoints = int(
+                    self.CLP_SampleFrequency * self.CLP_CurrentDuration
+                )
+                PulseNumber = np.floor(
+                    self.CLP_CurrentDuration * self.CLP_Frequency
+                )
                 EachPulse = Amplitude * np.ones(PointsEachPulse)
                 PulseInterval = np.zeros(PulseIntervalPoints)
-                WaveFormEachCycle = np.concatenate((EachPulse, PulseInterval), axis=0)
+                WaveFormEachCycle = np.concatenate(
+                    (EachPulse, PulseInterval), axis=0
+                )
                 self.my_wave = np.empty(0)
                 # pulse number should be greater than 0
                 if PulseNumber > 1:
@@ -2167,9 +2327,14 @@ class GenerateTrials:
                         extra={"tags": [self.win.warning_log_tag]},
                     )
                     return
-                self.my_wave = np.concatenate((self.my_wave, EachPulse), axis=0)
                 self.my_wave = np.concatenate(
-                    (self.my_wave, np.zeros(TotalPoints - np.shape(self.my_wave)[0])),
+                    (self.my_wave, EachPulse), axis=0
+                )
+                self.my_wave = np.concatenate(
+                    (
+                        self.my_wave,
+                        np.zeros(TotalPoints - np.shape(self.my_wave)[0]),
+                    ),
                     axis=0,
                 )
                 # add offset
@@ -2214,7 +2379,9 @@ class GenerateTrials:
                     )
                 )
                 RD = np.arange(
-                    1, 0, -1 / (np.shape(self.my_wave)[0] - np.shape(Constant)[0])
+                    1,
+                    0,
+                    -1 / (np.shape(self.my_wave)[0] - np.shape(Constant)[0]),
                 )
                 RampingDown = np.concatenate((Constant, RD), axis=0)
                 self.my_wave = self.my_wave * RampingDown
@@ -2256,7 +2423,10 @@ class GenerateTrials:
             else:
                 Laser1PowerAmp = eval(self.CLP_Laser1Power)
                 Laser2PowerAmp = eval(self.CLP_Laser2Power)
-                self.CurrentLaserAmplitude = [Laser1PowerAmp[0], Laser2PowerAmp[0]]
+                self.CurrentLaserAmplitude = [
+                    Laser1PowerAmp[0],
+                    Laser2PowerAmp[0],
+                ]
         else:
             logging.warning(
                 "No stimulation location defined!",
@@ -2269,7 +2439,10 @@ class GenerateTrials:
         # condition should be taken into account in the future
         # check session session
         self._CheckSessionControl()
-        if self.session_control_state == 0 and self.TP_SessionWideControl == "on":
+        if (
+            self.session_control_state == 0
+            and self.TP_SessionWideControl == "on"
+        ):
             self.SelctedCondition = 0
             return
         ConditionsOn = []
@@ -2300,18 +2473,21 @@ class GenerateTrials:
             else:
                 self.SelctedCondition = 0  # control is selected
         # Determine whether the interval between two near trials is larger than the MinOptoInterval
-        non_zero_indices = np.nonzero(np.array(self.B_SelectedCondition).astype(int))
+        non_zero_indices = np.nonzero(
+            np.array(self.B_SelectedCondition).astype(int)
+        )
         if len(non_zero_indices[0]) > 0:
-            if len(self.B_SelectedCondition) - (non_zero_indices[0][-1] + 1) < float(
-                self.TP_MinOptoInterval
-            ):
+            if len(self.B_SelectedCondition) - (
+                non_zero_indices[0][-1] + 1
+            ) < float(self.TP_MinOptoInterval):
                 self.SelctedCondition = 0
 
     def _InitiateATrial(self, Channel1, Channel4):
-
         # Indicate that unsaved data exists
         self.win.unsaved_data = True
-        self.win.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+        self.win.Save.setStyleSheet(
+            "color: white;background-color : mediumorchid;"
+        )
 
         # Determine if the current lick port should be baited. self.B_Baited can only be updated after receiving response of the animal, so this part cannot appear in the _GenerateATrial section
         RandomNumber = np.random.random(2)
@@ -2389,9 +2565,11 @@ class GenerateTrials:
                     len(self.CurrentLaserAmplitude)
                 ):  # locations of these waveforms
                     getattr(Channel4, "WaveForm" + str(1) + "_" + str(i + 1))(
-                        str(getattr(self, "WaveFormLocation_" + str(i + 1)).tolist())[
-                            1:-1
-                        ]
+                        str(
+                            getattr(
+                                self, "WaveFormLocation_" + str(i + 1)
+                            ).tolist()
+                        )[1:-1]
                     )
                 FinishOfWaveForm = Channel4.receive()
             else:
@@ -2438,10 +2616,14 @@ class GenerateTrials:
                 if np.random.random(1) < 0.1:  # no response
                     self.B_AnimalCurrentResponse = 2
                 else:
-                    if np.random.random(1) < 0:  # Introduce a left bias if needed
+                    if (
+                        np.random.random(1) < 0
+                    ):  # Introduce a left bias if needed
                         self.B_AnimalCurrentResponse = 0
                     elif any(self.B_RewardedHistory[:, -1] == 1):  # win
-                        self.B_AnimalCurrentResponse = self.B_AnimalResponseHistory[-1]
+                        self.B_AnimalCurrentResponse = (
+                            self.B_AnimalResponseHistory[-1]
+                        )
                     elif (
                         any(self.B_RewardedHistory[:, -1] == 0)
                         and self.B_AnimalResponseHistory[-1] != 2
@@ -2468,7 +2650,9 @@ class GenerateTrials:
             self.B_Baited[0] = False
             self.B_CurrentRewarded[1] = False
             self.B_CurrentRewarded[0] = True
-        elif self.B_AnimalCurrentResponse == 0 and self.CurrentBait[0] == False:
+        elif (
+            self.B_AnimalCurrentResponse == 0 and self.CurrentBait[0] == False
+        ):
             self.B_Baited[0] = False
             self.B_CurrentRewarded[0] = False
             self.B_CurrentRewarded[1] = False
@@ -2476,7 +2660,9 @@ class GenerateTrials:
             self.B_Baited[1] = False
             self.B_CurrentRewarded[0] = False
             self.B_CurrentRewarded[1] = True
-        elif self.B_AnimalCurrentResponse == 1 and self.CurrentBait[1] == False:
+        elif (
+            self.B_AnimalCurrentResponse == 1 and self.CurrentBait[1] == False
+        ):
             self.B_Baited[1] = False
             self.B_CurrentRewarded[0] = False
             self.B_CurrentRewarded[1] = False
@@ -2521,7 +2707,9 @@ class GenerateTrials:
             self.B_DelayStartTimeHarp, DelayStartTimeHarp
         )
         self.B_DelayStartTimeHarpComplete.append(DelayStartTimeHarp)
-        self.B_TrialEndTimeHarp = np.append(self.B_TrialEndTimeHarp, TrialEndTimeHarp)
+        self.B_TrialEndTimeHarp = np.append(
+            self.B_TrialEndTimeHarp, TrialEndTimeHarp
+        )
         self.B_GoCueTimeBehaviorBoard = np.append(
             self.B_GoCueTimeBehaviorBoard, GoCueTimeBehaviorBoard
         )
@@ -2530,8 +2718,12 @@ class GenerateTrials:
         )
         self.B_DOPort2Output = np.append(self.B_DOPort2Output, B_DOPort2Output)
         # get the event time
-        self.B_TrialStartTime = np.append(self.B_TrialStartTime, TrialStartTime)
-        self.B_DelayStartTime = np.append(self.B_DelayStartTime, DelayStartTime)
+        self.B_TrialStartTime = np.append(
+            self.B_TrialStartTime, TrialStartTime
+        )
+        self.B_DelayStartTime = np.append(
+            self.B_DelayStartTime, DelayStartTime
+        )
         self.B_DelayStartTimeComplete.append(DelayStartTime)
         self.B_TrialEndTime = np.append(self.B_TrialEndTime, TrialEndTime)
         self.B_GoCueTime = np.append(self.B_GoCueTime, GoCueTime)
@@ -2543,14 +2735,22 @@ class GenerateTrials:
     def _add_one_trial(self):
         # to decide if we should add one trial to the block length on both sides
         if self.TP_AddOneTrialForNoresponse == "Yes":
-            if self.TP_Task in ["Uncoupled Baiting", "Uncoupled Without Baiting"]:
+            if self.TP_Task in [
+                "Uncoupled Baiting",
+                "Uncoupled Without Baiting",
+            ]:
                 for i, side in enumerate(["L", "R"]):
                     self.uncoupled_blocks.block_ends[side][-1] = (
                         self.uncoupled_blocks.block_ends[side][-1] + 1
                     )
-            elif self.TP_Task in ["Coupled Baiting", "Coupled Without Baiting"]:
+            elif self.TP_Task in [
+                "Coupled Baiting",
+                "Coupled Without Baiting",
+            ]:
                 for i, side in enumerate(["L", "R"]):
-                    self.BlockLenHistory[i][-1] = self.BlockLenHistory[i][-1] + 1
+                    self.BlockLenHistory[i][-1] = (
+                        self.BlockLenHistory[i][-1] + 1
+                    )
 
     def _GetAnimalResponse(self, Channel1, Channel3, data_lock):
         """Get the animal's response"""
@@ -2724,8 +2924,12 @@ class GenerateTrials:
                 self.B_GoCueTimeSoundCard, GoCueTimeSoundCard
             )
             # get the event time
-            self.B_TrialStartTime = np.append(self.B_TrialStartTime, TrialStartTime)
-            self.B_DelayStartTime = np.append(self.B_DelayStartTime, DelayStartTime[0])
+            self.B_TrialStartTime = np.append(
+                self.B_TrialStartTime, TrialStartTime
+            )
+            self.B_DelayStartTime = np.append(
+                self.B_DelayStartTime, DelayStartTime[0]
+            )
             self.B_DelayStartTimeComplete.append(DelayStartTime)
             self.B_TrialEndTime = np.append(self.B_TrialEndTime, TrialEndTime)
             self.B_GoCueTime = np.append(self.B_GoCueTime, GoCueTime)
@@ -2745,7 +2949,9 @@ class GenerateTrials:
     def _GiveLeft(self, channel3):
         """manually give left water"""
         channel3.LeftValue1(
-            float(self.win.LeftValue.text()) * 1000 * float(self.win.Multiplier.text())
+            float(self.win.LeftValue.text())
+            * 1000
+            * float(self.win.Multiplier.text())
         )
         time.sleep(0.01)
         channel3.ManualWater_Left(int(1))
@@ -2754,7 +2960,9 @@ class GenerateTrials:
     def _GiveRight(self, channel3):
         """manually give right water"""
         channel3.RightValue1(
-            float(self.win.RightValue.text()) * 1000 * float(self.win.Multiplier.text())
+            float(self.win.RightValue.text())
+            * 1000
+            * float(self.win.Multiplier.text())
         )
         time.sleep(0.01)
         channel3.ManualWater_Right(int(1))
@@ -2765,9 +2973,13 @@ class GenerateTrials:
         while not Channel2.msgs.empty():
             Rec = Channel2.receive()
             if Rec[0].address == "/LeftLickTime":
-                self.B_LeftLickTime = np.append(self.B_LeftLickTime, Rec[1][1][0])
+                self.B_LeftLickTime = np.append(
+                    self.B_LeftLickTime, Rec[1][1][0]
+                )
             elif Rec[0].address == "/RightLickTime":
-                self.B_RightLickTime = np.append(self.B_RightLickTime, Rec[1][1][0])
+                self.B_RightLickTime = np.append(
+                    self.B_RightLickTime, Rec[1][1][0]
+                )
             elif Rec[0].address == "/LeftRewardDeliveryTime":
                 self.B_LeftRewardDeliveryTime = np.append(
                     self.B_LeftRewardDeliveryTime, Rec[1][1][0]
@@ -2839,7 +3051,11 @@ class GenerateTrials:
         ]:
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren(
-                (QtWidgets.QLineEdit, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox)
+                (
+                    QtWidgets.QLineEdit,
+                    QtWidgets.QDoubleSpinBox,
+                    QtWidgets.QSpinBox,
+                )
             ):
                 if (
                     child.objectName() == "qt_spinbox_lineedit"
@@ -2861,7 +3077,10 @@ class GenerateTrials:
                 setattr(self, "TP_" + child.objectName(), child.isChecked())
 
         # Manually attach auto training parameters
-        if hasattr(win, "AutoTrain_dialog") and win.AutoTrain_dialog.auto_train_engaged:
+        if (
+            hasattr(win, "AutoTrain_dialog")
+            and win.AutoTrain_dialog.auto_train_engaged
+        ):
             self.TP_auto_train_engaged = True
             _curr = win.AutoTrain_dialog.curriculum_in_use
             self.TP_auto_train_curriculum_name = _curr.curriculum_name
@@ -2900,7 +3119,10 @@ class GenerateTrials:
                     # If the attribute does not exist in self.Obj, create a new list and append to it
                     self.Obj[attr_name] = [getattr(self, attr_name)]
         # get the newscale positions
-        if hasattr(self.win, "current_stage") or self.win.stage_widget is not None:
+        if (
+            hasattr(self.win, "current_stage")
+            or self.win.stage_widget is not None
+        ):
             self.B_StagePositions.append(self.win._GetPositions())
 
 
@@ -2916,7 +3138,9 @@ class NewScaleSerialY:
             print('serial number = ', instance.get_serial_number())
     """
 
-    def __init__(self, serial_number, pyserial_device=None, usbxpress_device=None):
+    def __init__(
+        self, serial_number, pyserial_device=None, usbxpress_device=None
+    ):
         self.sn = serial_number
         if pyserial_device:
             self.t = "pyserial"
@@ -2935,7 +3159,10 @@ class NewScaleSerialY:
                         hwid = comport.hwid
                         serial_number = hwid.split()[2].split("=")[1]
                         instances.append(
-                            cls(serial_number, pyserial_device=Serial(comport.device))
+                            cls(
+                                serial_number,
+                                pyserial_device=Serial(comport.device),
+                            )
                         )  # does this work?
         elif PLATFORM == "win32":
             n = USBXpressLib().get_num_devices()
@@ -3052,7 +3279,9 @@ class Worker(QtCore.QRunnable):
             self.signals.error.emit((exctype, value, traceback.format_exc()))
             logging.error(str(e))
         else:
-            self.signals.result.emit(result)  # Return the result of the processing
+            self.signals.result.emit(
+                result
+            )  # Return the result of the processing
         finally:
             self.signals.finished.emit()  # Done
 
@@ -3097,7 +3326,6 @@ class TimerWorker(QtCore.QObject):
 
 
 class EphysRecording:
-
     def __init__(self, open_ephys_machine_ip_address, mouse_id):
         """
         Runs an experiment with Open Ephys GUI,
@@ -3136,10 +3364,13 @@ class EphysRecording:
 
         """
         r1 = requests.put(
-            self.api_endpoint + "recording", json={"prepend_text": self.mouse_id + "_"}
+            self.api_endpoint + "recording",
+            json={"prepend_text": self.mouse_id + "_"},
         )
 
-        r2 = requests.put(self.api_endpoint + "status", json={"mode": "RECORD"})
+        r2 = requests.put(
+            self.api_endpoint + "status", json={"mode": "RECORD"}
+        )
         return r1.json(), r2.json()
 
     def stop_open_ephys_recording(self):
@@ -3148,7 +3379,9 @@ class EphysRecording:
 
         """
 
-        r = requests.put(self.api_endpoint + "status", json={"mode": "ACQUIRE"})
+        r = requests.put(
+            self.api_endpoint + "status", json={"mode": "ACQUIRE"}
+        )
 
         return r.json()
 

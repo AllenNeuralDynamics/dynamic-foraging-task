@@ -18,7 +18,6 @@ class IOCommand:
 
 
 class MoveAbsolute3dCommand(IOCommand):
-
     def __init__(self, device, pos):
         IOCommand.__init__(self, device)
         self.x = pos[0]
@@ -35,7 +34,6 @@ class MoveAbsolute3dCommand(IOCommand):
 
 
 class MoveAbsolute1dCommand(IOCommand):
-
     def __init__(self, device, axis, pos):
         IOCommand.__init__(self, device)
         self.axis = axis
@@ -56,7 +54,6 @@ class MoveAbsolute1dCommand(IOCommand):
 
 
 class MoveRelative3dCommand(IOCommand):
-
     def __init__(self, device, dist_3d):
         IOCommand.__init__(self, device)
         self.dx = dist_3d[0]
@@ -73,7 +70,6 @@ class MoveRelative3dCommand(IOCommand):
 
 
 class MoveRelative1dCommand(IOCommand):
-
     def __init__(self, device, axis, dist):
         IOCommand.__init__(self, device)
         self.axis = axis
@@ -94,7 +90,6 @@ class MoveRelative1dCommand(IOCommand):
 
 
 class GetPositionCommand(IOCommand):
-
     def __init__(self, device):
         IOCommand.__init__(self, device)
         self.blocking = True
@@ -111,7 +106,6 @@ class GetPositionCommand(IOCommand):
 
 
 class GetSpeedCommand(IOCommand):
-
     def __init__(self, device):
         IOCommand.__init__(self, device)
         self.blocking = True
@@ -129,7 +123,6 @@ class GetSpeedCommand(IOCommand):
 
 
 class SetSpeedCommand(IOCommand):
-
     def __init__(self, device, speed):
         IOCommand.__init__(self, device)
         self.speed = speed
@@ -150,7 +143,6 @@ class SetSpeedCommand(IOCommand):
 
 
 class CalibrateFrequencyCommand(IOCommand):
-
     def __init__(self, device):
         IOCommand.__init__(self, device)
         self.blocking = True
