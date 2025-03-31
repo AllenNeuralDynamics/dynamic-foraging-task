@@ -4800,6 +4800,8 @@ class Window(QMainWindow):
                     and len(Obj["B_StagePositions"]) != 0
                 ):
                     last_positions = Obj["B_StagePositions"][-1]
+                    if last_positions is None:
+                        pass
                     if hasattr(self, "current_stage"):  # newscale stage
                         self.current_stage.move_absolute_3d(
                             float(last_positions["x"]),
@@ -4833,6 +4835,8 @@ class Window(QMainWindow):
                     and len(Obj["B_NewscalePositions"]) != 0
                 ):  # cross compatibility for mice run on older version of code.
                     last_positions = Obj["B_NewscalePositions"][-1]
+                    if last_positions is None:
+                        pass
                     self.current_stage.move_absolute_3d(
                         float(last_positions[0]),
                         float(last_positions[1]),
