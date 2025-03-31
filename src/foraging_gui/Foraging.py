@@ -5587,10 +5587,12 @@ class Window(QMainWindow):
         ]
         index = np.where(np.array(projects) == "Behavior Platform")[0]
         if len(index) > 0:
+            logging.error('here 1')
             index = index[0]
             self.Metadata_dialog.ProjectName.setCurrentIndex(index)
             self.Metadata_dialog._show_project_info()
         else:
+            logging.error('here')
             self.Metadata_dialog.ProjectName.addItems([project_name])
         return project_name
 
