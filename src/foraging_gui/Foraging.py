@@ -1630,7 +1630,6 @@ class Window(QMainWindow):
             if len(index) > 0:
                 index = index[0]
                 self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-                self.Metadata_dialog._show_project_info()
                 logging.info("Setting project name: {}".format(project_name))
                 add_default = False
 
@@ -5590,10 +5589,17 @@ class Window(QMainWindow):
             logging.error('here 1')
             index = index[0]
             self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-            self.Metadata_dialog._show_project_info()
         else:
             logging.error('here')
             self.Metadata_dialog.ProjectName.addItems([project_name])
+
+        #self.Metadata_dialog.meta_data["session_metadata"]["IACUCProtocol"] = (
+        #    str(int(protocol))
+        #)
+        #self.Metadata_dialog._update_metadata(
+        #    update_rig_metadata=False, update_session_metadata=True
+        #)
+
         return project_name
 
     def _empty_initialize_fields(self):
