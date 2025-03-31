@@ -1629,9 +1629,9 @@ class Window(QMainWindow):
             index = np.where(np.array(projects) == project_name)[0]
             if len(index) > 0:
                 # If project name is valid, update metadata
-                self.Metadata_dialog.meta_data["session_metadata"]["ProjectName"] = (
-                    project_name
-                )
+                self.Metadata_dialog.meta_data["session_metadata"][
+                    "ProjectName"
+                ] = project_name
                 self.Metadata_dialog._update_metadata(
                     update_rig_metadata=False, update_session_metadata=True
                 )
@@ -5585,7 +5585,7 @@ class Window(QMainWindow):
                 self.behavior_session_model.subject, "Behavior Platform"
             )
         )
-        
+
         # Check if Behavior Platform is in project list
         projects = [
             self.Metadata_dialog.ProjectName.itemText(i)
@@ -5598,9 +5598,9 @@ class Window(QMainWindow):
             self.Metadata_dialog.ProjectName.addItems([project_name])
 
         # Set project name
-        self.Metadata_dialog.meta_data["session_metadata"]["ProjectName"] = (
-            project_name
-        )
+        self.Metadata_dialog.meta_data["session_metadata"][
+            "ProjectName"
+        ] = project_name
         self.Metadata_dialog._update_metadata(
             update_rig_metadata=False, update_session_metadata=True
         )
