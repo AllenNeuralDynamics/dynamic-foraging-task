@@ -11,6 +11,7 @@ from sys import platform as PLATFORM
 import numpy as np
 import requests
 from PyQt5 import QtCore, QtWidgets
+from serial import Serial
 from serial.tools.list_ports import comports as list_comports
 
 from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
@@ -2359,7 +2360,7 @@ class GenerateTrials:
         """
         # test
         import matplotlib.pyplot as plt
-        plt.plot(np.arange(0, length, length / resolution), self.my_wave)   
+        plt.plot(np.arange(0, length, length / resolution), self.my_wave)
         plt.show()
         """
 
