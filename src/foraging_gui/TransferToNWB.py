@@ -21,7 +21,11 @@ logger = logging.getLogger(__name__)
 
 
 def _get_field(
-    obj, field_list, reject_list=[None, np.nan, "", []], index=None, default=np.nan
+    obj,
+    field_list,
+    reject_list=[None, np.nan, "", []],
+    index=None,
+    default=np.nan,
 ):
     """get field from obj, if not found, return default
 
@@ -107,7 +111,10 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
 
     # Early return if missing some key fields
     if any(
-        [not hasattr(obj, field) for field in ["B_TrialEndTime", "TP_BaseRewardSum"]]
+        [
+            not hasattr(obj, field)
+            for field in ["B_TrialEndTime", "TP_BaseRewardSum"]
+        ]
     ):
         logger.warning(f"Missing key fields! Skipping {fname}")
         return "incomplete_json"
@@ -162,11 +169,15 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     )
     # Old name "ExtraWater" goes first because old json has a wrong Suggested Water
     water_after_session = float(
-        _get_field(obj, field_list=["ExtraWater", "SuggestedWater"], default=np.nan)
+        _get_field(
+            obj, field_list=["ExtraWater", "SuggestedWater"], default=np.nan
+        )
     )
     water_day_total = float(_get_field(obj, "TotalWater"))
     water_in_session_total = water_day_total - water_after_session
-    water_in_session_manual = water_in_session_total - water_in_session_foraging
+    water_in_session_manual = (
+        water_in_session_total - water_in_session_foraging
+    )
     Opto_dialog = _get_field(obj, "Opto_dialog", default="None")
     metadata = {
         # Meta
@@ -228,10 +239,12 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         description=f"The response of the animal. 0, left choice; 1, right choice; 2, no response",
     )
     nwbfile.add_trial_column(
-        name="rewarded_historyL", description=f"The reward history of left lick port"
+        name="rewarded_historyL",
+        description=f"The reward history of left lick port",
     )
     nwbfile.add_trial_column(
-        name="rewarded_historyR", description=f"The reward history of right lick port"
+        name="rewarded_historyR",
+        description=f"The reward history of right lick port",
     )
     nwbfile.add_trial_column(
         name="delay_start_time", description=f"The delay start time"
@@ -285,10 +298,12 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         description=f"The beta of exponential distribution to generate the block length",
     )
     nwbfile.add_trial_column(
-        name="block_min", description=f"The minimum length allowed for each block"
+        name="block_min",
+        description=f"The minimum length allowed for each block",
     )
     nwbfile.add_trial_column(
-        name="block_max", description=f"The maxmum length allowed for each block"
+        name="block_max",
+        description=f"The maxmum length allowed for each block",
     )
     nwbfile.add_trial_column(
         name="min_reward_each_block",
@@ -300,10 +315,12 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         description=f"The beta of exponential distribution to generate the delay duration(s)",
     )
     nwbfile.add_trial_column(
-        name="delay_min", description=f"The minimum duration(s) allowed for each delay"
+        name="delay_min",
+        description=f"The minimum duration(s) allowed for each delay",
     )
     nwbfile.add_trial_column(
-        name="delay_max", description=f"The maxmum duration(s) allowed for each delay"
+        name="delay_max",
+        description=f"The maxmum duration(s) allowed for each delay",
     )
     nwbfile.add_trial_column(
         name="delay_duration",
@@ -315,10 +332,12 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         description=f"The beta of exponential distribution to generate the ITI duration(s)",
     )
     nwbfile.add_trial_column(
-        name="ITI_min", description=f"The minimum duration(s) allowed for each ITI"
+        name="ITI_min",
+        description=f"The minimum duration(s) allowed for each ITI",
     )
     nwbfile.add_trial_column(
-        name="ITI_max", description=f"The maxmum duration(s) allowed for each ITI"
+        name="ITI_max",
+        description=f"The maxmum duration(s) allowed for each ITI",
     )
     nwbfile.add_trial_column(
         name="ITI_duration",
@@ -336,10 +355,13 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     )
     # reward delay
     nwbfile.add_trial_column(
-        name="reward_delay", description=f"The delay between choice and reward delivery"
+        name="reward_delay",
+        description=f"The delay between choice and reward delivery",
     )
     # auto water
-    nwbfile.add_trial_column(name="auto_waterL", description=f"Autowater given at Left")
+    nwbfile.add_trial_column(
+        name="auto_waterL", description=f"Autowater given at Left"
+    )
     nwbfile.add_trial_column(
         name="auto_waterR", description=f"Autowater given at Right"
     )
@@ -362,7 +384,9 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_trial_column(
         name="laser_on_probability", description=f"The laser on probability"
     )
-    nwbfile.add_trial_column(name="laser_duration", description=f"The laser duration")
+    nwbfile.add_trial_column(
+        name="laser_duration", description=f"The laser duration"
+    )
     nwbfile.add_trial_column(
         name="laser_condition",
         description=f"The laser on is conditioned on LaserCondition",
@@ -385,12 +409,15 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         name="laser_end_offset",
         description=f"Laser end is aligned to an event with an offset",
     )
-    nwbfile.add_trial_column(name="laser_protocol", description=f"The laser waveform")
+    nwbfile.add_trial_column(
+        name="laser_protocol", description=f"The laser waveform"
+    )
     nwbfile.add_trial_column(
         name="laser_frequency", description=f"The laser waveform frequency"
     )
     nwbfile.add_trial_column(
-        name="laser_rampingdown", description=f"The ramping down time of the laser"
+        name="laser_rampingdown",
+        description=f"The ramping down time of the laser",
     )
     nwbfile.add_trial_column(
         name="laser_pulse_duration",
@@ -419,7 +446,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
 
     # auto training parameters
     nwbfile.add_trial_column(
-        name="auto_train_engaged", description=f"Whether the auto training is engaged"
+        name="auto_train_engaged",
+        description=f"Whether the auto training is engaged",
     )
     nwbfile.add_trial_column(
         name="auto_train_curriculum_name",
@@ -434,7 +462,8 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         description=f"The schema version of the auto training curriculum",
     )
     nwbfile.add_trial_column(
-        name="auto_train_stage", description=f"The current stage of auto training"
+        name="auto_train_stage",
+        description=f"The current stage of auto training",
     )
     nwbfile.add_trial_column(
         name="auto_train_stage_overridden",
@@ -482,7 +511,9 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     # to see if we have harp timestamps
     if not hasattr(obj, "B_TrialEndTimeHarp"):
         Harp = ""
-    elif obj.B_TrialEndTimeHarp == []:  # for json file transferred from mat data
+    elif (
+        obj.B_TrialEndTimeHarp == []
+    ):  # for json file transferred from mat data
         Harp = ""
     else:
         Harp = "Harp"
@@ -508,7 +539,9 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
 
         else:
             laser_color = _get_field(
-                obj, field_list=[f"TP_Laser_{Sc}", f"TP_LaserColor_{Sc}"], index=i
+                obj,
+                field_list=[f"TP_Laser_{Sc}", f"TP_LaserColor_{Sc}"],
+                index=i,
             )
             if laser_color == "Blue":
                 LaserWavelengthC = float(473)
@@ -521,7 +554,10 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                 eval(
                     _get_field(
                         obj,
-                        field_list=[f"TP_Laser1_power_{Sc}", f"TP_LaserPowerLeft_{Sc}"],
+                        field_list=[
+                            f"TP_Laser1_power_{Sc}",
+                            f"TP_LaserPowerLeft_{Sc}",
+                        ],
                         index=i,
                         default="[np.nan,np.nan]",
                     )
@@ -554,7 +590,9 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
             LaserPulseDurC = float(getattr(obj, f"TP_PulseDur_{Sc}")[i])
 
         if Harp == "":
-            goCue_start_time_t = getattr(obj, f"B_GoCueTime")[i]  # Use CPU time
+            goCue_start_time_t = getattr(obj, f"B_GoCueTime")[
+                i
+            ]  # Use CPU time
         else:
             if hasattr(obj, f"B_GoCueTimeHarp"):
                 goCue_start_time_t = getattr(obj, f"B_GoCueTimeHarp")[
@@ -582,10 +620,16 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
             "reward_probabilityL": float(obj.B_RewardProHistory[0][i]),
             "reward_probabilityR": float(obj.B_RewardProHistory[1][i]),
             "reward_random_number_left": _get_field(
-                obj, "B_CurrentRewardProbRandomNumber", index=i, default=[np.nan] * 2
+                obj,
+                "B_CurrentRewardProbRandomNumber",
+                index=i,
+                default=[np.nan] * 2,
             )[0],
             "reward_random_number_right": _get_field(
-                obj, "B_CurrentRewardProbRandomNumber", index=i, default=[np.nan] * 2
+                obj,
+                "B_CurrentRewardProbRandomNumber",
+                index=i,
+                default=[np.nan] * 2,
             )[1],
             "left_valve_open_time": float(obj.TP_LeftValue[i]),
             "right_valve_open_time": float(obj.TP_RightValue[i]),
@@ -638,7 +682,9 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                 obj, "TP_SessionWideControl", index=i, default="None"
             ),
             "fraction_of_session": float(
-                _get_field(obj, "TP_FractionOfSession", index=i, default=np.nan)
+                _get_field(
+                    obj, "TP_FractionOfSession", index=i, default=np.nan
+                )
             ),
             "session_start_with": _get_field(
                 obj, "TP_SessionStartWith", index=i, default="None"
@@ -657,10 +703,16 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                 obj, "TP_auto_train_curriculum_name", index=i, default="None"
             ),
             "auto_train_curriculum_version": _get_field(
-                obj, "TP_auto_train_curriculum_version", index=i, default="None"
+                obj,
+                "TP_auto_train_curriculum_version",
+                index=i,
+                default="None",
             ),
             "auto_train_curriculum_schema_version": _get_field(
-                obj, "TP_auto_train_curriculum_schema_version", index=i, default="None"
+                obj,
+                "TP_auto_train_curriculum_schema_version",
+                index=i,
+                default="None",
             ),
             "auto_train_stage": _get_field(
                 obj, "TP_auto_train_stage", index=i, default="None"
@@ -669,7 +721,9 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                 obj, "TP_auto_train_stage_overridden", index=i, default=np.nan
             ),
             # reward size
-            "reward_size_left": float(_get_field(obj, "TP_LeftValue_volume", index=i)),
+            "reward_size_left": float(
+                _get_field(obj, "TP_LeftValue_volume", index=i)
+            ),
             "reward_size_right": float(
                 _get_field(obj, "TP_RightValue_volume", index=i)
             ),
@@ -679,16 +733,27 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
         stage_positions = getattr(
             obj, "B_StagePositions", []
         )  # If obj doesn't have attr, skip if since i !< len([])
-        if i < len(stage_positions):  # index is valid for stage position lengths
+        if i < len(
+            stage_positions
+        ):  # index is valid for stage position lengths
             trial_kwargs["lickspout_position_x"] = stage_positions[i].get(
                 "x", np.nan
             )  # nan default if keys are wrong
             trial_kwargs["lickspout_position_z"] = stage_positions[i].get(
                 "z", np.nan
             )  # nan default if keys are wrong
-            if list(stage_positions[i].keys()) == ["x", "y1", "y2", "z"]:  # aind stage
-                trial_kwargs["lickspout_position_y1"] = stage_positions[i]["y1"]
-                trial_kwargs["lickspout_position_y2"] = stage_positions[i]["y2"]
+            if list(stage_positions[i].keys()) == [
+                "x",
+                "y1",
+                "y2",
+                "z",
+            ]:  # aind stage
+                trial_kwargs["lickspout_position_y1"] = stage_positions[i][
+                    "y1"
+                ]
+                trial_kwargs["lickspout_position_y2"] = stage_positions[i][
+                    "y2"
+                ]
             else:  # newscale stage
                 trial_kwargs["lickspout_position_y"] = stage_positions[i].get(
                     "y", np.nan
@@ -779,7 +844,9 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     DO0 stored in B_TrialStartTimeHarp), and the second source is the optogenetics time stamps aligned to other events 
     (e.g go cue and reward outcome; from the DO3 stored in B_OptogeneticsTimeHarp).
     """
-    start_time = np.array(_get_field(obj, f"B_TrialStartTime{Harp}", default=[np.nan]))
+    start_time = np.array(
+        _get_field(obj, f"B_TrialStartTime{Harp}", default=[np.nan])
+    )
     LaserStart = []
     for i in range(len(obj.B_TrialEndTime)):
         Sc = obj.B_SelectedCondition[i]  # the optogenetics conditions
@@ -847,7 +914,9 @@ def test_bonsai_json_to_nwb(test_json_urls):
                 temp_nwb_name = temp_json_name.replace("json", "nwb")
                 io = NWBHDF5IO(temp_nwb_name, mode="r")
                 nwbfile = io.read()
-                results.append(f"   Reload nwb and get {len(nwbfile.trials)} trials!\n")
+                results.append(
+                    f"   Reload nwb and get {len(nwbfile.trials)} trials!\n"
+                )
                 io.close()
                 print(temp_nwb_name)
                 os.remove(temp_nwb_name)

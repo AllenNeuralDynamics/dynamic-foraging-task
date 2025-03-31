@@ -15,16 +15,32 @@ from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
 from aind_auto_train.curriculum_manager import CurriculumManager
 from aind_auto_train.schema.curriculum import DynamicForagingCurriculum
 from aind_auto_train.schema.task import TrainingStage
-from matplotlib.backends.backend_qt5agg import \
-    NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import (
+    NavigationToolbar2QT as NavigationToolbar,
+)
 from PyQt5 import QtGui, QtWidgets, uic
-from PyQt5.QtCore import (QAbstractTableModel, QItemSelectionModel, QObject,
-                          Qt, QThreadPool, QTimer)
+from PyQt5.QtCore import (
+    QAbstractTableModel,
+    QItemSelectionModel,
+    QObject,
+    Qt,
+    QThreadPool,
+    QTimer,
+)
 from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import (QApplication, QDialog, QDialogButtonBox,
-                             QFileDialog, QGridLayout, QHBoxLayout,
-                             QInputDialog, QLabel, QLineEdit, QMessageBox,
-                             QVBoxLayout)
+from PyQt5.QtWidgets import (
+    QApplication,
+    QDialog,
+    QDialogButtonBox,
+    QFileDialog,
+    QGridLayout,
+    QHBoxLayout,
+    QInputDialog,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QVBoxLayout,
+)
 
 from foraging_gui.MyFunctions import Worker
 from foraging_gui.Visualization import PlotWaterCalibration
@@ -37,12 +53,13 @@ logger = logging.getLogger(__name__)
 
 
 class MouseSelectorDialog(QDialog):
-
     def __init__(self, MainWindow, mice, parent=None):
         super().__init__(parent)
         self.mice = [""] + mice
         self.MainWindow = MainWindow
-        self.setWindowTitle("Box {}, Load Mouse".format(self.MainWindow.box_letter))
+        self.setWindowTitle(
+            "Box {}, Load Mouse".format(self.MainWindow.box_letter)
+        )
         self.setFixedSize(250, 125)
 
         QBtns = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
@@ -54,7 +71,9 @@ class MouseSelectorDialog(QDialog):
         combo.addItems(self.mice)
         combo.setEditable(True)
         combo.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
-        combo.completer().setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
+        combo.completer().setCompletionMode(
+            QtWidgets.QCompleter.PopupCompletion
+        )
         font = combo.font()
         font.setPointSize(15)
         combo.setFont(font)
@@ -130,9 +149,13 @@ class OptogeneticsDialog(QDialog):
             self._connectSignalSlot(f"LaserStart_{i}", self._activated, i)
             self._connectSignalSlot(f"LaserEnd_{i}", self._activated, i)
 
-        self.Laser_calibration.currentIndexChanged.connect(self._Laser_calibration)
+        self.Laser_calibration.currentIndexChanged.connect(
+            self._Laser_calibration
+        )
         self.Laser_calibration.activated.connect(self._Laser_calibration)
-        self.SessionWideControl.currentIndexChanged.connect(self._SessionWideControl)
+        self.SessionWideControl.currentIndexChanged.connect(
+            self._SessionWideControl
+        )
 
     def _connectSignalSlot(self, signal_name, slot_method, index):
         signal = getattr(self, signal_name)
@@ -179,14 +202,18 @@ class OptogeneticsDialog(QDialog):
         try:
             Color = getattr(self, f"LaserColor_{str(Numb)}").currentText()
             Protocol = getattr(self, f"Protocol_{str(Numb)}").currentText()
-            CurrentFrequency = getattr(self, f"Frequency_{str(Numb)}").currentText()
+            CurrentFrequency = getattr(
+                self, f"Frequency_{str(Numb)}"
+            ).currentText()
             latest_calibration_date = self._FindLatestCalibrationDate(Color)
             if latest_calibration_date == "NA":
                 RecentLaserCalibration = {}
             else:
-                RecentLaserCalibration = self.MainWindow.LaserCalibrationResults[
-                    latest_calibration_date
-                ]
+                RecentLaserCalibration = (
+                    self.MainWindow.LaserCalibrationResults[
+                        latest_calibration_date
+                    ]
+                )
             for laser_tag in self.laser_tags:
                 ItemsLaserPower = []
                 CurrentlaserPowerLaser = getattr(
@@ -195,16 +222,20 @@ class OptogeneticsDialog(QDialog):
                 if Protocol in ["Sine"]:
                     for i in range(
                         len(
-                            RecentLaserCalibration[Color][Protocol][CurrentFrequency][
-                                f"Laser_{str(laser_tag)}"
-                            ]["LaserPowerVoltage"]
+                            RecentLaserCalibration[Color][Protocol][
+                                CurrentFrequency
+                            ][f"Laser_{str(laser_tag)}"]["LaserPowerVoltage"]
                         )
                     ):
                         ItemsLaserPower.append(
                             str(
                                 RecentLaserCalibration[Color][Protocol][
                                     CurrentFrequency
-                                ][f"Laser_{str(laser_tag)}"]["LaserPowerVoltage"][i]
+                                ][f"Laser_{str(laser_tag)}"][
+                                    "LaserPowerVoltage"
+                                ][
+                                    i
+                                ]
                             )
                         )
                 if Protocol in ["Constant", "Pulse"]:
@@ -223,10 +254,12 @@ class OptogeneticsDialog(QDialog):
                             )
                         )
                 ItemsLaserPower = sorted(ItemsLaserPower)
-                getattr(self, f"Laser{str(laser_tag)}_power_{str(Numb)}").clear()
-                getattr(self, f"Laser{str(laser_tag)}_power_{str(Numb)}").addItems(
-                    ItemsLaserPower
-                )
+                getattr(
+                    self, f"Laser{str(laser_tag)}_power_{str(Numb)}"
+                ).clear()
+                getattr(
+                    self, f"Laser{str(laser_tag)}_power_{str(Numb)}"
+                ).addItems(ItemsLaserPower)
                 index = getattr(
                     self, f"Laser{str(laser_tag)}_power_{str(Numb)}"
                 ).findText(CurrentlaserPowerLaser)
@@ -290,26 +323,34 @@ class OptogeneticsDialog(QDialog):
             Label = True
             Color = getattr(self, "LaserColor_" + str(Numb)).currentText()
             Protocol = getattr(self, "Protocol_" + str(Numb)).currentText()
-            CurrentFrequency = getattr(self, "Frequency_" + str(Numb)).currentText()
+            CurrentFrequency = getattr(
+                self, "Frequency_" + str(Numb)
+            ).currentText()
             latest_calibration_date = self._FindLatestCalibrationDate(Color)
             if latest_calibration_date == "NA":
                 RecentLaserCalibration = {}
             else:
-                RecentLaserCalibration = self.MainWindow.LaserCalibrationResults[
-                    latest_calibration_date
-                ]
+                RecentLaserCalibration = (
+                    self.MainWindow.LaserCalibrationResults[
+                        latest_calibration_date
+                    ]
+                )
             no_calibration = False
             if not RecentLaserCalibration == {}:
                 if Color in RecentLaserCalibration.keys():
                     if Protocol in RecentLaserCalibration[Color].keys():
                         if Protocol == "Sine":
-                            Frequency = RecentLaserCalibration[Color][Protocol].keys()
+                            Frequency = RecentLaserCalibration[Color][
+                                Protocol
+                            ].keys()
                             ItemsFrequency = []
                             for Fre in Frequency:
                                 ItemsFrequency.append(Fre)
                             ItemsFrequency = sorted(ItemsFrequency)
                             getattr(self, f"Frequency_{Numb}").clear()
-                            getattr(self, f"Frequency_{Numb}").addItems(ItemsFrequency)
+                            getattr(self, f"Frequency_{Numb}").addItems(
+                                ItemsFrequency
+                            )
                             if not CurrentFrequency in Frequency:
                                 CurrentFrequency = getattr(
                                     self, "Frequency_" + str(Numb)
@@ -318,16 +359,22 @@ class OptogeneticsDialog(QDialog):
                                 ItemsLaserPower = []
                                 for i in range(
                                     len(
-                                        RecentLaserCalibration[Color][Protocol][
-                                            CurrentFrequency
-                                        ][f"Laser_{laser_tag}"]["LaserPowerVoltage"]
+                                        RecentLaserCalibration[Color][
+                                            Protocol
+                                        ][CurrentFrequency][
+                                            f"Laser_{laser_tag}"
+                                        ][
+                                            "LaserPowerVoltage"
+                                        ]
                                     )
                                 ):
                                     ItemsLaserPower.append(
                                         str(
-                                            RecentLaserCalibration[Color][Protocol][
-                                                CurrentFrequency
-                                            ][f"Laser_{laser_tag}"][
+                                            RecentLaserCalibration[Color][
+                                                Protocol
+                                            ][CurrentFrequency][
+                                                f"Laser_{laser_tag}"
+                                            ][
                                                 "LaserPowerVoltage"
                                             ][
                                                 i
@@ -346,16 +393,22 @@ class OptogeneticsDialog(QDialog):
                                 ItemsLaserPower = []
                                 for i in range(
                                     len(
-                                        RecentLaserCalibration[Color][Protocol][
-                                            f"Laser_{laser_tag}"
-                                        ]["LaserPowerVoltage"]
+                                        RecentLaserCalibration[Color][
+                                            Protocol
+                                        ][f"Laser_{laser_tag}"][
+                                            "LaserPowerVoltage"
+                                        ]
                                     )
                                 ):
                                     ItemsLaserPower.append(
                                         str(
-                                            RecentLaserCalibration[Color][Protocol][
-                                                f"Laser_{laser_tag}"
-                                            ]["LaserPowerVoltage"][i]
+                                            RecentLaserCalibration[Color][
+                                                Protocol
+                                            ][f"Laser_{laser_tag}"][
+                                                "LaserPowerVoltage"
+                                            ][
+                                                i
+                                            ]
                                         )
                                     )
                                 ItemsLaserPower = sorted(ItemsLaserPower)
@@ -374,7 +427,9 @@ class OptogeneticsDialog(QDialog):
 
             if no_calibration:
                 for laser_tag in self.laser_tags:
-                    getattr(self, f"Laser{laser_tag}_power_{str(Numb)}").clear()
+                    getattr(
+                        self, f"Laser{laser_tag}_power_{str(Numb)}"
+                    ).clear()
                     logging.warning(
                         "No calibration for this protocol identified!",
                         extra={"tags": [self.MainWindow.warning_log_tag]},
@@ -417,13 +472,19 @@ class WaterCalibrationDialog(QDialog):
             self.MainWindow.WaterCalibrationResults = {}
             self.WaterCalibrationResults = {}
         else:
-            self.WaterCalibrationResults = self.MainWindow.WaterCalibrationResults
+            self.WaterCalibrationResults = (
+                self.MainWindow.WaterCalibrationResults
+            )
         self._connectSignalsSlots()
         self.ToInitializeVisual = 1
         self._UpdateFigure()
-        self.setWindowTitle("Water Calibration: {}".format(self.MainWindow.current_box))
+        self.setWindowTitle(
+            "Water Calibration: {}".format(self.MainWindow.current_box)
+        )
         self.Warning.setText("")
-        self.Warning.setStyleSheet(f"color: {self.MainWindow.default_warning_color};")
+        self.Warning.setStyleSheet(
+            f"color: {self.MainWindow.default_warning_color};"
+        )
         # find all buttons and set them to not be the default button
         for container in [self]:
             for child in container.findChildren((QtWidgets.QPushButton)):
@@ -449,13 +510,13 @@ class WaterCalibrationDialog(QDialog):
         # setup Qtimers for updating text countdown
         self.left_text_timer = QTimer(
             timeout=lambda: self.OpenLeft5ml.setText(
-                f"Open left 5ml: {round(self.left_close_timer.remainingTime()/1000)}s"
+                f"Open left 5ml: {round(self.left_close_timer.remainingTime() / 1000)}s"
             ),
             interval=1000,
         )
         self.right_text_timer = QTimer(
             timeout=lambda: self.OpenRight5ml.setText(
-                f"Open right 5ml: {round(self.right_close_timer.remainingTime()/1000)}s"
+                f"Open right 5ml: {round(self.right_close_timer.remainingTime() / 1000)}s"
             ),
             interval=1000,
         )
@@ -469,14 +530,18 @@ class WaterCalibrationDialog(QDialog):
             lambda: self._ToggleValve(self.OpenLeftForever, "Left")
         )
         self.OpenLeftForever.clicked.connect(
-            lambda: self.OpenLeft5ml.setDisabled(self.OpenLeftForever.isChecked())
+            lambda: self.OpenLeft5ml.setDisabled(
+                self.OpenLeftForever.isChecked()
+            )
         )
         # Set up OpenRightForever button
         self.OpenRightForever.clicked.connect(
             lambda: self._ToggleValve(self.OpenRightForever, "Right")
         )
         self.OpenRightForever.clicked.connect(
-            lambda: self.OpenRight5ml.setDisabled(self.OpenRightForever.isChecked())
+            lambda: self.OpenRight5ml.setDisabled(
+                self.OpenRightForever.isChecked()
+            )
         )
         # Set up OpenLeft5ml button
         self.OpenLeft5ml.toggled.connect(
@@ -552,7 +617,9 @@ class WaterCalibrationDialog(QDialog):
         self.StartCalibratingLeft.setEnabled(True)
         self.StartCalibratingRight.setEnabled(True)
         self.Warning.setText("Calibration Finished")
-        self.Warning.setStyleSheet(f"color: {self.MainWindow.default_warning_color};")
+        self.Warning.setStyleSheet(
+            f"color: {self.MainWindow.default_warning_color};"
+        )
 
     def _Continue(self):
         """Change the color of the continue button"""
@@ -641,7 +708,9 @@ class WaterCalibrationDialog(QDialog):
         self.SpotInterval = float(self.WaterCalibrationPar["Spot"]["Interval"])
 
         # Add other calibration types to drop down list, but only if they have all parameters
-        other_types = set(self.WaterCalibrationPar.keys()) - set(["Full", "Spot"])
+        other_types = set(self.WaterCalibrationPar.keys()) - set(
+            ["Full", "Spot"]
+        )
         required = set(["TimeMin", "TimeMax", "Stride", "Interval", "Cycle"])
         if len(other_types) > 0:
             for t in other_types:
@@ -649,7 +718,9 @@ class WaterCalibrationDialog(QDialog):
                     self.CalibrationType.addItem(t)
                 else:
                     logging.info(
-                        'Calibration Type "{}" missing required fields'.format(t)
+                        'Calibration Type "{}" missing required fields'.format(
+                            t
+                        )
                     )
 
     def _StartCalibratingLeft(self):
@@ -668,7 +739,9 @@ class WaterCalibrationDialog(QDialog):
 
         if self.StartCalibratingLeft.isChecked():
             # change button color
-            self.StartCalibratingLeft.setStyleSheet("background-color : green;")
+            self.StartCalibratingLeft.setStyleSheet(
+                "background-color : green;"
+            )
             QApplication.processEvents()
             # disable the right valve calibration
             self.StartCalibratingRight.setEnabled(False)
@@ -678,7 +751,9 @@ class WaterCalibrationDialog(QDialog):
             return
 
         # Get Calibration parameters
-        self.params = self.WaterCalibrationPar[self.CalibrationType.currentText()]
+        self.params = self.WaterCalibrationPar[
+            self.CalibrationType.currentText()
+        ]
 
         # Populate options for calibrations
         self.left_opentimes = np.arange(
@@ -718,7 +793,9 @@ class WaterCalibrationDialog(QDialog):
             self.LeftOpenTime.setCurrentIndex(next_index)
         else:
             next_index = self.LeftOpenTime.currentIndex()
-        logging.info("Calibrating left: {}".format(self.left_opentimes[next_index]))
+        logging.info(
+            "Calibrating left: {}".format(self.left_opentimes[next_index])
+        )
 
         # Shuffle weights of before/after
         self.WeightBeforeLeft.setText(self.WeightAfterLeft.text())
@@ -758,11 +835,15 @@ class WaterCalibrationDialog(QDialog):
                 )
 
                 # set the valve open time
-                self.MainWindow.Channel.LeftValue(float(current_valve_opentime) * 1000)
+                self.MainWindow.Channel.LeftValue(
+                    float(current_valve_opentime) * 1000
+                )
                 # open the valve
                 self.MainWindow.Channel3.ManualWater_Left(int(1))
                 # delay
-                time.sleep(current_valve_opentime + float(self.params["Interval"]))
+                time.sleep(
+                    current_valve_opentime + float(self.params["Interval"])
+                )
             else:
                 self.Warning.setText("Please repeat measurement")
                 self.WeightBeforeLeft.setText("")
@@ -770,7 +851,9 @@ class WaterCalibrationDialog(QDialog):
                 self.Repeat.setStyleSheet(
                     "color: white;background-color : mediumorchid;"
                 )
-                self.Continue.setStyleSheet("color: black;background-color : none;")
+                self.Continue.setStyleSheet(
+                    "color: black;background-color : none;"
+                )
                 self.EmergencyStop.setChecked(False)
                 self.EmergencyStop.setStyleSheet("background-color : none;")
                 return
@@ -790,8 +873,12 @@ class WaterCalibrationDialog(QDialog):
             self.Warning.setText("Please repeat measurement")
             self.WeightBeforeLeft.setText("")
             self.WeightAfterLeft.setText("")
-            self.Repeat.setStyleSheet("color: white;background-color : mediumorchid;")
-            self.Continue.setStyleSheet("color: black;background-color : none;")
+            self.Repeat.setStyleSheet(
+                "color: white;background-color : mediumorchid;"
+            )
+            self.Continue.setStyleSheet(
+                "color: black;background-color : none;"
+            )
             return
         self.WeightAfterLeft.setText(str(final_tube_weight))
 
@@ -813,10 +900,14 @@ class WaterCalibrationDialog(QDialog):
                 "Measurements recorded for all values. Please press Repeat, or Finished"
             )
             self.Repeat.setStyleSheet("color: black;background-color : none;")
-            self.Finished.setStyleSheet("color: white;background-color : mediumorchid;")
+            self.Finished.setStyleSheet(
+                "color: white;background-color : mediumorchid;"
+            )
         else:
             self.Warning.setText("Please press Continue, Repeat, or Finished")
-            self.Continue.setStyleSheet("color: white;background-color : mediumorchid;")
+            self.Continue.setStyleSheet(
+                "color: white;background-color : mediumorchid;"
+            )
             self.Repeat.setStyleSheet("color: black;background-color : none;")
 
     def _StartCalibratingRight(self):
@@ -835,7 +926,9 @@ class WaterCalibrationDialog(QDialog):
 
         if self.StartCalibratingRight.isChecked():
             # change button color
-            self.StartCalibratingRight.setStyleSheet("background-color : green;")
+            self.StartCalibratingRight.setStyleSheet(
+                "background-color : green;"
+            )
             QApplication.processEvents()
             # disable the right valve calibration
             self.StartCalibratingRight.setEnabled(False)
@@ -845,7 +938,9 @@ class WaterCalibrationDialog(QDialog):
             return
 
         # Get Calibration parameters
-        self.params = self.WaterCalibrationPar[self.CalibrationType.currentText()]
+        self.params = self.WaterCalibrationPar[
+            self.CalibrationType.currentText()
+        ]
 
         # Populate options for calibrations
         self.right_opentimes = np.arange(
@@ -885,7 +980,9 @@ class WaterCalibrationDialog(QDialog):
             self.RightOpenTime.setCurrentIndex(next_index)
         else:
             next_index = self.RightOpenTime.currentIndex()
-        logging.info("Calibrating right: {}".format(self.right_opentimes[next_index]))
+        logging.info(
+            "Calibrating right: {}".format(self.right_opentimes[next_index])
+        )
 
         # Shuffle weights of before/after
         self.WeightBeforeRight.setText(self.WeightAfterRight.text())
@@ -925,11 +1022,15 @@ class WaterCalibrationDialog(QDialog):
                 )
 
                 # set the valve open time
-                self.MainWindow.Channel.RightValue(float(current_valve_opentime) * 1000)
+                self.MainWindow.Channel.RightValue(
+                    float(current_valve_opentime) * 1000
+                )
                 # open the valve
                 self.MainWindow.Channel3.ManualWater_Right(int(1))
                 # delay
-                time.sleep(current_valve_opentime + float(self.params["Interval"]))
+                time.sleep(
+                    current_valve_opentime + float(self.params["Interval"])
+                )
             else:
                 self.Warning.setText("Please repeat measurement")
                 self.WeightBeforeRight.setText("")
@@ -937,7 +1038,9 @@ class WaterCalibrationDialog(QDialog):
                 self.Repeat.setStyleSheet(
                     "color: white;background-color : mediumorchid;"
                 )
-                self.Continue.setStyleSheet("color: black;background-color : none;")
+                self.Continue.setStyleSheet(
+                    "color: black;background-color : none;"
+                )
                 self.EmergencyStop.setChecked(False)
                 self.EmergencyStop.setStyleSheet("background-color : none;")
                 return
@@ -957,8 +1060,12 @@ class WaterCalibrationDialog(QDialog):
             self.Warning.setText("Please repeat measurement")
             self.WeightBeforeRight.setText("")
             self.WeightAfterRight.setText("")
-            self.Repeat.setStyleSheet("color: white;background-color : mediumorchid;")
-            self.Continue.setStyleSheet("color: black;background-color : none;")
+            self.Repeat.setStyleSheet(
+                "color: white;background-color : mediumorchid;"
+            )
+            self.Continue.setStyleSheet(
+                "color: black;background-color : none;"
+            )
             return
         self.WeightAfterRight.setText(str(final_tube_weight))
 
@@ -982,7 +1089,9 @@ class WaterCalibrationDialog(QDialog):
             self.Repeat.setStyleSheet("color: black;background-color : none;")
         else:
             self.Warning.setText("Please press Continue, Repeat, or Finished")
-            self.Continue.setStyleSheet("color: white;background-color : mediumorchid;")
+            self.Continue.setStyleSheet(
+                "color: white;background-color : mediumorchid;"
+            )
             self.Repeat.setStyleSheet("color: black;background-color : none;")
 
     def _CalibrationStatus(self, opentime, weight_before, i, cycle, interval):
@@ -996,7 +1105,9 @@ class WaterCalibrationDialog(QDialog):
                 self._TimeRemaining(i, cycle, opentime, interval)
             )
         )
-        self.Warning.setStyleSheet(f"color: {self.MainWindow.default_warning_color};")
+        self.Warning.setStyleSheet(
+            f"color: {self.MainWindow.default_warning_color};"
+        )
 
     def _Save(
         self,
@@ -1052,7 +1163,9 @@ class WaterCalibrationDialog(QDialog):
         self.WaterCalibrationResults = WaterCalibrationResults.copy()
 
         # save to the json file
-        if not os.path.exists(os.path.dirname(self.MainWindow.WaterCalibrationFiles)):
+        if not os.path.exists(
+            os.path.dirname(self.MainWindow.WaterCalibrationFiles)
+        ):
             os.makedirs(os.path.dirname(self.MainWindow.WaterCalibrationFiles))
         with open(self.MainWindow.WaterCalibrationFiles, "w") as file:
             json.dump(WaterCalibrationResults, file, indent=4)
@@ -1092,14 +1205,18 @@ class WaterCalibrationDialog(QDialog):
             return
 
         set_valve_time = getattr(self.MainWindow.Channel, f"{valve}Value")
-        toggle_valve_state = getattr(self.MainWindow.Channel3, f"ManualWater_{valve}")
+        toggle_valve_state = getattr(
+            self.MainWindow.Channel3, f"ManualWater_{valve}"
+        )
         open_timer = getattr(self, f"{valve.lower()}_open_timer")
         close_timer = getattr(self, f"{valve.lower()}_close_timer")
         text_timer = getattr(self, f"{valve.lower()}_text_timer")
 
         if button.isChecked():  # open valve
             button.setStyleSheet("background-color : green;")
-            set_valve_time(float(1000) * 1000)  # set the valve open time to max value
+            set_valve_time(
+                float(1000) * 1000
+            )  # set the valve open time to max value
             toggle_valve_state(int(1))  # set valve initially open
 
             if (
@@ -1143,8 +1260,12 @@ class WaterCalibrationDialog(QDialog):
         param valve: string specifying right or left valve"""
 
         # get correct function based on input valve name
-        getattr(self.MainWindow.Channel3, f"ManualWater_{valve}")(int(1))  # close valve
-        getattr(self.MainWindow.Channel3, f"ManualWater_{valve}")(int(1))  # open valve
+        getattr(self.MainWindow.Channel3, f"ManualWater_{valve}")(
+            int(1)
+        )  # close valve
+        getattr(self.MainWindow.Channel3, f"ManualWater_{valve}")(
+            int(1)
+        )  # open valve
 
     def _TimeRemaining(self, i, cycles, opentime, interval):
         total_seconds = (cycles - i) * (opentime + interval)
@@ -1209,7 +1330,9 @@ class WaterCalibrationDialog(QDialog):
                     "Please perform full calibration before spot check",
                     QMessageBox.Ok,
                 )
-                logging.warning("Cannot perform spot check before full calibration")
+                logging.warning(
+                    "Cannot perform spot check before full calibration"
+                )
                 spot_check.setStyleSheet("background-color : none;")
                 spot_check.setChecked(False)
                 self.Warning.setText("")
@@ -1282,7 +1405,9 @@ class WaterCalibrationDialog(QDialog):
                     float(open_time) * 1000
                 )
                 # open the valve
-                getattr(self.MainWindow.Channel3, f"ManualWater_{valve}")(int(1))
+                getattr(self.MainWindow.Channel3, f"ManualWater_{valve}")(
+                    int(1)
+                )
                 # delay
                 time.sleep(open_time + self.SpotInterval)
             else:
@@ -1313,7 +1438,11 @@ class WaterCalibrationDialog(QDialog):
         total_water.setText(str(final_tube_weight))
 
         # Determine result
-        result = (final_tube_weight - empty_tube_weight) / int(self.SpotCycle) * 1000
+        result = (
+            (final_tube_weight - empty_tube_weight)
+            / int(self.SpotCycle)
+            * 1000
+        )
 
         error = result - float(volume)
         error = np.round(error, 4)
@@ -1347,7 +1476,9 @@ class WaterCalibrationDialog(QDialog):
                         valve, error
                     )
                 )
-                save.setStyleSheet("color: white;background-color : mediumorchid;")
+                save.setStyleSheet(
+                    "color: white;background-color : mediumorchid;"
+                )
                 self.Warning.setText(
                     f"Measuring {valve.lower()} valve: {volume}uL"
                     + "\nEmpty tube weight: {}g".format(empty_tube_weight)
@@ -1360,7 +1491,9 @@ class WaterCalibrationDialog(QDialog):
                         "Two or more spot checks, {}, have failed in the last 30 days. Please create a SIPE ticket to "
                         "check rig.".format(valve)
                     )
-                    logging.error(msg, extra={"tags": self.MainWindow.warning_log_tag})
+                    logging.error(
+                        msg, extra={"tags": self.MainWindow.warning_log_tag}
+                    )
                     QMessageBox.critical(
                         self, f"Spot check {valve}", msg, QMessageBox.Ok
                     )
@@ -1408,7 +1541,10 @@ class WaterCalibrationDialog(QDialog):
                     for cycle, measurements in interval.items():
                         for measurement in measurements:
                             result = float(measurement) / float(cycle)
-                            if np.abs(np.round(result - volume, 4)) > TOLERANCE:
+                            if (
+                                np.abs(np.round(result - volume, 4))
+                                > TOLERANCE
+                            ):
                                 over_tolerance += 1
         return over_tolerance
 
@@ -1461,7 +1597,9 @@ class CameraDialog(QDialog):
                     extra={"tags": self.MainWindow.warning_log_tag},
                 )
                 if "No logging folder found!" not in text:
-                    self.info_label.setText(text + "\n No logging folder found!")
+                    self.info_label.setText(
+                        text + "\n No logging folder found!"
+                    )
         else:
             logging.warning(
                 "No logging folder found!",
@@ -1501,7 +1639,8 @@ class CameraDialog(QDialog):
 
             self.StartPreview.setStyleSheet("background-color : none;")
             logging.info(
-                "Camera is off", extra={"tags": self.MainWindow.warning_log_tag}
+                "Camera is off",
+                extra={"tags": self.MainWindow.warning_log_tag},
             )
             self.info_label.setText("Camera is off")
 
@@ -1519,7 +1658,8 @@ class CameraDialog(QDialog):
         if self.StartRecording.isChecked():
             self.StartRecording.setStyleSheet("background-color : green;")
             logging.info(
-                "Camera is turning on", extra={"tags": self.MainWindow.warning_log_tag}
+                "Camera is turning on",
+                extra={"tags": self.MainWindow.warning_log_tag},
             )
             self.info_label.setText("Camera is turning on")
             QApplication.processEvents()
@@ -1529,8 +1669,13 @@ class CameraDialog(QDialog):
                 # sleep for 1 second to make sure the trigger is off
                 time.sleep(1)
             # Start logging if the formal logging is not started
-            if self.MainWindow.logging_type != 0 or self.MainWindow.logging_type == -1:
-                self.MainWindow.Ot_log_folder = self.MainWindow._restartlogging()
+            if (
+                self.MainWindow.logging_type != 0
+                or self.MainWindow.logging_type == -1
+            ):
+                self.MainWindow.Ot_log_folder = (
+                    self.MainWindow._restartlogging()
+                )
             # set to check drop frame as true
             self.MainWindow.to_check_drop_frames = 1
             # disable the start preview button
@@ -1548,13 +1693,15 @@ class CameraDialog(QDialog):
             time.sleep(5)
             self.camera_start_time = str(datetime.now())
             logging.info(
-                "Camera is on!", extra={"tags": [self.MainWindow.warning_log_tag]}
+                "Camera is on!",
+                extra={"tags": [self.MainWindow.warning_log_tag]},
             )
             self.info_label.setText("Camera is on!")
         else:
             self.StartRecording.setStyleSheet("background-color : none")
             logging.info(
-                "Camera is turning off", extra={"tags": self.MainWindow.warning_log_tag}
+                "Camera is turning off",
+                extra={"tags": self.MainWindow.warning_log_tag},
             )
             self.info_label.setText("Camera is turning off")
             QApplication.processEvents()
@@ -1562,7 +1709,8 @@ class CameraDialog(QDialog):
             self.camera_stop_time = str(datetime.now())
             time.sleep(5)
             logging.info(
-                "Camera is off!", extra={"tags": [self.MainWindow.warning_log_tag]}
+                "Camera is off!",
+                extra={"tags": [self.MainWindow.warning_log_tag]},
             )
             self.info_label.setText("Camera is off!")
 
@@ -1671,33 +1819,43 @@ class LaserCalibrationDialog(QDialog):
         Inactlabel2 = 13  # frequency
         Inactlabel3 = 14  # Ramping down
         if getattr(self, "Protocol_" + str(Numb)).currentText() == "Sine":
-            getattr(self, "label" + str(Numb) + "_" + str(Inactlabel1)).setEnabled(
-                False
-            )
+            getattr(
+                self, "label" + str(Numb) + "_" + str(Inactlabel1)
+            ).setEnabled(False)
             getattr(self, "PulseDur_" + str(Numb)).setEnabled(False)
-            getattr(self, "label" + str(Numb) + "_" + str(Inactlabel2)).setEnabled(True)
+            getattr(
+                self, "label" + str(Numb) + "_" + str(Inactlabel2)
+            ).setEnabled(True)
             getattr(self, "Frequency_" + str(Numb)).setEnabled(True)
-            getattr(self, "label" + str(Numb) + "_" + str(Inactlabel3)).setEnabled(True)
+            getattr(
+                self, "label" + str(Numb) + "_" + str(Inactlabel3)
+            ).setEnabled(True)
             getattr(self, "RD_" + str(Numb)).setEnabled(True)
         if getattr(self, "Protocol_" + str(Numb)).currentText() == "Pulse":
-            getattr(self, "label" + str(Numb) + "_" + str(Inactlabel1)).setEnabled(True)
+            getattr(
+                self, "label" + str(Numb) + "_" + str(Inactlabel1)
+            ).setEnabled(True)
             getattr(self, "PulseDur_" + str(Numb)).setEnabled(True)
-            getattr(self, "label" + str(Numb) + "_" + str(Inactlabel2)).setEnabled(True)
+            getattr(
+                self, "label" + str(Numb) + "_" + str(Inactlabel2)
+            ).setEnabled(True)
             getattr(self, "Frequency_" + str(Numb)).setEnabled(True)
-            getattr(self, "label" + str(Numb) + "_" + str(Inactlabel3)).setEnabled(
-                False
-            )
+            getattr(
+                self, "label" + str(Numb) + "_" + str(Inactlabel3)
+            ).setEnabled(False)
             getattr(self, "RD_" + str(Numb)).setEnabled(False)
         if getattr(self, "Protocol_" + str(Numb)).currentText() == "Constant":
-            getattr(self, "label" + str(Numb) + "_" + str(Inactlabel1)).setEnabled(
-                False
-            )
+            getattr(
+                self, "label" + str(Numb) + "_" + str(Inactlabel1)
+            ).setEnabled(False)
             getattr(self, "PulseDur_" + str(Numb)).setEnabled(False)
-            getattr(self, "label" + str(Numb) + "_" + str(Inactlabel2)).setEnabled(
-                False
-            )
+            getattr(
+                self, "label" + str(Numb) + "_" + str(Inactlabel2)
+            ).setEnabled(False)
             getattr(self, "Frequency_" + str(Numb)).setEnabled(False)
-            getattr(self, "label" + str(Numb) + "_" + str(Inactlabel3)).setEnabled(True)
+            getattr(
+                self, "label" + str(Numb) + "_" + str(Inactlabel3)
+            ).setEnabled(True)
             getattr(self, "RD_" + str(Numb)).setEnabled(True)
 
     def _LaserColor(self, Numb):
@@ -1743,15 +1901,20 @@ class LaserCalibrationDialog(QDialog):
             setattr(self, "WaveFormLocation_" + str(i + 1), self.my_wave)
             setattr(
                 self,
-                f"Location{i+1}_Size",
-                getattr(self, f"WaveFormLocation_{i+1}").size,
+                f"Location{i + 1}_Size",
+                getattr(self, f"WaveFormLocation_{i + 1}").size,
             )
             # send waveform and send the waveform size
-            getattr(self.MainWindow.Channel, "Location" + str(i + 1) + "_Size")(
-                int(getattr(self, "Location" + str(i + 1) + "_Size"))
-            )
-            getattr(self.MainWindow.Channel4, "WaveForm" + str(1) + "_" + str(i + 1))(
-                str(getattr(self, "WaveFormLocation_" + str(i + 1)).tolist())[1:-1]
+            getattr(
+                self.MainWindow.Channel, "Location" + str(i + 1) + "_Size"
+            )(int(getattr(self, "Location" + str(i + 1) + "_Size")))
+            getattr(
+                self.MainWindow.Channel4,
+                "WaveForm" + str(1) + "_" + str(i + 1),
+            )(
+                str(getattr(self, "WaveFormLocation_" + str(i + 1)).tolist())[
+                    1:-1
+                ]
             )
         FinishOfWaveForm = self.MainWindow.Channel4.receive()
 
@@ -1794,7 +1957,10 @@ class LaserCalibrationDialog(QDialog):
                         )
                     )
                     RD = np.arange(
-                        1, 0, -1 / (np.shape(self.my_wave)[0] - np.shape(Constant)[0])
+                        1,
+                        0,
+                        -1
+                        / (np.shape(self.my_wave)[0] - np.shape(Constant)[0]),
                     )
                     RampingDown = np.concatenate((Constant, RD), axis=0)
                     self.my_wave = self.my_wave * RampingDown
@@ -1807,20 +1973,29 @@ class LaserCalibrationDialog(QDialog):
                 )
             else:
                 self.CLP_PulseDur = float(self.CLP_PulseDur)
-                PointsEachPulse = int(self.CLP_SampleFrequency * self.CLP_PulseDur)
+                PointsEachPulse = int(
+                    self.CLP_SampleFrequency * self.CLP_PulseDur
+                )
                 PulseIntervalPoints = int(
-                    1 / self.CLP_Frequency * self.CLP_SampleFrequency - PointsEachPulse
+                    1 / self.CLP_Frequency * self.CLP_SampleFrequency
+                    - PointsEachPulse
                 )
                 if PulseIntervalPoints < 0:
                     logging.warning(
                         "Pulse frequency and pulse duration are not compatible!",
                         extra={"tags": [self.MainWindow.warning_log_tag]},
                     )
-                TotalPoints = int(self.CLP_SampleFrequency * self.CLP_CurrentDuration)
-                PulseNumber = np.floor(self.CLP_CurrentDuration * self.CLP_Frequency)
+                TotalPoints = int(
+                    self.CLP_SampleFrequency * self.CLP_CurrentDuration
+                )
+                PulseNumber = np.floor(
+                    self.CLP_CurrentDuration * self.CLP_Frequency
+                )
                 EachPulse = Amplitude * np.ones(PointsEachPulse)
                 PulseInterval = np.zeros(PulseIntervalPoints)
-                WaveFormEachCycle = np.concatenate((EachPulse, PulseInterval), axis=0)
+                WaveFormEachCycle = np.concatenate(
+                    (EachPulse, PulseInterval), axis=0
+                )
                 self.my_wave = np.empty(0)
                 # pulse number should be greater than 0
                 if PulseNumber > 1:
@@ -1834,9 +2009,14 @@ class LaserCalibrationDialog(QDialog):
                         extra={"tags": [self.MainWindow.warning_log_tag]},
                     )
                     return
-                self.my_wave = np.concatenate((self.my_wave, EachPulse), axis=0)
                 self.my_wave = np.concatenate(
-                    (self.my_wave, np.zeros(TotalPoints - np.shape(self.my_wave)[0])),
+                    (self.my_wave, EachPulse), axis=0
+                )
+                self.my_wave = np.concatenate(
+                    (
+                        self.my_wave,
+                        np.zeros(TotalPoints - np.shape(self.my_wave)[0]),
+                    ),
                     axis=0,
                 )
                 self.my_wave = np.append(self.my_wave, [0, 0])
@@ -1860,7 +2040,10 @@ class LaserCalibrationDialog(QDialog):
                         )
                     )
                     RD = np.arange(
-                        1, 0, -1 / (np.shape(self.my_wave)[0] - np.shape(Constant)[0])
+                        1,
+                        0,
+                        -1
+                        / (np.shape(self.my_wave)[0] - np.shape(Constant)[0]),
                     )
                     RampingDown = np.concatenate((Constant, RD), axis=0)
                     self.my_wave = self.my_wave * RampingDown
@@ -1878,7 +2061,10 @@ class LaserCalibrationDialog(QDialog):
         elif self.CLP_Location == "Laser_2":
             self.CurrentLaserAmplitude = [0, self.CLP_InputVoltage]
         elif self.CLP_Location == "Both":
-            self.CurrentLaserAmplitude = [self.CLP_InputVoltage, self.CLP_InputVoltage]
+            self.CurrentLaserAmplitude = [
+                self.CLP_InputVoltage,
+                self.CLP_InputVoltage,
+            ]
         else:
             logging.warning(
                 "No stimulation location defined!",
@@ -1902,12 +2088,18 @@ class LaserCalibrationDialog(QDialog):
             for child in container.findChildren(QtWidgets.QComboBox):
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store the child's current text value
-                setattr(self, Prefix + "_" + child.objectName(), child.currentText())
+                setattr(
+                    self,
+                    Prefix + "_" + child.objectName(),
+                    child.currentText(),
+                )
             # Iterate over each child of the container that is a QPushButton
             for child in container.findChildren(QtWidgets.QPushButton):
                 # Set an attribute in self with the name 'TP_' followed by the child's object name
                 # and store whether the child is checked or not
-                setattr(self, Prefix + "_" + child.objectName(), child.isChecked())
+                setattr(
+                    self, Prefix + "_" + child.objectName(), child.isChecked()
+                )
 
     def _InitiateATrial(self):
         """Initiate calibration in bonsai"""
@@ -1933,10 +2125,14 @@ class LaserCalibrationDialog(QDialog):
             ).currentText()
         )
         self.RD_1.setText(
-            self.MainWindow.Opto_dialog.__getattribute__("RD_" + condition).text()
+            self.MainWindow.Opto_dialog.__getattribute__(
+                "RD_" + condition
+            ).text()
         )
         self.PulseDur_1.setText(
-            self.MainWindow.Opto_dialog.__getattribute__("PulseDur_" + condition).text()
+            self.MainWindow.Opto_dialog.__getattribute__(
+                "PulseDur_" + condition
+            ).text()
         )
         self.LaserColor_1.setCurrentIndex(
             self.MainWindow.Opto_dialog.__getattribute__(
@@ -1984,7 +2180,9 @@ class LaserCalibrationDialog(QDialog):
             self.Warning.setAlignment(Qt.AlignCenter)
             return
         if self.LaserPowerMeasured.text() == "":
-            self.Warning.setText("Data not captured! Please enter power measured!")
+            self.Warning.setText(
+                "Data not captured! Please enter power measured!"
+            )
             self.Warning.setStyleSheet(
                 f"color: {self.MainWindow.default_warning_color};"
             )
@@ -1999,7 +2197,11 @@ class LaserCalibrationDialog(QDialog):
                         getattr(self, attr_name)
                     )
                 else:
-                    setattr(self, "LCM_" + attr_name[3:], [getattr(self, attr_name)])
+                    setattr(
+                        self,
+                        "LCM_" + attr_name[3:],
+                        [getattr(self, attr_name)],
+                    )
         # save the measure time
         if hasattr(self, "LCM_MeasureTime"):
             current_time = datetime.now()
@@ -2028,7 +2230,9 @@ class LaserCalibrationDialog(QDialog):
             self.LCM_MeasureTime.copy()
         except Exception as e:
             logging.error(str(e))
-            self.Warning.setText("Data not saved! Please Capture the power first!")
+            self.Warning.setText(
+                "Data not saved! Please Capture the power first!"
+            )
             self.Warning.setStyleSheet(
                 f"color: {self.MainWindow.default_warning_color};"
             )
@@ -2041,7 +2245,9 @@ class LaserCalibrationDialog(QDialog):
             if value == ""
         ]
         both_indices = [
-            index for index, value in enumerate(self.LCM_Location_1) if value == "Both"
+            index
+            for index, value in enumerate(self.LCM_Location_1)
+            if value == "Both"
         ]
         delete_indices = both_indices + empty_indices
         delete_indices = list(set(delete_indices))
@@ -2087,7 +2293,9 @@ class LaserCalibrationDialog(QDialog):
                     for index, value in enumerate(self.LCM_LaserColor_1)
                     if value == current_color
                 ]
-                current_color_ind = list(set(current_color_ind) & set(current_date_ind))
+                current_color_ind = list(
+                    set(current_color_ind) & set(current_date_ind)
+                )
                 Protocols = self._extract_elements(
                     self.LCM_Protocol_1, current_color_ind
                 )
@@ -2111,11 +2319,14 @@ class LaserCalibrationDialog(QDialog):
                             current_frequency = Frequency_unique[m]
                             current_frequency_ind = [
                                 index
-                                for index, value in enumerate(self.LCM_Frequency_1)
+                                for index, value in enumerate(
+                                    self.LCM_Frequency_1
+                                )
                                 if value == current_frequency
                             ]
                             current_frequency_ind = list(
-                                set(current_frequency_ind) & set(current_protocol_ind)
+                                set(current_frequency_ind)
+                                & set(current_protocol_ind)
                             )
                             for laser_tag in self.laser_tags:
                                 ItemsLaserPower = self._get_laser_power_list(
@@ -2133,9 +2344,11 @@ class LaserCalibrationDialog(QDialog):
                                 )
                                 if (
                                     "LaserPowerVoltage"
-                                    not in LaserCalibrationResults[current_date_name][
-                                        current_color
-                                    ][current_protocol][current_frequency][
+                                    not in LaserCalibrationResults[
+                                        current_date_name
+                                    ][current_color][current_protocol][
+                                        current_frequency
+                                    ][
                                         f"Laser_{laser_tag}"
                                     ]
                                 ):
@@ -2154,16 +2367,21 @@ class LaserCalibrationDialog(QDialog):
                                     ][
                                         "LaserPowerVoltage"
                                     ] = self._unique(
-                                        LaserCalibrationResults[current_date_name][
-                                            current_color
-                                        ][current_protocol][current_frequency][
+                                        LaserCalibrationResults[
+                                            current_date_name
+                                        ][current_color][current_protocol][
+                                            current_frequency
+                                        ][
                                             f"Laser_{laser_tag}"
                                         ][
                                             "LaserPowerVoltage"
                                         ]
                                         + ItemsLaserPower
                                     )
-                    elif current_protocol == "Constant" or current_protocol == "Pulse":
+                    elif (
+                        current_protocol == "Constant"
+                        or current_protocol == "Pulse"
+                    ):
                         for laser_tag in self.laser_tags:
                             ItemsLaserPower = self._get_laser_power_list(
                                 current_protocol_ind, laser_tag
@@ -2180,9 +2398,11 @@ class LaserCalibrationDialog(QDialog):
                             )
                             if (
                                 "LaserPowerVoltage"
-                                not in LaserCalibrationResults[current_date_name][
-                                    current_color
-                                ][current_protocol][f"Laser_{laser_tag}"]
+                                not in LaserCalibrationResults[
+                                    current_date_name
+                                ][current_color][current_protocol][
+                                    f"Laser_{laser_tag}"
+                                ]
                             ):
                                 LaserCalibrationResults[current_date_name][
                                     current_color
@@ -2216,9 +2436,11 @@ class LaserCalibrationDialog(QDialog):
                                 )
                                 if (
                                     "LaserPowerVoltage"
-                                    not in LaserCalibrationResults[current_date_name][
-                                        current_color
-                                    ]["Pulse"][f"Laser_{laser_tag}"]
+                                    not in LaserCalibrationResults[
+                                        current_date_name
+                                    ][current_color]["Pulse"][
+                                        f"Laser_{laser_tag}"
+                                    ]
                                 ):
                                     LaserCalibrationResults[current_date_name][
                                         current_color
@@ -2231,21 +2453,27 @@ class LaserCalibrationDialog(QDialog):
                                     ]["Pulse"][f"Laser_{laser_tag}"][
                                         "LaserPowerVoltage"
                                     ] = self._unique(
-                                        LaserCalibrationResults[current_date_name][
-                                            current_color
-                                        ]["Pulse"][f"Laser_{laser_tag}"][
+                                        LaserCalibrationResults[
+                                            current_date_name
+                                        ][current_color]["Pulse"][
+                                            f"Laser_{laser_tag}"
+                                        ][
                                             "LaserPowerVoltage"
                                         ]
                                         + ItemsLaserPower
                                     )
         # save to json file
-        if not os.path.exists(os.path.dirname(self.MainWindow.LaserCalibrationFiles)):
+        if not os.path.exists(
+            os.path.dirname(self.MainWindow.LaserCalibrationFiles)
+        ):
             os.makedirs(os.path.dirname(self.MainWindow.LaserCalibrationFiles))
         with open(self.MainWindow.LaserCalibrationFiles, "w") as file:
             json.dump(LaserCalibrationResults, file, indent=4)
         self.Warning.setText("")
         if LaserCalibrationResults == {}:
-            self.Warning.setText("Data not saved! Please enter power measured!")
+            self.Warning.setText(
+                "Data not saved! Please enter power measured!"
+            )
             self.Warning.setStyleSheet(
                 f"color: {self.MainWindow.default_warning_color};"
             )
@@ -2277,7 +2505,9 @@ class LaserCalibrationDialog(QDialog):
         ]
         ind = list(set(ind) & set(current_laser_tag_ind))
         input_voltages = self._extract_elements(self.LCM_voltage, ind)
-        laser_power_measured = self._extract_elements(self.LCM_LaserPowerMeasured, ind)
+        laser_power_measured = self._extract_elements(
+            self.LCM_LaserPowerMeasured, ind
+        )
         input_voltages_unique = list(set(input_voltages))
         for n in range(len(input_voltages_unique)):
             current_voltage = input_voltages_unique[n]
@@ -2286,9 +2516,13 @@ class LaserCalibrationDialog(QDialog):
                 for k in range(len(input_voltages))
                 if input_voltages[k] == current_voltage
             ]
-            measured_power = self._extract_elements(laser_power_measured, laser_ind)
+            measured_power = self._extract_elements(
+                laser_power_measured, laser_ind
+            )
             measured_power_mean = self._getmean(measured_power)
-            ItemsLaserPower.append([float(current_voltage), measured_power_mean])
+            ItemsLaserPower.append(
+                [float(current_voltage), measured_power_mean]
+            )
         return ItemsLaserPower
 
     def _unique(self, input):
@@ -2301,7 +2535,8 @@ class LaserCalibrationDialog(QDialog):
         for current_votage in voltage_unique:
             laser_power = input_array[
                 np.logical_and(
-                    input_array[:, 0] == current_votage, input_array[:, 1] != "NA"
+                    input_array[:, 0] == current_votage,
+                    input_array[:, 1] != "NA",
                 )
             ][:, 1]
             mean_laser_power = self._getmean(list(laser_power))
@@ -2421,7 +2656,9 @@ class MetadataDialog(QDialog):
         self.meta_data["rig_metadata"] = {}
         self.meta_data["session_metadata"] = {}
         self.meta_data["rig_metadata_file"] = ""
-        self.LickSpoutDistance.setText(str(self.MainWindow.Other_lick_spout_distance))
+        self.LickSpoutDistance.setText(
+            str(self.MainWindow.Other_lick_spout_distance)
+        )
         self._get_basics()
         self._show_project_names()
 
@@ -2444,7 +2681,9 @@ class MetadataDialog(QDialog):
             )
         # add in lick spout distance
         grid_layout.addWidget(self.label_96, len(positions.keys()) + 1, 0)
-        grid_layout.addWidget(self.LickSpoutDistance, len(positions.keys()) + 1, 1)
+        grid_layout.addWidget(
+            self.LickSpoutDistance, len(positions.keys()) + 1, 1
+        )
         self.groupBox.setLayout(grid_layout)
 
     def _connectSignalsSlots(self):
@@ -2467,7 +2706,9 @@ class MetadataDialog(QDialog):
         self.Stick_ModuleAngle.textChanged.connect(self._save_configuration)
         self.Stick_RotationAngle.textChanged.connect(self._save_configuration)
         self.ProjectName.currentIndexChanged.connect(self._show_project_info)
-        self.LickSpoutDistance.textChanged.connect(self._save_lick_spout_distance)
+        self.LickSpoutDistance.textChanged.connect(
+            self._save_lick_spout_distance
+        )
 
     def _set_reference(self, reference: dict):
         """
@@ -2486,7 +2727,9 @@ class MetadataDialog(QDialog):
 
     def _save_lick_spout_distance(self):
         """save the lick spout distance"""
-        self.MainWindow.Other_lick_spout_distance = self.LickSpoutDistance.text()
+        self.MainWindow.Other_lick_spout_distance = (
+            self.LickSpoutDistance.text()
+        )
 
     def _show_project_names(self):
         """show the project names"""
@@ -2535,7 +2778,10 @@ class MetadataDialog(QDialog):
         self._update_metadata(dont_clear=True)
 
     def _update_metadata(
-        self, update_rig_metadata=True, update_session_metadata=True, dont_clear=False
+        self,
+        update_rig_metadata=True,
+        update_session_metadata=True,
+        dont_clear=False,
     ):
         """update the metadata"""
         if (update_rig_metadata) and ("rig_metadata_file" in self.meta_data):
@@ -2553,7 +2799,9 @@ class MetadataDialog(QDialog):
             )
         if update_session_metadata:
             widget_dict = self._get_widgets()
-            self._set_widgets_value(widget_dict, self.meta_data["session_metadata"])
+            self._set_widgets_value(
+                widget_dict, self.meta_data["session_metadata"]
+            )
 
         self._show_ephys_probes()
         self._show_stick_microscopes()
@@ -2630,7 +2878,11 @@ class MetadataDialog(QDialog):
         """get the widgets used for saving/loading metadata"""
         exclude_widgets = self._get_children_keys(self.Probes)
         exclude_widgets += self._get_children_keys(self.Microscopes)
-        exclude_widgets += ["EphysProbes", "RigMetadataFile", "StickMicroscopes"]
+        exclude_widgets += [
+            "EphysProbes",
+            "RigMetadataFile",
+            "StickMicroscopes",
+        ]
         widget_dict = {
             w.objectName(): w
             for w in self.findChildren(
@@ -2658,9 +2910,9 @@ class MetadataDialog(QDialog):
             )
             keys = self._get_children_keys(widget)
             for key in keys:
-                self.meta_data["session_metadata"][metadata_key][current_probe][key] = (
-                    getattr(self, key).text()
-                )
+                self.meta_data["session_metadata"][metadata_key][
+                    current_probe
+                ][key] = getattr(self, key).text()
 
     def _show_angles(self):
         """
@@ -2678,7 +2930,9 @@ class MetadataDialog(QDialog):
             action = self._save_configuration
 
             self._manage_signals(
-                enable=False, keys=self._get_children_keys(widget), action=action
+                enable=False,
+                keys=self._get_children_keys(widget),
+                action=action,
             )
             self._manage_signals(
                 enable=False, keys=[probe_type], action=self._show_angles
@@ -2690,14 +2944,17 @@ class MetadataDialog(QDialog):
             )
             if (
                 current_probe == ""
-                or current_probe not in self.meta_data["session_metadata"][metadata_key]
+                or current_probe
+                not in self.meta_data["session_metadata"][metadata_key]
             ):
                 self._clear_angles(self._get_children_keys(widget))
                 self._manage_signals(
                     enable=True, keys=[probe_type], action=self._show_angles
                 )
                 self._manage_signals(
-                    enable=True, keys=self._get_children_keys(widget), action=action
+                    enable=True,
+                    keys=self._get_children_keys(widget),
+                    action=action,
                 )
                 continue
 
@@ -2711,11 +2968,15 @@ class MetadataDialog(QDialog):
                     current_probe
                 ].setdefault(key, "")
                 getattr(self, key).setText(
-                    self.meta_data["session_metadata"][metadata_key][current_probe][key]
+                    self.meta_data["session_metadata"][metadata_key][
+                        current_probe
+                    ][key]
                 )
 
             self._manage_signals(
-                enable=True, keys=self._get_children_keys(widget), action=action
+                enable=True,
+                keys=self._get_children_keys(widget),
+                action=action,
             )
             self._manage_signals(
                 enable=True, keys=[probe_type], action=self._show_angles
@@ -2744,9 +3005,13 @@ class MetadataDialog(QDialog):
             return
         items = []
         if "stick_microscopes" in self.meta_data["rig_metadata"]:
-            for i in range(len(self.meta_data["rig_metadata"]["stick_microscopes"])):
+            for i in range(
+                len(self.meta_data["rig_metadata"]["stick_microscopes"])
+            ):
                 items.append(
-                    self.meta_data["rig_metadata"]["stick_microscopes"][i]["name"]
+                    self.meta_data["rig_metadata"]["stick_microscopes"][i][
+                        "name"
+                    ]
                 )
         if items == []:
             self.StickMicroscopes.clear()
@@ -2859,7 +3124,9 @@ class MetadataDialog(QDialog):
         if not rig_metadata_file:
             return
         self.meta_data["rig_metadata_file"] = rig_metadata_file
-        self.meta_data["session_metadata"]["RigMetadataFile"] = rig_metadata_file
+        self.meta_data["session_metadata"][
+            "RigMetadataFile"
+        ] = rig_metadata_file
         if os.path.exists(rig_metadata_file):
             with open(rig_metadata_file, "r") as file:
                 self.meta_data["rig_metadata"] = json.load(file)
@@ -2904,7 +3171,9 @@ class AutoTrainDialog(QDialog):
         self.checkBox_show_this_mouse_only.stateChanged.connect(
             self._show_auto_training_manager
         )
-        self.checkBox_override_stage.stateChanged.connect(self._override_stage_clicked)
+        self.checkBox_override_stage.stateChanged.connect(
+            self._override_stage_clicked
+        )
         self.comboBox_override_stage.currentIndexChanged.connect(
             self._update_stage_to_apply
         )
@@ -2914,7 +3183,9 @@ class AutoTrainDialog(QDialog):
         self.checkBox_override_curriculum.stateChanged.connect(
             self._override_curriculum_clicked
         )
-        self.pushButton_apply_curriculum.clicked.connect(self._apply_curriculum)
+        self.pushButton_apply_curriculum.clicked.connect(
+            self._apply_curriculum
+        )
         self.pushButton_show_curriculum_in_streamlit.clicked.connect(
             self._show_curriculum_in_streamlit
         )
@@ -2992,7 +3263,10 @@ class AutoTrainDialog(QDialog):
                 last_curriculum_schema_version = self.last_session[
                     "curriculum_schema_version"
                 ]
-                if codebase_curriculum_schema_version != last_curriculum_schema_version:
+                if (
+                    codebase_curriculum_schema_version
+                    != last_curriculum_schema_version
+                ):
                     # schema version don't match. prompt user to choose another curriculum
                     if self.isVisible():
                         QMessageBox.information(
@@ -3030,8 +3304,12 @@ class AutoTrainDialog(QDialog):
                     self.curriculum_in_use = self.curriculum_manager.get_curriculum(
                         curriculum_name=self.last_session["curriculum_name"],
                         curriculum_schema_version=last_curriculum_schema_version,
-                        curriculum_version=self.last_session["curriculum_version"],
-                    )["curriculum"]
+                        curriculum_version=self.last_session[
+                            "curriculum_version"
+                        ],
+                    )[
+                        "curriculum"
+                    ]
 
                     self.pushButton_preview_auto_train_paras.setEnabled(True)
 
@@ -3145,7 +3423,9 @@ class AutoTrainDialog(QDialog):
         df_training_manager = self.auto_train_manager.df_manager
 
         # Format dataframe
-        df_training_manager["session"] = df_training_manager["session"].astype(int)
+        df_training_manager["session"] = df_training_manager["session"].astype(
+            int
+        )
         df_training_manager["foraging_efficiency"] = df_training_manager[
             "foraging_efficiency"
         ].round(3)
@@ -3207,7 +3487,9 @@ class AutoTrainDialog(QDialog):
                     == self.last_session["session"]
                 )
             ][0]
-            _index = self.tableView_df_training_manager.model().index(session_index, 0)
+            _index = self.tableView_df_training_manager.model().index(
+                session_index, 0
+            )
             self.tableView_df_training_manager.clearSelection()
             self.tableView_df_training_manager.selectionModel().select(
                 _index, QItemSelectionModel.Select | QItemSelectionModel.Rows
@@ -3238,7 +3520,9 @@ class AutoTrainDialog(QDialog):
         self.tableView_df_curriculum.setSortingEnabled(True)
 
         # Add callback
-        self.tableView_df_curriculum.clicked.connect(self._update_curriculum_diagrams)
+        self.tableView_df_curriculum.clicked.connect(
+            self._update_curriculum_diagrams
+        )
 
         self._sync_curriculum_in_use_to_table()
 
@@ -3265,7 +3549,9 @@ class AutoTrainDialog(QDialog):
         ][0]
 
         # Auto click the curriculum of the latest session
-        _index = self.tableView_df_curriculum.model().index(curriculum_index, 0)
+        _index = self.tableView_df_curriculum.model().index(
+            curriculum_index, 0
+        )
         self.tableView_df_curriculum.selectionModel().select(
             _index, QItemSelectionModel.Select | QItemSelectionModel.Rows
         )
@@ -3280,7 +3566,9 @@ class AutoTrainDialog(QDialog):
         logger.info(f"Selected curriculum: {selected_row.to_dict()}")
         self.selected_curriculum = self.curriculum_manager.get_curriculum(
             curriculum_name=selected_row["curriculum_name"],
-            curriculum_schema_version=selected_row["curriculum_schema_version"],
+            curriculum_schema_version=selected_row[
+                "curriculum_schema_version"
+            ],
             curriculum_version=selected_row["curriculum_version"],
         )
 
@@ -3289,9 +3577,9 @@ class AutoTrainDialog(QDialog):
             webbrowser.open(
                 "https://foraging-behavior-browser.allenneuraldynamics-test.org/"
                 "?tab_id=tab_auto_train_curriculum"
-                f'&auto_training_curriculum_name={self.selected_curriculum["curriculum"].curriculum_name}'
-                f'&auto_training_curriculum_version={self.selected_curriculum["curriculum"].curriculum_version}'
-                f'&auto_training_curriculum_schema_version={self.selected_curriculum["curriculum"].curriculum_schema_version}'
+                f"&auto_training_curriculum_name={self.selected_curriculum['curriculum'].curriculum_name}"
+                f"&auto_training_curriculum_version={self.selected_curriculum['curriculum'].curriculum_version}"
+                f"&auto_training_curriculum_schema_version={self.selected_curriculum['curriculum'].curriculum_schema_version}"
             )
 
     def _show_auto_training_history_in_streamlit(self):
@@ -3306,7 +3594,10 @@ class AutoTrainDialog(QDialog):
 
     def _update_available_training_stages(self):
         # If AutoTrain is engaged, and override stage is checked
-        if self.auto_train_engaged and self.checkBox_override_stage.isChecked():
+        if (
+            self.auto_train_engaged
+            and self.checkBox_override_stage.isChecked()
+        ):
             # Restore stage_in_use. No need to reload available stages
             self.comboBox_override_stage.setCurrentText(self.stage_in_use)
         else:
@@ -3352,9 +3643,9 @@ class AutoTrainDialog(QDialog):
 
         self.pushButton_apply_auto_train_paras.setText(
             f"Apply and lock\n"
-            + "\n".join(get_curriculum_string(self.curriculum_in_use).split("(")).strip(
-                ")"
-            )
+            + "\n".join(
+                get_curriculum_string(self.curriculum_in_use).split("(")
+            ).strip(")")
             + f"\n{self.stage_in_use}"
         )
 
@@ -3365,7 +3656,10 @@ class AutoTrainDialog(QDialog):
 
     def _apply_curriculum(self):
         # Check if a curriculum is selected
-        if not hasattr(self, "selected_curriculum") or self.selected_curriculum is None:
+        if (
+            not hasattr(self, "selected_curriculum")
+            or self.selected_curriculum is None
+        ):
             QMessageBox.critical(
                 self,
                 "Box {}, Error".format(self.MainWindow.box_letter),
@@ -3428,7 +3722,10 @@ class AutoTrainDialog(QDialog):
         else:
             # -- This is an existing mouse, we are changing the curriculum --
             # Not sure whether we should leave this option open. But for now, I allow this freedom.
-            if self.selected_curriculum["curriculum"] == self.curriculum_in_use:
+            if (
+                self.selected_curriculum["curriculum"]
+                == self.curriculum_in_use
+            ):
                 # The selected curriculum is the same as the one in use
                 logger.info(
                     f"Selected curriculum is the same as the one in use. No change is made."
@@ -3456,7 +3753,9 @@ class AutoTrainDialog(QDialog):
                         f"{get_curriculum_string(self.curriculum_in_use)} to "
                         f"{get_curriculum_string(self.selected_curriculum['curriculum'])}"
                     )
-                    self.curriculum_in_use = self.selected_curriculum["curriculum"]
+                    self.curriculum_in_use = self.selected_curriculum[
+                        "curriculum"
+                    ]
 
             self.checkBox_override_curriculum.setChecked(False)
             self.pushButton_apply_curriculum.setEnabled(False)
@@ -3476,7 +3775,9 @@ class AutoTrainDialog(QDialog):
                 return
 
             # Get parameter settings
-            paras = self.curriculum_in_use.parameters[TrainingStage[self.stage_in_use]]
+            paras = self.curriculum_in_use.parameters[
+                TrainingStage[self.stage_in_use]
+            ]
 
             # Convert to GUI format and set the parameters
             paras_dict = paras.to_GUI_format()
@@ -3522,16 +3823,24 @@ class AutoTrainDialog(QDialog):
             self.auto_train_engaged = True
 
             # Get parameter settings
-            paras = self.curriculum_in_use.parameters[TrainingStage[self.stage_in_use]]
+            paras = self.curriculum_in_use.parameters[
+                TrainingStage[self.stage_in_use]
+            ]
 
             # Convert to GUI format and set the parameters
             paras_dict = paras.to_GUI_format()
-            self.widgets_locked_by_auto_train, _ = self._set_training_parameters(
-                paras_dict=paras_dict, if_apply_and_lock=True
+            self.widgets_locked_by_auto_train, _ = (
+                self._set_training_parameters(
+                    paras_dict=paras_dict, if_apply_and_lock=True
+                )
             )
 
-            if self.widgets_locked_by_auto_train == []:  # Error in setting parameters
-                self.update_auto_train_lock(engaged=False)  # Uncheck the "apply" button
+            if (
+                self.widgets_locked_by_auto_train == []
+            ):  # Error in setting parameters
+                self.update_auto_train_lock(
+                    engaged=False
+                )  # Uncheck the "apply" button
                 return
 
             # lock the widgets that have been set by auto training
@@ -3620,10 +3929,13 @@ class AutoTrainDialog(QDialog):
             # can be correctly registered in WarmupBackup if warmup is turned on later
             if (
                 paras_dict
-                and paras_dict["warmup"] != self.MainWindow.warmup.currentText()
+                and paras_dict["warmup"]
+                != self.MainWindow.warmup.currentText()
             ):
                 widgets_changed.update(
-                    {self.MainWindow.warmup: self.MainWindow.warmup.currentText()}
+                    {
+                        self.MainWindow.warmup: self.MainWindow.warmup.currentText()
+                    }
                 )  # Track the changes
 
             index = self.MainWindow.warmup.findText("off")
@@ -3641,7 +3953,7 @@ class AutoTrainDialog(QDialog):
                     QMessageBox.critical(
                         self,
                         "Box {}, Error".format(self.MainWindow.box_letter),
-                        f"""Task "{paras_dict['task']}" not found. Check the curriculum!""",
+                        f"""Task "{paras_dict["task"]}" not found. Check the curriculum!""",
                     )
                     return []  # Return an empty list without setting anything
                 else:
@@ -3678,7 +3990,9 @@ class AutoTrainDialog(QDialog):
             # Set the value according to the widget type
             if isinstance(widget, (QtWidgets.QLineEdit, QtWidgets.QTextEdit)):
                 if value != widget.text():
-                    widgets_changed.update({widget: widget.text()})  # Track the changes
+                    widgets_changed.update(
+                        {widget: widget.text()}
+                    )  # Track the changes
                     widget.setText(value)
             elif isinstance(widget, QtWidgets.QComboBox):
                 ind = widget.findText(value)
@@ -3728,7 +4042,9 @@ class AutoTrainDialog(QDialog):
                 widgets_set.extend(
                     [
                         self.MainWindow.findChild(QObject, "RightValue"),
-                        self.MainWindow.findChild(QObject, "RightValue_volume"),
+                        self.MainWindow.findChild(
+                            QObject, "RightValue_volume"
+                        ),
                     ]
                 )
 

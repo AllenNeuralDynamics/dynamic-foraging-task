@@ -17,8 +17,9 @@ from deepdiff import DeepDiff
 from foraging_gui.Visualization import GetWaterCalibration
 
 
-def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibration):
-
+def build_rig_json(
+    existing_rig_json, settings, water_calibration, laser_calibration
+):
     # Build the new rig schema
     rig = build_rig_json_core(settings, water_calibration, laser_calibration)
     if rig is None:
@@ -43,7 +44,9 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
     # Determine which schema to use
     if len(differences) > 0:
         # If any differences remain save a new rig.json
-        logging.info("differences with existing rig json: {}".format(differences))
+        logging.info(
+            "differences with existing rig json: {}".format(differences)
+        )
         # Write to file
         time_str = datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
         filename = "_{}_{}.json".format(settings["rig_name"], time_str)
@@ -57,7 +60,6 @@ def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibra
 
 
 def build_rig_json_core(settings, water_calibration, laser_calibration):
-
     # Set up
     ###########################################################################
     logging.info("building rig json")
@@ -119,7 +121,9 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         sensor_width=720,
                         sensor_height=540,
                         model="Blackfly S BFS-U3-04S2M",
-                        serial_number=settings["box_settings"]["SideCameraRight"],
+                        serial_number=settings["box_settings"][
+                            "SideCameraRight"
+                        ],
                     ),
                 )
             )
@@ -253,7 +257,10 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
 
     # Stimulus devices
     ###########################################################################
-    if settings["newscale_serial_num_box{}".format(settings["box_number"])] != "":
+    if (
+        settings["newscale_serial_num_box{}".format(settings["box_number"])]
+        != ""
+    ):
         stage = d.MotorizedStage(
             name="NewScaleMotor for LickSpouts",
             serial_number=settings[
@@ -430,7 +437,9 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         components["detectors"] = [
             d.Detector(
                 name="Green CMOS",
-                serial_number=settings["box_settings"]["FipGreenCMOSSerialNumber"],
+                serial_number=settings["box_settings"][
+                    "FipGreenCMOSSerialNumber"
+                ],
                 manufacturer=d.Organization.FLIR,
                 model="BFS-U3-20S40M",
                 detector_type="Camera",
@@ -448,7 +457,9 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             ),
             d.Detector(
                 name="Red CMOS",
-                serial_number=settings["box_settings"]["FipRedCMOSSerialNumber"],
+                serial_number=settings["box_settings"][
+                    "FipRedCMOSSerialNumber"
+                ],
                 manufacturer=d.Organization.FLIR,
                 model="BFS-U3-20S40M",
                 detector_type="Camera",
@@ -469,7 +480,9 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         components["objectives"] = [
             d.Objective(
                 name="Objective",
-                serial_number=settings["box_settings"]["FipObjectiveSerialNumber"],
+                serial_number=settings["box_settings"][
+                    "FipObjectiveSerialNumber"
+                ],
                 manufacturer=d.Organization.NIKON,
                 model="CFI Plan Apochromat Lambda D 10x",
                 numerical_aperture=0.45,
@@ -623,19 +636,25 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         )
 
         # laser calibration
-        components["calibrations"].extend(parse_laser_calibration(laser_calibration))
+        components["calibrations"].extend(
+            parse_laser_calibration(laser_calibration)
+        )
 
     # Generate Rig Schema
     ###########################################################################
     # Assemble rig schema
-    rig_id = "{}_{}".format(settings["rig_name"], datetime.now().strftime("%Y%m%d"))
+    rig_id = "{}_{}".format(
+        settings["rig_name"], datetime.now().strftime("%Y%m%d")
+    )
     if (
         re.match(r.RIG_ID_PATTERN, rig_id) is None
     ):  # rig_id does not match regex pattern reqs
         try:  # assuming rigs are named in room-box-letter fashion
             room, box, letter = settings["rig_name"].split("-")
             rig_name = room + "_" + box + letter
-            rig_id = "{}_{}".format(rig_name, datetime.now().strftime("%Y%m%d"))
+            rig_id = "{}_{}".format(
+                rig_name, datetime.now().strftime("%Y%m%d")
+            )
             if (
                 re.match(r.RIG_ID_PATTERN, rig_id) is None
             ):  # rig_id still does not match regex pattern reqs
@@ -669,7 +688,9 @@ def parse_water_calibration(water_calibration):
             calibrations.append(left)
             break
         elif "SpotLeft" in water_calibration[date]:
-            times, volumes = GetWaterCalibration(water_calibration, date, "SpotLeft")
+            times, volumes = GetWaterCalibration(
+                water_calibration, date, "SpotLeft"
+            )
             left = d.Calibration(
                 calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
                 device_name="Lick spout Left",
@@ -698,7 +719,9 @@ def parse_water_calibration(water_calibration):
             calibrations.append(right)
             break
         elif "SpotRight" in water_calibration[date]:
-            times, volumes = GetWaterCalibration(water_calibration, date, "SpotRight")
+            times, volumes = GetWaterCalibration(
+                water_calibration, date, "SpotRight"
+            )
             right = d.Calibration(
                 calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
                 device_name="Lick spout Right",
@@ -722,7 +745,9 @@ def parse_laser_calibration(laser_calibration):
     laser_colors = get_laser_names(laser_calibration)
     for laser in laser_colors:
         # find the last calibration for this laser color
-        latest_calibration_date = FindLatestCalibrationDate(laser, laser_calibration)
+        latest_calibration_date = FindLatestCalibrationDate(
+            laser, laser_calibration
+        )
         if latest_calibration_date == "NA":
             continue
 
@@ -734,15 +759,15 @@ def parse_laser_calibration(laser_calibration):
                     for laser_name in this_calibration[protocol][freq].keys():
                         voltage = [
                             x[0]
-                            for x in this_calibration[protocol][freq][laser_name][
-                                "LaserPowerVoltage"
-                            ]
+                            for x in this_calibration[protocol][freq][
+                                laser_name
+                            ]["LaserPowerVoltage"]
                         ]
                         power = [
                             x[1]
-                            for x in this_calibration[protocol][freq][laser_name][
-                                "LaserPowerVoltage"
-                            ]
+                            for x in this_calibration[protocol][freq][
+                                laser_name
+                            ]["LaserPowerVoltage"]
                         ]
                         voltage, power = zip(
                             *sorted(zip(voltage, power), key=lambda x: x[0])

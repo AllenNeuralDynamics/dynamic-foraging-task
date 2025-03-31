@@ -60,16 +60,20 @@ class BonsaiSettingsModel(BaseModel):
         default=0, description="Using High Speed cameras"
     )
     HasSideCameraLeft: Literal["0", "1"] = Field(
-        default=0, description="Using high speed camera on the left side of the mouse"
+        default=0,
+        description="Using high speed camera on the left side of the mouse",
     )
     HasSideCameraRight: Literal["0", "1"] = Field(
-        default=0, description="Using high speed camera on the right side of the mouse"
+        default=0,
+        description="Using high speed camera on the right side of the mouse",
     )
     HasBottomCamera: Literal["0", "1"] = Field(
-        default=0, description="Using high speed camera on the bottom the mouse"
+        default=0,
+        description="Using high speed camera on the bottom the mouse",
     )
     HasBodyCamera: Literal["0", "1"] = Field(
-        default=0, description="Using high speed camera on the body of the mouse"
+        default=0,
+        description="Using high speed camera on the body of the mouse",
     )
     # TODO, need to add a validator that these camera serial numbers are required if Has<camera> is 1
     SideCameraLeft: int = Field(
@@ -78,10 +82,16 @@ class BonsaiSettingsModel(BaseModel):
     SideCameraRight: int = Field(
         default=0, description="serial number for side camera right"
     )
-    BottomCamera: int = Field(default=0, description="serial number for bottom camera")
-    BodyCamera: int = Field(default=0, description="serial number for body camera")
+    BottomCamera: int = Field(
+        default=0, description="serial number for bottom camera"
+    )
+    BodyCamera: int = Field(
+        default=0, description="serial number for body camera"
+    )
     codec: Optional[str] = Field(default="", description="Video codec")
-    HasOpto: Literal["0", "1"] = Field(default=0, description="Using Optogenetics")
+    HasOpto: Literal["0", "1"] = Field(
+        default=0, description="Using Optogenetics"
+    )
     # Need to add Optogenetic parameters
     # TODO OptoLaser<x>Manufacturer
     # TODO OptoLaser<x>Wavelength
