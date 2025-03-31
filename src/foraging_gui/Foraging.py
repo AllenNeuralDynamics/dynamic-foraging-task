@@ -5577,7 +5577,7 @@ class Window(QMainWindow):
         """Set default project information"""
         project_name = "Behavior Platform"
         logging.error(
-            "Setting default project name: {}".format("Behavior Platform")
+            "Setting default project name for mouse {}: {}".format(self.behavior_session_model.subject,"Behavior Platform")
         )
         projects = [
             self.Metadata_dialog.ProjectName.itemText(i)
