@@ -6,6 +6,7 @@ import subprocess
 from datetime import datetime
 
 import numpy as np
+from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_data_schema.components.coordinates import (
     Axis,
     AxisName,
@@ -72,12 +73,14 @@ class generate_metadata:
 
     def __init__(
         self,
+        session_model: AindBehaviorSessionModel,
         json_file=None,
         Obj=None,
         dialog_metadata_file=None,
         dialog_metadata=None,
         output_folder=None,
     ):
+        self.session_model = session_model
         self.session_metadata_success = False
         self.rig_metadata_success = False
 
@@ -1404,15 +1407,9 @@ class generate_metadata:
         """
         self.behavior_software = []
         try:
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            os.chdir(
-                script_dir
-            )  # Change to the directory of the current script
             # Get information about task repository
             commit_ID = (
-                subprocess.check_output(["git", "rev-parse", "HEAD"])
-                .decode("ascii")
-                .strip()
+                self.session_model.commit_hash
             )
             current_branch = (
                 subprocess.check_output(["git", "branch", "--show-current"])

@@ -58,7 +58,13 @@ def _get_field(
                 has_field = 1
         if has_field == 0:
             continue
-        if value in reject_list:
+        reject = (
+            not isinstance(value, np.generic)
+            and value in reject_list
+            or isinstance(value, np.generic)
+            and value.size == 0
+        )
+        if reject:
             continue
         if index is None:
             return value
