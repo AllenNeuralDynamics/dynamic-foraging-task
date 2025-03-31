@@ -3998,7 +3998,6 @@ class Window(QMainWindow):
                     ]
                 ):
                     self._AddWaterLogResult(session)
-                self.bias_indicator.clear()  # prepare for new session
 
         except Exception as e:
             logging.warning(
