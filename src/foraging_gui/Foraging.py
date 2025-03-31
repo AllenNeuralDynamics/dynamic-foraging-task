@@ -1352,7 +1352,7 @@ class Window(QMainWindow):
             return
 
     def _GetInfoFromSchedule(self, mouse_id, column):
-        mouse_id = int(mouse_id)
+        mouse_id = str(mouse_id)
         if not hasattr(self, 'schedule'):
             return None
         if mouse_id not in self.schedule['Mouse ID'].values:
