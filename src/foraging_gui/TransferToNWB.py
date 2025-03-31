@@ -836,10 +836,10 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_acquisition(PhotometryRisingTimeHarp)
 
     # Add optogenetics time stamps
-    """ 
-    There are two sources of optogenetics time stamps depending on which event it is aligned to. 
-    The first source is the optogenetics time stamps aligned to the trial start time (from the 
-    DO0 stored in B_TrialStartTimeHarp), and the second source is the optogenetics time stamps aligned to other events 
+    """
+    There are two sources of optogenetics time stamps depending on which event it is aligned to.
+    The first source is the optogenetics time stamps aligned to the trial start time (from the
+    DO0 stored in B_TrialStartTimeHarp), and the second source is the optogenetics time stamps aligned to other events
     (e.g go cue and reward outcome; from the DO3 stored in B_OptogeneticsTimeHarp).
     """
     start_time = np.array(

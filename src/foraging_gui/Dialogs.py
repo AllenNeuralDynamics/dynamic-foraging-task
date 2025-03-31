@@ -3413,7 +3413,7 @@ class AutoTrainDialog(QDialog):
                 self.MainWindow,
                 "Box {}, Error".format(self.MainWindow.box_letter),
                 "AWS connection failed!\n"
-                "Please check your AWS credentials at ~\.aws\credentials and restart the GUI!\n\n"
+                "Please check your AWS credentials at ~/.aws/credentials and restart the GUI!\n\n"
                 "The AutoTrain will be disabled until the connection is restored.",
             )
             return False

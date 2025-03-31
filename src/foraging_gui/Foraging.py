@@ -2565,13 +2565,13 @@ class Window(QMainWindow):
                 loading_parameters_type = 1
             if isinstance(widget, QtWidgets.QPushButton):
                 pass
-            if type(value) == bool:
+            if isinstance(value, bool):
                 loading_parameters_type = 1
             else:
                 if len(value) == 0:
                     value = np.array([""], dtype="<U1")
                     loading_parameters_type = 0
-            if type(value) == np.ndarray:
+            if isinstance(value, np.ndarray):
                 loading_parameters_type = 0
             if isinstance(widget, QtWidgets.QLineEdit):
                 if loading_parameters_type == 0:
@@ -4663,13 +4663,13 @@ class Window(QMainWindow):
                             loading_parameters_type = 1
 
                         # tag=0, get the last value for ndarray; tag=1, get the current value for single value data
-                        if type(value) == bool:
+                        if isinstance(value, bool):
                             loading_parameters_type = 1
                         else:
                             if len(value) == 0:
                                 value = np.array([""], dtype="<U1")
                                 loading_parameters_type = 0
-                        if type(value) == np.ndarray:
+                        if isinstance(value, np.ndarray):
                             loading_parameters_type = 0
 
                         if loading_parameters_type == 0:
@@ -4897,9 +4897,8 @@ class Window(QMainWindow):
                     else:
                         value = Obj[attr_name]
                     # transfer list to numpy array
-                    if (
-                        type(getattr(self.GeneratedTrials, attr_name))
-                        == np.ndarray
+                    if isinstance(
+                        getattr(self.GeneratedTrials, attr_name), np.ndarray
                     ):
                         value = np.array(value)
                     # Set the attribute in the GeneratedTrials object
