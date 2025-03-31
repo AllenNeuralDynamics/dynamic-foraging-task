@@ -2702,7 +2702,6 @@ class MetadataDialog(QDialog):
         self.Stick_ArcAngle.textChanged.connect(self._save_configuration)
         self.Stick_ModuleAngle.textChanged.connect(self._save_configuration)
         self.Stick_RotationAngle.textChanged.connect(self._save_configuration)
-        #self.ProjectName.currentIndexChanged.connect(self._save_configuration)
         self.LickSpoutDistance.textChanged.connect(
             self._save_lick_spout_distance
         )

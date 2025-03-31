@@ -1628,15 +1628,13 @@ class Window(QMainWindow):
             ]
             index = np.where(np.array(projects) == project_name)[0]
             if len(index) > 0:
+                # If project name is valid, update metadata
                 self.Metadata_dialog.meta_data["session_metadata"]["ProjectName"] = (
                     project_name
                 )
                 self.Metadata_dialog._update_metadata(
                     update_rig_metadata=False, update_session_metadata=True
                 )
-
-                #index = index[0]
-                #self.Metadata_dialog.ProjectName.setCurrentIndex(index)
                 logging.info("Setting project name: {}".format(project_name))
                 add_default = False
 
@@ -5587,33 +5585,25 @@ class Window(QMainWindow):
                 self.behavior_session_model.subject, "Behavior Platform"
             )
         )
+        
+        # Check if Behavior Platform is in project list
         projects = [
             self.Metadata_dialog.ProjectName.itemText(i)
             for i in range(self.Metadata_dialog.ProjectName.count())
         ]
         index = np.where(np.array(projects) == "Behavior Platform")[0]
+
+        # If not, add it
         if len(index) == 0:
             self.Metadata_dialog.ProjectName.addItems([project_name])
 
+        # Set project name
         self.Metadata_dialog.meta_data["session_metadata"]["ProjectName"] = (
             project_name
         )
         self.Metadata_dialog._update_metadata(
             update_rig_metadata=False, update_session_metadata=True
         )
-        logging.error('here 1')
-        #    index = index[0]
-        #    self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-        #else:
-        #    logging.error('here')
-        #    self.Metadata_dialog.ProjectName.addItems([project_name])
-
-        #self.Metadata_dialog.meta_data["session_metadata"]["IACUCProtocol"] = (
-        #    str(int(protocol))
-        #)
-        #self.Metadata_dialog._update_metadata(
-        #    update_rig_metadata=False, update_session_metadata=True
-        #)
 
         return project_name
 
