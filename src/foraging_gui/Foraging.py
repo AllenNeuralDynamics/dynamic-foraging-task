@@ -4900,7 +4900,7 @@ class Window(QMainWindow):
             else:
                 # Session started after 5:30
                 # upload time is current time plus 3 hours plus a random offset
-                schedule_time = self.behavior_session_model.date + timedelta(hours=3,seconds =np.random.randin(30*60))
+                schedule_time = self.behavior_session_model.date + timedelta(hours=3,seconds =np.random.randint(30*60))
             capsule_id = '0ae9703f-9012-4d0b-ad8d-b6a00858b80d'
             mount = 'FIP'
 
