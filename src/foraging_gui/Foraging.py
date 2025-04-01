@@ -4801,52 +4801,54 @@ class Window(QMainWindow):
                     and len(Obj["B_StagePositions"]) != 0
                 ):
                     last_positions = Obj["B_StagePositions"][-1]
-                    if hasattr(self, "current_stage"):  # newscale stage
-                        self.current_stage.move_absolute_3d(
-                            float(last_positions["x"]),
-                            float(last_positions["y"]),
-                            float(last_positions["z"]),
-                        )
-                        self._UpdatePosition(
-                            (
+                    if last_positions is not None:
+                        if hasattr(self, "current_stage"):  # newscale stage
+                            self.current_stage.move_absolute_3d(
                                 float(last_positions["x"]),
                                 float(last_positions["y"]),
                                 float(last_positions["z"]),
-                            ),
-                            (0, 0, 0),
-                        )
-                    elif self.stage_widget is not None:  # aind stage
-                        # Move AIND stage to the last session positions
-                        positions = {
-                            0: float(last_positions["x"]),
-                            1: float(last_positions["y1"]),
-                            2: float(last_positions["y2"]),
-                            3: float(last_positions["z"]),
-                        }
-                        self.stage_widget.stage_model.update_position(
-                            positions
-                        )
-                        (
-                            self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
-                        )
+                            )
+                            self._UpdatePosition(
+                                (
+                                    float(last_positions["x"]),
+                                    float(last_positions["y"]),
+                                    float(last_positions["z"]),
+                                ),
+                                (0, 0, 0),
+                            )
+                        elif self.stage_widget is not None:  # aind stage
+                            # Move AIND stage to the last session positions
+                            positions = {
+                                0: float(last_positions["x"]),
+                                1: float(last_positions["y1"]),
+                                2: float(last_positions["y2"]),
+                                3: float(last_positions["z"]),
+                            }
+                            self.stage_widget.stage_model.update_position(
+                                positions
+                            )
+                            (
+                                self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
+                            )
                 elif (
                     "B_NewscalePositions" in Obj.keys()
                     and len(Obj["B_NewscalePositions"]) != 0
                 ):  # cross compatibility for mice run on older version of code.
                     last_positions = Obj["B_NewscalePositions"][-1]
-                    self.current_stage.move_absolute_3d(
-                        float(last_positions[0]),
-                        float(last_positions[1]),
-                        float(last_positions[2]),
-                    )
-                    self._UpdatePosition(
-                        (
+                    if last_positions is not None:
+                        self.current_stage.move_absolute_3d(
                             float(last_positions[0]),
                             float(last_positions[1]),
                             float(last_positions[2]),
-                        ),
-                        (0, 0, 0),
-                    )
+                        )
+                        self._UpdatePosition(
+                            (
+                                float(last_positions[0]),
+                                float(last_positions[1]),
+                                float(last_positions[2]),
+                            ),
+                            (0, 0, 0),
+                        )
                 else:
                     pass
 
