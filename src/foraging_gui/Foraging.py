@@ -3664,7 +3664,7 @@ class Window(QMainWindow):
             self.NewSession.setChecked(False)
             # disable metadata fields
             self._set_metadata_enabled(False)
-            
+
             # update slims with latest stage offset value for loaded mouse
             self.update_loaded_mouse_offset()
 
