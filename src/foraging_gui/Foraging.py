@@ -53,7 +53,7 @@ from foraging_gui.schema_widgets.operation_control_widget import OperationContro
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
-from foraging_gui.slims_handler import SlimsHandler
+from foraging_gui.loaded_mouse_slims_handler import LoadedMouseSlimsHandler
 from aind_behavior_services.session import AindBehaviorSessionModel
 
 from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
@@ -280,7 +280,7 @@ class Window(QMainWindow):
         self._Optogenetics()  # open the optogenetics panel and initialize opto model
 
         # create slims handler to handle waterlog and curriculum management
-        self.slims_handler = SlimsHandler()
+        self.slims_handler = LoadedMouseSlimsHandler()
 
         # initialize mouse selector
         slims_mice = self.slims_handler.get_added_mice()[-100:]  # grab 100 latest mice from slims
@@ -515,18 +515,51 @@ class Window(QMainWindow):
         self.WeightAfter.setValidator(double_validator)
         self.SuggestedWater.setValidator(double_validator)
 
-        # add validator for stage position fields if using newscale stage widget
-        if not hasattr(self, "stage_widget"):
-            double_validator = QtGui.QIntValidator()
-            self.PositionZ.setValidator(double_validator)
-            self.PositionY.setValidator(double_validator)
-            self.PositionX.setValidator(double_validator)
-            self.Step.setValidator(double_validator)
+        if hasattr(self, "current_stage"): # Connect newscale button to update loaded mouse offset
+            print('Hiiiiiii')
+            self.MoveXP.clicked.connect(self.update_loaded_mouse_offset)
+            self.MoveYP.clicked.connect(self.update_loaded_mouse_offset)
+            self.MoveZP.clicked.connect(self.update_loaded_mouse_offset)
+            self.MoveXN.clicked.connect(self.update_loaded_mouse_offset)
+            self.MoveYN.clicked.connect(self.update_loaded_mouse_offset)
+            self.MoveZN.clicked.connect(self.update_loaded_mouse_offset)
+
+        elif self.stage_widget is not None:   # connect aind stage widgets to update loaded mouse offset when pressed/changed
+            self.stage_widget.movement_page_view.lineEdit_z.textEdited.connect(self.update_loaded_mouse_offset)
+            self.stage_widget.movement_page_view.lineEdit_x.textEdited.connect(self.update_loaded_mouse_offset)
+            self.stage_widget.movement_page_view.lineEdit_y1.textEdited.connect(self.update_loaded_mouse_offset)
+            self.stage_widget.movement_page_view.lineEdit_y2.textEdited.connect(self.update_loaded_mouse_offset)
+
+            self.stage_widget.movement_page_view.btn_z_plus.clicked.connect(self.update_loaded_mouse_offset)
+            self.stage_widget.movement_page_view.btn_z_minus.clicked.connect(self.update_loaded_mouse_offset)
+            self.stage_widget.movement_page_view.btn_x_plus.clicked.connect(self.update_loaded_mouse_offset)
+            self.stage_widget.movement_page_view.btn_x_minus.clicked.connect(self.update_loaded_mouse_offset)
+            self.stage_widget.movement_page_view.btn_y1_plus.clicked.connect(self.update_loaded_mouse_offset)
+            self.stage_widget.movement_page_view.btn_y1_minus.clicked.connect(self.update_loaded_mouse_offset)
+            self.stage_widget.movement_page_view.btn_y2_plus.clicked.connect(self.update_loaded_mouse_offset)
+            self.stage_widget.movement_page_view.btn_y2_minus.clicked.connect(self.update_loaded_mouse_offset)
 
         # update model widgets if models have changed
         self.modelsChanged.connect(self.update_model_widgets)
 
-    def load_curriculum(self, mouse_id: str):
+
+    def update_loaded_mouse_offset(self):
+        """
+            Update the stage offset associated with mouse model from slims
+        """
+
+        current_positions = self._GetPositions()
+        if current_positions is None:
+            logging.info("Can't update loaded mouse position because no stage is connected.")
+            return
+        elif current_positions.keys() == ['x', 'y', 'z']:
+            self.slims_handler.set_loaded_mouse_offset(**current_positions)
+        else:
+            self.slims_handler.set_loaded_mouse_offset(current_positions["x"],
+                                                       current_positions["y1"],
+                                                       current_positions["z"])
+
+    def load_curriculum(self, mouse_id: str) -> None:
         """
             Load and apply curriculum from slims
             :param mouse_id: mouse id to load
@@ -556,6 +589,21 @@ class Window(QMainWindow):
             # set state of on_curriculum check
             self.on_curriculum.setChecked(slims_session.is_curriculum_suggestion)
             self.on_curriculum.setEnabled(slims_session.is_curriculum_suggestion)
+
+            # load stage coords and move stage
+            last_positions = self.slims_handler.get_loaded_mouse_offset()
+            if hasattr(self, "current_stage") and last_positions is not None:  # newscale stage
+                last_positions_lst = list(last_positions.values())
+                self.current_stage.move_absolute_3d(*last_positions_lst)
+                self._UpdatePosition(last_positions_lst, (0, 0, 0))
+            elif self.stage_widget is not None and last_positions is not None:  # aind stage
+                positions = {0: float(last_positions["x"]),
+                             1: float(last_positions["y"]),
+                             2: float(last_positions["y"]),
+                             3: float(last_positions["z"]),
+                            }
+                self.stage_widget.stage_model.update_position(positions)
+                self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
 
             logging.info(f"Successfully loaded mouse {mouse_id}", extra={'tags': [self.warning_log_tag]})
 
@@ -936,7 +984,6 @@ class Window(QMainWindow):
                 logging.info('Move Stage pressed, but no current stage')
                 return
             logging.info('Moving stage')
-            self.StageStop.click
             current_stage = self.current_stage
             current_position = current_stage.get_position()
             current_stage.set_speed(3000)
@@ -3617,6 +3664,9 @@ class Window(QMainWindow):
             self.NewSession.setChecked(False)
             # disable metadata fields
             self._set_metadata_enabled(False)
+            
+            # update slims with latest stage offset value for loaded mouse
+            self.update_loaded_mouse_offset()
 
             # Set IACUC protocol in metadata based on schedule
             protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')
