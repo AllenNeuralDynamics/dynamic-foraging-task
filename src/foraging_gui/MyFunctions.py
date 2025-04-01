@@ -26,7 +26,8 @@ from foraging_gui.metadata_mapper import (
     task_parameters_to_tp_conversion,
     session_to_tp_conversion,
     fip_to_tp_conversion,
-    opto_to_tp_conversion
+    opto_to_tp_conversion,
+    operational_control_to_tp_conversion
 )
 
 if PLATFORM == 'win32':
@@ -136,6 +137,7 @@ class GenerateTrials():
             **session_to_tp_conversion(self.session_model),
             **fip_to_tp_conversion(self.fip_model),
             **opto_to_tp_conversion(self.opto_model),
+            **operational_control_to_tp_conversion(self.operation_control_model),
             "LeftValue": [],    # left valve open times
             "RightValue": [],   # right valve open times
             "TP_LeftValue": [],  # left valve open times
@@ -2029,8 +2031,9 @@ class GenerateTrials():
         session_tp = session_to_tp_conversion(self.session_model)
         fip_tp = fip_to_tp_conversion(self.fip_model)
         opto_tp = opto_to_tp_conversion(self.opto_model)
+        oc_tp = operational_control_to_tp_conversion(self.operation_control_model)
 
-        for key, value in {**task_tp, **session_tp, **fip_tp, **opto_tp}.items():
+        for key, value in {**task_tp, **session_tp, **fip_tp, **opto_tp, **oc_tp}.items():
             if "TP_" == key[:3]:
                 self.Obj[key] = [self.Obj[key], value] if type(self.Obj[key]) is not list else self.Obj[key] + [value]
 

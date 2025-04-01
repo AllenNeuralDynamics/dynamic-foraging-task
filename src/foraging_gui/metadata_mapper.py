@@ -6,6 +6,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
 )
 
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry
+from aind_behavior_dynamic_foraging.DataSchemas.operation_control import OperationalControl
 
 
 def task_parameters_to_tp_conversion(task_parameters: AindDynamicForagingTaskParameters) -> dict:
@@ -211,3 +212,21 @@ def opto_to_tp_conversion(opto_model: Optogenetics) -> dict:
             dictionary[f'TP_Location_{i+1}'] = None
 
     return dictionary
+
+def operational_control_to_tp_conversion(operational_control: OperationalControl) -> dict:
+    """
+    Map the OperationalControl to previously foraging gui TP_ parameters
+    :param operational_control: operational_control to map
+    """
+
+    return {
+        'auto_stop_ignore_ratio_threshold': operational_control.auto_stop.ignore_ratio_threshold,
+        'auto_stop_ignore_win': operational_control.auto_stop.ignore_win,
+        'TP_auto_stop_ignore_ratio_threshold': operational_control.auto_stop.ignore_ratio_threshold,
+        'TP_auto_stop_ignore_win': operational_control.auto_stop.ignore_win,
+        'TP_MaxTime': operational_control.auto_stop.max_time,
+        'TP_MaxTrial': operational_control.auto_stop.max_trial,
+        'TP_min_time': operational_control.auto_stop.min_time,
+        'TP_WindowSize': operational_control.auto_stop.ignore_win,
+        'WindowSize': operational_control.auto_stop.ignore_win,
+    }
