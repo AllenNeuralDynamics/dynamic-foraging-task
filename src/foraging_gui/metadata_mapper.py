@@ -139,7 +139,7 @@ def opto_to_tp_conversion(opto_model: Optogenetics) -> dict:
         'TP_SampleFrequency': opto_model.sample_frequency,
         'TP_SessionAlternating': getattr(opto_model.session_control, "alternating_sessions", None),
         'TP_SessionStartWith': getattr(opto_model.session_control, "optogenetic_start", None),
-        'TP_SessionWideControl': opto_model.session_control,
+        'TP_SessionWideControl': False if opto_model.session_control is None else True,
     }
 
     sort_map = ["LaserColorOne",

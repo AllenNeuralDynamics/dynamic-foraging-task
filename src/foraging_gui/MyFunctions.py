@@ -1613,13 +1613,13 @@ class GenerateTrials():
         # determine auto water
         if self.CurrentAutoReward == 1:
             self.CurrentAutoRewardTrial = [0, 0]
-            if self.task_logic.task_parameters.auto_water.auto_water_type.value == 'Natural':
+            if self.task_logic.task_parameters.auto_water.auto_water_type == 'Natural':
                 for i in range(len(self.CurrentBait)):
                     if self.CurrentBait[i] == True:
                         self.CurrentAutoRewardTrial[i] = 1
-            if self.task_logic.task_parameters.auto_water.auto_water_type.value == 'Both':
+            if self.task_logic.task_parameters.auto_water.auto_water_type == 'Both':
                 self.CurrentAutoRewardTrial = [1, 1]
-            if self.task_logic.task_parameters.auto_water.auto_water_type.value == 'High pro':
+            if self.task_logic.task_parameters.auto_water.auto_water_type == 'High pro':
                 if self.B_CurrentRewardProb[0] > self.B_CurrentRewardProb[1]:
                     self.CurrentAutoRewardTrial = [1, 0]
                 elif self.B_CurrentRewardProb[0] < self.B_CurrentRewardProb[1]:
