@@ -4950,31 +4950,34 @@ class Window(QMainWindow):
                 'Please alert the mouse owner, and report on github.')
 
 def setup_loki_logging(box_number):
-    db_file=os.getenv('SIPE_DB_FILE', r'//allen/aibs/mpe/keepass/sipe_sw_passwords.kdbx')
-    key_file=os.getenv('SIPE_KEY_FILE', r'c:\ProgramData\AIBS_MPE\.secrets\sipe_sw_passwords.keyx')
-    kp = PyKeePass(db_file, keyfile=key_file)
-    entry = kp.find_entries(title="Loki Credentials", first=True)
-    session =  md5((''.join([str(datetime.now()), platform.node(), str(os.getpid())])).encode("utf-8")).hexdigest()[:7]
+    try:
+        db_file=os.getenv('SIPE_DB_FILE', r'//allen/aibs/mpe/keepass/sipe_sw_passwords.kdbx')
+        key_file=os.getenv('SIPE_KEY_FILE', r'c:\ProgramData\AIBS_MPE\.secrets\sipe_sw_passwords.keyx')
+        kp = PyKeePass(db_file, keyfile=key_file)
+        entry = kp.find_entries(title="Loki Credentials", first=True)
+        session =  md5((''.join([str(datetime.now()), platform.node(), str(os.getpid())])).encode("utf-8")).hexdigest()[:7]
 
-    handler = logging_loki.LokiHandler(
-        url="http://eng-tools/loki/api/v1/push",
-        tags={
-            'hostname': socket.gethostname(),
-            'process_name': __name__,
-            'user_name': os.getlogin(),
-            'log_session': session,
-            'box_name': chr(box_number + 64)  # they use A=1, B=2, ...
-        },
-        auth=(entry.username, entry.password),
-        version="1",
-    )
+        handler = logging_loki.LokiHandler(
+            url="http://eng-tools/loki/api/v1/push",
+            tags={
+                'hostname': socket.gethostname(),
+                'process_name': __name__,
+                'user_name': os.getlogin(),
+                'log_session': session,
+                'box_name': chr(box_number + 64)  # they use A=1, B=2, ...
+            },
+            auth=(entry.username, entry.password),
+            version="1",
+        )
 
-    handler.setFormatter(
-        logging.Formatter(fmt='%(asctime)s\n%(name)s\n%(levelname)s\n%(funcName)s (%(filename)s:%(lineno)d)\n%(message)s',
-                          datefmt='%Y-%m-%d %H:%M:%S')
-    )
-    handler.setLevel(logging.INFO)
-    logger.root.addHandler(handler)
+        handler.setFormatter(
+            logging.Formatter(fmt='%(asctime)s\n%(name)s\n%(levelname)s\n%(funcName)s (%(filename)s:%(lineno)d)\n%(message)s',
+                              datefmt='%Y-%m-%d %H:%M:%S')
+        )
+        handler.setLevel(logging.INFO)
+        logger.root.addHandler(handler)
+    except:
+        logging.error('loki logging crashed')
 
 def start_gui_log_file(box_number):
     '''
