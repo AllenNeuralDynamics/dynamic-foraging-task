@@ -622,6 +622,7 @@ class Window(QMainWindow):
         stages = curriculum.see_stages()
         stage_mapping = ["1.1", "1.2", "2", "3", "4", "FINAL", "GRADUATED"]
         stage = self._GetInfoFromSchedule(mouse_id, "Current Stage")
+        stage = "1.1" if isinstance(stage, float) and math.isnan(stage) else stage  # account for blank schedule
         logging.info("Creating trainer state")
         ts = TrainerState(stage=stages[stage_mapping.index(stage)],
                           curriculum=curriculum,
@@ -657,13 +658,14 @@ class Window(QMainWindow):
             else str(self._GetInfoFromSchedule(mouse_id, "RA Notes"))
 
         # update fip model
-        if not math.isnan((mode := self._GetInfoFromSchedule(mouse_id, "FIP Mode"))):
-            first = self._GetInfoFromSchedule(mouse_id, "First FP Stage")
+        mode = self._GetInfoFromSchedule(mouse_id, "FIP Mode")
+        if not (isinstance(mode, float) and math.isnan(mode)):  # schedule has input for fip
+            stage_list = get_args(STAGE_STARTS)
+            first = stage_list[stage_mapping.index(self._GetInfoFromSchedule(mouse_id, "First FP Stage"))]
             self.fip_model = FiberPhotometry(mode=mode,
                                              stage_start="stage_1_warmup" if type(first) != str else first.lower()
             )
             # check if current stage is past stage_start and enable if so
-            stage_list = get_args(STAGE_STARTS)
             self.fip_model.enabled = stage_list.index(ts.stage.name) >= stage_list.index(self.fip_model.stage_start)
 
         # create slims session model
