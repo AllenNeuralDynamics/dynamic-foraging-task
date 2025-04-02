@@ -46,7 +46,7 @@ from foraging_gui.Dialogs import LaserCalibrationDialog,OpticalTaggingDialog,Ran
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
-#from foraging_gui.stage import Stage
+from foraging_gui.stage import Stage
 from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.warning_widget import WarningWidget
 from foraging_gui.GenerateMetadata import generate_metadata
