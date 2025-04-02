@@ -2702,7 +2702,6 @@ class MetadataDialog(QDialog):
         self.Stick_ArcAngle.textChanged.connect(self._save_configuration)
         self.Stick_ModuleAngle.textChanged.connect(self._save_configuration)
         self.Stick_RotationAngle.textChanged.connect(self._save_configuration)
-        self.ProjectName.currentIndexChanged.connect(self._show_project_info)
         self.LickSpoutDistance.textChanged.connect(
             self._save_lick_spout_distance
         )
@@ -2717,11 +2716,6 @@ class MetadataDialog(QDialog):
             line_edit = getattr(self, f"LickSpoutReference{axis.upper()}")
             line_edit.setText(str(pos))
 
-    def _show_project_info(self):
-        """show the project information based on current project name"""
-        self.ProjectName.currentIndex()
-        self.current_project_name = self.ProjectName.currentText()
-
     def _save_lick_spout_distance(self):
         """save the lick spout distance"""
         self.MainWindow.Other_lick_spout_distance = (
@@ -2732,16 +2726,8 @@ class MetadataDialog(QDialog):
         """show the project names"""
         project_names = self.MainWindow._GetApprovedAINDProjectNames()
 
-        # show the project information
         # adding project names to the project combobox
-        self._manage_signals(
-            enable=False, keys=["ProjectName"], action=self._show_project_info
-        )
         self.ProjectName.addItems(project_names)
-        self._manage_signals(
-            enable=True, keys=["ProjectName"], action=self._show_project_info
-        )
-        self._show_project_info()
 
     def _get_basics(self):
         """get the basic information"""

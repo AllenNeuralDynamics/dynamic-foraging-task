@@ -1622,15 +1622,14 @@ class Window(QMainWindow):
 
         # If we have a valid name update the metadata dialog
         if project_name is not None:
-            projects = [
-                self.Metadata_dialog.ProjectName.itemText(i)
-                for i in range(self.Metadata_dialog.ProjectName.count())
-            ]
-            index = np.where(np.array(projects) == project_name)[0]
-            if len(index) > 0:
-                index = index[0]
-                self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-                self.Metadata_dialog._show_project_info()
+            if self.Metadata_dialog.ProjectName.findText(project_name) != -1:
+                # If project name is valid, update metadata
+                self.Metadata_dialog.meta_data["session_metadata"][
+                    "ProjectName"
+                ] = project_name
+                self.Metadata_dialog._update_metadata(
+                    update_rig_metadata=False, update_session_metadata=True
+                )
                 logging.info("Setting project name: {}".format(project_name))
                 add_default = False
 
@@ -5579,19 +5578,23 @@ class Window(QMainWindow):
         """Set default project information"""
         project_name = "Behavior Platform"
         logging.error(
-            "Setting default project name: {}".format("Behavior Platform")
+            "Setting default project name for mouse {}: {}".format(
+                self.behavior_session_model.subject, project_name
+            )
         )
-        projects = [
-            self.Metadata_dialog.ProjectName.itemText(i)
-            for i in range(self.Metadata_dialog.ProjectName.count())
-        ]
-        index = np.where(np.array(projects) == "Behavior Platform")[0]
-        if len(index) > 0:
-            index = index[0]
-            self.Metadata_dialog.ProjectName.setCurrentIndex(index)
-            self.Metadata_dialog._show_project_info()
-        else:
-            self.Metadata_dialog.ProjectName.addItems([project_name])
+
+        # Check if Behavior Platform is in project list
+        if self.Metadata_dialog.ProjectName.findText(project_name) == -1:
+            self.Metadata_dialog.ProjectName.addItem(project_name)
+
+        # Set project name
+        self.Metadata_dialog.meta_data["session_metadata"][
+            "ProjectName"
+        ] = project_name
+        self.Metadata_dialog._update_metadata(
+            update_rig_metadata=False, update_session_metadata=True
+        )
+
         return project_name
 
     def _empty_initialize_fields(self):
