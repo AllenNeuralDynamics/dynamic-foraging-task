@@ -1622,12 +1622,7 @@ class Window(QMainWindow):
 
         # If we have a valid name update the metadata dialog
         if project_name is not None:
-            projects = [
-                self.Metadata_dialog.ProjectName.itemText(i)
-                for i in range(self.Metadata_dialog.ProjectName.count())
-            ]
-            index = np.where(np.array(projects) == project_name)[0]
-            if len(index) > 0:
+            if self.Metadata_dialog.ProjectName.findText(project_name) != -1:
                 # If project name is valid, update metadata
                 self.Metadata_dialog.meta_data["session_metadata"][
                     "ProjectName"
@@ -5582,20 +5577,13 @@ class Window(QMainWindow):
         project_name = "Behavior Platform"
         logging.error(
             "Setting default project name for mouse {}: {}".format(
-                self.behavior_session_model.subject, "Behavior Platform"
+                self.behavior_session_model.subject, project_name
             )
         )
 
         # Check if Behavior Platform is in project list
-        projects = [
-            self.Metadata_dialog.ProjectName.itemText(i)
-            for i in range(self.Metadata_dialog.ProjectName.count())
-        ]
-        index = np.where(np.array(projects) == "Behavior Platform")[0]
-
-        # If not, add it
-        if len(index) == 0:
-            self.Metadata_dialog.ProjectName.addItems([project_name])
+        if self.Metadata_dialog.ProjectName.findText(project_name) == -1:
+            self.Metadata_dialog.ProjectName.addItem(project_name)
 
         # Set project name
         self.Metadata_dialog.meta_data["session_metadata"][
