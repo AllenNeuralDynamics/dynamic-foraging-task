@@ -9,7 +9,7 @@ import math
 import logging
 import requests
 from hashlib import md5
-from typing import Literal
+from typing import Literal, get_args
 from pydantic import BaseModel
 from importlib import import_module
 
@@ -83,7 +83,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
     SessionControl
 )
 
-from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry
+from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry, STAGE_STARTS
 
 from aind_behavior_dynamic_foraging.DataSchemas.operation_control import OperationalControl
 
@@ -596,9 +596,10 @@ class Window(QMainWindow):
         """
 
         # define mapping between schedule and curriculums
-        curriculum_mapping = {"Uncoupled Unbaited 2.3.1rwdDelay159": "uncoupled_no_baiting_2p3",
-                              "Uncoupled Baited 2.3": "uncoupled_baiting_2p3",
-                              "Coupled Baited 2.3": "coupled_baiting_2p3"}
+        curriculum_mapping = {"Uncoupled Without Baiting 2.3.1rwdDelay159": "uncoupled_no_baiting_rwdDelay_2p3p1",
+                              "Uncoupled Without Baiting 2.3": "uncoupled_no_baiting_2p3",
+                              "Uncoupled Baiting 2.3": "uncoupled_baiting_2p3",
+                              "Coupled Baiting 2.3": "coupled_baiting_2p3"}
 
         # gather keys from schedule
         logging.info("Gathering curriculum keys from schedule.")
@@ -649,20 +650,21 @@ class Window(QMainWindow):
         self.slims_handler.set_loaded_mouse(mouse_id, metrics, ts, curriculum)
 
         # update session model
-        experiment_mapping = {"Uncoupled Unbaited": "Uncoupled Without Baiting",
-                              "Uncoupled Baited": "Uncoupled Baiting",
-                              "Coupled Baited": "Coupled Baiting"}
-        self.session_model.experiment = experiment_mapping[autotrain_curriculum_name]
+        self.session_model.experiment = autotrain_curriculum_name
         self.session_model.experimenter = [str(self._GetInfoFromSchedule(mouse_id, "Trainer"))]
         self.session_model.subject = mouse_id
         self.session_model.notes = "" if math.isnan(self._GetInfoFromSchedule(mouse_id, "RA Notes")) \
             else str(self._GetInfoFromSchedule(mouse_id, "RA Notes"))
 
         # update fip model
-        if (mode := self._GetInfoFromSchedule(mouse_id, "FIP Mode")) is not float("nan"):
+        if not math.isnan((mode := self._GetInfoFromSchedule(mouse_id, "FIP Mode"))):
             first = self._GetInfoFromSchedule(mouse_id, "First FP Stage")
             self.fip_model = FiberPhotometry(mode=mode,
-                                             stage_start="stage_1_warmup" if type(first) != str else first.lower())
+                                             stage_start="stage_1_warmup" if type(first) != str else first.lower()
+            )
+            # check if current stage is past stage_start and enable if so
+            stage_list = get_args(STAGE_STARTS)
+            self.fip_model.enabled = stage_list.index(ts.stage.name) >= stage_list.index(self.fip_model.stage_start)
 
         # create slims session model
         sbs = SlimsBehaviorSession(
