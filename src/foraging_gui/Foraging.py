@@ -619,7 +619,7 @@ class Window(QMainWindow):
 
         # create trainer state
         stages = curriculum.see_stages()
-        stage_mapping = ["warmup", "1", "2", "3", "4", "FINAL", "GRADUATED"]
+        stage_mapping = ["1.1", "1.2", "2", "3", "4", "FINAL", "GRADUATED"]
         stage = self._GetInfoFromSchedule(mouse_id, "Current Stage")
         logging.info("Creating trainer state")
         ts = TrainerState(stage=stages[stage_mapping.index(stage)],
