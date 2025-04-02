@@ -1354,9 +1354,11 @@ class Window(QMainWindow):
     def _GetInfoFromSchedule(self, mouse_id, column):
         mouse_id = str(mouse_id)
         if not hasattr(self, 'schedule'):
-            return None
+            logging.info("No schedule loaded.")
+            return
         if mouse_id not in self.schedule['Mouse ID'].values:
-            return None
+            logging.info(f"Mouse id {mouse_id} not in schedule values: {self.schedule['Mouse ID'].values}")
+            return
         return self.schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
 
     def _GetProjectName(self, mouse_id):

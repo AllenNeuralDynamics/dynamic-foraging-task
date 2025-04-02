@@ -25,7 +25,6 @@ dependencies = [
     "pyserial >=3, <4",
     "pyOSC3@git+https://github.com/glopesdev/pyosc3.git@master",
     "newscale@git+https://github.com/AllenNeuralDynamics/python-newscale@axes-on-target",
-    "aind-auto-train@git+https://github.com/AllenNeuralDynamics/aind-foraging-behavior-bonsai-automatic-training.git@main",
     "aind-slims-api@git+https://github.com/AllenNeuralDynamics/aind-slims-api@main",
     "aind-dynamic-foraging-models@git+https://github.com/AllenNeuralDynamics/aind-dynamic-foraging-models@main",
     "aind-behavior-dynamic-foraging@git+https://github.com/AllenNeuralDynamics/Aind.Behavior.DynamicForaging@main",
