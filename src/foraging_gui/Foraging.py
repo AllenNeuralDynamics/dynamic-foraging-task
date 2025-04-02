@@ -10,7 +10,7 @@ import logging
 import requests
 from hashlib import md5
 
-import logging_loki
+# import logging_loki
 import socket
 import harp
 import threading
@@ -37,7 +37,7 @@ from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
 from typing import Literal
-from StageWidget.main import get_stage_widget
+#from StageWidget.main import get_stage_widget
 
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
@@ -47,7 +47,7 @@ from foraging_gui.Dialogs import LaserCalibrationDialog
 from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
 from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
 from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
-from foraging_gui.stage import Stage
+#from foraging_gui.stage import Stage
 from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.warning_widget import WarningWidget
 from foraging_gui.sound_button import SoundButton
@@ -4950,6 +4950,7 @@ class Window(QMainWindow):
                 'Please alert the mouse owner, and report on github.')
 
 def setup_loki_logging(box_number):
+    
     db_file=os.getenv('SIPE_DB_FILE', r'//allen/aibs/mpe/keepass/sipe_sw_passwords.kdbx')
     key_file=os.getenv('SIPE_KEY_FILE', r'c:\ProgramData\AIBS_MPE\.secrets\sipe_sw_passwords.keyx')
     kp = PyKeePass(db_file, keyfile=key_file)
