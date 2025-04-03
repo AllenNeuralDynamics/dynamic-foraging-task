@@ -37,7 +37,7 @@ dependencies = [
     "aind-data-schema==1.1.0",
     "aind-data-schema-models==0.5.6",
     "pydantic >=2.9.2, <3",
-    "stagewidget==1.0.4.dev5",
+    "stagewidget==1.0.4.dev10",
     "python-logging-loki >=0.3.1, <2",
     "pykeepass >=4.0.7, <5",
     "pyyaml >=6, <7",
