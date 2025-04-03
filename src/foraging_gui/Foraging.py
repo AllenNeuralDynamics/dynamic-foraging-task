@@ -2700,8 +2700,9 @@ class Window(QMainWindow):
         Method to update all widget based on pydantic models
         """
 
-        self.task_widget.apply_schema(self.task_logic.task_parameters)
+        logging.info("Applying models to widgets")
         self.session_widget.apply_schema(self.session_model)
+        self.task_widget.apply_schema(self.task_logic.task_parameters)
         self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
         self.fip_widget.apply_schema(self.fip_model)
         self.operation_control_widget.apply_schema(self.operation_control_model)
