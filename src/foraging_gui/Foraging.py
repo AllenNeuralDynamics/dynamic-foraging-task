@@ -516,7 +516,6 @@ class Window(QMainWindow):
         self.SuggestedWater.setValidator(double_validator)
 
         if hasattr(self, "current_stage"): # Connect newscale button to update loaded mouse offset
-            print('Hiiiiiii')
             self.MoveXP.clicked.connect(self.update_loaded_mouse_offset)
             self.MoveYP.clicked.connect(self.update_loaded_mouse_offset)
             self.MoveZP.clicked.connect(self.update_loaded_mouse_offset)
@@ -592,15 +591,18 @@ class Window(QMainWindow):
 
             # load stage coords and move stage
             last_positions = self.slims_handler.get_loaded_mouse_offset()
-            if hasattr(self, "current_stage") and last_positions is not None:  # newscale stage
+            current_positions = self._GetPositions()
+            none_pos = {"x": None, "y": None, "z": None}
+            if hasattr(self, "current_stage") and last_positions != none_pos:  # newscale stage
+                last_positions = {k: v if v is not None else current_positions[k] for k, v in last_positions.items()}
                 last_positions_lst = list(last_positions.values())
                 self.current_stage.move_absolute_3d(*last_positions_lst)
                 self._UpdatePosition(last_positions_lst, (0, 0, 0))
-            elif self.stage_widget is not None and last_positions is not None:  # aind stage
-                positions = {0: float(last_positions["x"]),
-                             1: float(last_positions["y"]),
-                             2: float(last_positions["y"]),
-                             3: float(last_positions["z"]),
+            elif self.stage_widget is not None and last_positions != none_pos:  # aind stage
+                positions = {0: current_positions['x'] if last_positions['x'] is None else float(last_positions["x"]),
+                             1: current_positions['y1'] if last_positions['y'] is None else float(last_positions["y"]),
+                             2: current_positions['y2'] if last_positions['y2'] is None else float(last_positions["y"]),
+                             3: current_positions['z'] if last_positions['z'] is None else float(last_positions["z"]),
                             }
                 self.stage_widget.stage_model.update_position(positions)
                 self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
