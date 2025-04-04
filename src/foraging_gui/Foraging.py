@@ -547,10 +547,13 @@ class Window(QMainWindow):
         elif current_positions.keys() == ['x', 'y', 'z']:
             self.slims_handler.set_loaded_mouse_offset(**current_positions)
         else:
+            x = self.stage_widget.movement_page_view.lineEdit_x.text()
+            y = self.stage_widget.movement_page_view.lineEdit_y1.text()
+            z = self.stage_widget.movement_page_view.lineEdit_z.text()
             # use widget values since current position isn't updated yet
-            self.slims_handler.set_loaded_mouse_offset(float(self.stage_widget.movement_page_view.lineEdit_x.text()),
-                                                       float(self.stage_widget.movement_page_view.lineEdit_y1.text()),
-                                                       float(self.stage_widget.movement_page_view.lineEdit_z.text()))
+            self.slims_handler.set_loaded_mouse_offset(None if x == '' else float(x),
+                                                       None if y == '' else float(y),
+                                                       None if z == '' else float(z))
 
     def load_curriculum(self, mouse_id: str) -> None:
         """
