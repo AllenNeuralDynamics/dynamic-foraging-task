@@ -11,6 +11,7 @@ import requests
 from hashlib import md5
 from typing import Literal
 from pydantic import BaseModel
+import re
 
 import logging_loki
 import socket
@@ -34,6 +35,7 @@ from pyOSC3.OSC3 import OSCStreamingClient
 import webbrowser
 from pydantic import ValidationError
 from StageWidget.main import get_stage_widget
+
 
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
@@ -450,7 +452,6 @@ class Window(QMainWindow):
         self.Save_continue.triggered.connect(self._Save_continue)
         self.action_Exit.triggered.connect(self._Exit)
         self.action_New.triggered.connect(self._NewSession)
-        self.action_Clear.triggered.connect(self._Clear)
         self.action_Start.triggered.connect(self.Start.click)
         self.action_NewSession.triggered.connect(self.NewSession.click)
         self.actionConnectBonsai.triggered.connect(self._ConnectBonsai)
@@ -458,7 +459,6 @@ class Window(QMainWindow):
         self.Load.clicked.connect(self.mouse_selector_dialog.show)
         self.Save.setCheckable(True)
         self.Save.clicked.connect(self._Save)
-        self.Clear.clicked.connect(self._Clear)
         self.Start.clicked.connect(self._Start)
         self.GiveLeft.clicked.connect(lambda: self.give_manual_water("Left"))
         self.GiveRight.clicked.connect(lambda: self.give_manual_water("Right"))
@@ -488,8 +488,6 @@ class Window(QMainWindow):
         self.MoveZN.clicked.connect(self._MoveZN)
         self.StageStop.clicked.connect(self._StageStop)
         self.GetPositions.clicked.connect(self._GetPositions)
-        self.Sessionlist.currentIndexChanged.connect(self._session_list)
-        self.SessionlistSpin.textChanged.connect(self._session_list_spin)
         self.StartEphysRecording.clicked.connect(self._StartEphysRecording)
         self.SetReference.clicked.connect(self._set_reference)
         self.Opto_dialog.laser_1_calibration_voltage.textChanged.connect(self._toggle_save_color)
@@ -558,7 +556,7 @@ class Window(QMainWindow):
             self.on_curriculum.setEnabled(slims_session.is_curriculum_suggestion)
 
             logging.info(f"Successfully loaded mouse {mouse_id}", extra={'tags': [self.warning_log_tag]})
-
+            self.load_tag = 1
         except Exception as e:
             logging.error(str(e), extra={'tags': [self.warning_log_tag]})
             self.Load.setEnabled(True)
@@ -725,79 +723,6 @@ class Window(QMainWindow):
                 self.fip_widget.setEnabled(True)
                 self.Opto_dialog.opto_widget.setEnabled(True)
                 self.on_curriculum.setEnabled(False)
-
-    def _session_list(self):
-        '''show all sessions of the current animal and load the selected session by drop down list'''
-        if not hasattr(self, 'fname'):
-            return 0
-        # open the selected session
-        if self.Sessionlist.currentText() != '':
-            selected_index = self.Sessionlist.currentIndex()
-            fname = self.session_full_path_list[self.Sessionlist.currentIndex()]
-            self._Open(input_file=fname)
-            # set the selected index back to the current session
-            self._connect_Sessionlist(connect=False)
-            self.Sessionlist.setCurrentIndex(selected_index)
-            self.SessionlistSpin.setValue(int(selected_index + 1))
-            self._connect_Sessionlist(connect=True)
-
-    def _session_list_spin(self):
-        '''show all sessions of the current animal and load the selected session by spin box'''
-        if not hasattr(self, 'fname'):
-            return 0
-        if self.SessionlistSpin.text() != '':
-            self._connect_Sessionlist(connect=False)
-            if int(self.SessionlistSpin.text()) > self.Sessionlist.count():
-                self.SessionlistSpin.setValue(int(self.Sessionlist.count()))
-            if int(self.SessionlistSpin.text()) < 1:
-                self.SessionlistSpin.setValue(1)
-            fname = self.session_full_path_list[int(self.SessionlistSpin.text()) - 1]
-            self.Sessionlist.setCurrentIndex(int(self.SessionlistSpin.text()) - 1)
-            self._connect_Sessionlist(connect=True)
-            self._Open(input_file=fname)
-
-    def _connect_Sessionlist(self, connect=True):
-        '''connect or disconnect the Sessionlist and SessionlistSpin'''
-        if connect:
-            self.Sessionlist.currentIndexChanged.connect(self._session_list)
-            self.SessionlistSpin.textChanged.connect(self._session_list_spin)
-        else:
-            self.Sessionlist.disconnect()
-            self.SessionlistSpin.disconnect()
-
-    def _show_sessions(self):
-        '''list all sessions of the current animal'''
-        if not hasattr(self, 'fname'):
-            return 0
-        animal_folder = os.path.dirname(os.path.dirname(os.path.dirname(self.fname)))
-        session_full_path_list = []
-        session_path_list = []
-        for session_folder in os.listdir(animal_folder):
-            training_folder_old = os.path.join(animal_folder, session_folder, 'TrainingFolder')
-            training_folder_new = os.path.join(animal_folder, session_folder, 'behavior')
-            if os.path.exists(training_folder_old):
-                for file_name in os.listdir(training_folder_old):
-                    if file_name.endswith('.json'):
-                        session_full_path_list.append(os.path.join(training_folder_old, file_name))
-                        session_path_list.append(session_folder)
-            elif os.path.exists(training_folder_new):
-                for file_name in os.listdir(training_folder_new):
-                    if file_name.endswith('.json'):
-                        session_full_path_list.append(os.path.join(training_folder_new, file_name))
-                        session_path_list.append(session_folder)
-
-        sorted_indices = sorted(enumerate(session_path_list), key=lambda x: x[1], reverse=True)
-        sorted_dates = [date for index, date in sorted_indices]
-        # Extract just the indices
-        indices = [index for index, date in sorted_indices]
-        # Apply sorted index
-        self.session_full_path_list = [session_full_path_list[index] for index in indices]
-        self.session_path_list = sorted_dates
-
-        self._connect_Sessionlist(connect=False)
-        self.Sessionlist.clear()
-        self.Sessionlist.addItems(sorted_dates)
-        self._connect_Sessionlist(connect=True)
 
     def _check_drop_frames(self, save_tag=1):
         '''check if there are any drop frames in the video'''
@@ -1792,75 +1717,6 @@ class Window(QMainWindow):
         '''Restart the formal logging'''
         self.Ot_log_folder = self._restartlogging()
 
-    def _set_parameters(self, key, widget_dict, parameters):
-        '''Set the parameters in the GUI
-            key: the parameter name you want to change
-            widget_dict: the dictionary of all the widgets in the GUI
-            parameters: the dictionary of all the parameters containing the key you want to change
-        '''
-        if key in parameters:
-            # skip some keys
-            if key == 'ExtraWater' or key == 'WeightAfter' or key == 'SuggestedWater':
-                self.WeightAfter.setText('')
-                return
-            widget = widget_dict[key]
-            try:  # load the paramter used by last trial
-                value = np.array([parameters[key]])
-                loading_parameters_type = 0
-            # sometimes we only have training parameters, no behavior parameters
-            except Exception as e:
-                logging.error(traceback.format_exc())
-                value = parameters[key]
-                loading_parameters_type = 1
-            if isinstance(widget, QtWidgets.QPushButton):
-                pass
-            if type(value) == bool:
-                loading_parameters_type = 1
-            else:
-                if len(value) == 0:
-                    value = np.array([''], dtype='<U1')
-                    loading_parameters_type = 0
-            if type(value) == np.ndarray:
-                loading_parameters_type = 0
-            if isinstance(widget, QtWidgets.QLineEdit):
-                if loading_parameters_type == 0:
-                    widget.setText(value[-1])
-                elif loading_parameters_type == 1:
-                    widget.setText(value)
-            elif isinstance(widget, QtWidgets.QComboBox):
-                if loading_parameters_type == 0:
-                    index = widget.findText(value[-1])
-                elif loading_parameters_type == 1:
-                    index = widget.findText(value)
-                if index != -1:
-                    widget.setCurrentIndex(index)
-            elif isinstance(widget, QtWidgets.QDoubleSpinBox):
-                if loading_parameters_type == 0:
-                    widget.setValue(float(value[-1]))
-                elif loading_parameters_type == 1:
-                    widget.setValue(float(value))
-            elif isinstance(widget, QtWidgets.QSpinBox):
-                if loading_parameters_type == 0:
-                    widget.setValue(int(value[-1]))
-                elif loading_parameters_type == 1:
-                    widget.setValue(int(value))
-            elif isinstance(widget, QtWidgets.QTextEdit):
-                if loading_parameters_type == 0:
-                    widget.setText(value[-1])
-                elif loading_parameters_type == 1:
-                    widget.setText(value)
-            elif isinstance(widget, QtWidgets.QPushButton):
-                if key == 'AutoReward':
-                    if loading_parameters_type == 0:
-                        widget.setChecked(bool(value[-1]))
-                    elif loading_parameters_type == 1:
-                        widget.setChecked(value)
-        else:
-            widget = widget_dict[key]
-            if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
-                pass
-                # widget.clear()
-
     def _QComboBoxUpdate(self, parameter, value):
         logging.info('Field updated: {}:{}'.format(parameter, value))
 
@@ -2478,9 +2334,6 @@ class Window(QMainWindow):
             else:
                 logging.warning('Saving of loaded files is not allowed!', extra={'tags': [self.warning_log_tag]})
 
-            self.SessionlistSpin.setEnabled(True)
-            self.Sessionlist.setEnabled(True)
-
             if self.StartEphysRecording.isChecked():
                 QMessageBox.warning(self, '',
                                     'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
@@ -2602,28 +2455,26 @@ class Window(QMainWindow):
         """
 
         id_name = self.session_model.session_name.split("behavior_")[-1]
-        session_model_path = os.path.join(self.session_model.root_path, f'behavior_session_model_{id_name}.json')
-        task_model_path = os.path.join(self.session_model.root_path, f'behavior_task_logic_model_{id_name}.json')
 
         # validate behavior session model and document validation errors if any
+        session_model_path = os.path.join(self.session_model.root_path, f'behavior_session_model_{id_name}.json')
         self.validate_and_save_model(AindBehaviorSessionModel, self.session_model, session_model_path)
 
         # validate behavior task logic model and document validation errors if any
+        task_model_path = os.path.join(self.session_model.root_path, f'behavior_task_logic_model_{id_name}.json')
         self.validate_and_save_model(AindDynamicForagingTaskLogic, self.task_logic, task_model_path)
 
         # validate operation_control_model and document validation errors if any
-        self.validate_and_save_model(OperationalControl, self.operation_control_model, task_model_path)
+        oc_path = os.path.join(self.session_model.root_path, f'behavior_operational_control_{id_name}.json')
+        self.validate_and_save_model(OperationalControl, self.operation_control_model, oc_path)
 
-        # check if opto ran
-        if self.opto_model.laser_colors != []:
-            opto_model_path = os.path.join(self.session_model.root_path, f'behavior_optogenetics_model_{id_name}.json')
-            self.validate_and_save_model(Optogenetics, self.opto_model, opto_model_path)
+        # validate opto_model and document validation errors if any
+        opto_model_path = os.path.join(self.session_model.root_path, f'behavior_optogenetics_model_{id_name}.json')
+        self.validate_and_save_model(Optogenetics, self.opto_model, opto_model_path)
 
-        # check if fip ran
-        if self.fip_model.enabled:
-            fip_model_path = os.path.join(self.session_model.root_path,
-                                          f'behavior_fiber_photometry_model_{id_name}.json')
-            self.validate_and_save_model(FiberPhotometry, self.fip_model, fip_model_path)
+        # validate fip_model and document validation errors if any
+        fip_model_path = os.path.join(self.session_model.root_path, f'behavior_fiber_photometry_model_{id_name}.json')
+        self.validate_and_save_model(FiberPhotometry, self.fip_model, fip_model_path)
 
     def validate_and_save_model(self, schema: BaseModel, model, path: str):
         """
@@ -2676,245 +2527,132 @@ class Window(QMainWindow):
                     Obj[keyname][widget.objectName()] = widget.currentText()
         return Obj
 
-    def _Open(self, input_file=''):
-        if input_file == '':
-            # stop current session first
-            self._StopCurrentSession()
+    def _Open(self):
 
-            # Open dialog box
-            fname, _ = QFileDialog.getOpenFileName(self, 'Open file',
-                                                   self.default_openFolder + '\\' + self.current_box,
-                                                   "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
-            logging.info('User selected: {}'.format(fname))
-            if fname != '':
-                self.default_openFolder = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(fname))))
+        # stop current session first
+        self._StopCurrentSession()
 
-            self.fname = fname
+        # check if user wants to load new session
+        new_session = self._NewSession()
 
-        else:
-            fname = input_file
-            self.fname = fname
-        if fname:
-            # Start new session
-            self.NewSession.setChecked(True)
-            new_session = self._NewSession()
-            if not new_session:
+        if not new_session:
+            return
+
+        # Open dialog box
+        folder_path = QFileDialog.getExistingDirectory(self, "Select Folder",
+                                                    self.default_openFolder + '\\' + self.current_box)
+        logging.info('User selected: {}'.format(folder_path))
+
+        if folder_path:
+
+            # dict to keep track if all models are in folder
+            loaded = {"behavior_task_logic_model": False,
+                      "behavior_session_model": False,
+                      "behavior_optogenetics_model": False,
+                      "behavior_fiber_photometry_model": False,
+                      "behavior_operational_control": False,
+                      "behavior_json": False}
+
+            # iterate through files
+            for filename in os.listdir(folder_path):
+
+                if filename.startswith("behavior_task_logic_model"):    # check and load task model
+                    loaded["task"] = True
+                    with open(filename, 'r') as f:
+                        task_logic = AindDynamicForagingTaskLogic(**json.load(f))
+
+                elif filename.startswith("behavior_session_model"):   # check and load session model
+                    loaded["session"] = True
+                    with open(filename, 'r') as f:
+                        session_model = AindBehaviorSessionModel(**json.load(f))
+
+                elif filename.startswith("behavior_optogenetics_model"):   # check and load optogenetic model
+                    loaded["opto"] = True
+                    with open(filename, 'r') as f:
+                        opto_model = Optogenetics(**json.load(f))
+
+                elif filename.startswith("behavior_fiber_photometry_model"):   # check and load fip model
+                    loaded["fip"] = True
+                    with open(filename, 'r') as f:
+                        fip_model = FiberPhotometry(**json.load(f))
+
+                elif filename.startswith("behavior_operational_control"):   # check and load operational model
+                    loaded["oc"] = True
+                    with open(filename, 'r') as f:
+                        operation_control_model = OperationalControl(**json.load(f))
+
+                # check and load behavior json
+                elif re.fullmatch(r"\b\d{6}_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json\b", filename):
+                    loaded["behavior_json"] = True
+                    with open(filename, 'r') as f:
+                        Obj = json.load(f)
+
+                elif re.fullmatch(r"\b\d{6}_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.mat\b", filename):
+                    loaded["behavior_json"] = True
+                    Obj = loadmat(filename)
+
+            if any(not value for value in loaded.values()):
+                logger.warning(f"Can't load mouse in folder {folder_path} because "
+                               f"{[key for key in loaded.keys() if not key]} are not found. Please add files or load"
+                               f"another session.")
                 return
 
-            if fname.endswith('.mat'):
-                Obj = loadmat(fname)
-            elif fname.endswith('.json'):
-                f = open(fname, "r")
-                Obj = json.loads(f.read())
-                f.close()
+            # update models
+            self.task_logic = task_logic
+            # TODO: Should I update the path and the date for the session model?
+            self.session_model.experiment = session_model.experiment
+            self.session_model.experimenter = session_model.experimenter
+            self.session_model.subject = session_model.subject
+            self.session_model.notes = session_model.notes
+            self.operation_control_model = operation_control_model
+            self.opto_model = opto_model
+            self.fip_model = fip_model
+
             self.Obj = Obj
 
-            widget_dict = {}
-            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog', 'centralwidget', 'TrainingParameters']
-            for dialog_name in dialogs:
-                if hasattr(self, dialog_name):
-                    widget_types = (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit,
-                                    QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox)
-                    widget_dict.update(
-                        {w.objectName(): w for w in getattr(self, dialog_name).findChildren(widget_types)})
-            # Adding widgets starting with 'Laser1_power' and 'Laser2_power' to widget_keys to allow the second update.
-            widget_keys = list(widget_dict.keys())
-            for key in widget_dict.keys():
-                if key.startswith('Laser1_power') or key.startswith('Laser2_power') or key.startswith(
-                        'Location_') or key.startswith('Frequency_'):
-                    widget_keys.append(key)
-            try:
-                for key in widget_keys:
-                    try:
-                        widget = widget_dict[key]
-                        if widget.parent().objectName() in ['Optogenetics', 'Optogenetics_trial_parameters',
-                                                            'SessionParameters']:
-                            CurrentObj = Obj['Opto_dialog']
-                        elif widget.parent().objectName() == 'Camera':
-                            CurrentObj = Obj['Camera_dialog']
-                        elif widget.parent().objectName() == 'CalibrationLaser':
-                            CurrentObj = Obj['LaserCalibration_dialog']
-                        elif widget.parent().objectName() == 'MetaData':
-                            CurrentObj = Obj['Metadata_dialog']
-                        else:
-                            CurrentObj = Obj.copy()
-                    except Exception as e:
-                        logging.error(traceback.format_exc())
-                        continue
-                    if key in CurrentObj:
-                        # skip LeftValue, RightValue, GiveWaterL, GiveWaterR if WaterCalibrationResults is not empty as they will be set by the corresponding volume.
-                        if (key in ['LeftValue', 'RightValue', 'GiveWaterL',
-                                    'GiveWaterR']) and self.WaterCalibrationResults != {}:
-                            continue
-                        # skip some keys
-                        if key in ['Start', 'warmup', 'SessionlistSpin', 'StartPreview', 'StartRecording']:
-                            self.WeightAfter.setText('')
-                            continue
-                        widget = widget_dict[key]
+        # Set stage position to last position
+        try:
+            if 'B_StagePositions' in Obj.keys() and len(Obj['B_StagePositions']) != 0:
+                last_positions = Obj['B_StagePositions'][-1]
+                if hasattr(self, 'current_stage'):  # newscale stage
+                    self.current_stage.move_absolute_3d(float(last_positions['x']),
+                                                        float(last_positions['y']),
+                                                        float(last_positions['z']))
+                    self._UpdatePosition((float(last_positions['x']),
+                                          float(last_positions['y']),
+                                          float(last_positions['z'])), (0, 0, 0))
+                elif self.stage_widget is not None:  # aind stage
+                    # Move AIND stage to the last session positions
+                    positions = {
+                        0: float(last_positions['x']),
+                        1: float(last_positions['y1']),
+                        2: float(last_positions['y2']),
+                        3: float(last_positions['z'])
+                    }
+                    self.stage_widget.stage_model.update_position(positions)
+                    step_size = self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
+            elif 'B_NewscalePositions' in Obj.keys() and len(
+                    Obj['B_NewscalePositions']) != 0:  # cross compatibility for mice run on older version of code.
+                last_positions = Obj['B_NewscalePositions'][-1]
+                self.current_stage.move_absolute_3d(float(last_positions[0]),
+                                                    float(last_positions[1]),
+                                                    float(last_positions[2]))
+                self._UpdatePosition((float(last_positions[0]),
+                                      float(last_positions[1]),
+                                      float(last_positions[2])),
+                                     (0, 0, 0))
+            else:
+                pass
 
-                        # loading_parameters_type=0, get the last value of saved training parameters for each trial; loading_parameters_type=1, get the current value for single value data directly from the window.
-                        if 'TP_{}'.format(key) in CurrentObj:
-                            value = np.array([CurrentObj['TP_' + key][-2]])
-                            loading_parameters_type = 0
-                        else:
-                            value = CurrentObj[key]
-                            loading_parameters_type = 1
+        except Exception as e:
+            logging.error(traceback.format_exc())
 
-                        if key in {'BaseWeight', 'TotalWater', 'TargetWeight', 'WeightAfter', 'SuggestedWater',
-                                   'TargetRatio'}:
-                            self.BaseWeight.disconnect()
-                            self.TargetRatio.disconnect()
-                            self.WeightAfter.disconnect()
-                            value = CurrentObj[key]
-                            loading_parameters_type = 1
+        # check dropping frames
+        self.to_check_drop_frames = 1
+        self._check_drop_frames(save_tag=0)
 
-                        # tag=0, get the last value for ndarray; tag=1, get the current value for single value data
-                        if type(value) == bool:
-                            loading_parameters_type = 1
-                        else:
-                            if len(value) == 0:
-                                value = np.array([''], dtype='<U1')
-                                loading_parameters_type = 0
-                        if type(value) == np.ndarray:
-                            loading_parameters_type = 0
-
-                        if loading_parameters_type == 0:
-                            final_value = value[-1]
-                        elif loading_parameters_type == 1:
-                            final_value = value
-
-                        if isinstance(widget, QtWidgets.QLineEdit):
-                            widget.setText(final_value)
-                            if key in {'BaseWeight', 'TotalWater', 'TargetWeight', 'WeightAfter', 'SuggestedWater',
-                                       'TargetRatio'}:
-                                self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
-                                self.WeightAfter.textChanged.connect(self._PostWeightChange)
-                                self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
-                        elif isinstance(widget, QtWidgets.QComboBox):
-                            index = widget.findText(final_value)
-                            if key.startswith('Frequency_'):
-                                condition = key.split('_')[1]
-                                if CurrentObj['Protocol_' + condition] in ['Pulse']:
-                                    widget.setEditable(True)
-                                    widget.lineEdit().setText(final_value)
-                                    continue
-
-                            if index != -1:
-                                # Alternating on/off for SessionStartWith if SessionAlternating is on
-                                if key == 'SessionStartWith' and 'Opto_dialog' in Obj:
-                                    if 'SessionAlternating' in Obj['Opto_dialog'] and 'SessionWideControl' in Obj[
-                                        'Opto_dialog']:
-                                        if Obj['Opto_dialog']['SessionAlternating'] == 'on' and Obj[
-                                            'OptogeneticsB'] == 'on' and Obj['Opto_dialog'][
-                                            'SessionWideControl'] == 'on':
-                                            index = 1 - index
-                                            widget.setCurrentIndex(index)
-                                        else:
-                                            widget.setCurrentIndex(index)
-                                    else:
-                                        widget.setCurrentIndex(index)
-                                else:
-                                    widget.setCurrentIndex(index)
-                        elif isinstance(widget, QtWidgets.QDoubleSpinBox):
-                            widget.setValue(float(final_value))
-                        elif isinstance(widget, QtWidgets.QSpinBox):
-                            widget.setValue(int(final_value))
-                        elif isinstance(widget, QtWidgets.QTextEdit):
-                            widget.setText(final_value)
-                        elif isinstance(widget, QtWidgets.QPushButton):
-                            widget.setChecked(bool(final_value))
-                    else:
-                        widget = widget_dict[key]
-                        if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
-                            widget.clear()
-            except Exception as e:
-                # Catch the exception and print error information
-                logging.error(traceback.format_exc())
-            try:
-                # visualization when loading the data
-                self._LoadVisualization()
-            except Exception as e:
-                # Catch the exception and print error information
-                logging.error(traceback.format_exc())
-                # delete GeneratedTrials
-                del self.GeneratedTrials
-            # show basic information
-            if self.default_ui == 'ForagingGUI.ui':
-                if 'info_task' in Obj:
-                    self.label_info_task.setText(Obj['info_task'])
-                if 'info_performance_others' in Obj:
-                    self.label_info_performance_others.setText(Obj['info_performance_others'])
-                if 'info_performance_essential_1' in Obj:
-                    self.label_info_performance_essential_1.setText(Obj['info_performance_essential_1'])
-                if 'info_performance_essential_2' in Obj:
-                    self.label_info_performance_essential_2.setText(Obj['info_performance_essential_2'])
-            elif self.default_ui == 'ForagingGUI_Ephys.ui':
-                if 'Other_inforTitle' in Obj:
-                    self.infor.setTitle(Obj['Other_inforTitle'])
-                if 'Other_BasicTitle' in Obj:
-                    self.Basic.setTitle(Obj['Other_BasicTitle'])
-                if 'Other_BasicText' in Obj:
-                    self.ShowBasic.setText(Obj['Other_BasicText'])
-
-            # Set stage position to last position
-            try:
-                if 'B_StagePositions' in Obj.keys() and len(Obj['B_StagePositions']) != 0:
-                    last_positions = Obj['B_StagePositions'][-1]
-                    if hasattr(self, 'current_stage'):  # newscale stage
-                        self.current_stage.move_absolute_3d(float(last_positions['x']),
-                                                            float(last_positions['y']),
-                                                            float(last_positions['z']))
-                        self._UpdatePosition((float(last_positions['x']),
-                                              float(last_positions['y']),
-                                              float(last_positions['z'])), (0, 0, 0))
-                    elif self.stage_widget is not None:  # aind stage
-                        # Move AIND stage to the last session positions
-                        positions = {
-                            0: float(last_positions['x']),
-                            1: float(last_positions['y1']),
-                            2: float(last_positions['y2']),
-                            3: float(last_positions['z'])
-                        }
-                        self.stage_widget.stage_model.update_position(positions)
-                        step_size = self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
-                elif 'B_NewscalePositions' in Obj.keys() and len(
-                        Obj['B_NewscalePositions']) != 0:  # cross compatibility for mice run on older version of code.
-                    last_positions = Obj['B_NewscalePositions'][-1]
-                    self.current_stage.move_absolute_3d(float(last_positions[0]),
-                                                        float(last_positions[1]),
-                                                        float(last_positions[2]))
-                    self._UpdatePosition((float(last_positions[0]),
-                                          float(last_positions[1]),
-                                          float(last_positions[2])),
-                                         (0, 0, 0))
-                else:
-                    pass
-
-            except Exception as e:
-                logging.error(traceback.format_exc())
-
-            # load metadata to the metadata dialog
-            if 'meta_data_dialog' in Obj:
-                if 'session_metadata' in Obj['meta_data_dialog']:
-                    self.Metadata_dialog.meta_data['session_metadata'] = Obj['meta_data_dialog']['session_metadata']
-                self.Metadata_dialog._update_metadata()
-
-            # show session list related to that animal
-            tag = self._show_sessions()
-            if tag != 0:
-                fname_session_folder = os.path.basename(os.path.dirname(os.path.dirname(fname)))
-                Ind = self.Sessionlist.findText(fname_session_folder)
-                self._connect_Sessionlist(connect=False)
-                self.Sessionlist.setCurrentIndex(Ind)
-                self.SessionlistSpin.setValue(Ind + 1)
-                self._connect_Sessionlist(connect=True)
-            # check dropping frames
-            self.to_check_drop_frames = 1
-            self._check_drop_frames(save_tag=0)
-        else:
-            self.NewSession.setDisabled(False)
         self.StartExcitation.setChecked(False)
-        self.load_tag=1
+        self.load_tag = 1
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -2974,39 +2712,6 @@ class Window(QMainWindow):
         self.bias_indicator.clear()
         self.PlotM._Update(GeneratedTrials=self.GeneratedTrials)
         self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
-
-    def _Clear(self):
-        # Stop current session first
-        self._StopCurrentSession()
-
-        # Verify user wants to clear parameters
-        if self.unsaved_data:
-            reply = QMessageBox.critical(self,
-                                         'Box {}, Clear parameters:'.format(self.box_letter),
-                                         'Unsaved data exists! Do you want to clear training parameters?',
-                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-
-        # post weight not entered and session ran and new session button was clicked
-        elif self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
-            reply = QMessageBox.critical(self,
-                                         'Box {}, Foraging Close'.format(self.box_letter),
-                                         'Post weight appears to not be entered. Do you want to clear training parameters?',
-                                         QMessageBox.Yes, QMessageBox.No)
-        else:
-            reply = QMessageBox.question(self,
-                                         'Box {}, Clear parameters:'.format(self.box_letter),
-                                         'Do you want to clear training parameters?',
-                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-
-        # If yes, clear parameters
-        if reply == QMessageBox.Yes:
-            for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit) + self.centralwidget.findChildren(
-                    QtWidgets.QLineEdit):
-                if child.isEnabled():
-                    child.clear()
-        else:
-            logging.info('Clearing declined')
-            return
 
     def _StartFIP(self):
         self.StartFIP.setChecked(False)
@@ -3499,14 +3204,6 @@ class Window(QMainWindow):
             self.Start.setChecked(False)
             self.Start.setStyleSheet('background-color:none;')
             return
-
-        # clear the session list
-        self._connect_Sessionlist(connect=False)
-        self.Sessionlist.clear()
-        self.SessionlistSpin.setValue(1)
-        self._connect_Sessionlist(connect=True)
-        self.SessionlistSpin.setEnabled(False)
-        self.Sessionlist.setEnabled(False)
 
         # Clear warnings
         self.NewSession.setDisabled(False)
