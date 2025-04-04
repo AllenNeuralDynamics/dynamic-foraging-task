@@ -294,6 +294,10 @@ class Window(QMainWindow):
         self.load_slims_progress.setWindowFlag(Qt.FramelessWindowHint)
         self.load_slims_progress.setMovie(movie)
 
+        # create qtimer to update offset so gui doesn't freeze
+        self.offset_timer = QTimer(timeout=self.update_loaded_mouse_offset)
+        self.offset_timer.setSingleShot(True)
+
         self._LaserCalibration()  # to open the laser calibration panel
         self._WaterCalibration()  # to open the water calibration panel
         self._Camera()
@@ -516,28 +520,27 @@ class Window(QMainWindow):
         self.SuggestedWater.setValidator(double_validator)
 
         if hasattr(self, "current_stage"): # Connect newscale button to update loaded mouse offset
-            self.MoveXP.clicked.connect(self.update_loaded_mouse_offset)
-            self.MoveYP.clicked.connect(self.update_loaded_mouse_offset)
-            self.MoveZP.clicked.connect(self.update_loaded_mouse_offset)
-            self.MoveXN.clicked.connect(self.update_loaded_mouse_offset)
-            self.MoveYN.clicked.connect(self.update_loaded_mouse_offset)
-            self.MoveZN.clicked.connect(self.update_loaded_mouse_offset)
+            self.MoveXP.clicked.connect(self.offset_timer.start)
+            self.MoveYP.clicked.connect(self.offset_timer.start)
+            self.MoveZP.clicked.connect(self.offset_timer)
+            self.MoveXN.clicked.connect(self.offset_timer)
+            self.MoveYN.clicked.connect(self.offset_timer)
+            self.MoveZN.clicked.connect(self.offset_timer)
 
         elif self.stage_widget is not None:
             # connect aind stage widgets to update loaded mouse offset if text has been changed by user or button press
-            self.stage_widget.movement_page_view.lineEdit_z.textChanged.connect(self.update_loaded_mouse_offset)
-            self.stage_widget.movement_page_view.lineEdit_x.textChanged.connect(self.update_loaded_mouse_offset)
-            self.stage_widget.movement_page_view.lineEdit_y1.textChanged.connect(self.update_loaded_mouse_offset)
-            self.stage_widget.movement_page_view.lineEdit_y2.textChanged.connect(self.update_loaded_mouse_offset)
+            self.stage_widget.movement_page_view.lineEdit_z.textChanged.connect(lambda v: self.offset_timer)
+            self.stage_widget.movement_page_view.lineEdit_x.textChanged.connect(lambda v: self.offset_timer)
+            self.stage_widget.movement_page_view.lineEdit_y1.textChanged.connect(lambda v: self.offset_timer)
+            self.stage_widget.movement_page_view.lineEdit_y2.textChanged.connect(lambda v: self.offset_timer)
 
         # update model widgets if models have changed
         self.modelsChanged.connect(self.update_model_widgets)
 
 
-    def update_loaded_mouse_offset(self, *args):
+    def update_loaded_mouse_offset(self):
         """
             Update the stage offset associated with mouse model from slims
-            :param args: catch for the signal with arguments
         """
 
         current_positions = self._GetPositions()
