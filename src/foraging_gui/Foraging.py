@@ -523,28 +523,21 @@ class Window(QMainWindow):
             self.MoveYN.clicked.connect(self.update_loaded_mouse_offset)
             self.MoveZN.clicked.connect(self.update_loaded_mouse_offset)
 
-        elif self.stage_widget is not None:   # connect aind stage widgets to update loaded mouse offset when pressed/changed
-            self.stage_widget.movement_page_view.lineEdit_z.textEdited.connect(self.update_loaded_mouse_offset)
-            self.stage_widget.movement_page_view.lineEdit_x.textEdited.connect(self.update_loaded_mouse_offset)
-            self.stage_widget.movement_page_view.lineEdit_y1.textEdited.connect(self.update_loaded_mouse_offset)
-            self.stage_widget.movement_page_view.lineEdit_y2.textEdited.connect(self.update_loaded_mouse_offset)
-
-            self.stage_widget.movement_page_view.btn_z_plus.clicked.connect(self.update_loaded_mouse_offset)
-            self.stage_widget.movement_page_view.btn_z_minus.clicked.connect(self.update_loaded_mouse_offset)
-            self.stage_widget.movement_page_view.btn_x_plus.clicked.connect(self.update_loaded_mouse_offset)
-            self.stage_widget.movement_page_view.btn_x_minus.clicked.connect(self.update_loaded_mouse_offset)
-            self.stage_widget.movement_page_view.btn_y1_plus.clicked.connect(self.update_loaded_mouse_offset)
-            self.stage_widget.movement_page_view.btn_y1_minus.clicked.connect(self.update_loaded_mouse_offset)
-            self.stage_widget.movement_page_view.btn_y2_plus.clicked.connect(self.update_loaded_mouse_offset)
-            self.stage_widget.movement_page_view.btn_y2_minus.clicked.connect(self.update_loaded_mouse_offset)
+        elif self.stage_widget is not None:
+            # connect aind stage widgets to update loaded mouse offset if text has been changed by user or button press
+            self.stage_widget.movement_page_view.lineEdit_z.textChanged.connect(self.update_loaded_mouse_offset)
+            self.stage_widget.movement_page_view.lineEdit_x.textChanged.connect(self.update_loaded_mouse_offset)
+            self.stage_widget.movement_page_view.lineEdit_y1.textChanged.connect(self.update_loaded_mouse_offset)
+            self.stage_widget.movement_page_view.lineEdit_y2.textChanged.connect(self.update_loaded_mouse_offset)
 
         # update model widgets if models have changed
         self.modelsChanged.connect(self.update_model_widgets)
 
 
-    def update_loaded_mouse_offset(self):
+    def update_loaded_mouse_offset(self, *args):
         """
             Update the stage offset associated with mouse model from slims
+            :param args: catch for the signal with arguments
         """
 
         current_positions = self._GetPositions()
