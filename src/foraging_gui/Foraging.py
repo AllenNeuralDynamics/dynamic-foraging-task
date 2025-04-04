@@ -516,19 +516,19 @@ class Window(QMainWindow):
         self.SuggestedWater.setValidator(double_validator)
 
         if hasattr(self, "current_stage"): # Connect newscale button to update loaded mouse offset
-            self.MoveXP.clicked.connect(self.threading.Thread(target=self.update_loaded_mouse_offset).start)
-            self.MoveYP.clicked.connect(self.threading.Thread(target=self.update_loaded_mouse_offset).start)
-            self.MoveZP.clicked.connect(self.threading.Thread(target=self.update_loaded_mouse_offset).start)
-            self.MoveXN.clicked.connect(self.threading.Thread(target=self.update_loaded_mouse_offset).start)
-            self.MoveYN.clicked.connect(self.threading.Thread(target=self.update_loaded_mouse_offset).start)
-            self.MoveZN.clicked.connect(self.threading.Thread(target=self.update_loaded_mouse_offset).start)
+            self.MoveXP.clicked.connect(threading.Thread(target=self.update_loaded_mouse_offset).start)
+            self.MoveYP.clicked.connect(threading.Thread(target=self.update_loaded_mouse_offset).start)
+            self.MoveZP.clicked.connect(threading.Thread(target=self.update_loaded_mouse_offset).start)
+            self.MoveXN.clicked.connect(threading.Thread(target=self.update_loaded_mouse_offset).start)
+            self.MoveYN.clicked.connect(threading.Thread(target=self.update_loaded_mouse_offset).start)
+            self.MoveZN.clicked.connect(threading.Thread(target=self.update_loaded_mouse_offset).start)
 
         elif self.stage_widget is not None:
             # connect aind stage widgets to update loaded mouse offset if text has been changed by user or button press
-            self.stage_widget.movement_page_view.lineEdit_z.textChanged.connect(lambda v: self.threading.Thread(target=self.update_loaded_mouse_offset).start())
-            self.stage_widget.movement_page_view.lineEdit_x.textChanged.connect(lambda v: self.threading.Thread(target=self.update_loaded_mouse_offset).start())
-            self.stage_widget.movement_page_view.lineEdit_y1.textChanged.connect(lambda v: self.threading.Thread(target=self.update_loaded_mouse_offset).start())
-            self.stage_widget.movement_page_view.lineEdit_y2.textChanged.connect(lambda v: self.threading.Thread(target=self.update_loaded_mouse_offset).start())
+            self.stage_widget.movement_page_view.lineEdit_z.textChanged.connect(lambda v: threading.Thread(target=self.update_loaded_mouse_offset).start())
+            self.stage_widget.movement_page_view.lineEdit_x.textChanged.connect(lambda v: threading.Thread(target=self.update_loaded_mouse_offset).start())
+            self.stage_widget.movement_page_view.lineEdit_y1.textChanged.connect(lambda v: threading.Thread(target=self.update_loaded_mouse_offset).start())
+            self.stage_widget.movement_page_view.lineEdit_y2.textChanged.connect(lambda v: threading.Thread(target=self.update_loaded_mouse_offset).start())
 
         # update model widgets if models have changed
         self.modelsChanged.connect(self.update_model_widgets)
