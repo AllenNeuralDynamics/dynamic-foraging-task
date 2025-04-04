@@ -295,8 +295,7 @@ class Window(QMainWindow):
         self.load_slims_progress.setMovie(movie)
 
         # create qtimer to update offset so gui doesn't freeze
-        self.offset_timer = QTimer(timeout=self.update_loaded_mouse_offset)
-        self.offset_timer.setSingleShot(True)
+        self.offset_thread = threading.Thread(target=self.update_loaded_mouse_offset)
 
         self._LaserCalibration()  # to open the laser calibration panel
         self._WaterCalibration()  # to open the water calibration panel
@@ -520,19 +519,19 @@ class Window(QMainWindow):
         self.SuggestedWater.setValidator(double_validator)
 
         if hasattr(self, "current_stage"): # Connect newscale button to update loaded mouse offset
-            self.MoveXP.clicked.connect(self.offset_timer.start)
-            self.MoveYP.clicked.connect(self.offset_timer.start)
-            self.MoveZP.clicked.connect(self.offset_timer.start)
-            self.MoveXN.clicked.connect(self.offset_timer.start)
-            self.MoveYN.clicked.connect(self.offset_timer.start)
-            self.MoveZN.clicked.connect(self.offset_timer.start)
+            self.MoveXP.clicked.connect(self.offset_thread.start)
+            self.MoveYP.clicked.connect(self.offset_thread.start)
+            self.MoveZP.clicked.connect(self.offset_thread.start)
+            self.MoveXN.clicked.connect(self.offset_thread.start)
+            self.MoveYN.clicked.connect(self.offset_thread.start)
+            self.MoveZN.clicked.connect(self.offset_thread.start)
 
         elif self.stage_widget is not None:
             # connect aind stage widgets to update loaded mouse offset if text has been changed by user or button press
-            self.stage_widget.movement_page_view.lineEdit_z.textChanged.connect(lambda v: self.offset_timer.start())
-            self.stage_widget.movement_page_view.lineEdit_x.textChanged.connect(lambda v: self.offset_timer.start())
-            self.stage_widget.movement_page_view.lineEdit_y1.textChanged.connect(lambda v: self.offset_timer.start())
-            self.stage_widget.movement_page_view.lineEdit_y2.textChanged.connect(lambda v: self.offset_timer.start())
+            self.stage_widget.movement_page_view.lineEdit_z.textChanged.connect(lambda v: self.offset_thread.start())
+            self.stage_widget.movement_page_view.lineEdit_x.textChanged.connect(lambda v: self.offset_thread.start())
+            self.stage_widget.movement_page_view.lineEdit_y1.textChanged.connect(lambda v: self.offset_thread.start())
+            self.stage_widget.movement_page_view.lineEdit_y2.textChanged.connect(lambda v: self.offset_thread.start())
 
         # update model widgets if models have changed
         self.modelsChanged.connect(self.update_model_widgets)
