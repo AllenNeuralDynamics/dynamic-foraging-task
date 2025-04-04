@@ -602,7 +602,7 @@ class Window(QMainWindow):
             elif self.stage_widget is not None and last_positions != none_pos:  # aind stage
                 positions = {0: current_positions['x'] if last_positions['x'] is None else float(last_positions["x"]),
                              1: current_positions['y1'] if last_positions['y'] is None else float(last_positions["y"]),
-                             2: current_positions['y2'] if last_positions['y2'] is None else float(last_positions["y"]),
+                             2: current_positions['y2'] if last_positions['y'] is None else float(last_positions["y"]),
                              3: current_positions['z'] if last_positions['z'] is None else float(last_positions["z"]),
                             }
                 self.stage_widget.stage_model.update_position(positions)
