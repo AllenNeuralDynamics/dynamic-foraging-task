@@ -538,6 +538,7 @@ class Window(QMainWindow):
         """
             Update the stage offset associated with mouse model from slims
         """
+        print('updating offset')
 
         current_positions = self._GetPositions()
         if current_positions is None:
