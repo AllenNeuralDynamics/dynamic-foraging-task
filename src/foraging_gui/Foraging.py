@@ -596,7 +596,7 @@ class Window(QMainWindow):
         """
 
         # define mapping between schedule and curriculums
-        curriculum_mapping = {"Uncoupled Without Baiting 2.3.1rwdDelay159": "uncoupled_no_baiting_rwdDelay_2p3p1",
+        curriculum_mapping = {"Uncoupled Without Baiting 2.3.1rwdDelay159": "uncoupled_no_baiting_rd_2p3p1",
                               "Uncoupled Without Baiting 2.3": "uncoupled_no_baiting_2p3",
                               "Uncoupled Baiting 2.3": "uncoupled_baiting_2p3",
                               "Coupled Baiting 2.3": "coupled_baiting_2p3"}
