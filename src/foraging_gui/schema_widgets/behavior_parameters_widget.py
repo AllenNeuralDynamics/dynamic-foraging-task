@@ -137,16 +137,18 @@ class BehaviorParametersWidget(SchemaWidgetBase):
         :param enabled: whether to add or remove field
         :param value: value to set field to
         """
+
         widgets = getattr(self, name+"_widgets") if hasattr(self, name+"_widgets") \
             else {"k": getattr(self, name+"_widget")}  # disable all sub widgets
         for widget in widgets.values():
             widget.setEnabled(enabled)
         name_lst = name.split(".")
-        if enabled:
+        if enabled and self.path_get(self.schema, name_lst) is None:
             self.path_set(self.schema, name_lst, value)
-        else:
+            self.ValueChangedInside.emit(name)
+        elif not enabled and self.path_get(self.schema, name_lst) is not None:
             self.path_set(self.schema, name_lst, None)
-        self.ValueChangedInside.emit(name)
+            self.ValueChangedInside.emit(name)
 
     def update_field_widget(self, name):
         """
@@ -154,11 +156,10 @@ class BehaviorParametersWidget(SchemaWidgetBase):
         """
 
         value = self.path_get(self.schema, name.split("."))
+        if hasattr(self, name + "_check_box"):  # optional type
+            getattr(self, name + "_check_box").setChecked(not value is None)
         if dict not in type(value).__mro__ and list not in type(value).__mro__ and BaseModel not in type(value).__mro__:  # not a dictionary or list like value
-            if hasattr(self, name + "_check_box"):  # optional type
-                getattr(self, name + "_check_box").setChecked(not value is None)
-            else:
-                self._set_widget_text(name, value)
+            self._set_widget_text(name, value)
         elif dict in type(value).__mro__ or BaseModel in type(value).__mro__:
             value = value.model_dump() if BaseModel in type(value).__mro__ else value
             for k, v in value.items():  # multiple widgets to set values for
@@ -192,13 +193,16 @@ if __name__ == "__main__":
                            [[1, 0], [.9, .1], [.8, .2], [.7, .3], [.6, .4], [.5, .5]], [[6, 1], [3, 1], [1, 1]]]
 
     task_widget = BehaviorParametersWidget(task_model.task_parameters, reward_families)
-    task_widget.ValueChangedInside.connect(lambda name: print(task_model))
-    task_widget.taskUpdated.connect(print)
+    #task_widget.ValueChangedInside.connect(lambda name: print(task_model))
+    #task_widget.taskUpdated.connect(print)
     task_widget.show()
 
     task_model.task_parameters.block_parameters.min = 10
     task_model.task_parameters.auto_water = None
     task_model.task_parameters.warmup = None
+    task_model.task_parameters.uncoupled_reward = [.4, .7, .8]
     task_widget.apply_schema(task_model.task_parameters)
+
+
 
     sys.exit(app.exec_())

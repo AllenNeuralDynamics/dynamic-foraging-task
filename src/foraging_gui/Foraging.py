@@ -9,8 +9,9 @@ import math
 import logging
 import requests
 from hashlib import md5
-from typing import Literal
+from typing import Literal, get_args
 from pydantic import BaseModel
+from importlib import import_module
 
 import logging_loki
 import socket
@@ -55,6 +56,12 @@ from foraging_gui.RigJsonBuilder import build_rig_json
 from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
 from foraging_gui.loaded_mouse_slims_handler import LoadedMouseSlimsHandler
 from aind_behavior_services.session import AindBehaviorSessionModel
+from aind_slims_api.models.behavior_session import SlimsBehaviorSession
+from aind_behavior_dynamic_foraging.CurriculumManager.trainer import (
+    DynamicForagingTrainerState,
+    TrainerState,
+    DynamicForagingMetrics,
+)
 
 from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
     AindDynamicForagingTaskLogic,
@@ -76,7 +83,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
     SessionControl
 )
 
-from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry
+from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry, STAGE_STARTS
 
 from aind_behavior_dynamic_foraging.DataSchemas.operation_control import OperationalControl
 
@@ -277,8 +284,6 @@ class Window(QMainWindow):
         self.Other_manual_water_right_volume = []  # the volume of manual water given by the right valve each time
         self.Other_manual_water_right_time = []  # the valve open time of manual water given by the right valve each time
 
-        self._Optogenetics()  # open the optogenetics panel and initialize opto model
-
         # create slims handler to handle waterlog and curriculum management
         self.slims_handler = LoadedMouseSlimsHandler()
 
@@ -294,6 +299,7 @@ class Window(QMainWindow):
         self.load_slims_progress.setWindowFlag(Qt.FramelessWindowHint)
         self.load_slims_progress.setMovie(movie)
 
+        self._Optogenetics()  # open the optogenetics panel and initialize opto model
         self._LaserCalibration()  # to open the laser calibration panel
         self._WaterCalibration()  # to open the water calibration panel
         self._Camera()
@@ -559,8 +565,18 @@ class Window(QMainWindow):
             :param mouse_id: mouse id to load
         """
 
+        continue_load = self._NewSession()
+
+        if not continue_load:
+            return
+
         try:
+            # check slims for curriculum
             trainer_state, slims_session, task, sess, opto, fip, oc = self.slims_handler.load_mouse_curriculum(mouse_id)
+
+            if trainer_state is None:  # no curriculum in slims for this mouse
+                logging.info(f"Attempting to create curriculum for mouse {mouse_id} from schedule.")
+                trainer_state, slims_session, task, sess, opto, fip, oc = self.create_curriculum(mouse_id)
 
             # update models
             self.task_logic = task
@@ -612,14 +628,109 @@ class Window(QMainWindow):
             self.load_slims_progress.hide()
             self.modelsChanged.emit()
 
+    def create_curriculum(self, mouse_id) -> tuple[DynamicForagingTrainerState or None,
+                                                   SlimsBehaviorSession or None,
+                                                   AindDynamicForagingTaskLogic or None,
+                                                   AindBehaviorSessionModel or None,
+                                                   Optogenetics or None,
+                                                   FiberPhotometry or None,
+                                                   OperationalControl or None]:
+        """
+        Create curriculum based on schedule
+        :params mouse_id: mouse id string to load from slims
+        """
+
+        # define mapping between schedule and curriculums
+        curriculum_mapping = {"Uncoupled Without Baiting 2.3.1rwdDelay159": "uncoupled_no_baiting_rd_2p3p1",
+                              "Uncoupled Without Baiting 2.3": "uncoupled_no_baiting_2p3",
+                              "Uncoupled Baiting 2.3": "uncoupled_baiting_2p3",
+                              "Coupled Baiting 2.3": "coupled_baiting_2p3"}
+
+        # gather keys from schedule
+        logging.info("Gathering curriculum keys from schedule.")
+        autotrain_curriculum_name = self._GetInfoFromSchedule(mouse_id, "Autotrain Curriculum Name")
+        curriculum_version = self._GetInfoFromSchedule(mouse_id, "Curriculum Version")
+
+        key = f"{autotrain_curriculum_name} {curriculum_version}"
+        if key not in curriculum_mapping.keys():
+            raise KeyError(f"Curriculum {key} as defined in the schedule is not a valid curriculum. "
+                           f"Valid curriculums are {curriculum_mapping.keys()}")
+
+        # import and instantiate curriculum
+        logging.info("Importing and instantiating curriculum")
+        module = curriculum_mapping[key]
+        creation_factory_name = f"construct_{module}_curriculum"
+        curriculum = getattr(import_module(f"aind_behavior_dynamic_foraging.CurriculumManager.curriculums.{module}"),
+                             creation_factory_name)()
+
+        # create trainer state
+        stages = curriculum.see_stages()
+        stage_mapping = ["1.1", "1.2", "2", "3", "4", "FINAL", "GRADUATED"]
+        stage = self._GetInfoFromSchedule(mouse_id, "Current Stage")
+        stage = "1.1" if isinstance(stage, float) and math.isnan(stage) else stage  # account for blank schedule
+        logging.info("Creating trainer state")
+        ts = TrainerState(stage=stages[stage_mapping.index(stage)],
+                          curriculum=curriculum,
+                          is_on_curriculum=True)
+
+        # create metrics from docdb
+        sessions = self.slims_handler.trainer.docdb_client.retrieve_docdb_records(
+            filter_query={"name": {"$regex": f"^behavior_{mouse_id}(?!.*processed).*"}}
+        )
+        session_total = len(sessions)
+        sessions = [session for session in sessions if session['session'] is not None]  # sort out none types
+        sessions.sort(key=lambda session: session['session']['session_start_time'])  # sort based on time
+        epochs = [session['session']['stimulus_epochs'][0] for session in sessions]
+        finished_trials = [epoch['trials_finished'] for epoch in epochs]
+        foraging_efficiency = [epoch['output_parameters']['performance']['foraging_efficiency'] for epoch in epochs]
+        logging.info("Creating metrics.")
+        metrics = DynamicForagingMetrics(
+            foraging_efficiency=foraging_efficiency,
+            finished_trials=finished_trials,
+            session_total=session_total,
+            session_at_current_stage=0  # TODO: Just a guess? I'm not sure how to know this with only session.json
+        )
+
+        # set loaded mouse in slims handler to be able to write after session
+        logging.info("Creating metrics.")
+        self.slims_handler.set_loaded_mouse(mouse_id, metrics, ts, curriculum)
+
+        # update session model
+        self.session_model.experiment = autotrain_curriculum_name
+        self.session_model.experimenter = [str(self._GetInfoFromSchedule(mouse_id, "Trainer"))]
+        self.session_model.subject = mouse_id
+        self.session_model.notes = "" if math.isnan(self._GetInfoFromSchedule(mouse_id, "RA Notes")) \
+            else str(self._GetInfoFromSchedule(mouse_id, "RA Notes"))
+
+        # update fip model
+        mode = self._GetInfoFromSchedule(mouse_id, "FIP Mode")
+        if not (isinstance(mode, float) and math.isnan(mode)):  # schedule has input for fip
+            stage_list = get_args(STAGE_STARTS)
+            first = stage_list[stage_mapping.index(self._GetInfoFromSchedule(mouse_id, "First FP Stage"))]
+            self.fip_model = FiberPhotometry(mode=mode,
+                                             stage_start="stage_1_warmup" if type(first) != str else first.lower()
+            )
+            # check if current stage is past stage_start and enable if so
+            self.fip_model.enabled = stage_list.index(ts.stage.name) >= stage_list.index(self.fip_model.stage_start)
+
+        # create slims session model
+        sbs = SlimsBehaviorSession(
+            task_stage=ts.stage.name,
+            task=curriculum.name,
+            task_schema_version=curriculum.version,
+            is_curriculum_suggestion=True,
+        )
+
+        return ts, sbs, ts.stage.task, self.session_model, self.opto_model, self.fip_model, self.operation_control_model
+
     def write_curriculum(self):
         """
             Write curriculum to slims for next session
         """
-        # add session to slims
-        if hasattr(self, "GeneratedTrials"):
+        # add session to slims if there are trials and mouse loaded
+        if hasattr(self, "GeneratedTrials") and self.slims_handler.curriculum is not None:
             try:
-                trainer_state = self.slims_handler.write_session_to_slims(self.session_model.subject,
+                trainer_state = self.slims_handler.write_loaded_mouse(self.session_model.subject,
                                                                           self.on_curriculum.isChecked(),
                                                                           self.GeneratedTrials.B_for_eff_optimal,
                                                                           self.GeneratedTrials.B_CurrentTrialN,
@@ -636,7 +747,6 @@ class Window(QMainWindow):
 
             except Exception as e:
                 logging.error(str(e), extra={'tags': [self.warning_log_tag]})
-
 
     def _set_reference(self):
         '''
@@ -1292,9 +1402,11 @@ class Window(QMainWindow):
     def _GetInfoFromSchedule(self, mouse_id, column):
         mouse_id = str(mouse_id)
         if not hasattr(self, 'schedule'):
-            return None
+            logging.info("No schedule loaded.")
+            return
         if mouse_id not in self.schedule['Mouse ID'].values:
-            return None
+            logging.info(f"Mouse id {mouse_id} not in schedule values: {self.schedule['Mouse ID'].values}")
+            return
         return self.schedule.query('`Mouse ID` == @mouse_id').iloc[0][column]
 
     def _GetProjectName(self, mouse_id):
@@ -1941,8 +2053,9 @@ class Window(QMainWindow):
                                   tp.reward_probability.base_reward_sum
             elif self.session_model.experiment in ['Uncoupled Baiting', 'Uncoupled Without Baiting']:
                 self.RewardProb = np.array(tp.uncoupled_reward)
+            str_reward = str(self.RewardProb) if type(self.RewardProb) != float else str(np.round(self.RewardProb, 2))
             reward_str = 'Reward pairs:\n' + \
-                         str(np.round(self.RewardProb, 2)).replace('\n', ',') + \
+                         str_reward.replace('\n', ',') + \
                          '\n\n' + \
                          'Current pair:\n'
             if hasattr(self, 'GeneratedTrials'):
@@ -2631,8 +2744,9 @@ class Window(QMainWindow):
         Method to update all widget based on pydantic models
         """
 
-        self.task_widget.apply_schema(self.task_logic.task_parameters)
+        logging.info("Applying models to widgets")
         self.session_widget.apply_schema(self.session_model)
+        self.task_widget.apply_schema(self.task_logic.task_parameters)
         self.Opto_dialog.opto_widget.apply_schema(self.opto_model)
         self.fip_widget.apply_schema(self.fip_model)
         self.operation_control_widget.apply_schema(self.operation_control_model)
