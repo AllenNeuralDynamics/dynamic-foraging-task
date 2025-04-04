@@ -4000,6 +4000,7 @@ class Window(QMainWindow):
                 ):
                     self._AddWaterLogResult(session)
 
+
         except Exception as e:
             logging.warning(
                 "Meta data is not saved!",
