@@ -20,15 +20,18 @@ class FIBParametersWidget(SchemaWidgetBase):
         self.enabled_widget.toggled.connect(self.toggle_enabled)
         self.toggle_enabled(self.schema.enabled)
 
-    def toggle_enabled(self, enabled):
+    def toggle_enabled(self, enabled=True):
         """
             Disable widgets if enabled is False
         """
-
         for key, widget in self.schema_fields_widgets.items():
             if key == "enabled":
                 continue
-            widget.setEnabled(enabled)
+            widget.setEnabled(self.schema.enabled)
+
+    def apply_schema(self, schema):
+        super(FIBParametersWidget, self).apply_schema(schema)
+        self.toggle_enabled()
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication
@@ -50,6 +53,7 @@ if __name__ == "__main__":
 
     task_model.mode = "Axon"
     task_model.baseline_time = 7
+    task_model.enabled = False
     task_widget.apply_schema(task_model)
 
     sys.exit(app.exec_())
