@@ -582,7 +582,7 @@ class generate_metadata:
         keys: list
             key to be initialized
         default_value: any
-        """
+        '''
         for key in keys:
             if key not in dic:
                 dic[key] = default_value
@@ -1198,7 +1198,7 @@ class generate_metadata:
                 ))
     def _get_optical_tagging_light_source_config(self):
         '''
-        get the optical tagging light source config
+         get the optical tagging light source config
         '''
         self.optical_tagging_light_source_config=[]
         self._get_light_names_used_in_optical_tagging()
