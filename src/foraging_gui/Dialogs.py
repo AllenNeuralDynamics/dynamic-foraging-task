@@ -8,7 +8,7 @@ import webbrowser
 
 from sklearn.linear_model import LinearRegression
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Tuple
 
 import numpy as np
 import pandas as pd
