@@ -131,6 +131,7 @@ class generate_metadata:
                 'Oxxius Laser 561-2': {'color':'Yellow','laser_tag':2}, 
                 'Oxxius Laser 638-1': {'color':'Red','laser_tag':1}, 
                 'Oxxius Laser 638-2': {'color':'Red','laser_tag':2}, 
+                'Coherent Laser 640-1': {'color':'Red_coherent','laser_tag':1}, 
             },# laser name in the rig metadata and the corresponding color used in the behavior GUI
             'led_name_mapper':{
                 'LED 460-1': {'color':'Blue','laser_tag':1},
