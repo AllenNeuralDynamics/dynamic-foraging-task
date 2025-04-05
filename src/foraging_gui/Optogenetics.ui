@@ -616,9 +616,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>0</y>
-      <width>1372</width>
-      <height>431</height>
+      <y>-112</y>
+      <width>1376</width>
+      <height>381</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -946,7 +946,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>4</number>
+          <number>5</number>
          </property>
          <item>
           <property name="text">
@@ -956,6 +956,11 @@
          <item>
           <property name="text">
            <string>Red</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Red_coherent</string>
           </property>
          </item>
          <item>
@@ -1951,7 +1956,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>4</number>
+          <number>5</number>
          </property>
          <item>
           <property name="text">
@@ -1961,6 +1966,11 @@
          <item>
           <property name="text">
            <string>Red</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Red_coherent</string>
           </property>
          </item>
          <item>
@@ -2477,7 +2487,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>4</number>
+          <number>5</number>
          </property>
          <item>
           <property name="text">
@@ -2487,6 +2497,11 @@
          <item>
           <property name="text">
            <string>Red</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Red_coherent</string>
           </property>
          </item>
          <item>
@@ -3247,7 +3262,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>4</number>
+          <number>5</number>
          </property>
          <item>
           <property name="text">
@@ -3257,6 +3272,11 @@
          <item>
           <property name="text">
            <string>Red</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Red_coherent</string>
           </property>
          </item>
          <item>
@@ -3496,7 +3516,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>4</number>
+          <number>5</number>
          </property>
          <item>
           <property name="text">
@@ -3506,6 +3526,11 @@
          <item>
           <property name="text">
            <string>Red</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Red_coherent</string>
           </property>
          </item>
          <item>
@@ -5077,7 +5102,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>4</number>
+          <number>5</number>
          </property>
          <item>
           <property name="text">
@@ -5087,6 +5112,11 @@
          <item>
           <property name="text">
            <string>Red</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Red_coherent</string>
           </property>
          </item>
          <item>
