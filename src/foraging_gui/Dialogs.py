@@ -5,6 +5,8 @@ import os
 import subprocess
 import time
 import webbrowser
+
+from sklearn.linear_model import LinearRegression
 from datetime import datetime
 from typing import Literal
 
@@ -39,12 +41,13 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
 )
 
-from foraging_gui.MyFunctions import Worker
+from foraging_gui.MyFunctions import Worker,WorkerTagging
 from foraging_gui.Visualization import PlotWaterCalibration
 
 codebase_curriculum_schema_version = DynamicForagingCurriculum.model_fields[
     "curriculum_schema_version"
 ].default
+
 
 logger = logging.getLogger(__name__)
 
@@ -1666,13 +1669,8 @@ class CameraDialog(QDialog):
                 # sleep for 1 second to make sure the trigger is off
                 time.sleep(1)
             # Start logging if the formal logging is not started
-            if (
-                self.MainWindow.logging_type != 0
-                or self.MainWindow.logging_type == -1
-            ):
-                self.MainWindow.Ot_log_folder = (
-                    self.MainWindow._restartlogging()
-                )
+            if self.MainWindow.logging_type!=0:
+                self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
             # set to check drop frame as true
             self.MainWindow.to_check_drop_frames = 1
             # disable the start preview button
@@ -4080,3 +4078,610 @@ class PandasModel(QAbstractTableModel):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             return self._data.columns[col]
         return None
+    
+
+class OpticalTaggingDialog(QDialog):
+    
+    def __init__(self, MainWindow, parent=None):
+        super().__init__(parent)
+        uic.loadUi('OpticalTagging.ui', self)
+        self._connectSignalsSlots()
+        self.MainWindow = MainWindow
+        self.current_optical_tagging_par={}
+        self.optical_tagging_par={}
+        self.cycle_finish_tag = 1
+        self.thread_finish_tag = 1
+        self.threadpool = QThreadPool()
+        # find all buttons and set them to not be the default button
+        for container in [self]:
+            for child in container.findChildren((QtWidgets.QPushButton)):     
+                child.setDefault(False)
+                child.setAutoDefault(False)
+                
+    def _connectSignalsSlots(self):
+        self.Start.clicked.connect(self._Start)
+        self.WhichLaser.currentIndexChanged.connect(self._WhichLaser)
+        self.Restart.clicked.connect(self._start_over)
+        self.Save.clicked.connect(self._Save)
+        self.ClearData.clicked.connect(self._clear_data)
+    
+    def _Save(self):
+        '''Save the optical tagging results'''
+        if self.optical_tagging_par=={}:
+            return
+        # giving the user a warning message to show "This will only save the current parameters and results related to the random reward. If you want to save more including the metadata, please go to the main window and click the save button."
+        QMessageBox.warning(
+            self,
+            "Save Warning",
+            "Only the current parameters and results related to the optical tagging will be saved. "
+            "To save additional data, including metadata, please use the Save button in the main window."
+        )
+        # get the save folder
+        if self.MainWindow.CreateNewFolder == 1:
+            self.MainWindow._GetSaveFolder()
+            self.MainWindow.CreateNewFolder = 0
+
+        save_file=self.MainWindow.SaveFileJson
+        if not os.path.exists(os.path.dirname(save_file)):
+            os.makedirs(os.path.dirname(save_file))
+            logging.info(f"Created new folder: {os.path.dirname(save_file)}")
+            
+        self.optical_tagging_par["task_parameters"]={
+            "laser_name": self.WhichLaser.currentText(),
+            "protocol": self.Protocol.currentText(),
+            "laser_1_color": self.Laser_1_color.currentText(),
+            "laser_2_color": self.Laser_2_color.currentText(),
+            "laser_1_power": self.Laser_1_power.text(),
+            "laser_2_power": self.Laser_2_power.text(),
+            "frequency": self.Frequency.text(),
+            "pulse_duration": self.Pulse_duration.text(),
+            "duration_each_cycle": self.Duration_each_cycle.text(),
+            "interval_between_cycles": self.Interval_between_cycles.text(),
+            "cycles_each_condition": self.Cycles_each_condition.text(),
+            "pulse_ramp_up": self.Pulse_ramp_up.text(),
+            "pulse_ramp_down": self.Pulse_ramp_down.text(),
+        }
+        # save the data 
+        with open(save_file, 'w') as f:
+            json.dump(self.optical_tagging_par, f, indent=4)
+        
+    def _Start(self):
+        '''Start the optical tagging'''
+        # restart the logging if it is not started
+        if self.MainWindow.logging_type!=0 :
+            self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
+
+        # toggle the button color
+        if self.Start.isChecked():
+            self.Start.setStyleSheet("background-color : green;")
+        else:
+            self.Start.setStyleSheet("background-color : none")
+            return
+        # generate random conditions including lasers, laser power, laser color, and protocol
+        if self.cycle_finish_tag==1:
+            # generate new random conditions
+            self._generate_random_conditions()
+            self.index=list(range(len(self.current_optical_tagging_par['protocol_sampled_all'])))
+            self.cycle_finish_tag = 0
+
+        # send the trigger source
+        self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
+
+        # start the optical tagging in a different thread
+        worker_tagging = WorkerTagging(self._start_optical_tagging)
+        worker_tagging.signals.update_label.connect(self.label_show_current.setText)  # Connect to label update
+        worker_tagging.signals.finished.connect(self._thread_complete_tag)
+
+        # get the first start time
+        if "optical_tagging_start_time" not in self.optical_tagging_par:
+            self.optical_tagging_par["optical_tagging_start_time"] = str(datetime.now())
+        if self.optical_tagging_par["optical_tagging_start_time"]=='':
+            self.optical_tagging_par["optical_tagging_start_time"] = str(datetime.now())
+
+        # Execute
+        if self.thread_finish_tag == 1:
+            self.threadpool.start(worker_tagging)
+        else:
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
+        #self._start_optical_tagging()
+
+    def _clear_data(self):
+        '''Clear the optical tagging data'''
+        # ask for confirmation
+        reply = QMessageBox.question(self, 'Message', 'Are you sure to clear the optical tagging data?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.cycle_finish_tag = 1
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
+            # wait for the thread to finish
+            while self.thread_finish_tag == 0:
+                QApplication.processEvents()
+                time.sleep(0.1)
+            self.optical_tagging_par={}
+            self.label_show_current.setText('')
+            self.LocationTag.setText('')
+
+    def _start_over(self):
+        '''Stop the optical tagging and start over (parameters will be shuffled)'''
+        # ask for confirmation
+        reply = QMessageBox.question(self, 'Message', 'Are you sure to start over the optical tagging?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.cycle_finish_tag = 1
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
+
+    def _thread_complete_tag(self):
+        '''Complete the optical tagging'''
+        self.thread_finish_tag = 1
+        self.Start.setChecked(False)
+        self.Start.setStyleSheet("background-color : none")
+        # update the stop time
+        self.optical_tagging_par["optical_tagging_end_time"] = str(datetime.now())
+        # toggle the start button in the main window
+        self.MainWindow.unsaved_data=True
+        self.MainWindow.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+
+    def _start_optical_tagging(self,update_label):
+        '''Start the optical tagging in a different thread'''
+        self.thread_finish_tag = 0
+        # iterate each condition
+        for i in self.index[:]:
+            if self.Start.isChecked():
+                if i == self.index[-1]:
+                    self.cycle_finish_tag = 1
+                # exclude the index that has been run
+                self.index.remove(i)
+                success_tag=0
+                # get the current parameters
+                protocol = self.current_optical_tagging_par['protocol_sampled_all'][i]
+                frequency = self.current_optical_tagging_par['frequency_sampled_all'][i]
+                pulse_duration = self.current_optical_tagging_par['pulse_duration_sampled_all'][i]
+                pulse_ramp_up = self.current_optical_tagging_par['pulse_ramp_up_sampled_all'][i]
+                pulse_ramp_down = self.current_optical_tagging_par['pulse_ramp_down_sampled_all'][i]
+                laser_name = self.current_optical_tagging_par['laser_name_sampled_all'][i]
+                target_power = self.current_optical_tagging_par['target_power_sampled_all'][i]
+                laser_color = self.current_optical_tagging_par['laser_color_sampled_all'][i]
+                duration_each_cycle = self.current_optical_tagging_par['duration_each_cycle_sampled_all'][i]
+                interval_between_cycles = self.current_optical_tagging_par['interval_between_cycles_sampled_all'][i]
+                location_tag = self.current_optical_tagging_par['location_tag_sampled_all'][i]
+                # produce the waveforms
+                my_wave=self._produce_waveforms(protocol=protocol, 
+                                                frequency=frequency, 
+                                                pulse_duration=pulse_duration, 
+                                                pulse_ramp_up=pulse_ramp_up,
+                                                pulse_ramp_down=pulse_ramp_down,
+                                                laser_name=laser_name, 
+                                                target_power=target_power, 
+                                                laser_color=laser_color, 
+                                                duration_each_cycle=duration_each_cycle
+                                            )
+                my_wave_control=self._produce_waveforms(protocol=protocol,
+                                                        frequency=frequency,
+                                                        pulse_duration=pulse_duration,
+                                                        pulse_ramp_up=pulse_ramp_up,
+                                                        pulse_ramp_down=pulse_ramp_down,
+                                                        laser_name=laser_name,
+                                                        target_power=0,
+                                                        laser_color=laser_color,
+                                                        duration_each_cycle=duration_each_cycle
+                                                    )
+                if my_wave is None:
+                    continue
+                # send the waveform and size to the bonsai
+                if laser_name=='Laser_1':
+                    getattr(self.MainWindow.Channel, 'Location1_Size')(int(my_wave.size))
+                    getattr(self.MainWindow.Channel4, 'WaveForm1_1')(str(my_wave.tolist())[1:-1])
+                    getattr(self.MainWindow.Channel, 'Location2_Size')(int(my_wave_control.size))
+                    getattr(self.MainWindow.Channel4, 'WaveForm1_2')(str(my_wave_control.tolist())[1:-1])
+                elif laser_name=='Laser_2':
+                    getattr(self.MainWindow.Channel, 'Location2_Size')(int(my_wave.size))
+                    getattr(self.MainWindow.Channel4, 'WaveForm1_2')(str(my_wave.tolist())[1:-1])
+                    getattr(self.MainWindow.Channel, 'Location1_Size')(int(my_wave_control.size))
+                    getattr(self.MainWindow.Channel4, 'WaveForm1_1')(str(my_wave_control.tolist())[1:-1])
+                FinishOfWaveForm=self.MainWindow.Channel4.receive() 
+                # initiate the laser
+                # need to change the bonsai code to initiate the laser
+                self._initiate_laser()
+                # receiving the timestamps of laser start and saving them. The laser waveforms should be sent to the NI-daq as a backup. 
+                Rec=self.MainWindow.Channel.receive()
+
+                if Rec[0].address=='/ITIStartTimeHarp':
+                    laser_start_timestamp=Rec[1][1][0]
+                    # change the success_tag to 1
+                    success_tag=1
+                else:
+                    laser_start_timestamp=-999 # error tag
+
+                # save the data 
+                self._save_data(protocol=protocol,
+                                frequency=frequency,
+                                pulse_duration=pulse_duration,
+                                pulse_ramp_up=pulse_ramp_up,
+                                pulse_ramp_down=pulse_ramp_down,
+                                laser_name=laser_name,
+                                target_power=target_power,
+                                laser_color=laser_color,
+                                duration_each_cycle=duration_each_cycle,
+                                interval_between_cycles=interval_between_cycles,
+                                location_tag=location_tag,
+                                laser_start_timestamp=laser_start_timestamp,
+                                success_tag=success_tag
+                            )
+                # show current cycle and parameters
+                # Emit signal to update the label
+                update_label(
+                    f"Cycles: {i+1}/{len(self.current_optical_tagging_par['protocol_sampled_all'])} \n"
+                    f"Power: {target_power} mW\n"
+                    f"Color: {laser_color}\n"
+                    f"Laser: {laser_name}\n"
+                    f"protocol: {protocol}\n"
+                    f"Frequency: {frequency} Hz\n"
+                    f"Pulse Duration: {pulse_duration} ms\n"
+                    f"Ramp Up: {pulse_ramp_up} ms\n"
+                    f"Ramp Down: {pulse_ramp_down} ms\n"
+                    f"Duration: {duration_each_cycle} s\n"
+                    f"Interval: {interval_between_cycles} s"
+                )
+                # wait to start the next cycle
+                time.sleep(duration_each_cycle+interval_between_cycles)
+            else:
+                break
+
+    def _save_data(self, **kwargs):
+        """
+        Extend the current parameters in self.optical_tagging_par using any provided keyword arguments.
+        
+        Each keyword argument's key is used as a dictionary key, and its value is appended
+        to the corresponding list.
+        """
+        # Initialize the dictionary if it hasn't been already
+        if not hasattr(self, 'optical_tagging_par') or not isinstance(self.optical_tagging_par, dict):
+            self.optical_tagging_par = {}
+            
+        for key, value in kwargs.items():
+            # If the key is not present, initialize with an empty list
+            if key not in self.optical_tagging_par:
+                self.optical_tagging_par[key] = []
+            # Append the new value to the list for this key
+            self.optical_tagging_par[key].append(value)
+
+    def _initiate_laser(self):
+        '''Initiate laser in bonsai'''
+        # start generating waveform in bonsai
+        self.MainWindow.Channel.OptogeneticsCalibration(int(1))
+
+    def _generate_random_conditions(self):
+        """
+        Generate random conditions for the optical tagging process. Each condition corresponds to one cycle, with parameters randomly selected for each duration. 
+
+        The parameters are chosen as follows:
+        - **Lasers**: One of the following is selected: `Laser_1` or `Laser_2`.
+        - **Laser Power**: If `Laser_1` is selected, `Laser_1_power` is used. If `Laser_2` is selected, `Laser_2_power` is used.
+        - **Laser Color**: If `Laser_1` is selected, `Laser_1_color` is used. If `Laser_2` is selected, `Laser_2_color` is used.
+        *Note: `Laser`, `Laser Power`, and `Laser Color` are selected together as a group.*
+
+        Additional parameters:
+        - **Protocol**: Currently supports only `Pulse`.
+        - **Frequency (Hz)**: Applied to both lasers during the cycle.
+        - **Pulse Duration (ms)**: Applied to both lasers during the cycle.
+        """
+        # get the protocol
+        protocol = self.Protocol.currentText()
+        if protocol!='Pulse':
+            raise ValueError(f"Unknown protocol: {protocol}")
+        # get the number of cycles
+        number_of_cycles = int(math.floor(float(self.Cycles_each_condition.text())))
+        # get the frequency
+        frequency_list = list(map(int, extract_numbers_from_string(self.Frequency.text())))
+        # get the pulse duration (seconds)
+        pulse_duration_list = extract_numbers_from_string(self.Pulse_duration.text())
+        # get the laser name
+        if self.WhichLaser.currentText()=="Both":
+            laser_name_list = ['Laser_1','Laser_2']
+            laser_config = {
+                'Laser_1': (self.Laser_1_power, self.Laser_1_color),
+                'Laser_2': (self.Laser_2_power, self.Laser_2_color)
+            }
+        elif self.WhichLaser.currentText() in ['Laser_1','Laser_2']:
+            laser_name_list = [self.WhichLaser.currentText()]
+            if laser_name_list[0]=='Laser_1':
+                laser_config = {
+                    'Laser_1': (self.Laser_1_power, self.Laser_1_color)
+                }
+            elif laser_name_list[0]=='Laser_2':
+                laser_config = {
+                    'Laser_2': (self.Laser_2_power, self.Laser_2_color)
+                }
+        else:
+            # give an popup error window if the laser is not selected
+            QMessageBox.critical(self.MainWindow, "Error", "Please select the laser to use.")
+            return
+        
+        pulse_ramp_up_list = extract_numbers_from_string(self.Pulse_ramp_up.text())
+        pulse_ramp_down_list = extract_numbers_from_string(self.Pulse_ramp_down.text())
+        # Generate combinations for each laser
+        protocol_sampled, frequency_sampled, pulse_duration_sampled,pulse_ramp_up_sampled,pulse_ramp_down_sampled, laser_name_sampled, target_power_sampled, laser_color_sampled,duration_each_cycle_sampled,interval_between_cycles_sampled = zip(*[
+            (protocol, frequency, pulse_duration,pulse_ramp_up,pulse_ramp_down, laser_name, target_power, laser_config[laser_name][1].currentText(),duration_each_cycle,interval_between_cycles)
+            for frequency in frequency_list
+            for pulse_duration in pulse_duration_list
+            for pulse_ramp_up in pulse_ramp_up_list
+            for pulse_ramp_down in pulse_ramp_down_list
+            for laser_name, (power_field, _) in laser_config.items()
+            for target_power in extract_numbers_from_string(power_field.text())
+            for duration_each_cycle in extract_numbers_from_string(self.Duration_each_cycle.text())
+            for interval_between_cycles in extract_numbers_from_string(self.Interval_between_cycles.text())
+        ])
+
+        self.current_optical_tagging_par['protocol_sampled_all'] = []
+        self.current_optical_tagging_par['frequency_sampled_all'] = []
+        self.current_optical_tagging_par['pulse_duration_sampled_all'] = []
+        self.current_optical_tagging_par['pulse_ramp_up_sampled_all'] = []
+        self.current_optical_tagging_par['pulse_ramp_down_sampled_all'] = []
+        self.current_optical_tagging_par['laser_name_sampled_all'] = []
+        self.current_optical_tagging_par['target_power_sampled_all'] = []
+        self.current_optical_tagging_par['laser_color_sampled_all'] = []
+        self.current_optical_tagging_par['duration_each_cycle_sampled_all'] = []
+        self.current_optical_tagging_par['interval_between_cycles_sampled_all'] = []
+        self.current_optical_tagging_par['location_tag_sampled_all'] = []
+        for i in range(number_of_cycles):
+            # Generate a random index to sample conditions
+            random_indices = random.sample(range(len(protocol_sampled)), len(protocol_sampled))
+            # Use the random indices to shuffle the conditions
+            protocol_sampled_now = [protocol_sampled[i] for i in random_indices]
+            frequency_sampled_now = [frequency_sampled[i] for i in random_indices]
+            pulse_duration_sampled_now = [pulse_duration_sampled[i] for i in random_indices]
+            pulse_ramp_up_sampled_now = [pulse_ramp_up_sampled[i] for i in random_indices]
+            pulse_ramp_down_sampled_now = [pulse_ramp_down_sampled[i] for i in random_indices]
+            laser_name_sampled_now = [laser_name_sampled[i] for i in random_indices]
+            target_power_sampled_now = [target_power_sampled[i] for i in random_indices]
+            laser_color_sampled_now = [laser_color_sampled[i] for i in random_indices]
+            duration_each_cycle_sampled = [duration_each_cycle_sampled[i] for i in random_indices]
+            # Append the conditions
+            self.current_optical_tagging_par['protocol_sampled_all'].extend(protocol_sampled_now)
+            self.current_optical_tagging_par['frequency_sampled_all'].extend(frequency_sampled_now)
+            self.current_optical_tagging_par['pulse_duration_sampled_all'].extend(pulse_duration_sampled_now)
+            self.current_optical_tagging_par['pulse_ramp_up_sampled_all'].extend(pulse_ramp_up_sampled_now)
+            self.current_optical_tagging_par['pulse_ramp_down_sampled_all'].extend(pulse_ramp_down_sampled_now)
+            self.current_optical_tagging_par['laser_name_sampled_all'].extend(laser_name_sampled_now)
+            self.current_optical_tagging_par['target_power_sampled_all'].extend(target_power_sampled_now)
+            self.current_optical_tagging_par['laser_color_sampled_all'].extend(laser_color_sampled_now)
+            self.current_optical_tagging_par['duration_each_cycle_sampled_all'].extend(duration_each_cycle_sampled)
+            self.current_optical_tagging_par['interval_between_cycles_sampled_all'].extend(interval_between_cycles_sampled)
+            self.current_optical_tagging_par['location_tag_sampled_all'].extend([self.LocationTag.text()]*len(protocol_sampled))
+
+    def _WhichLaser(self):
+        '''Select the laser to use and disable non-relevant widgets'''
+        laser_name = self.WhichLaser.currentText()
+        if laser_name=='Laser_1':
+            self.Laser_2_power.setEnabled(False)
+            self.label1_16.setEnabled(False)
+            self.label1_3.setEnabled(True)
+            self.Laser_1_power.setEnabled(True)
+        elif laser_name=='Laser_2':
+            self.Laser_1_power.setEnabled(False)
+            self.label1_3.setEnabled(False)
+            self.label1_16.setEnabled(True)
+            self.Laser_2_power.setEnabled(True)
+        else:
+            self.Laser_1_power.setEnabled(True)
+            self.Laser_2_power.setEnabled(True)
+            self.label1_3.setEnabled(True)
+            self.label1_16.setEnabled(True)
+    
+    def _produce_waveforms(self,protocol:str,
+                           frequency:float,
+                           pulse_duration:float,
+                           pulse_ramp_up:float,
+                           pulse_ramp_down:float,
+                           laser_name:str,
+                           target_power:float,
+                           laser_color:str,
+                           duration_each_cycle:float
+                           ):
+        '''Produce the waveforms for the optical tagging'''
+        # get the amplitude of the laser
+        if target_power==0:
+            # force the input_voltage to be 0 when the target_power is 0
+            input_voltage=0
+        else:
+            input_voltage=self._get_laser_amplitude(target_power=target_power,
+                                                    laser_color=laser_color,
+                                                    protocol=protocol,
+                                                    laser_name=laser_name
+                                                )
+        if input_voltage is None:
+            return
+        
+        # produce the waveform
+        my_wave=self._get_laser_waveform(protocol=protocol,
+                                        frequency=frequency,
+                                        pulse_duration=pulse_duration,
+                                        pulse_ramp_up=pulse_ramp_up,
+                                        pulse_ramp_down=pulse_ramp_down,
+                                        input_voltage=input_voltage,
+                                        duration_each_cycle=duration_each_cycle
+                                    )
+        
+        return my_wave
+    
+    def _get_laser_waveform(self, protocol: str, frequency: float, pulse_duration: float,
+                        input_voltage: float, duration_each_cycle: float,
+                        pulse_ramp_up: float, pulse_ramp_down: float
+                        ) -> np.array:
+        '''Get the waveform for the laser with linear ramp up and down for each pulse.
+        
+        Args:
+            protocol: The protocol to use (only 'Pulse' is supported).
+            frequency: The frequency of the pulse.
+            pulse_duration: The total duration of the pulse (ms).
+            input_voltage: The input voltage of the laser.
+            duration_each_cycle: The total duration of one cycle.
+            pulse_ramp_up: Duration for the linear ramp up at the beginning of each pulse (ms).
+            pulse_ramp_down: Duration for the linear ramp down at the end of each pulse (ms).
+            
+        Returns:
+            np.array: The complete waveform for the laser.
+        '''
+
+        # The sample frequency of the NI-daq (Hz).
+        sample_frequency=int(self.NI_daq_sample_frequency.text())
+
+        # Check protocol
+        if protocol != 'Pulse':
+            logger.warning(f"Unknown protocol: {protocol}")
+            return
+
+        # Calculate the total number of points per pulse
+        PointsEachPulse = int(sample_frequency * pulse_duration / 1000)
+
+        # Calculate the number of points for ramp up and ramp down
+        ramp_up_points = int(sample_frequency * pulse_ramp_up / 1000)
+        ramp_down_points = int(sample_frequency * pulse_ramp_down / 1000)
+        
+        # Check if ramp durations exceed pulse duration
+        if ramp_up_points + ramp_down_points > PointsEachPulse:
+            logging.warning('Ramp up and ramp down durations exceed the total pulse duration!',
+                            extra={'tags': [self.MainWindow.warning_log_tag]})
+            return
+
+        # The remaining points are for the plateau (steady high) part of the pulse
+        plateau_points = PointsEachPulse - (ramp_up_points + ramp_down_points)
+        
+        # Build the pulse waveform:
+        # Linear ramp-up: from 0 to input_voltage over ramp_up_points
+        if ramp_up_points > 0:
+            ramp_up = np.linspace(0, input_voltage, ramp_up_points, endpoint=False)
+        else:
+            ramp_up = np.array([])
+        
+        # Plateau at input_voltage
+        if plateau_points > 0:
+            plateau = input_voltage * np.ones(plateau_points)
+        else:
+            plateau = np.array([])
+        
+        # Linear ramp-down: from input_voltage to 0 over ramp_down_points
+        if ramp_down_points > 0:
+            ramp_down = np.linspace(input_voltage, 0, ramp_down_points, endpoint=False)
+        else:
+            ramp_down = np.array([])
+        
+        # Construct one pulse with ramp up, plateau, and ramp down
+        EachPulse = np.concatenate((ramp_up, plateau, ramp_down), axis=0)
+        
+        # Calculate the number of points for the off interval between pulses
+        PulseIntervalPoints = int(1 / frequency * sample_frequency - PointsEachPulse)
+        if PulseIntervalPoints < 0:
+            logging.warning('Pulse frequency and pulse duration are not compatible!',
+                            extra={'tags': [self.MainWindow.warning_log_tag]})
+        
+        PulseInterval = np.zeros(PulseIntervalPoints)
+        WaveFormEachCycle = np.concatenate((EachPulse, PulseInterval), axis=0)
+        
+        TotalPoints = int(sample_frequency * duration_each_cycle)
+        PulseNumber = np.floor(duration_each_cycle * frequency)
+        
+        my_wave = np.empty(0)
+        # Ensure pulse number is greater than 0
+        if PulseNumber >= 1:
+            for i in range(int(PulseNumber - 1)):
+                my_wave = np.concatenate((my_wave, WaveFormEachCycle), axis=0)
+        else:
+            logging.warning('Pulse number is less than 1!',
+                            extra={'tags': [self.MainWindow.warning_log_tag]})
+            return
+
+        my_wave = np.concatenate((my_wave, EachPulse), axis=0)
+        my_wave = np.concatenate((my_wave, np.zeros(TotalPoints - np.shape(my_wave)[0])), axis=0)
+        my_wave = np.append(my_wave, [0, 0])
+        return my_wave
+
+    def _get_laser_amplitude(self,target_power:float,laser_color:str,protocol:str,laser_name:str)->float:
+        '''Get the amplitude of the laser based on the calibraion results
+        Args:
+            target_power: The target power of the laser.
+            laser_color: The color of the laser.
+            protocol: The protocol to use.
+        Returns:
+            float: The amplitude of the laser.
+        '''
+        # get the current calibration results
+        latest_calibration_date=find_latest_calibration_date(self.MainWindow.LaserCalibrationResults,laser_color)
+        # get the selected laser
+        if latest_calibration_date=='NA':
+            logger.info(f"No calibration results found for {laser_color}")
+            return
+        else:
+            try:
+                calibration_results=self.MainWindow.LaserCalibrationResults[latest_calibration_date][laser_color][protocol][laser_name]['LaserPowerVoltage']
+            except:
+                logger.info(f"No calibration results found for {laser_color} and {laser_name}")
+                return
+        # fit the calibration results with a linear model
+        slope,intercept=fit_calibration_results(calibration_results)
+        # Find the corresponding input voltage for a target laser power
+        input_voltage_for_target = (target_power - intercept) / slope
+        return round(input_voltage_for_target, 2)
+    
+def fit_calibration_results(calibration_results: list) -> Tuple[float, float]:
+    """
+    Fit the calibration results with a linear model.
+
+    Args:
+        calibration_results: A list of calibration results where each entry is [input_voltage, laser_power].
+
+    Returns:
+        A tuple (slope, intercept) of the fitted linear model.
+    """
+    # Convert to numpy array for easier manipulation
+    calibration_results = np.array(calibration_results)
+
+    # Separate input voltage and laser power
+    input_voltage = calibration_results[:, 0].reshape(-1, 1)  # X (features)
+    laser_power = calibration_results[:, 1]  # y (target)
+
+    # Fit the linear model
+    model = LinearRegression()
+    model.fit(input_voltage, laser_power)
+
+    # Extract model coefficients
+    slope = model.coef_[0]
+    intercept = model.intercept_
+
+    return slope, intercept
+            
+def find_latest_calibration_date(calibration:list,laser_color:str)->str:
+    """
+    Find the latest calibration date for the selected laser.
+
+    Args:
+        calibration: The calibration object.
+        Laser: The selected laser color.
+
+    Returns:
+        str: The latest calibration date for the selected laser.
+    """
+    Dates=[]
+    for Date in calibration:
+        if laser_color in calibration[Date].keys():
+            Dates.append(Date)
+    sorted_dates = sorted(Dates)
+    if sorted_dates==[]:
+        return 'NA'
+    else:
+        return sorted_dates[-1]
+    
+def extract_numbers_from_string(input_string:str)->list:
+    """
+    Extract numbers from a string.
+
+    Args:
+        string: The input string.
+
+    Returns:
+        list: The list of numbers.
+    """
+    # Regular expression to match floating-point numbers
+    float_pattern = r"[-+]?\d*\.\d+|\d+"  # Matches numbers like 0.4, -0.5, etc.
+    return [float(num) for num in re.findall(float_pattern, input_string)]

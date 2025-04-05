@@ -50,6 +50,15 @@ from StageWidget.main import get_stage_widget
 
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
+
+from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
+from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,MetadataDialog
+from foraging_gui.Dialogs import LaserCalibrationDialog,OpticalTaggingDialog
+from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
+from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
+from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
+from foraging_gui.stage import Stage
+
 from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.Dialogs import (
     AutoTrainDialog,
@@ -263,42 +272,37 @@ class Window(QMainWindow):
         self.toolBar_3.addWidget(self.sound_button)
 
         # Set up more parameters
-        self.FIP_started = False
-        self.OpenOptogenetics = 0
-        self.OpenWaterCalibration = 0
-        self.OpenLaserCalibration = 0
-        self.OpenCamera = 0
-        self.OpenMetadata = 0
-        self.NewTrialRewardOrder = 0
-        self.LickSta = 0
-        self.LickSta_ToInitializeVisual = 1
-        self.TimeDistribution = 0
-        self.TimeDistribution_ToInitializeVisual = 1
-        self.finish_Timer = 1  # for photometry baseline recordings
-        self.PhotometryRun = 0  # 1. Photometry has been run; 0. Photometry has not been carried out.
-        self.ignore_timer = (
-            False  # Used for canceling the photometry baseline timer
-        )
-        self.give_left_volume_reserved = 0  # the reserved volume of the left valve (usually given after go cue)
-        self.give_right_volume_reserved = 0  # the reserved volume of the right valve (usually given after go cue)
-        self.give_left_time_reserved = 0  # the reserved open time of the left valve (usually given after go cue)
-        self.give_right_time_reserved = 0  # the reserved open time of the right valve (usually given after go cue)
-        self.load_tag = (
-            0  # 1, a session has been loaded; 0, no session has been loaded
-        )
-        # the volume of manual water given by the left valve each time
-        self.Other_manual_water_left_volume = []
-        # the valve open time of manual water given by the left valve each time
-        self.Other_manual_water_left_time = []
-        # the volume of manual water given by the right valve each time
-        self.Other_manual_water_right_volume = []
-        # the valve open time of manual water given by the right valve each time
-        self.Other_manual_water_right_time = []
+        self.FIP_started=False
+        self.OpenOptogenetics=0
+        self.OpenWaterCalibration=0
+        self.OpenLaserCalibration=0
+        self.OpenCamera=0
+        self.OpenMetadata=0
+        self.OpenOpticalTagging=0
+        self.NewTrialRewardOrder=0
+        self.LickSta=0
+        self.LickSta_ToInitializeVisual=1
+        self.TimeDistribution=0
+        self.TimeDistribution_ToInitializeVisual=1
+        self.finish_Timer=1     # for photometry baseline recordings
+        self.PhotometryRun=0    # 1. Photometry has been run; 0. Photometry has not been carried out.
+        self.ignore_timer=False # Used for canceling the photometry baseline timer
+        self.give_left_volume_reserved=0 # the reserved volume of the left valve (usually given after go cue)
+        self.give_right_volume_reserved=0 # the reserved volume of the right valve (usually given after go cue)
+        self.give_left_time_reserved=0 # the reserved open time of the left valve (usually given after go cue)
+        self.give_right_time_reserved=0 # the reserved open time of the right valve (usually given after go cue)
+        self.load_tag=0 # 1, a session has been loaded; 0, no session has been loaded
+        self.Other_manual_water_left_volume=[] # the volume of manual water given by the left valve each time
+        self.Other_manual_water_left_time=[] # the valve open time of manual water given by the left valve each time
+        self.Other_manual_water_right_volume=[] # the volume of manual water given by the right valve each time
+        self.Other_manual_water_right_time=[] # the valve open time of manual water given by the right valve each time
 
-        self._Optogenetics()  # open the optogenetics panel
-        self._LaserCalibration()  # to open the laser calibration panel
-        self._WaterCalibration()  # to open the water calibration panel
+        self._Optogenetics()    # open the optogenetics panel
+        self._LaserCalibration()# to open the laser calibration panel
+        self._WaterCalibration()# to open the water calibration panel
+
         self._Camera()
+        self._OpticalTagging()
         self._InitializeMotorStage()
         self._Metadata()
         self.RewardFamilies = [
@@ -448,6 +452,7 @@ class Window(QMainWindow):
         self.sound_button.attenuationChanged.connect(self.change_attenuation)
 
         self.actionMeta_Data.triggered.connect(self._Metadata)
+        self.actionOptical_Tagging.triggered.connect(self._OpticalTagging)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
         self.actionLicks_sta.triggered.connect(self._LickSta)
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
@@ -3462,6 +3467,16 @@ class Window(QMainWindow):
         else:
             self.Camera_dialog.hide()
 
+    def _OpticalTagging(self):
+        '''Open the optical tagging dialog'''
+        if self.OpenOpticalTagging==0:
+            self.OpticalTagging_dialog = OpticalTaggingDialog(MainWindow=self)
+            self.OpenOpticalTagging=1
+        if self.actionOptical_Tagging.isChecked()==True:
+            self.OpticalTagging_dialog.show()
+        else:
+            self.OpticalTagging_dialog.hide()
+            
     def play_beep(self):
         """
         Convenience function to play tone
@@ -3802,6 +3817,7 @@ class Window(QMainWindow):
                 "Opto_dialog",
                 "Camera_dialog",
                 "Metadata_dialog",
+                "OpticalTagging_dialog"
             ]
             for dialog_name in dialogs:
                 if hasattr(self, dialog_name):
@@ -3952,6 +3968,9 @@ class Window(QMainWindow):
         Obj["MetadataFolder"] = self.MetadataFolder
         Obj["SaveFile"] = self.SaveFile
 
+        # save optical tagging parameters
+        if not self.OpticalTagging_dialog.optical_tagging_par == {}:
+            Obj['optical_tagging_par']=self.OpticalTagging_dialog.optical_tagging_par
         # generate the metadata file and update slims
         try:
             # save the metadata collected in the metadata dialogue
@@ -4553,7 +4572,6 @@ class Window(QMainWindow):
                 Obj = json.loads(f.read())
                 f.close()
             self.Obj = Obj
-
             widget_dict = {}
             dialogs = [
                 "LaserCalibration_dialog",
@@ -4561,6 +4579,7 @@ class Window(QMainWindow):
                 "Camera_dialog",
                 "centralwidget",
                 "TrainingParameters",
+                "OpticalTagging_dialog"
             ]
             for dialog_name in dialogs:
                 if hasattr(self, dialog_name):
@@ -4608,6 +4627,8 @@ class Window(QMainWindow):
                             CurrentObj = Obj["LaserCalibration_dialog"]
                         elif widget.parent().objectName() == "MetaData":
                             CurrentObj = Obj["Metadata_dialog"]
+                        elif widget.parent().objectName() == 'OpticalTagging':
+                            CurrentObj = Obj['OpticalTagging_dialog']
                         else:
                             CurrentObj = Obj.copy()
                     except Exception:
@@ -4754,12 +4775,10 @@ class Window(QMainWindow):
                                 self._NextBlock()
                     else:
                         widget = widget_dict[key]
-                        if not (
-                            isinstance(widget, QtWidgets.QComboBox)
-                            or isinstance(widget, QtWidgets.QPushButton)
-                        ):
+                        if widget.isEnabled() and not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
                             widget.clear()
-            except Exception:
+
+            except Exception as e:
                 # Catch the exception and print error information
                 logging.error(traceback.format_exc())
             try:
