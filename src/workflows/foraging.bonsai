@@ -7982,7 +7982,7 @@
                                 <io:Overwrite>true</io:Overwrite>
                                 <io:Suffix>None</io:Suffix>
                                 <io:IncludeHeader>false</io:IncludeHeader>
-                                <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp,Value.ChunkData.Gain,Value.ChunkData.ExposureTime</io:Selector>
+                                <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp</io:Selector>
                               </Expression>
                               <Expression xsi:type="MemberSelector">
                                 <Selector>Value.Image</Selector>
@@ -8203,7 +8203,7 @@
                                 <io:Overwrite>true</io:Overwrite>
                                 <io:Suffix>None</io:Suffix>
                                 <io:IncludeHeader>false</io:IncludeHeader>
-                                <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp,Value.ChunkData.Gain,Value.ChunkData.ExposureTime</io:Selector>
+                                <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp</io:Selector>
                               </Expression>
                               <Expression xsi:type="MemberSelector">
                                 <Selector>Value.Image</Selector>
@@ -8428,7 +8428,7 @@
                                 <io:Overwrite>true</io:Overwrite>
                                 <io:Suffix>None</io:Suffix>
                                 <io:IncludeHeader>false</io:IncludeHeader>
-                                <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp,Value.ChunkData.Gain,Value.ChunkData.ExposureTime</io:Selector>
+                                <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp</io:Selector>
                               </Expression>
                               <Expression xsi:type="MemberSelector">
                                 <Selector>Value.Image</Selector>
@@ -8653,7 +8653,7 @@
                                 <io:Overwrite>true</io:Overwrite>
                                 <io:Suffix>None</io:Suffix>
                                 <io:IncludeHeader>false</io:IncludeHeader>
-                                <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp,Value.ChunkData.Gain,Value.ChunkData.ExposureTime</io:Selector>
+                                <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp</io:Selector>
                               </Expression>
                               <Expression xsi:type="MemberSelector">
                                 <Selector>Value.Image</Selector>
