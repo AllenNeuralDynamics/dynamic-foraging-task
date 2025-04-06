@@ -9460,7 +9460,7 @@
                               </Expression>
                               <Expression xsi:type="Index">
                                 <Operand xsi:type="StringProperty">
-                                  <Value>BottomCameraLeft</Value>
+                                  <Value>BottomCamera</Value>
                                 </Operand>
                               </Expression>
                               <Expression xsi:type="PropertyMapping">
