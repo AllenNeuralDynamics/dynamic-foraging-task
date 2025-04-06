@@ -1671,7 +1671,7 @@ class CameraDialog(QDialog):
                 or self.MainWindow.logging_type == -1
             ):
                 self.MainWindow.Ot_log_folder = (
-                    self.MainWindow._restartlogging()
+                    self.MainWindow._restartlogging(start_from_camera=True)
                 )
             # set to check drop frame as true
             self.MainWindow.to_check_drop_frames = 1
