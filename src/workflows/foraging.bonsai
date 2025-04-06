@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<WorkflowBuilder Version="2.8.0"
+<WorkflowBuilder Version="2.8.2"
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xmlns:rx="clr-namespace:Bonsai.Reactive;assembly=Bonsai.Core"
                  xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -22,6 +22,7 @@
                  xmlns:ffmpeg="clr-namespace:Bonsai.FFmpeg;assembly=Bonsai.FFmpeg"
                  xmlns:p4="clr-namespace:;assembly=Extensions"
                  xmlns:gui="clr-namespace:Bonsai.Gui;assembly=Bonsai.Gui"
+                 xmlns:p5="clr-namespace:AllenNeuralDynamics.Core;assembly=AllenNeuralDynamics.Core"
                  xmlns="https://bonsai-rx.org/2018/workflow">
   <Workflow>
     <Nodes>
@@ -1530,7 +1531,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM3</harp:PortName>
+                      <harp:PortName>COM12</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -2877,7 +2878,7 @@
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM4</harp:PortName>
+                <harp:PortName>COM16</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -8962,7 +8963,7 @@
         <Property Name="FileName" DisplayName="SettingsPath" />
       </Expression>
       <Expression xsi:type="io:CsvReader">
-        <io:FileName>C:\Users\micah.woodard\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
+        <io:FileName>C:\Users\svc_aind_ephys\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
         <io:ScanPattern>%s,%s</io:ScanPattern>
         <io:SkipRows>0</io:SkipRows>
       </Expression>
@@ -8999,7 +9000,7 @@
               <gui:Enabled>true</gui:Enabled>
               <gui:Visible>true</gui:Visible>
               <gui:Font>Microsoft Sans Serif, 15.75pt, style=Bold</gui:Font>
-              <gui:Text>667-1-A</gui:Text>
+              <gui:Text>323_Ephys3</gui:Text>
             </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="SubscribeSubject">
@@ -9132,11 +9133,57 @@
                                   <Property Name="SerialNumber" />
                                 </PropertyMappings>
                               </Expression>
+                              <Expression xsi:type="SubscribeSubject">
+                                <Name>ComPorts</Name>
+                              </Expression>
+                              <Expression xsi:type="Index">
+                                <Operand xsi:type="StringProperty">
+                                  <Value>SideCameraLeft_ExposureTime</Value>
+                                </Operand>
+                              </Expression>
+                              <Expression xsi:type="scr:ExpressionTransform">
+                                <scr:Name>Convert To Float</scr:Name>
+                                <scr:Expression>Convert.ToSingle(it)</scr:Expression>
+                              </Expression>
+                              <Expression xsi:type="PropertyMapping">
+                                <PropertyMappings>
+                                  <Property Name="ExposureTime" />
+                                </PropertyMappings>
+                              </Expression>
+                              <Expression xsi:type="SubscribeSubject">
+                                <Name>ComPorts</Name>
+                              </Expression>
+                              <Expression xsi:type="Index">
+                                <Operand xsi:type="StringProperty">
+                                  <Value>SideCameraLeft_Gain</Value>
+                                </Operand>
+                              </Expression>
+                              <Expression xsi:type="scr:ExpressionTransform">
+                                <scr:Name>Convert To Float</scr:Name>
+                                <scr:Expression>Convert.ToSingle(it)</scr:Expression>
+                              </Expression>
+                              <Expression xsi:type="PropertyMapping">
+                                <PropertyMappings>
+                                  <Property Name="Gain" />
+                                </PropertyMappings>
+                              </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="spk:SpinnakerCapture">
+                                <Combinator xsi:type="p5:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>23022717</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
+                                  <p5:ExposureTime>1000</p5:ExposureTime>
+                                  <p5:Gain>8</p5:Gain>
+                                  <p5:Binning>1</p5:Binning>
+                                  <p5:Gamma xsi:nil="true" />
+                                  <p5:PixelFormat>Mono8</p5:PixelFormat>
+                                  <p5:RegionOfInterest>
+                                    <p5:X>0</p5:X>
+                                    <p5:Y>0</p5:Y>
+                                    <p5:Width>0</p5:Width>
+                                    <p5:Height>0</p5:Height>
+                                  </p5:RegionOfInterest>
+                                  <p5:AdcBitDepth>Bit8</p5:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="MemberSelector">
@@ -9146,8 +9193,16 @@
                             <Edges>
                               <Edge From="0" To="1" Label="Source1" />
                               <Edge From="1" To="2" Label="Source1" />
-                              <Edge From="2" To="3" Label="Source1" />
+                              <Edge From="2" To="11" Label="Source1" />
                               <Edge From="3" To="4" Label="Source1" />
+                              <Edge From="4" To="5" Label="Source1" />
+                              <Edge From="5" To="6" Label="Source1" />
+                              <Edge From="6" To="11" Label="Source2" />
+                              <Edge From="7" To="8" Label="Source1" />
+                              <Edge From="8" To="9" Label="Source1" />
+                              <Edge From="9" To="10" Label="Source1" />
+                              <Edge From="10" To="11" Label="Source3" />
+                              <Edge From="11" To="12" Label="Source1" />
                             </Edges>
                           </Workflow>
                         </Expression>
@@ -9189,7 +9244,7 @@
                               </Expression>
                               <Expression xsi:type="Index">
                                 <Operand xsi:type="StringProperty">
-                                  <Value>BottomCamera</Value>
+                                  <Value>BottomCameraLeft</Value>
                                 </Operand>
                               </Expression>
                               <Expression xsi:type="PropertyMapping">
@@ -9197,11 +9252,57 @@
                                   <Property Name="SerialNumber" />
                                 </PropertyMappings>
                               </Expression>
+                              <Expression xsi:type="SubscribeSubject">
+                                <Name>ComPorts</Name>
+                              </Expression>
+                              <Expression xsi:type="Index">
+                                <Operand xsi:type="StringProperty">
+                                  <Value>BottomCamera_ExposureTime</Value>
+                                </Operand>
+                              </Expression>
+                              <Expression xsi:type="scr:ExpressionTransform">
+                                <scr:Name>Convert To Float</scr:Name>
+                                <scr:Expression>Convert.ToSingle(it)</scr:Expression>
+                              </Expression>
+                              <Expression xsi:type="PropertyMapping">
+                                <PropertyMappings>
+                                  <Property Name="ExposureTime" />
+                                </PropertyMappings>
+                              </Expression>
+                              <Expression xsi:type="SubscribeSubject">
+                                <Name>ComPorts</Name>
+                              </Expression>
+                              <Expression xsi:type="Index">
+                                <Operand xsi:type="StringProperty">
+                                  <Value>BottomCamera_Gain</Value>
+                                </Operand>
+                              </Expression>
+                              <Expression xsi:type="scr:ExpressionTransform">
+                                <scr:Name>Convert To Float</scr:Name>
+                                <scr:Expression>Convert.ToSingle(it)</scr:Expression>
+                              </Expression>
+                              <Expression xsi:type="PropertyMapping">
+                                <PropertyMappings>
+                                  <Property Name="Gain" />
+                                </PropertyMappings>
+                              </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="spk:SpinnakerCapture">
+                                <Combinator xsi:type="p5:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
-                                  <spk:SerialNumber>23045805</spk:SerialNumber>
+                                  <spk:SerialNumber>23022717</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
+                                  <p5:ExposureTime>1000</p5:ExposureTime>
+                                  <p5:Gain>8</p5:Gain>
+                                  <p5:Binning>1</p5:Binning>
+                                  <p5:Gamma xsi:nil="true" />
+                                  <p5:PixelFormat>Mono8</p5:PixelFormat>
+                                  <p5:RegionOfInterest>
+                                    <p5:X>0</p5:X>
+                                    <p5:Y>0</p5:Y>
+                                    <p5:Width>0</p5:Width>
+                                    <p5:Height>0</p5:Height>
+                                  </p5:RegionOfInterest>
+                                  <p5:AdcBitDepth>Bit8</p5:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="MemberSelector">
@@ -9214,9 +9315,17 @@
                             <Edges>
                               <Edge From="0" To="1" Label="Source1" />
                               <Edge From="1" To="2" Label="Source1" />
-                              <Edge From="2" To="3" Label="Source1" />
+                              <Edge From="2" To="11" Label="Source1" />
                               <Edge From="3" To="4" Label="Source1" />
                               <Edge From="4" To="5" Label="Source1" />
+                              <Edge From="5" To="6" Label="Source1" />
+                              <Edge From="6" To="11" Label="Source2" />
+                              <Edge From="7" To="8" Label="Source1" />
+                              <Edge From="8" To="9" Label="Source1" />
+                              <Edge From="9" To="10" Label="Source1" />
+                              <Edge From="10" To="11" Label="Source3" />
+                              <Edge From="11" To="12" Label="Source1" />
+                              <Edge From="12" To="13" Label="Source1" />
                             </Edges>
                           </Workflow>
                         </Expression>
@@ -9266,11 +9375,57 @@
                                   <Property Name="SerialNumber" />
                                 </PropertyMappings>
                               </Expression>
+                              <Expression xsi:type="SubscribeSubject">
+                                <Name>ComPorts</Name>
+                              </Expression>
+                              <Expression xsi:type="Index">
+                                <Operand xsi:type="StringProperty">
+                                  <Value>SideCameraRight_ExposureTime</Value>
+                                </Operand>
+                              </Expression>
+                              <Expression xsi:type="scr:ExpressionTransform">
+                                <scr:Name>Convert To Float</scr:Name>
+                                <scr:Expression>Convert.ToSingle(it)</scr:Expression>
+                              </Expression>
+                              <Expression xsi:type="PropertyMapping">
+                                <PropertyMappings>
+                                  <Property Name="ExposureTime" />
+                                </PropertyMappings>
+                              </Expression>
+                              <Expression xsi:type="SubscribeSubject">
+                                <Name>ComPorts</Name>
+                              </Expression>
+                              <Expression xsi:type="Index">
+                                <Operand xsi:type="StringProperty">
+                                  <Value>SideCameraRight_Gain</Value>
+                                </Operand>
+                              </Expression>
+                              <Expression xsi:type="scr:ExpressionTransform">
+                                <scr:Name>Convert To Float</scr:Name>
+                                <scr:Expression>Convert.ToSingle(it)</scr:Expression>
+                              </Expression>
+                              <Expression xsi:type="PropertyMapping">
+                                <PropertyMappings>
+                                  <Property Name="Gain" />
+                                </PropertyMappings>
+                              </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="spk:SpinnakerCapture">
+                                <Combinator xsi:type="p5:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
-                                  <spk:SerialNumber>23022710</spk:SerialNumber>
+                                  <spk:SerialNumber>23022717</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
+                                  <p5:ExposureTime>1000</p5:ExposureTime>
+                                  <p5:Gain>8</p5:Gain>
+                                  <p5:Binning>1</p5:Binning>
+                                  <p5:Gamma xsi:nil="true" />
+                                  <p5:PixelFormat>Mono8</p5:PixelFormat>
+                                  <p5:RegionOfInterest>
+                                    <p5:X>0</p5:X>
+                                    <p5:Y>0</p5:Y>
+                                    <p5:Width>0</p5:Width>
+                                    <p5:Height>0</p5:Height>
+                                  </p5:RegionOfInterest>
+                                  <p5:AdcBitDepth>Bit8</p5:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="MemberSelector">
@@ -9283,9 +9438,17 @@
                             <Edges>
                               <Edge From="0" To="1" Label="Source1" />
                               <Edge From="1" To="2" Label="Source1" />
-                              <Edge From="2" To="3" Label="Source1" />
+                              <Edge From="2" To="11" Label="Source1" />
                               <Edge From="3" To="4" Label="Source1" />
                               <Edge From="4" To="5" Label="Source1" />
+                              <Edge From="5" To="6" Label="Source1" />
+                              <Edge From="6" To="11" Label="Source2" />
+                              <Edge From="7" To="8" Label="Source1" />
+                              <Edge From="8" To="9" Label="Source1" />
+                              <Edge From="9" To="10" Label="Source1" />
+                              <Edge From="10" To="11" Label="Source3" />
+                              <Edge From="11" To="12" Label="Source1" />
+                              <Edge From="12" To="13" Label="Source1" />
                             </Edges>
                           </Workflow>
                         </Expression>
@@ -9335,11 +9498,57 @@
                                   <Property Name="SerialNumber" />
                                 </PropertyMappings>
                               </Expression>
+                              <Expression xsi:type="SubscribeSubject">
+                                <Name>ComPorts</Name>
+                              </Expression>
+                              <Expression xsi:type="Index">
+                                <Operand xsi:type="StringProperty">
+                                  <Value>BodyCamera_ExposureTime</Value>
+                                </Operand>
+                              </Expression>
+                              <Expression xsi:type="scr:ExpressionTransform">
+                                <scr:Name>Convert To Float</scr:Name>
+                                <scr:Expression>Convert.ToSingle(it)</scr:Expression>
+                              </Expression>
+                              <Expression xsi:type="PropertyMapping">
+                                <PropertyMappings>
+                                  <Property Name="ExposureTime" />
+                                </PropertyMappings>
+                              </Expression>
+                              <Expression xsi:type="SubscribeSubject">
+                                <Name>ComPorts</Name>
+                              </Expression>
+                              <Expression xsi:type="Index">
+                                <Operand xsi:type="StringProperty">
+                                  <Value>BodyCamera_Gain</Value>
+                                </Operand>
+                              </Expression>
+                              <Expression xsi:type="scr:ExpressionTransform">
+                                <scr:Name>Convert To Float</scr:Name>
+                                <scr:Expression>Convert.ToSingle(it)</scr:Expression>
+                              </Expression>
+                              <Expression xsi:type="PropertyMapping">
+                                <PropertyMappings>
+                                  <Property Name="Gain" />
+                                </PropertyMappings>
+                              </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="spk:SpinnakerCapture">
+                                <Combinator xsi:type="p5:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
-                                  <spk:SerialNumber>22511912</spk:SerialNumber>
+                                  <spk:SerialNumber>23022717</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
+                                  <p5:ExposureTime>1000</p5:ExposureTime>
+                                  <p5:Gain>8</p5:Gain>
+                                  <p5:Binning>1</p5:Binning>
+                                  <p5:Gamma xsi:nil="true" />
+                                  <p5:PixelFormat>Mono8</p5:PixelFormat>
+                                  <p5:RegionOfInterest>
+                                    <p5:X>0</p5:X>
+                                    <p5:Y>0</p5:Y>
+                                    <p5:Width>0</p5:Width>
+                                    <p5:Height>0</p5:Height>
+                                  </p5:RegionOfInterest>
+                                  <p5:AdcBitDepth>Bit8</p5:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="MemberSelector">
@@ -9349,8 +9558,16 @@
                             <Edges>
                               <Edge From="0" To="1" Label="Source1" />
                               <Edge From="1" To="2" Label="Source1" />
-                              <Edge From="2" To="3" Label="Source1" />
+                              <Edge From="2" To="11" Label="Source1" />
                               <Edge From="3" To="4" Label="Source1" />
+                              <Edge From="4" To="5" Label="Source1" />
+                              <Edge From="5" To="6" Label="Source1" />
+                              <Edge From="6" To="11" Label="Source2" />
+                              <Edge From="7" To="8" Label="Source1" />
+                              <Edge From="8" To="9" Label="Source1" />
+                              <Edge From="9" To="10" Label="Source1" />
+                              <Edge From="10" To="11" Label="Source3" />
+                              <Edge From="11" To="12" Label="Source1" />
                             </Edges>
                           </Workflow>
                         </Expression>
