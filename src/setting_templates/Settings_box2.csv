@@ -33,3 +33,11 @@ AttenuationLeft,0
 AttenuationRight,0
 current_box,4xx-x-B
 RunningWheel,0
+BottomCamera_ExposureTime,1000
+SideCameraLeft_ExposureTime,1000
+SideCameraRight_ExposureTime,1000
+BodyCamera_ExposureTime,1000
+BottomCamera_Gain,8
+SideCameraLeft_Gain,8
+SideCameraRight_Gain,8
+BodyCamera_Gain,8
