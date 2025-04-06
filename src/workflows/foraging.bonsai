@@ -7977,7 +7977,7 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="io:CsvWriter">
-                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_left.csv</io:FileName>
+                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-04-05_18-01-27\behavior\raw.harp/../../behavior-videos/side_camera_left.csv</io:FileName>
                                 <io:Append>false</io:Append>
                                 <io:Overwrite>true</io:Overwrite>
                                 <io:Suffix>None</io:Suffix>
@@ -8022,11 +8022,11 @@
                               </Expression>
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="ffmpeg:VideoWriter">
-                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_left.avi</ffmpeg:FileName>
+                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-04-05_18-01-27\behavior\raw.harp/../../behavior-videos/side_camera_left.avi</ffmpeg:FileName>
                                   <ffmpeg:Suffix>None</ffmpeg:Suffix>
                                   <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                                   <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M</ffmpeg:OutputArguments>
+                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24</ffmpeg:OutputArguments>
                                 </Combinator>
                               </Expression>
                             </Nodes>
@@ -8148,7 +8148,7 @@
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="p4:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
-                                  <spk:SerialNumber>23022717</spk:SerialNumber>
+                                  <spk:SerialNumber>23045805</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
                                   <p4:ExposureTime>1000</p4:ExposureTime>
                                   <p4:Gain>8</p4:Gain>
@@ -8198,7 +8198,7 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="io:CsvWriter">
-                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/bottom_camera.csv</io:FileName>
+                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-04-05_18-01-27\behavior\raw.harp/../../behavior-videos/bottom_camera.csv</io:FileName>
                                 <io:Append>false</io:Append>
                                 <io:Overwrite>true</io:Overwrite>
                                 <io:Suffix>None</io:Suffix>
@@ -8246,11 +8246,11 @@
                               </Expression>
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="ffmpeg:VideoWriter">
-                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/bottom_camera.avi</ffmpeg:FileName>
+                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-04-05_18-01-27\behavior\raw.harp/../../behavior-videos/bottom_camera.avi</ffmpeg:FileName>
                                   <ffmpeg:Suffix>None</ffmpeg:Suffix>
                                   <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                                   <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M</ffmpeg:OutputArguments>
+                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24</ffmpeg:OutputArguments>
                                 </Combinator>
                               </Expression>
                             </Nodes>
@@ -8373,7 +8373,7 @@
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="p4:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
-                                  <spk:SerialNumber>23022717</spk:SerialNumber>
+                                  <spk:SerialNumber>23022710</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
                                   <p4:ExposureTime>1000</p4:ExposureTime>
                                   <p4:Gain>8</p4:Gain>
@@ -8423,7 +8423,7 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="io:CsvWriter">
-                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_right.csv</io:FileName>
+                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-04-05_18-01-27\behavior\raw.harp/../../behavior-videos/side_camera_right.csv</io:FileName>
                                 <io:Append>false</io:Append>
                                 <io:Overwrite>true</io:Overwrite>
                                 <io:Suffix>None</io:Suffix>
@@ -8471,11 +8471,11 @@
                               </Expression>
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="ffmpeg:VideoWriter">
-                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/side_camera_right.avi</ffmpeg:FileName>
+                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-04-05_18-01-27\behavior\raw.harp/../../behavior-videos/side_camera_right.avi</ffmpeg:FileName>
                                   <ffmpeg:Suffix>None</ffmpeg:Suffix>
                                   <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                                   <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M</ffmpeg:OutputArguments>
+                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24</ffmpeg:OutputArguments>
                                 </Combinator>
                               </Expression>
                             </Nodes>
@@ -8598,7 +8598,7 @@
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="p4:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
-                                  <spk:SerialNumber>23022717</spk:SerialNumber>
+                                  <spk:SerialNumber>22511912</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
                                   <p4:ExposureTime>1000</p4:ExposureTime>
                                   <p4:Gain>8</p4:Gain>
@@ -8648,7 +8648,7 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="io:CsvWriter">
-                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/body_camera.csv</io:FileName>
+                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-04-05_18-01-27\behavior\raw.harp/../../behavior-videos/body_camera.csv</io:FileName>
                                 <io:Append>false</io:Append>
                                 <io:Overwrite>true</io:Overwrite>
                                 <io:Suffix>None</io:Suffix>
@@ -8693,11 +8693,11 @@
                               </Expression>
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="ffmpeg:VideoWriter">
-                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2024-04-05_10-37-19\behavior\raw.harp/../../behavior-videos/body_camera.avi</ffmpeg:FileName>
+                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-04-05_18-01-27\behavior\raw.harp/../../behavior-videos/body_camera.avi</ffmpeg:FileName>
                                   <ffmpeg:Suffix>None</ffmpeg:Suffix>
                                   <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
                                   <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M</ffmpeg:OutputArguments>
+                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24</ffmpeg:OutputArguments>
                                 </Combinator>
                               </Expression>
                             </Nodes>
@@ -9505,7 +9505,7 @@
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="p4:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
-                                  <spk:SerialNumber>23022717</spk:SerialNumber>
+                                  <spk:SerialNumber>23045805</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
                                   <p4:ExposureTime>1000</p4:ExposureTime>
                                   <p4:Gain>8</p4:Gain>
@@ -9628,7 +9628,7 @@
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="p4:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
-                                  <spk:SerialNumber>23022717</spk:SerialNumber>
+                                  <spk:SerialNumber>23022710</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
                                   <p4:ExposureTime>1000</p4:ExposureTime>
                                   <p4:Gain>8</p4:Gain>
@@ -9751,7 +9751,7 @@
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="p4:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
-                                  <spk:SerialNumber>23022717</spk:SerialNumber>
+                                  <spk:SerialNumber>22511912</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
                                   <p4:ExposureTime>1000</p4:ExposureTime>
                                   <p4:Gain>8</p4:Gain>
