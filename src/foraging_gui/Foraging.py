@@ -1423,7 +1423,7 @@ class Window(QMainWindow):
         else:
             self._StopCurrentSession()
         
-        # We don't need to stop the recording if the logging is from the camera
+        # We don't need to stop the recording when the start_from_camera is True as the logging is from the camera
         if start_from_camera == False:
             # Turn off the camera recording if it it on
             if self.Camera_dialog.StartRecording.isChecked():
