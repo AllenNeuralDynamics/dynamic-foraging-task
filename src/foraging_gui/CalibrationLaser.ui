@@ -206,6 +206,9 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
    <item>
     <property name="text">
      <string>Blue</string>
@@ -214,6 +217,11 @@
    <item>
     <property name="text">
      <string>Red</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Red_coherent</string>
     </property>
    </item>
    <item>
