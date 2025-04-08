@@ -522,12 +522,12 @@ class Window(QMainWindow):
         self.SuggestedWater.setValidator(double_validator)
 
         if hasattr(self, "current_stage"): # Connect newscale button to update loaded mouse offset
-            self.MoveXP.clicked.connect(threading.Thread(target=self.update_loaded_mouse_offset).start)
-            self.MoveYP.clicked.connect(threading.Thread(target=self.update_loaded_mouse_offset).start)
-            self.MoveZP.clicked.connect(threading.Thread(target=self.update_loaded_mouse_offset).start)
-            self.MoveXN.clicked.connect(threading.Thread(target=self.update_loaded_mouse_offset).start)
-            self.MoveYN.clicked.connect(threading.Thread(target=self.update_loaded_mouse_offset).start)
-            self.MoveZN.clicked.connect(threading.Thread(target=self.update_loaded_mouse_offset).start)
+            self.MoveXP.clicked.connect(lambda: threading.Thread(target=self.update_loaded_mouse_offset).start())
+            self.MoveYP.clicked.connect(lambda: threading.Thread(target=self.update_loaded_mouse_offset).start())
+            self.MoveZP.clicked.connect(lambda: threading.Thread(target=self.update_loaded_mouse_offset).start())
+            self.MoveXN.clicked.connect(lambda: threading.Thread(target=self.update_loaded_mouse_offset).start())
+            self.MoveYN.clicked.connect(lambda: threading.Thread(target=self.update_loaded_mouse_offset).start())
+            self.MoveZN.clicked.connect(lambda: threading.Thread(target=self.update_loaded_mouse_offset).start())
 
         elif self.stage_widget is not None:
             # connect aind stage widgets to update loaded mouse offset if text has been changed by user or button press
@@ -545,11 +545,10 @@ class Window(QMainWindow):
             Update the stage offset associated with mouse model from slims
         """
         current_positions = self._GetPositions()
-        print(current_positions)
         if current_positions is None:
             logging.info("Can't update loaded mouse position because no stage is connected.")
             return
-        elif current_positions.keys() == ['x', 'y', 'z']:
+        elif list(current_positions.keys()) == ['x', 'y', 'z']:
             self.slims_handler.set_loaded_mouse_offset(**current_positions)
         else:
             x = self.stage_widget.movement_page_view.lineEdit_x.text()
@@ -1061,7 +1060,7 @@ class Window(QMainWindow):
             logging.info('Grabbing current stage position')
             current_stage = self.current_stage
             current_position = current_stage.get_position()
-            self._UpdatePosition(current_position, (0, 0, 0))
+            #self._UpdatePosition(current_position, (0, 0, 0))
             return {axis: float(pos) for axis, pos in zip(['x', 'y', 'z'], current_position)}
         elif self.stage_widget is not None:  # aind stage
             # Get absolute position of motors in AIND stage
