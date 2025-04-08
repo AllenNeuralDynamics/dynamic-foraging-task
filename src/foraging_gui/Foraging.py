@@ -545,6 +545,7 @@ class Window(QMainWindow):
             Update the stage offset associated with mouse model from slims
         """
         current_positions = self._GetPositions()
+        print(current_positions)
         if current_positions is None:
             logging.info("Can't update loaded mouse position because no stage is connected.")
             return
