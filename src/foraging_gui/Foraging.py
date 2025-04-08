@@ -620,7 +620,8 @@ class Window(QMainWindow):
 
         # create trainer state
         stages = curriculum.see_stages()
-        stage_mapping = ["1.1", "1.2", "2", "3", "4", "FINAL", "GRADUATED"]
+        stage_mapping = ["1.1", "1.2", "2", "3", "4", "FINAL", "GRADUATED"] if len(stages) == 6 else \
+            ["1.1", "1.2", "2", "3", "FINAL", "GRADUATED"]
         stage = self._GetInfoFromSchedule(mouse_id, "Current Stage")
         stage = "1.1" if isinstance(stage, float) and math.isnan(stage) else stage  # account for blank schedule
         logging.info("Creating trainer state")
@@ -661,7 +662,7 @@ class Window(QMainWindow):
         mode = self._GetInfoFromSchedule(mouse_id, "FIP Mode")
         if not (isinstance(mode, float) and math.isnan(mode)):  # schedule has input for fip
             stage_list = get_args(STAGE_STARTS)
-            print(stage_list, stage_mapping.index(self._GetInfoFromSchedule(mouse_id, "First FP Stage")))
+            stage_mapping = ["1.1", "1.2", "2", "3", "4", "FINAL", "GRADUATED"]
             first = stage_list[stage_mapping.index(self._GetInfoFromSchedule(mouse_id, "First FP Stage"))]
             self.fip_model = FiberPhotometry(mode=mode,
                                              stage_start="stage_1_warmup" if type(first) != str else first.lower()
