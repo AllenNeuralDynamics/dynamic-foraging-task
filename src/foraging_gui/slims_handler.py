@@ -189,8 +189,8 @@ class SlimsHandler:
             else:
                 fip_model = None
 
-            self.log.info(f"Mouse {mouse_id} curriculum loaded from Slims.")
             self._loaded_mouse_id = mouse_id
+            self.log.info(f"Mouse {mouse_id} curriculum loaded from Slims.")
 
             return self.trainer_state, session, task_logic, session_model, opto_model, fip_model, operation_control
 

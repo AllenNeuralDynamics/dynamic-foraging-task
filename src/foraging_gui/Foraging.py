@@ -2546,55 +2546,55 @@ class Window(QMainWindow):
         if folder_path:
 
             # dict to keep track if all models are in folder
-            loaded = {"behavior_task_logic_model": False,
-                      "behavior_session_model": False,
-                      "behavior_optogenetics_model": False,
-                      "behavior_fiber_photometry_model": False,
-                      "behavior_operational_control": False,
+            loaded = {"task": False,
+                      "session": False,
+                      "opto": False,
+                      "fip": False,
+                      "oc": False,
                       "behavior_json": False}
 
             # iterate through files
             for filename in os.listdir(folder_path):
-
+                joined = os.path.join(folder_path, filename)
                 if filename.startswith("behavior_task_logic_model"):    # check and load task model
+
                     loaded["task"] = True
-                    with open(filename, 'r') as f:
+                    with open(joined, 'r') as f:
                         task_logic = AindDynamicForagingTaskLogic(**json.load(f))
 
                 elif filename.startswith("behavior_session_model"):   # check and load session model
                     loaded["session"] = True
-                    with open(filename, 'r') as f:
+                    with open(joined, 'r') as f:
                         session_model = AindBehaviorSessionModel(**json.load(f))
 
                 elif filename.startswith("behavior_optogenetics_model"):   # check and load optogenetic model
                     loaded["opto"] = True
-                    with open(filename, 'r') as f:
+                    with open(joined, 'r') as f:
                         opto_model = Optogenetics(**json.load(f))
 
                 elif filename.startswith("behavior_fiber_photometry_model"):   # check and load fip model
                     loaded["fip"] = True
-                    with open(filename, 'r') as f:
+                    with open(joined, 'r') as f:
                         fip_model = FiberPhotometry(**json.load(f))
 
                 elif filename.startswith("behavior_operational_control"):   # check and load operational model
                     loaded["oc"] = True
-                    with open(filename, 'r') as f:
+                    with open(joined, 'r') as f:
                         operation_control_model = OperationalControl(**json.load(f))
 
                 # check and load behavior json
                 elif re.fullmatch(r"\b\d{6}_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json\b", filename):
                     loaded["behavior_json"] = True
-                    with open(filename, 'r') as f:
+                    with open(joined, 'r') as f:
                         Obj = json.load(f)
 
                 elif re.fullmatch(r"\b\d{6}_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.mat\b", filename):
                     loaded["behavior_json"] = True
-                    Obj = loadmat(filename)
-
+                    Obj = loadmat(joined)
             if any(not value for value in loaded.values()):
                 logger.warning(f"Can't load mouse in folder {folder_path} because "
-                               f"{[key for key in loaded.keys() if not key]} are not found. Please add files or load"
-                               f"another session.")
+                               f"{[key for key, value in loaded.items() if not value]} are not found. Please add files "
+                               f"or load another session.")
                 return
 
             # update models
@@ -2611,8 +2611,7 @@ class Window(QMainWindow):
             self.Obj = Obj
 
         # Set stage position to last position
-        try:
-            if 'B_StagePositions' in Obj.keys() and len(Obj['B_StagePositions']) != 0:
+        if 'B_StagePositions' in Obj.keys() and len(Obj['B_StagePositions']) != 0:
                 last_positions = Obj['B_StagePositions'][-1]
                 if hasattr(self, 'current_stage'):  # newscale stage
                     self.current_stage.move_absolute_3d(float(last_positions['x']),
@@ -2631,28 +2630,15 @@ class Window(QMainWindow):
                     }
                     self.stage_widget.stage_model.update_position(positions)
                     step_size = self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
-            elif 'B_NewscalePositions' in Obj.keys() and len(
-                    Obj['B_NewscalePositions']) != 0:  # cross compatibility for mice run on older version of code.
-                last_positions = Obj['B_NewscalePositions'][-1]
-                self.current_stage.move_absolute_3d(float(last_positions[0]),
-                                                    float(last_positions[1]),
-                                                    float(last_positions[2]))
-                self._UpdatePosition((float(last_positions[0]),
-                                      float(last_positions[1]),
-                                      float(last_positions[2])),
-                                     (0, 0, 0))
-            else:
-                pass
-
-        except Exception as e:
-            logging.error(traceback.format_exc())
-
+            
         # check dropping frames
         self.to_check_drop_frames = 1
         self._check_drop_frames(save_tag=0)
 
         self.StartExcitation.setChecked(False)
         self.load_tag = 1
+
+        self.modelsChanged.emit()
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
