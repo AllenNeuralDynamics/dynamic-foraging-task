@@ -661,6 +661,7 @@ class Window(QMainWindow):
         mode = self._GetInfoFromSchedule(mouse_id, "FIP Mode")
         if not (isinstance(mode, float) and math.isnan(mode)):  # schedule has input for fip
             stage_list = get_args(STAGE_STARTS)
+            print(stage_list, stage_mapping.index(self._GetInfoFromSchedule(mouse_id, "First FP Stage")))
             first = stage_list[stage_mapping.index(self._GetInfoFromSchedule(mouse_id, "First FP Stage"))]
             self.fip_model = FiberPhotometry(mode=mode,
                                              stage_start="stage_1_warmup" if type(first) != str else first.lower()
