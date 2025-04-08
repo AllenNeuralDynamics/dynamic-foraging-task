@@ -620,7 +620,7 @@ class Window(QMainWindow):
 
         # create trainer state
         stages = curriculum.see_stages()
-        stage_mapping = ["1.1", "1.2", "2", "3", "4", "FINAL", "GRADUATED"] if len(stages) == 6 else \
+        stage_mapping = ["1.1", "1.2", "2", "3", "4", "FINAL", "GRADUATED"] if len(stages) == 7 else \
             ["1.1", "1.2", "2", "3", "FINAL", "GRADUATED"]
         stage = self._GetInfoFromSchedule(mouse_id, "Current Stage")
         stage = "1.1" if isinstance(stage, float) and math.isnan(stage) else stage  # account for blank schedule
