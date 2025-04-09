@@ -907,7 +907,7 @@ class generate_metadata:
                         name=current_detector["name"],
                         exposure_time=exposure_time,
                         exposure_time_unit=TimeUnit.US,
-                        trigger_type=TriggerType.INTERNAL,
+                        trigger_type=TriggerType.EXTERNAL,
                     )
                 )
 
