@@ -807,10 +807,10 @@ class GenerateTrials:
             self.BS_CurrentBlockTrialN[i] = length[-1]
             index[i] = indexN[-1]
         self.BS_RewardedTrialN_CurrentLeftBlock = np.sum(
-            B_RewardedHistory[0][index[0][0] : index[0][1] + 1] is True
+            B_RewardedHistory[0][index[0][0] : index[0][1] + 1] == True
         )
         self.BS_RewardedTrialN_CurrentRightBlock = np.sum(
-            B_RewardedHistory[1][index[1][0] : index[1][1] + 1] is True
+            B_RewardedHistory[1][index[1][0] : index[1][1] + 1] == True
         )
         self.AllRewardThisBlock = (
             self.BS_RewardedTrialN_CurrentLeftBlock
@@ -845,7 +845,7 @@ class GenerateTrials:
             self.BS_RespondedRate = np.nan
         else:
             self.BS_RespondedRate = self.BS_FinisheTrialN / self.BS_AllTrialN
-        self.BS_RewardTrialN = np.sum(self.B_RewardedHistory is True)
+        self.BS_RewardTrialN = np.sum(self.B_RewardedHistory == True)
         B_RewardedHistory = self.B_RewardedHistory.copy()
         # auto reward is considered as reward
         Ind = range(len(self.B_RewardedHistory[0]))
@@ -853,8 +853,8 @@ class GenerateTrials:
             B_RewardedHistory[i] = np.logical_or(
                 self.B_RewardedHistory[i], self.B_AutoWaterTrial[i][Ind]
             )
-        self.BS_RewardN = np.sum(B_RewardedHistory[0] is True) + np.sum(
-            B_RewardedHistory[1] is True
+        self.BS_RewardN = np.sum(B_RewardedHistory[0] == True) + np.sum(
+            B_RewardedHistory[1] == True
         )
 
         (
@@ -893,8 +893,8 @@ class GenerateTrials:
             + BS_auto_water_left
             + BS_auto_water_right
         )
-        self.BS_LeftRewardTrialN = np.sum(self.B_RewardedHistory[0] is True)
-        self.BS_RightRewardTrialN = np.sum(self.B_RewardedHistory[1] is True)
+        self.BS_LeftRewardTrialN = np.sum(self.B_RewardedHistory[0] == True)
+        self.BS_RightRewardTrialN = np.sum(self.B_RewardedHistory[1] == True)
         self.BS_LeftChoiceN = np.sum(self.B_AnimalResponseHistory == 0)
         self.BS_RightChoiceN = np.sum(self.B_AnimalResponseHistory == 1)
         self.BS_OverallRewardRate = self.BS_RewardTrialN / (
@@ -2153,9 +2153,9 @@ class GenerateTrials:
                             extra={"tags": [self.win.warning_log_tag]},
                         )
                     elif (
-                        np.all(B_RewardedHistory[0][-UnrewardedN:] is False)
+                        np.all(B_RewardedHistory[0][-UnrewardedN:] == False)
                         and np.all(
-                            B_RewardedHistory[1][-UnrewardedN:] is False
+                            B_RewardedHistory[1][-UnrewardedN:] == False
                         )
                         and np.shape(B_RewardedHistory[0])[0] >= UnrewardedN
                     ):
@@ -2652,7 +2652,7 @@ class GenerateTrials:
             self.B_CurrentRewarded[1] = False
             self.B_CurrentRewarded[0] = True
         elif (
-            self.B_AnimalCurrentResponse == 0 and self.CurrentBait[0] is False
+            self.B_AnimalCurrentResponse == 0 and self.CurrentBait[0] == False
         ):
             self.B_Baited[0] = False
             self.B_CurrentRewarded[0] = False
@@ -2662,7 +2662,7 @@ class GenerateTrials:
             self.B_CurrentRewarded[0] = False
             self.B_CurrentRewarded[1] = True
         elif (
-            self.B_AnimalCurrentResponse == 1 and self.CurrentBait[1] is False
+            self.B_AnimalCurrentResponse == 1 and self.CurrentBait[1] == False
         ):
             self.B_Baited[1] = False
             self.B_CurrentRewarded[0] = False
