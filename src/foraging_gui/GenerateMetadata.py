@@ -42,6 +42,7 @@ from aind_data_schema_models.units import (
     PowerUnit,
     SizeUnit,
     SoundIntensityUnit,
+    TimeUnit
 )
 
 import foraging_gui
@@ -905,6 +906,7 @@ class generate_metadata:
                     DetectorConfig(
                         name=current_detector["name"],
                         exposure_time=exposure_time,
+                        exposure_time_unit=TimeUnit.US,
                         trigger_type=TriggerType.INTERNAL,
                     )
                 )
