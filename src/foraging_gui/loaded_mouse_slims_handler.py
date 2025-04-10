@@ -19,10 +19,19 @@ import logging
 import os
 import math
 from datetime import timezone
-from typing import get_args
+from typing import get_args, TypedDict
 
 
-class SlimsHandler:
+class StageCoords(TypedDict):
+    """
+        Class detailing return value of SlimHandler function get_mouse_offset
+    """
+    x: float
+    y: float
+    z: float
+
+
+class LoadedMouseSlimsHandler:
     """
     Class to handle communication from slims to write waterlogs and curriculums
     """
@@ -46,6 +55,14 @@ class SlimsHandler:
         self.trainer_state = None
         self.metrics = None
         self._loaded_mouse_id = None
+
+    @property
+    def loaded_mouse_id(self) -> str:
+        """
+            Return loaded mouse id. Read only. Use load_mouse_curriculum to update.
+        """
+
+        return self._loaded_mouse_id
 
     def connect_to_slims(self, username: str = None, password: str = None) -> SlimsClient:
         """
@@ -258,7 +275,7 @@ class SlimsHandler:
             :returns trainer state of next session
         """
 
-        if self.metrics is not None and mouse_id == self._loaded_mouse_id:  # loaded mouse
+        if self.metrics is not None:  # loaded mouse
             # add current session to metrics
             self.log.info("Constructing new metrics.")
             new_metrics = DynamicForagingMetrics(
@@ -278,7 +295,7 @@ class SlimsHandler:
                 next_trainer_state = self.trainer_state
 
             self.log.info("Writing trainer state to slims.")
-            slims_model = self.trainer.write_data(subject_id=mouse_id,
+            slims_model = self.trainer.write_data(subject_id=self._loaded_mouse_id,
                                                   curriculum=self.curriculum,
                                                   trainer_state=next_trainer_state,
                                                   date=session_model.date,
@@ -316,15 +333,53 @@ class SlimsHandler:
                 )
 
             self.log.info(f"Writing next session to Slims successful. "
-                          f"Mouse {mouse_id} will run on {next_trainer_state.stage.name} next session.",
+                          f"Mouse {self._loaded_mouse_id} will run on {next_trainer_state.stage.name} next session.",
                           )
 
             self.clear_loaded_mouse()
 
             return next_trainer_state
 
-        elif mouse_id != self._loaded_mouse_id:
-            raise ValueError(f"Loaded mouse {self._loaded_mouse_id} does not match the input mouse id {mouse_id}")
-
         else:
-            self.log.error("No mouse loaded! Please load mouse using either load_mouse_curriculum or set_loaded_mouse.")
+            self.log.warning("No mouse loaded so can't write session to slims")
+
+    def get_loaded_mouse_offset(self) -> StageCoords or None:
+        """
+            Returns the stage offset associated with loaded mouse model from slims
+            :returns stage offset dict
+        """
+
+        if self._loaded_mouse_id is not None:
+            # grab mouse
+            mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=self._loaded_mouse_id)
+
+            return {"x": mouse.x_offset,
+                    "y": mouse.y_offset,
+                    "z": mouse.z_offset
+                    }
+        else:
+            self.log.info("No mouse loaded so can't return offset.")
+
+    def set_loaded_mouse_offset(self,
+                                x: float = None,
+                                y: float = None,
+                                z: float = None) -> None:
+        """
+            Update the stage offset associated with mouse model from slims
+
+            :param x: new x offset for mouse
+            :param y: new y offset for mouse
+            :param z: new z offset for mouse
+        """
+
+        if self._loaded_mouse_id is not None:
+            mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=self._loaded_mouse_id)  # grab mouse
+            if [mouse.x_offset, mouse.y_offset, mouse.z_offset] == [x, y, z]:   # skip update if offset is the same
+                return
+            mouse.x_offset = x
+            mouse.y_offset = y
+            mouse.z_offset = z
+            self.log.info(f'Updating mouse offset to x: {x}, y: {y}, z: {z} for mouse {self._loaded_mouse_id}')
+            self.slims_client.update_model(model=mouse)  # update model
+        else:
+            self.log.info("No mouse loaded so can't set offset.")
