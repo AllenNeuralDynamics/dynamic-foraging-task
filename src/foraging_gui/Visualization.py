@@ -200,25 +200,25 @@ class PlotV(FigureCanvas):
         LeftChoice_Rewarded = np.where(
             np.logical_and(
                 self.B_AnimalResponseHistory == 0,
-                self.B_RewardedHistory[0] is True,
+                self.B_RewardedHistory[0] == True,
             )
         )
         np.where(
             np.logical_and(
                 self.B_AnimalResponseHistory == 0,
-                self.B_RewardedHistory[0] is False,
+                self.B_RewardedHistory[0] == False,
             )
         )
         RightChoice_Rewarded = np.where(
             np.logical_and(
                 self.B_AnimalResponseHistory == 1,
-                self.B_RewardedHistory[1] is True,
+                self.B_RewardedHistory[1] == True,
             )
         )
         np.where(
             np.logical_and(
                 self.B_AnimalResponseHistory == 1,
-                self.B_RewardedHistory[1] is False,
+                self.B_RewardedHistory[1] == False,
             )
         )
 
@@ -277,8 +277,8 @@ class PlotV(FigureCanvas):
         NoResponse = np.where(self.B_AnimalResponseHistory == 2)
 
         if self.B_BaitHistory.shape[1] > self.B_AnimalResponseHistory.shape[0]:
-            LeftBait = np.where(self.B_BaitHistory[0][:-1])
-            RightBait = np.where(self.B_BaitHistory[1][:-1])
+            LeftBait = np.where(self.B_BaitHistory[0][:-1]==True)
+            RightBait = np.where(self.B_BaitHistory[1][:-1]==True)
             # plot the upcoming trial start time
             if self.B_CurrentTrialN > 0:
                 NewTrialStart = np.array(self.B_BTime[-1])
@@ -305,7 +305,7 @@ class PlotV(FigureCanvas):
                 color="k",
                 alpha=0.3,
             )
-            if self.B_BaitHistory[0][-1]:
+            if self.B_BaitHistory[0][-1] == True:
                 self.ax1.plot(
                     NewTrialStart2,
                     -0.2,
@@ -314,7 +314,7 @@ class PlotV(FigureCanvas):
                     markersize=self.MarkerSize,
                     alpha=0.4,
                 )
-            if self.B_BaitHistory[1][-1]:
+            if self.B_BaitHistory[1][-1] == True:
                 self.ax1.plot(
                     NewTrialStart2,
                     1.2,
