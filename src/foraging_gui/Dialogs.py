@@ -786,7 +786,7 @@ class WaterCalibrationDialog(QDialog):
                     "All measurements have been completed. Either press Repeat, or Finished"
                 )
                 return
-            next_index = np.where(self.left_measurements is False)[0][0]
+            next_index = np.where(self.left_measurements is not True)[0][0]
             self.LeftOpenTime.setCurrentIndex(next_index)
         else:
             next_index = self.LeftOpenTime.currentIndex()
@@ -973,7 +973,7 @@ class WaterCalibrationDialog(QDialog):
                     "All measurements have been completed. Either press Repeat, or Finished"
                 )
                 return
-            next_index = np.where(self.right_measurements is False)[0][0]
+            next_index = np.where(self.right_measurements is not True)[0][0]
             self.RightOpenTime.setCurrentIndex(next_index)
         else:
             next_index = self.RightOpenTime.currentIndex()
