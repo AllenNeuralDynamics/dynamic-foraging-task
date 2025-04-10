@@ -85,7 +85,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
 
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry, STAGE_STARTS
 
-from aind_behavior_dynamic_foraging.DataSchemas.operation_control import OperationalControl
+from aind_behavior_dynamic_foraging.DataSchemas.operation_control import OperationalControl, StageSpecs
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear()  # clear handlers so console output can be configured
@@ -197,7 +197,10 @@ class Window(QMainWindow):
         self.task_widget.volumeChanged.connect(self.update_valve_open_time)
 
         # create OperationControl model and widget to be used and referenced for session info
-        self.operation_control_model = OperationalControl()
+        self.operation_control_model = OperationalControl(stage_specs=StageSpecs(
+            stage_name="AIND" if self.Settings[f'newscale_serial_num_box{self.box_number}'] == '' else "newscale",
+            rig_name=self.current_box,
+        ))
         self.operation_control_widget = OperationControlWidget(self.operation_control_model)
 
         # create layout for task and operation widget
@@ -317,7 +320,10 @@ class Window(QMainWindow):
         self.ManualWaterVolume = [0, 0]
         self._StopPhotometry()  # Make sure photoexcitation is stopped
 
-        # create QTimer to flash start Fbutton color
+        # update operational control positions once stage is loaded
+        self.update_operational_control_stage_positions()
+
+        # create QTimer to flash start button color
         self.start_flash = QTimer(timeout=self.toggle_save_color, interval=500)
         self.is_purple = False
 
@@ -521,13 +527,13 @@ class Window(QMainWindow):
         self.WeightAfter.setValidator(double_validator)
         self.SuggestedWater.setValidator(double_validator)
 
-        if hasattr(self, "current_stage"): # Connect newscale button to update loaded mouse offset
-            self.MoveXP.clicked.connect(lambda: threading.Thread(target=self.update_loaded_mouse_offset).start())
-            self.MoveYP.clicked.connect(lambda: threading.Thread(target=self.update_loaded_mouse_offset).start())
-            self.MoveZP.clicked.connect(lambda: threading.Thread(target=self.update_loaded_mouse_offset).start())
-            self.MoveXN.clicked.connect(lambda: threading.Thread(target=self.update_loaded_mouse_offset).start())
-            self.MoveYN.clicked.connect(lambda: threading.Thread(target=self.update_loaded_mouse_offset).start())
-            self.MoveZN.clicked.connect(lambda: threading.Thread(target=self.update_loaded_mouse_offset).start())
+        if hasattr(self, "current_stage"): # Connect newscale button to update operational control model
+            self.MoveXP.clicked.connect(self.update_operational_control_stage_positions)
+            self.MoveYP.clicked.connect(self.update_operational_control_stage_positions)
+            self.MoveZP.clicked.connect(self.update_operational_control_stage_positions)
+            self.MoveXN.clicked.connect(self.update_operational_control_stage_positions)
+            self.MoveYN.clicked.connect(self.update_operational_control_stage_positions)
+            self.MoveZN.clicked.connect(self.update_operational_control_stage_positions)
 
         elif self.stage_widget is not None:
             # connect aind stage widgets to update loaded mouse offset if text has been changed by user or button press
@@ -535,21 +541,26 @@ class Window(QMainWindow):
             self.stage_widget.movement_page_view.lineEdit_x.textChanged.connect(lambda v: threading.Thread(target=self.update_loaded_mouse_offset).start())
             self.stage_widget.movement_page_view.lineEdit_y1.textChanged.connect(lambda v: threading.Thread(target=self.update_loaded_mouse_offset).start())
             self.stage_widget.movement_page_view.lineEdit_y2.textChanged.connect(lambda v: threading.Thread(target=self.update_loaded_mouse_offset).start())
+            # Connect aind stage widgets to update operational control model
+            self.stage_widget.movement_page_view.lineEdit_z.textChanged.connect(self.update_operational_control_stage_positions)
+            self.stage_widget.movement_page_view.lineEdit_x.textChanged.connect(self.update_operational_control_stage_positions)
+            self.stage_widget.movement_page_view.lineEdit_y1.textChanged.connect(self.update_operational_control_stage_positions)
+            self.stage_widget.movement_page_view.lineEdit_y2.textChanged.connect(self.update_operational_control_stage_positions)
 
         # update model widgets if models have changed
         self.modelsChanged.connect(self.update_model_widgets)
 
-
     def update_loaded_mouse_offset(self):
         """
-            Update the stage offset associated with mouse model from slims
+            Update the stage offset associated with mouse model from slims with aind stage coordinates
         """
         current_positions = self._GetPositions()
         if current_positions is None:
             logging.info("Can't update loaded mouse position because no stage is connected.")
             return
-        elif list(current_positions.keys()) == ['x', 'y', 'z']:
-            self.slims_handler.set_loaded_mouse_offset(**current_positions)
+
+        elif list(current_positions.keys()) == ["x", "y", "z"]:
+            logging.info("Can't update loaded mouse offset with non AIND stage coordinates.")
         else:
             x = self.stage_widget.movement_page_view.lineEdit_x.text()
             y = self.stage_widget.movement_page_view.lineEdit_y1.text()
@@ -558,6 +569,23 @@ class Window(QMainWindow):
             self.slims_handler.set_loaded_mouse_offset(None if x == '' else float(x),
                                                        None if y == '' else float(y),
                                                        None if z == '' else float(z))
+
+    def update_operational_control_stage_positions(self, *args):
+        """
+            Update operational control model with the latest stage coordinates
+
+            :params args: catchall for signal emit values
+        """
+
+        current_positions = self._GetPositions()
+        if current_positions is None:
+            logging.info("Can't update loaded mouse position because no stage is connected.")
+            return
+
+        self.operation_control_model.stage_specs.x = current_positions["x"]
+        self.operation_control_model.stage_specs.z = current_positions["z"]
+        # use y key and default to y1 key if not in dict
+        self.operation_control_model.stage_specs.y = current_positions.get("y", current_positions["y1"])
 
     def load_curriculum(self, mouse_id: str) -> None:
         """
@@ -580,7 +608,6 @@ class Window(QMainWindow):
 
             # update models
             self.task_logic = task
-            self.operation_control_model = oc
             self.opto_model = opto if opto else self.opto_model
             self.fip_model = fip if fip else self.fip_model
 
@@ -600,23 +627,47 @@ class Window(QMainWindow):
             self.on_curriculum.setChecked(slims_session.is_curriculum_suggestion)
             self.on_curriculum.setEnabled(slims_session.is_curriculum_suggestion)
 
-            # load stage coords and move stage
-            last_positions = self.slims_handler.get_loaded_mouse_offset()
-            current_positions = self._GetPositions()
+            # determine how stage should be moved.
+            last_positions = {"x": oc.stage_specs.x, "y": oc.stage_specs.y, "z": oc.stage_specs.z}
+            positions = self._GetPositions()
             none_pos = {"x": None, "y": None, "z": None}
-            if hasattr(self, "current_stage") and last_positions != none_pos:  # newscale stage
-                last_positions = {k: v if v is not None else current_positions[k] for k, v in last_positions.items()}
-                last_positions_lst = list(last_positions.values())
-                self.current_stage.move_absolute_3d(*last_positions_lst)
-                self._UpdatePosition(last_positions_lst, (0, 0, 0))
-            elif self.stage_widget is not None and last_positions != none_pos:  # aind stage
-                positions = {0: current_positions['x'] if last_positions['x'] is None else float(last_positions["x"]),
-                             1: current_positions['y1'] if last_positions['y'] is None else float(last_positions["y"]),
-                             2: current_positions['y2'] if last_positions['y'] is None else float(last_positions["y"]),
-                             3: current_positions['z'] if last_positions['z'] is None else float(last_positions["z"]),
-                            }
+
+            # check aind stage
+            if self.stage_widget is not None and last_positions != none_pos:
+                if oc.stage_specs.stage_name == "AIND":     # coordinates in oc model also come from aind stage
+                    logging.info("Using coordinates in loaded operational control model.")
+                    last_positions = {"x": oc.stage_specs.x, "y": oc.stage_specs.y, "z": oc.stage_specs.z}
+
+                else:   # coordinates in oc model also come from newscale stage and can't be applied
+                    logging.info("Coordinates in loaded operational control model come from newscale stage which does "
+                                 "not match current stage. Checking slims for location.")
+                    last_positions = self.slims_handler.get_loaded_mouse_offset()   # check if slims has offset
+
+                positions = {
+                    0: positions['x'] if last_positions['x'] is None else float(last_positions["x"]),
+                    1: positions['y1'] if last_positions['y'] is None else float(last_positions["y"]),
+                    2: positions['y2'] if last_positions['y'] is None else float(last_positions["y"]),
+                    3: positions['z'] if last_positions['z'] is None else float(last_positions["z"]),
+                }
                 self.stage_widget.stage_model.update_position(positions)
                 self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
+
+            # check newscale stage
+            elif hasattr(self, "current_stage") and last_positions != none_pos:  # newscale stage
+                # coordinates in oc model come from same newscale stage and can be used
+                if oc.stage_specs.stage_name == "newscale" and oc.rig_name == self.current_box:
+                    logging.info("Using coordinates in loaded operational control model.")
+                    last_positions = {k: v if v is not None else positions[k] for k, v in last_positions.items()}
+                    last_positions_lst = list(last_positions.values())
+                    self.current_stage.move_absolute_3d(*last_positions_lst)
+                    self._UpdatePosition(last_positions_lst, (0, 0, 0))
+                else:
+                    # don't do anything if oc model stage isn't newscal and not from box being used
+                    logging.info(f"Cannot move stage since last session was run using {oc.stage_specs.stage_name} and"
+                                 f"on {oc.rig_name}")
+
+            # update operational control model with latest stage coords
+            self.update_operational_control_stage_positions()
 
             logging.info(f"Successfully loaded mouse {mouse_id}", extra={'tags': [self.warning_log_tag]})
 
