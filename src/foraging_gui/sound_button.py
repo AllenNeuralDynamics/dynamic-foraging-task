@@ -1,4 +1,4 @@
-from PyQt5.Qt import pyqtSignal
+from PyQt5.Qt import QMouseEvent, Qt, pyqtSignal
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QGridLayout,

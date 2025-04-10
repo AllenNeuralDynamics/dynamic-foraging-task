@@ -140,7 +140,7 @@ class BiasIndicator(QMainWindow):
         if not 0 <= value <= 1:
             self._bias_threshold = 0.7
             raise ValueError(
-                "bias_threshold must be set between 0 and 1. Setting to .7"
+                f"bias_threshold must be set between 0 and 1. Setting to .7"
             )
         else:
             self._bias_threshold = value

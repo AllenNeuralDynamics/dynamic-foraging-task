@@ -32,12 +32,7 @@ class RandomWalkReward:
         if not isinstance(p_max, list):
             p_max = [p_max, p_max]  # Backward compatibility
 
-        self.p_min, self.p_max, self.sigma, self.mean = (
-            p_min,
-            p_max,
-            sigma,
-            mean,
-        )
+        self.p_min, self.p_max, self.sigma, self.mean = p_min, p_max, sigma, mean
 
         self.trial_rwd_prob = {"L": [], "R": []}  # Rwd prob per trial
         self.choice_history = []
@@ -87,22 +82,16 @@ class RandomWalkReward:
         )
 
         for s, col in zip(["L", "R"], ["r", "b"]):
-            ax[0, 0].plot(
-                self.trial_rwd_prob[s], col, marker=".", alpha=0.5, lw=2
-            )
+            ax[0, 0].plot(self.trial_rwd_prob[s], col, marker=".", alpha=0.5, lw=2)
             ax[0, 1].plot(self.auto_corr(self.trial_rwd_prob[s]), col)
 
         ax[1, 0].plot(
-            np.array(self.trial_rwd_prob["L"])
-            + np.array(self.trial_rwd_prob["R"]),
+            np.array(self.trial_rwd_prob["L"]) + np.array(self.trial_rwd_prob["R"]),
             label="sum",
         )
         ax[1, 0].plot(
             np.array(self.trial_rwd_prob["R"])
-            / (
-                np.array(self.trial_rwd_prob["L"])
-                + np.array(self.trial_rwd_prob["R"])
-            ),
+            / (np.array(self.trial_rwd_prob["L"]) + np.array(self.trial_rwd_prob["R"])),
             label="R/(L+R)",
         )
         ax[1, 0].legend()

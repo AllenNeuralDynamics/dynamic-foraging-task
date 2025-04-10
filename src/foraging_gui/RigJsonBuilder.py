@@ -1,12 +1,14 @@
 import json
 import logging
+import os
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 import aind_data_schema.components.coordinates as c
 import aind_data_schema.components.devices as d
 import aind_data_schema.core.rig as r
 import numpy as np
+import serial.tools.list_ports as list_ports
 from aind_data_schema_models.modalities import Modality
 from aind_data_schema_models.organizations import Organization
 from aind_data_schema_models.units import SizeUnit
@@ -18,7 +20,6 @@ from foraging_gui.Visualization import GetWaterCalibration
 def build_rig_json(
     existing_rig_json, settings, water_calibration, laser_calibration
 ):
-
     # Build the new rig schema
     rig = build_rig_json_core(settings, water_calibration, laser_calibration)
     if rig is None:

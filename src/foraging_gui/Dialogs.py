@@ -2,6 +2,7 @@ import json
 import logging
 import math
 import os
+import shutil
 import subprocess
 import time
 import webbrowser
@@ -17,7 +18,7 @@ from aind_auto_train.schema.task import TrainingStage
 from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar,
 )
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtGui, QtWidgets, uic
 from PyQt5.QtCore import (
     QAbstractTableModel,
     QItemSelectionModel,
@@ -26,12 +27,14 @@ from PyQt5.QtCore import (
     QThreadPool,
     QTimer,
 )
+from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import (
     QApplication,
     QDialog,
     QDialogButtonBox,
     QFileDialog,
     QGridLayout,
+    QHBoxLayout,
     QInputDialog,
     QLabel,
     QLineEdit,
@@ -126,7 +129,7 @@ class OptogeneticsDialog(QDialog):
         self._connectSignalsSlots()
         self.MainWindow = MainWindow
         for i in self.condition_idx:
-            getattr(self, "_LaserColor")(i)
+            getattr(self, f"_LaserColor")(i)
         self._Laser_calibration()
         self._SessionWideControl()
 
@@ -348,7 +351,7 @@ class OptogeneticsDialog(QDialog):
                             getattr(self, f"Frequency_{Numb}").addItems(
                                 ItemsFrequency
                             )
-                            if CurrentFrequency not in Frequency:
+                            if not CurrentFrequency in Frequency:
                                 CurrentFrequency = getattr(
                                     self, "Frequency_" + str(Numb)
                                 ).currentText()
@@ -585,7 +588,7 @@ class WaterCalibrationDialog(QDialog):
             reply = QMessageBox.question(
                 self,
                 "Box {}, Finished".format(self.MainWindow.box_letter),
-                "Calibration incomplete, are you sure you want to finish?\n",
+                f"Calibration incomplete, are you sure you want to finish?\n",
                 QMessageBox.Yes | QMessageBox.No,
                 QMessageBox.No,
             )
@@ -595,7 +598,7 @@ class WaterCalibrationDialog(QDialog):
             reply = QMessageBox.question(
                 self,
                 "Box {}, Finished".format(self.MainWindow.box_letter),
-                "Calibration incomplete, are you sure you want to finish?\n",
+                f"Calibration incomplete, are you sure you want to finish?\n",
                 QMessageBox.Yes | QMessageBox.No,
                 QMessageBox.No,
             )
@@ -786,7 +789,7 @@ class WaterCalibrationDialog(QDialog):
                     "All measurements have been completed. Either press Repeat, or Finished"
                 )
                 return
-            next_index = np.where(self.left_measurements is not True)[0][0]
+            next_index = np.where(self.left_measurements != True)[0][0]
             self.LeftOpenTime.setCurrentIndex(next_index)
         else:
             next_index = self.LeftOpenTime.currentIndex()
@@ -973,7 +976,7 @@ class WaterCalibrationDialog(QDialog):
                     "All measurements have been completed. Either press Repeat, or Finished"
                 )
                 return
-            next_index = np.where(self.right_measurements is not True)[0][0]
+            next_index = np.where(self.right_measurements != True)[0][0]
             self.RightOpenTime.setCurrentIndex(next_index)
         else:
             next_index = self.RightOpenTime.currentIndex()
@@ -1459,7 +1462,7 @@ class WaterCalibrationDialog(QDialog):
                 "If this is a typo, please press cancel."
                 '<br><br><span style="color:purple;font-weight:bold">IMPORTANT</span>: '
                 "If the measurement was correctly entered, please press okay and repeat"
-                "spot check once.",
+                "spot check once.".format(np.round(result, 2)),
                 QMessageBox.Ok | QMessageBox.Cancel,
             )
             if reply == QMessageBox.Cancel:
@@ -1718,7 +1721,7 @@ def is_file_in_use(file_path):
         try:
             os.rename(file_path, file_path)
             return False
-        except OSError:
+        except OSError as e:
             return True
 
 
@@ -1913,7 +1916,7 @@ class LaserCalibrationDialog(QDialog):
                     1:-1
                 ]
             )
-        self.MainWindow.Channel4.receive()
+        FinishOfWaveForm = self.MainWindow.Channel4.receive()
 
     def _ProduceWaveForm(self, Amplitude):
         """generate the waveform based on Duration and Protocol, Laser Power, Frequency, RampingDown, PulseDur and the sample frequency"""
@@ -2479,7 +2482,7 @@ class LaserCalibrationDialog(QDialog):
         self.MainWindow.LaserCalibrationResults = LaserCalibrationResults
         self.MainWindow._GetLaserCalibration()
         for i in self.condition_idx:
-            getattr(self.MainWindow.Opto_dialog, "_LaserColor")(i)
+            getattr(self.MainWindow.Opto_dialog, f"_LaserColor")(i)
         time.sleep(0.01)
         self.Save.setStyleSheet("background-color : none")
         self.Save.setChecked(False)
@@ -2589,7 +2592,7 @@ class LaserCalibrationDialog(QDialog):
                 if self.SleepStart == 1:  # only run once
                     self.SleepStart = 0
                     self.threadpool2.start(self.worker2)
-                if self.Open.isChecked() is False or self.SleepComplete2 == 1:
+                if self.Open.isChecked() == False or self.SleepComplete2 == 1:
                     break
             self.Open.setStyleSheet("background-color : none")
             self.Open.setChecked(False)
@@ -2619,7 +2622,7 @@ class LaserCalibrationDialog(QDialog):
                     self.SleepComplete = 0
                     self._InitiateATrial()
                     self.threadpool1.start(self.worker1)
-                if self.KeepOpen.isChecked() is False:
+                if self.KeepOpen.isChecked() == False:
                     break
             self.KeepOpen.setStyleSheet("background-color : none")
             self.KeepOpen.setChecked(False)
@@ -2773,7 +2776,7 @@ class MetadataDialog(QDialog):
                 != self.RigMetadataFile.text()
                 and self.RigMetadataFile.text() != ""
             ):
-                if dont_clear is False:
+                if dont_clear == False:
                     # clear probe angles if the rig metadata file is changed
                     self.meta_data["session_metadata"]["probes"] = {}
                     self.meta_data["session_metadata"]["microscopes"] = {}
@@ -3398,9 +3401,9 @@ class AutoTrainDialog(QDialog):
             QMessageBox.critical(
                 self.MainWindow,
                 "Box {}, Error".format(self.MainWindow.box_letter),
-                "AWS connection failed!\n"
-                "Please check your AWS credentials at ~\\.aws\\credentials and restart the GUI!\n\n"
-                "The AutoTrain will be disabled until the connection is restored.",
+                f"AWS connection failed!\n"
+                f"Please check your AWS credentials at ~\.aws\credentials and restart the GUI!\n\n"
+                f"The AutoTrain will be disabled until the connection is restored.",
             )
             return False
         df_training_manager = self.auto_train_manager.df_manager
@@ -3625,7 +3628,7 @@ class AutoTrainDialog(QDialog):
             self.stage_in_use = "unknown training stage"
 
         self.pushButton_apply_auto_train_paras.setText(
-            "Apply and lock\n"
+            f"Apply and lock\n"
             + "\n".join(
                 get_curriculum_string(self.curriculum_in_use).split("(")
             ).strip(")")
@@ -3711,7 +3714,7 @@ class AutoTrainDialog(QDialog):
             ):
                 # The selected curriculum is the same as the one in use
                 logger.info(
-                    "Selected curriculum is the same as the one in use. No change is made."
+                    f"Selected curriculum is the same as the one in use. No change is made."
                 )
                 QMessageBox.information(
                     self,
@@ -3724,8 +3727,8 @@ class AutoTrainDialog(QDialog):
                 reply = QMessageBox.question(
                     self,
                     "Box {}, Confirm".format(self.MainWindow.box_letter),
-                    "Are you sure you want to override the curriculum?\n"
-                    "If yes, please also manually select a training stage.",
+                    f"Are you sure you want to override the curriculum?\n"
+                    f"If yes, please also manually select a training stage.",
                     QMessageBox.Yes | QMessageBox.No,
                     QMessageBox.No,
                 )
