@@ -407,7 +407,7 @@ class GenerateTrials:
                 self.BaitPermitted = False
         else:
             self.BaitPermitted = True
-        if self.BaitPermitted is False:
+        if self.BaitPermitted == False:
             logging.warning(
                 "The active side has no reward due to consecutive \nselections("
                 + str(MaxCLen)
@@ -2497,7 +2497,7 @@ class GenerateTrials:
         if self.TP_Task in ["Coupled Baiting", "Uncoupled Baiting"]:
             self.CurrentBait = self.CurrentBait | self.B_Baited
         # For task rewardN, if this is the "initial N trials" of the active side, no bait will be be given.
-        if self.BaitPermitted is False:
+        if self.BaitPermitted == False:
             # no reward in the active side
             max_index = np.argmax(self.B_CurrentRewardProb)
             self.CurrentBait[max_index] = False
@@ -2599,8 +2599,8 @@ class GenerateTrials:
     def _CheckSimulationSession(self):
         """To check if this is a simulation session"""
         if (
-            self.win.actionWin_stay_lose_switch.isChecked() is True
-            or self.win.actionRandom_choice.isChecked() is True
+            self.win.actionWin_stay_lose_switch.isChecked() == True
+            or self.win.actionRandom_choice.isChecked() == True
         ):
             self.CurrentSimulation = True
             self.B_SimulationSession.append(True)
