@@ -786,7 +786,7 @@ class WaterCalibrationDialog(QDialog):
                     "All measurements have been completed. Either press Repeat, or Finished"
                 )
                 return
-            next_index = np.where(self.left_measurements == False)[0][0]
+            next_index = np.where(self.left_measurements != True)[0][0]
             self.LeftOpenTime.setCurrentIndex(next_index)
         else:
             next_index = self.LeftOpenTime.currentIndex()
@@ -973,7 +973,7 @@ class WaterCalibrationDialog(QDialog):
                     "All measurements have been completed. Either press Repeat, or Finished"
                 )
                 return
-            next_index = np.where(self.right_measurements == False)[0][0]
+            next_index = np.where(self.right_measurements != True)[0][0]
             self.RightOpenTime.setCurrentIndex(next_index)
         else:
             next_index = self.RightOpenTime.currentIndex()
@@ -1454,7 +1454,7 @@ class WaterCalibrationDialog(QDialog):
         if np.abs(error) > TOLERANCE:
             reply = QMessageBox.critical(
                 self,
-                f"Spot check {valve}",
+                f"Spot check {valve}".format(np.round(result, 2)),
                 "Measurement is outside expected tolerance.<br><br>"
                 "If this is a typo, please press cancel."
                 '<br><br><span style="color:purple;font-weight:bold">IMPORTANT</span>: '
