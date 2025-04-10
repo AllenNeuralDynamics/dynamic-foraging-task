@@ -1414,7 +1414,7 @@ class Window(QMainWindow):
                 QMessageBox.Ok,
             )
 
-    def _restartlogging(self, log_folder=None):
+    def _restartlogging(self, log_folder=None,start_from_camera=False):
         """Restarting logging"""
         logging.info("Restarting logging")
         # stop the current session except it is a new session
@@ -1422,9 +1422,14 @@ class Window(QMainWindow):
             pass
         else:
             self._StopCurrentSession()
+        
+        # We don't need to stop the recording when the start_from_camera is True as the logging is from the camera
+        if start_from_camera == False:
+            # Turn off the camera recording if it it on
+            if self.Camera_dialog.StartRecording.isChecked():
+                self.Camera_dialog.StartRecording.setChecked(False)
+                self.Camera_dialog.StartRecording()
 
-        # Turn off the camera recording in case it is on
-        self.Camera_dialog.StartRecording.setChecked(False)
         # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging.
         if (
             self.Camera_dialog.AutoControl.currentText() == "Yes"
