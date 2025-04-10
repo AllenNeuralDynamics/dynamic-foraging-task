@@ -1206,7 +1206,7 @@ class WaterCalibrationDialog(QDialog):
             self.MainWindow.Channel3, f"ManualWater_{valve}"
         )
         close_valve = getattr(
-            self.MainWindow.Channel3, f"ManualWater_{valve}_close"
+            self.MainWindow.Channel3, f"ManualWater_{valve}_Close"
         )
         open_timer = getattr(self, f"{valve.lower()}_open_timer")
         close_timer = getattr(self, f"{valve.lower()}_close_timer")
