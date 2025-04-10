@@ -1205,6 +1205,9 @@ class WaterCalibrationDialog(QDialog):
         toggle_valve_state = getattr(
             self.MainWindow.Channel3, f"ManualWater_{valve}"
         )
+        close_valve = getattr(
+            self.MainWindow.Channel3, f"ManualWater_{valve}_close"
+        )
         open_timer = getattr(self, f"{valve.lower()}_open_timer")
         close_timer = getattr(self, f"{valve.lower()}_close_timer")
         text_timer = getattr(self, f"{valve.lower()}_text_timer")
@@ -1214,6 +1217,8 @@ class WaterCalibrationDialog(QDialog):
             set_valve_time(
                 float(1000) * 1000
             )  # set the valve open time to max value
+
+            close_valve(int(1))     # set valve to known closed state so when toggled, it opens
             toggle_valve_state(int(1))  # set valve initially open
 
             if (
@@ -1243,7 +1248,7 @@ class WaterCalibrationDialog(QDialog):
                 button.setText(f"Open {valve.lower()} 5ml")
 
             # close the valve
-            toggle_valve_state(int(1))
+            close_valve(int(1))
 
             # reset the default valve open time
             time.sleep(0.01)
@@ -1257,12 +1262,12 @@ class WaterCalibrationDialog(QDialog):
         param valve: string specifying right or left valve"""
 
         # get correct function based on input valve name
-        getattr(self.MainWindow.Channel3, f"ManualWater_{valve}")(
+        getattr(self.MainWindow.Channel3, f"ManualWater_{valve}_Close")(
             int(1)
         )  # close valve
         getattr(self.MainWindow.Channel3, f"ManualWater_{valve}")(
             int(1)
-        )  # open valve
+        )  # toggle valve open
 
     def _TimeRemaining(self, i, cycles, opentime, interval):
         total_seconds = (cycles - i) * (opentime + interval)

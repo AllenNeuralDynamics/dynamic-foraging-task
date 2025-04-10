@@ -161,11 +161,17 @@ class RigClient:
     def RewardConsumeTime(self, value):
         self.send("/RewardConsumeTime", value)
 
-    def ManualWater_Left(self, value):
+    def ManualWater_Left(self, value: int):
         self.send("/ManualWater_Left", value)
 
-    def ManualWater_Right(self, value):
+    def ManualWater_Right(self, value: int):
         self.send("/ManualWater_Right", value)
+
+    def ManualWater_Left_Close(self, value: int):
+        self.send("/ManualWater_Left_Close", value)
+
+    def ManualWater_Right_Close(self, value: int):
+        self.send("/ManualWater_Right_Close", value)
 
     def AutoWater_Left(self, value):
         self.send("/AutoWater_Left", value)
