@@ -117,6 +117,7 @@ class OptogeneticsDialog(QDialog):
     def __init__(self, MainWindow, opto_model: Optogenetics, parent=None):
         super().__init__(parent)
         uic.loadUi('Optogenetics.ui', self)
+
         self.opto_model = opto_model
         self.opto_widget = OptoParametersWidget(self.opto_model)
         # initialize model as no optogenetics
