@@ -357,7 +357,7 @@
     <string>Calibration</string>
    </property>
   </widget>
-  <widget class="QWidget" name="QScrollOptogenetics">
+  <widget class="QScrollArea" name="QScrollOptogenetics">
    <property name="geometry">
     <rect>
      <x>10</x>

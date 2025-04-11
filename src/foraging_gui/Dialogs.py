@@ -125,7 +125,8 @@ class OptogeneticsDialog(QDialog):
         self.opto_model.session_control = None
         self.opto_widget.apply_schema(self.opto_model)
         self.QScrollOptogenetics.setWidget(self.opto_widget)
-
+        self.QScrollOptogenetics.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.QScrollOptogenetics.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.MainWindow = MainWindow
 
     def _connectSignalsSlots(self):
