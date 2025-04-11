@@ -357,7 +357,7 @@
     <string>Calibration</string>
    </property>
   </widget>
-  <widget class="QScrollArea" name="QScrollOptogenetics">
+  <widget class="QWidget" name="QOptogenetics">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -366,9 +366,8 @@
      <height>450</height>
     </rect>
    </property>
-   <property name="widgetResizable">
-    <bool>true</bool>
-   </property>
+   <layout class="QVBoxLayout" name="opto_layout">
+   </layout>
   </widget>
   <widget class="QGroupBox" name="groupBox_3">
    <property name="geometry">
