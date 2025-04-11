@@ -124,8 +124,9 @@ class OptogeneticsDialog(QDialog):
         self.opto_model.laser_colors = []
         self.opto_model.session_control = None
         self.opto_widget.apply_schema(self.opto_model)
-        self.opto_layout.addWidget(self.opto_widget)
-
+        self.QScrollOptogenetics.setWidget(self.opto_widget)
+        self.QScrollOptogenetics.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.QScrollOptogenetics.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.MainWindow = MainWindow
 
     def _connectSignalsSlots(self):
