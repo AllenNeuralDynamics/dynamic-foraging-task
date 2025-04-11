@@ -22,6 +22,14 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import Optogenetics
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry
 from aind_behavior_dynamic_foraging.DataSchemas.operation_control import OperationalControl
 
+from foraging_gui.metadata_mapper import (
+    task_parameters_to_tp_conversion,
+    session_to_tp_conversion,
+    fip_to_tp_conversion,
+    opto_to_tp_conversion,
+    operational_control_to_tp_conversion
+)
+
 if PLATFORM == 'win32':
     from newscale.usbxpress import USBXpressLib, USBXpressDevice
 VID_NEWSCALE = 0x10c4
@@ -124,14 +132,26 @@ class GenerateTrials():
         self.GeneFinish = 1
         self.GetResponseFinish = 1
         self.Obj = {
-            self.task_logic.name: [],
-            AindBehaviorSessionModel.__name__: [],
-            self.opto_model.name: [],
-            self.fip_model.name: [],
-            "left_valve_open_times": [],
-            "right_valve_open_times": [],
-            "multipliers": []
-        }
+            # initialize TP_ keys through mapping functions
+            **task_parameters_to_tp_conversion(self.task_logic.task_parameters),
+            **session_to_tp_conversion(self.session_model),
+            **fip_to_tp_conversion(self.fip_model),
+            **opto_to_tp_conversion(self.opto_model),
+            **operational_control_to_tp_conversion(self.operation_control_model),
+            "LeftValue": [],    # left valve open times
+            "RightValue": [],   # right valve open times
+            "TP_LeftValue": [],  # left valve open times
+            "TP_RightValue": [],
+            "multipliers": [],
+            "TP_Laser_calibration": [],
+            "TP_LatestCalibrationDate": [],
+            "TP_laser_1_calibration_power": [],
+            "TP_laser_1_calibration_voltage": [],
+            "TP_laser_1_target": [],
+            "TP_laser_2_calibration_power": [],
+            "TP_laser_2_calibration_voltage": [],
+            "TP_laser_2_target": []
+            }
         self.selected_condition = None
         self.warmup_on = self.task_logic.task_parameters.warmup is not None
         # get all of the training parameters of the current trial
@@ -689,9 +709,9 @@ class GenerateTrials():
         self.BS_RewardN = np.sum(B_RewardedHistory[0] == True) + np.sum(B_RewardedHistory[1] == True)
 
         BS_auto_water_left, BS_earned_reward_left, BS_AutoWater_N_left, BS_EarnedReward_N_left = self._process_values(
-            self.Obj["left_valve_open_times"], self.B_AutoWaterTrial[0], self.Obj["multipliers"], B_RewardedHistory[0])
+            self.Obj["LeftValue"], self.B_AutoWaterTrial[0], self.Obj["multipliers"], B_RewardedHistory[0])
         BS_auto_water_right, BS_earned_reward_right, BS_AutoWater_N_right, BS_EarnedReward_N_right = self._process_values(
-            self.Obj["right_valve_open_times"], self.B_AutoWaterTrial[1], self.Obj["multipliers"], B_RewardedHistory[1])
+            self.Obj["RightValue"], self.B_AutoWaterTrial[1], self.Obj["multipliers"], B_RewardedHistory[1])
         self.BS_auto_water = [BS_auto_water_left, BS_auto_water_right]
         self.BS_earned_reward = [BS_earned_reward_left, BS_earned_reward_right]
         self.BS_AutoWater_N = [BS_AutoWater_N_left, BS_AutoWater_N_right]
@@ -2005,18 +2025,19 @@ class GenerateTrials():
                 setattr(self, 'TP_' + child.objectName(), child.isChecked())
 
     def _SaveParameters(self):
-        # save task_logic model
-        self.Obj[self.task_logic.name].append(self.task_logic.model_dump_json())
 
-        # save session model
-        self.Obj[AindBehaviorSessionModel.__name__].append(self.session_model.model_dump_json())
+        # save models mapped to TP_ parameters
+        task_tp = task_parameters_to_tp_conversion(self.task_logic.task_parameters)
+        session_tp = session_to_tp_conversion(self.session_model)
+        fip_tp = fip_to_tp_conversion(self.fip_model)
+        opto_tp = opto_to_tp_conversion(self.opto_model)
+        oc_tp = operational_control_to_tp_conversion(self.operation_control_model)
 
-        #save opto model
-        self.Obj[self.opto_model.name].append(self.opto_model.model_dump_json())
+        for key, value in {**task_tp, **session_tp, **fip_tp, **opto_tp, **oc_tp}.items():
+            if "TP_" == key[:3]:
+                self.Obj[key] = [self.Obj[key], value] if type(self.Obj[key]) is not list else self.Obj[key] + [value]
 
-        # save fip model
-        self.Obj[self.fip_model.name].append(self.fip_model.model_dump_json())
-
+        # loop through and save all TP_ attributes
         for attr_name in dir(self):
             if attr_name.startswith('TP_'):
                 # Add the field to the dictionary with the 'TP_' prefix removed
@@ -2034,12 +2055,24 @@ class GenerateTrials():
         # get the newscale positions
         if hasattr(self.win, 'current_stage') or self.win.stage_widget is not None:
             self.B_StagePositions.append(self.win._GetPositions())
-        # save valve_open_times
-        self.Obj["left_valve_open_times"].append(self.win.left_valve_open_time)
-        self.Obj["right_valve_open_times"].append(self.win.right_valve_open_time)
-        # save multiplier value
+
+        # map miscellaneous values
+        self.Obj["LeftValue"].append(self.win.left_valve_open_time)
+        self.Obj["RightValue"].append(self.win.right_valve_open_time)
+        self.Obj["TP_LeftValue"].append(self.win.left_valve_open_time)
+        self.Obj["TP_RightValue"].append(self.win.right_valve_open_time)
         self.Obj["multipliers"].append(.8 if self.task_logic.task_parameters.auto_water is None
                                        else self.task_logic.task_parameters.auto_water.multiplier)
+
+        # add opto parameters
+        self.Obj["TP_Laser_calibration"].append(self.win.Opto_dialog.Laser_calibration.currentText())
+        self.Obj["TP_LatestCalibrationDate"].append(self.win.Opto_dialog.LatestCalibrationDate.text())
+        self.Obj["TP_laser_1_calibration_power"].append(self.win.Opto_dialog.laser_1_calibration_power.text())
+        self.Obj["TP_laser_1_calibration_voltage"].append(self.win.Opto_dialog.laser_1_calibration_voltage.text())
+        self.Obj["TP_laser_1_target"].append(self.win.Opto_dialog.laser_1_target.text())
+        self.Obj["TP_laser_2_calibration_power"].append(self.win.Opto_dialog.laser_2_calibration_power.text())
+        self.Obj["TP_laser_2_calibration_voltage"].append(self.win.Opto_dialog.laser_2_calibration_voltage.text())
+        self.Obj["TP_laser_2_target"].append(self.win.Opto_dialog.laser_2_target.text())
 
 class NewScaleSerialY():
     '''modified by Xinxin Yin'''
