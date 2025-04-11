@@ -42,6 +42,7 @@ from aind_data_schema_models.units import (
     PowerUnit,
     SizeUnit,
     SoundIntensityUnit,
+    TimeUnit
 )
 
 import foraging_gui
@@ -905,7 +906,8 @@ class generate_metadata:
                     DetectorConfig(
                         name=current_detector["name"],
                         exposure_time=exposure_time,
-                        trigger_type=TriggerType.INTERNAL,
+                        exposure_time_unit=TimeUnit.US,
+                        trigger_type=TriggerType.EXTERNAL,
                     )
                 )
 
@@ -945,7 +947,7 @@ class generate_metadata:
         Make the audio stimulus metadata
         """
         self.behavior_stimulus = []
-        if self.has_behavior_data is False:
+        if self.has_behavior_data == False:
             logging.info("No behavior data stream detected!")
             return
 
@@ -1376,7 +1378,7 @@ class generate_metadata:
         Make the behavior stream metadata
         """
 
-        if self.has_behavior_data is False:
+        if self.has_behavior_data == False:
             self.behavior_streams = []
             logging.info("No behavior data detected!")
             return
@@ -1408,9 +1410,7 @@ class generate_metadata:
         self.behavior_software = []
         try:
             # Get information about task repository
-            commit_ID = (
-                self.session_model.commit_hash
-            )
+            commit_ID = self.session_model.commit_hash
             current_branch = (
                 subprocess.check_output(["git", "branch", "--show-current"])
                 .decode("ascii")

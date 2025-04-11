@@ -786,7 +786,7 @@ class WaterCalibrationDialog(QDialog):
                     "All measurements have been completed. Either press Repeat, or Finished"
                 )
                 return
-            next_index = np.where(self.left_measurements is False)[0][0]
+            next_index = np.where(self.left_measurements != True)[0][0]
             self.LeftOpenTime.setCurrentIndex(next_index)
         else:
             next_index = self.LeftOpenTime.currentIndex()
@@ -973,7 +973,7 @@ class WaterCalibrationDialog(QDialog):
                     "All measurements have been completed. Either press Repeat, or Finished"
                 )
                 return
-            next_index = np.where(self.right_measurements is False)[0][0]
+            next_index = np.where(self.right_measurements != True)[0][0]
             self.RightOpenTime.setCurrentIndex(next_index)
         else:
             next_index = self.RightOpenTime.currentIndex()
@@ -1454,7 +1454,7 @@ class WaterCalibrationDialog(QDialog):
         if np.abs(error) > TOLERANCE:
             reply = QMessageBox.critical(
                 self,
-                f"Spot check {valve}",
+                f"Spot check {valve}".format(np.round(result, 2)),
                 "Measurement is outside expected tolerance.<br><br>"
                 "If this is a typo, please press cancel."
                 '<br><br><span style="color:purple;font-weight:bold">IMPORTANT</span>: '
@@ -1671,7 +1671,7 @@ class CameraDialog(QDialog):
                 or self.MainWindow.logging_type == -1
             ):
                 self.MainWindow.Ot_log_folder = (
-                    self.MainWindow._restartlogging()
+                    self.MainWindow._restartlogging(start_from_camera=True)
                 )
             # set to check drop frame as true
             self.MainWindow.to_check_drop_frames = 1
@@ -2589,7 +2589,7 @@ class LaserCalibrationDialog(QDialog):
                 if self.SleepStart == 1:  # only run once
                     self.SleepStart = 0
                     self.threadpool2.start(self.worker2)
-                if self.Open.isChecked() is False or self.SleepComplete2 == 1:
+                if self.Open.isChecked() == False or self.SleepComplete2 == 1:
                     break
             self.Open.setStyleSheet("background-color : none")
             self.Open.setChecked(False)
@@ -2619,7 +2619,7 @@ class LaserCalibrationDialog(QDialog):
                     self.SleepComplete = 0
                     self._InitiateATrial()
                     self.threadpool1.start(self.worker1)
-                if self.KeepOpen.isChecked() is False:
+                if self.KeepOpen.isChecked() == False:
                     break
             self.KeepOpen.setStyleSheet("background-color : none")
             self.KeepOpen.setChecked(False)
@@ -2773,7 +2773,7 @@ class MetadataDialog(QDialog):
                 != self.RigMetadataFile.text()
                 and self.RigMetadataFile.text() != ""
             ):
-                if dont_clear is False:
+                if dont_clear == False:
                     # clear probe angles if the rig metadata file is changed
                     self.meta_data["session_metadata"]["probes"] = {}
                     self.meta_data["session_metadata"]["microscopes"] = {}

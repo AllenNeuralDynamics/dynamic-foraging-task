@@ -1414,7 +1414,7 @@ class Window(QMainWindow):
                 QMessageBox.Ok,
             )
 
-    def _restartlogging(self, log_folder=None):
+    def _restartlogging(self, log_folder=None,start_from_camera=False):
         """Restarting logging"""
         logging.info("Restarting logging")
         # stop the current session except it is a new session
@@ -1422,9 +1422,14 @@ class Window(QMainWindow):
             pass
         else:
             self._StopCurrentSession()
+        
+        # We don't need to stop the recording when the start_from_camera is True as the logging is from the camera
+        if start_from_camera == False:
+            # Turn off the camera recording if it it on
+            if self.Camera_dialog.StartRecording.isChecked():
+                self.Camera_dialog.StartRecording.setChecked(False)
+                self.Camera_dialog.StartRecording()
 
-        # Turn off the camera recording in case it is on
-        self.Camera_dialog.StartRecording.setChecked(False)
         # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging.
         if (
             self.Camera_dialog.AutoControl.currentText() == "Yes"
@@ -2660,7 +2665,7 @@ class Window(QMainWindow):
         allow_reset (bool) allows the Baseweight etc. parameters to be reset to the empty string
         """
         try:
-            if self.actionTime_distribution.isChecked() is True:
+            if self.actionTime_distribution.isChecked() == True:
                 self.PlotTime._Update(self)
         except Exception:
             logging.error(traceback.format_exc())
@@ -2889,7 +2894,7 @@ class Window(QMainWindow):
             ):
                 if (
                     child.objectName() in ["qt_spinbox_lineedit", None, ""]
-                    or child.isEnabled() is False
+                    or child.isEnabled() == False
                 ):  # I don't understand where the qt_spinbox_lineedit comes from.
                     continue
                 if (
@@ -3447,7 +3452,7 @@ class Window(QMainWindow):
         if self.OpenOptogenetics == 0:
             self.Opto_dialog = OptogeneticsDialog(MainWindow=self)
             self.OpenOptogenetics = 1
-        if self.action_Optogenetics.isChecked() is True:
+        if self.action_Optogenetics.isChecked() == True:
             self.Opto_dialog.show()
         else:
             self.Opto_dialog.hide()
@@ -3457,7 +3462,7 @@ class Window(QMainWindow):
         if self.OpenCamera == 0:
             self.Camera_dialog = CameraDialog(MainWindow=self)
             self.OpenCamera = 1
-        if self.action_Camera.isChecked() is True:
+        if self.action_Camera.isChecked() == True:
             self.Camera_dialog.show()
         else:
             self.Camera_dialog.hide()
@@ -3505,7 +3510,7 @@ class Window(QMainWindow):
         if self.OpenMetadata == 0:
             self.Metadata_dialog = MetadataDialog(MainWindow=self)
             self.OpenMetadata = 1
-        if self.actionMeta_Data.isChecked() is True:
+        if self.actionMeta_Data.isChecked() == True:
             self.Metadata_dialog.show()
         else:
             self.Metadata_dialog.hide()
@@ -3516,7 +3521,7 @@ class Window(QMainWindow):
                 MainWindow=self
             )
             self.OpenWaterCalibration = 1
-        if self.action_Calibration.isChecked() is True:
+        if self.action_Calibration.isChecked() == True:
             self.WaterCalibration_dialog.show()
         else:
             self.WaterCalibration_dialog.hide()
@@ -3527,7 +3532,7 @@ class Window(QMainWindow):
                 MainWindow=self
             )
             self.OpenLaserCalibration = 1
-        if self.actionLaser_Calibration.isChecked() is True:
+        if self.actionLaser_Calibration.isChecked() == True:
             self.LaserCalibration_dialog.show()
         else:
             self.LaserCalibration_dialog.hide()
@@ -3542,7 +3547,7 @@ class Window(QMainWindow):
             self.TimeDistribution_dialog.setWindowTitle(
                 "Simulated time distribution"
             )
-        if self.actionTime_distribution.isChecked() is True:
+        if self.actionTime_distribution.isChecked() == True:
             self.TimeDistribution_dialog.show()
         else:
             self.TimeDistribution_dialog.hide()
@@ -3575,7 +3580,7 @@ class Window(QMainWindow):
             self.LickSta_dialog = LickStaDialog(MainWindow=self)
             self.LickSta = 1
             self.LickSta_dialog.setWindowTitle("Licks statistics")
-        if self.actionLicks_sta.isChecked() is True:
+        if self.actionLicks_sta.isChecked() == True:
             self.LickSta_dialog.show()
         else:
             self.LickSta_dialog.hide()
@@ -3999,7 +4004,6 @@ class Window(QMainWindow):
                     ]
                 ):
                     self._AddWaterLogResult(session)
-
 
         except Exception as e:
             logging.warning(
@@ -6166,7 +6170,7 @@ class Window(QMainWindow):
 
         self._StartTrialLoop(GeneratedTrials, worker1, worker_save)
 
-        if self.actionDrawing_after_stopping.isChecked() is True:
+        if self.actionDrawing_after_stopping.isChecked() == True:
             try:
                 self.PlotM._Update(
                     GeneratedTrials=GeneratedTrials, Channel=self.Channel2
@@ -6347,7 +6351,7 @@ class Window(QMainWindow):
                         self.Start.setStyleSheet("background-color : none")
                         break
                 # receive licks and update figures
-                if self.actionDrawing_after_stopping.isChecked() is False:
+                if self.actionDrawing_after_stopping.isChecked() == False:
                     self.PlotM._Update(
                         GeneratedTrials=GeneratedTrials, Channel=self.Channel2
                     )
@@ -6411,7 +6415,7 @@ class Window(QMainWindow):
                         )
 
                 # save the data everytrial
-                if GeneratedTrials.CurrentSimulation is True:
+                if GeneratedTrials.CurrentSimulation == True:
                     GeneratedTrials._GetAnimalResponse(
                         self.Channel, self.Channel3, self.data_lock
                     )
@@ -6429,7 +6433,7 @@ class Window(QMainWindow):
                     GeneratedTrials.B_CurrentTrialN > 0
                     and self.previous_backup_completed == 1
                     and self.save_each_trial
-                    and GeneratedTrials.CurrentSimulation is False
+                    and GeneratedTrials.CurrentSimulation == False
                 ):
                     self.previous_backup_completed = 0
                     self.threadpool6.start(worker_save)
