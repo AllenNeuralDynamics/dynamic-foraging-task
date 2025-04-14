@@ -587,6 +587,56 @@ class Window(QMainWindow):
         # use y key and default to y1 key if not in dict
         self.operation_control_model.stage_specs.y = current_positions.get("y") or current_positions.get("y1")
 
+    def update_stage_positions_from_operational_control(self, oc: OperationalControl = None) -> None:
+        """
+            Update stage position based on operational control model
+
+            :param operational_control: optional to use for stage position. If None, use operational_control attribute.
+        """
+
+        oc = oc if oc is not None else self.operation_control_model
+
+        # determine how stage should be moved.
+        last_positions = {"x": oc.stage_specs.x, "y": oc.stage_specs.y, "z": oc.stage_specs.z}
+        positions = self._GetPositions()
+        none_pos = {"x": None, "y": None, "z": None}
+
+        # check aind stage
+        if self.stage_widget is not None and last_positions != none_pos:
+            if oc.stage_specs.stage_name == "AIND":  # coordinates in oc model also come from aind stage
+                logging.info("Using coordinates in loaded operational control model.")
+                last_positions = {"x": oc.stage_specs.x, "y": oc.stage_specs.y, "z": oc.stage_specs.z}
+
+            else:  # coordinates in oc model also come from newscale stage and can't be applied
+                logging.info("Coordinates in loaded operational control model come from newscale stage which does "
+                             "not match current stage. Checking slims for location.")
+                last_positions = self.slims_handler.get_loaded_mouse_offset()  # check if slims has offset
+                if last_positions == none_pos:
+                    logging.info("No offset coordinates found in Slims. Not moving stage.")
+
+            positions = {
+                0: positions['x'] if last_positions['x'] is None else float(last_positions["x"]),
+                1: positions['y1'] if last_positions['y'] is None else float(last_positions["y"]),
+                2: positions['y2'] if last_positions['y'] is None else float(last_positions["y"]),
+                3: positions['z'] if last_positions['z'] is None else float(last_positions["z"]),
+            }
+            self.stage_widget.stage_model.update_position(positions)
+            self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
+
+        # check newscale stage
+        elif hasattr(self, "current_stage") and last_positions != none_pos:  # newscale stage
+            # coordinates in oc model come from same newscale stage and can be used
+            if oc.stage_specs.stage_name == "newscale" and oc.stage_specs.rig_name == self.current_box:
+                logging.info("Using coordinates in loaded operational control model.")
+                last_positions = {k: v if v is not None else positions[k] for k, v in last_positions.items()}
+                last_positions_lst = list(last_positions.values())
+                self.current_stage.move_absolute_3d(*last_positions_lst)
+                self._UpdatePosition(last_positions_lst, (0, 0, 0))
+            else:
+                # don't do anything if oc model stage isn't newscal and not from box being used
+                logging.info(f"Cannot move stage since last session was run using {oc.stage_specs.stage_name} and"
+                             f" on {oc.stage_specs.rig_name}")
+
     def load_curriculum(self, mouse_id: str) -> None:
         """
             Load and apply curriculum from slims
@@ -627,46 +677,7 @@ class Window(QMainWindow):
             self.on_curriculum.setChecked(slims_session.is_curriculum_suggestion)
             self.on_curriculum.setEnabled(slims_session.is_curriculum_suggestion)
 
-            # determine how stage should be moved.
-            last_positions = {"x": oc.stage_specs.x, "y": oc.stage_specs.y, "z": oc.stage_specs.z}
-            positions = self._GetPositions()
-            none_pos = {"x": None, "y": None, "z": None}
-
-            # check aind stage
-            if self.stage_widget is not None and last_positions != none_pos:
-                if oc.stage_specs.stage_name == "AIND":     # coordinates in oc model also come from aind stage
-                    logging.info("Using coordinates in loaded operational control model.")
-                    last_positions = {"x": oc.stage_specs.x, "y": oc.stage_specs.y, "z": oc.stage_specs.z}
-
-                else:   # coordinates in oc model also come from newscale stage and can't be applied
-                    logging.info("Coordinates in loaded operational control model come from newscale stage which does "
-                                 "not match current stage. Checking slims for location.")
-                    last_positions = self.slims_handler.get_loaded_mouse_offset()   # check if slims has offset
-                    if last_positions == none_pos:
-                        logging.info("No offset coordinates found in Slims. Not moving stage.")
-
-                positions = {
-                    0: positions['x'] if last_positions['x'] is None else float(last_positions["x"]),
-                    1: positions['y1'] if last_positions['y'] is None else float(last_positions["y"]),
-                    2: positions['y2'] if last_positions['y'] is None else float(last_positions["y"]),
-                    3: positions['z'] if last_positions['z'] is None else float(last_positions["z"]),
-                }
-                self.stage_widget.stage_model.update_position(positions)
-                self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
-
-            # check newscale stage
-            elif hasattr(self, "current_stage") and last_positions != none_pos:  # newscale stage
-                # coordinates in oc model come from same newscale stage and can be used
-                if oc.stage_specs.stage_name == "newscale" and oc.stage_specs.rig_name == self.current_box:
-                    logging.info("Using coordinates in loaded operational control model.")
-                    last_positions = {k: v if v is not None else positions[k] for k, v in last_positions.items()}
-                    last_positions_lst = list(last_positions.values())
-                    self.current_stage.move_absolute_3d(*last_positions_lst)
-                    self._UpdatePosition(last_positions_lst, (0, 0, 0))
-                else:
-                    # don't do anything if oc model stage isn't newscal and not from box being used
-                    logging.info(f"Cannot move stage since last session was run using {oc.stage_specs.stage_name} and"
-                                 f" on {oc.stage_specs.rig_name}")
+            self.update_stage_positions_from_operational_control(oc)
 
             # update operational control model with latest stage coords
             self.update_operational_control_stage_positions()
