@@ -251,7 +251,7 @@ class LoadedMouseSlimsHandler:
         self.metrics = None
         self._loaded_mouse_id = None
 
-    def write_loaded_mouse(self, mouse_id: str,
+    def write_loaded_mouse(self,
                            on_curriculum: bool,
                            foraging_efficiency: float,
                            finished_trials: int,

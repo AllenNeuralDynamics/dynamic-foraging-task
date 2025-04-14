@@ -589,11 +589,14 @@ class Window(QMainWindow):
         """
             Update stage position based on operational control model
 
-            :param operational_control: optional to use for stage position. If None, use operational_control attribute.
+            :param oc: optional model to use for stage position. If None, use operational_control attribute.
         """
 
         oc = oc if oc is not None else self.operation_control_model
 
+        if oc.stage_specs is None:
+            logging.info("Cannot move stage as stage specs are not defined in operational control model.")
+            return
         # determine how stage should be moved.
         last_positions = {"x": oc.stage_specs.x, "y": oc.stage_specs.y, "z": oc.stage_specs.z}
         positions = self._GetPositions()
@@ -794,15 +797,14 @@ class Window(QMainWindow):
         # add session to slims if there are trials and mouse loaded
         if hasattr(self, "GeneratedTrials") and self.slims_handler.curriculum is not None:
             try:
-                trainer_state = self.slims_handler.write_loaded_mouse(self.session_model.subject,
-                                                                          self.on_curriculum.isChecked(),
-                                                                          self.GeneratedTrials.B_for_eff_optimal,
-                                                                          self.GeneratedTrials.B_CurrentTrialN,
-                                                                          self.task_logic,
-                                                                          self.session_model,
-                                                                          self.opto_model,
-                                                                          self.fip_model,
-                                                                          self.operation_control_model)
+                trainer_state = self.slims_handler.write_loaded_mouse(self.on_curriculum.isChecked(),
+                                                                      self.GeneratedTrials.B_for_eff_optimal,
+                                                                      self.GeneratedTrials.B_CurrentTrialN,
+                                                                      self.task_logic,
+                                                                      self.session_model,
+                                                                      self.opto_model,
+                                                                      self.fip_model,
+                                                                      self.operation_control_model)
                 logging.info(f"Writing next session to Slims successful. Mouse {self.session_model.subject} will run"
                              f" on {trainer_state.stage.name} next session.", extra={'tags': [self.warning_log_tag]})
                 self.on_curriculum.setChecked(False)
@@ -2835,25 +2837,10 @@ class Window(QMainWindow):
             self.Obj = Obj
 
         # Set stage position to last position
-        if 'B_StagePositions' in Obj.keys() and len(Obj['B_StagePositions']) != 0:
-                last_positions = Obj['B_StagePositions'][-1]
-                if hasattr(self, 'current_stage'):  # newscale stage
-                    self.current_stage.move_absolute_3d(float(last_positions['x']),
-                                                        float(last_positions['y']),
-                                                        float(last_positions['z']))
-                    self._UpdatePosition((float(last_positions['x']),
-                                          float(last_positions['y']),
-                                          float(last_positions['z'])), (0, 0, 0))
-                elif self.stage_widget is not None:  # aind stage
-                    # Move AIND stage to the last session positions
-                    positions = {
-                        0: float(last_positions['x']),
-                        1: float(last_positions['y1']),
-                        2: float(last_positions['y2']),
-                        3: float(last_positions['z'])
-                    }
-                    self.stage_widget.stage_model.update_position(positions)
-                    step_size = self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
+        self.update_stage_positions_from_operational_control()
+
+        # TODO: should we add mouse as loaded in slims handler?
+        # self.slims_handler.set_loaded_mouse(self.session_model.subject, metrics, self.task_logic, curriculum)
 
         # check dropping frames
         self.to_check_drop_frames = 1
