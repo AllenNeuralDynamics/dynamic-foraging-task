@@ -582,8 +582,6 @@ class Window(QMainWindow):
             logging.info("Can't update loaded mouse position because no stage is connected.")
             return
 
-        elif
-
         self.operation_control_model.stage_specs.x = current_positions["x"]
         self.operation_control_model.stage_specs.z = current_positions["z"]
         # use y key and default to y1 key if not in dict
