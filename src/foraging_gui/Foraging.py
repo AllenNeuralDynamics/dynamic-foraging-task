@@ -4408,6 +4408,7 @@ class Window(QMainWindow):
         self._GetProjectName(mouse_id)
         self._GetProtocol(mouse_id)
         self.Scientist = self._GetInfoFromSchedule(mouse_id, 'PI')
+        logging.info('Setting Scientist {}'.format(self.Scientist))
         self.TargetRatio.setText("0.85")
         self.keyPressEvent(allow_reset=True)
 
@@ -4897,6 +4898,7 @@ class Window(QMainWindow):
         self._GetProjectName(self.behavior_session_model.subject)
         self._GetProtocol(self.behavior_session_model.subject)
         self.Scientist = self._GetInfoFromSchedule(self.behavior_session_model.subject, 'PI')
+        logging.info('Setting Scientist {}'.format(self.Scientist))
 
     def _LoadVisualization(self):
         """To visulize the training when loading a session"""
