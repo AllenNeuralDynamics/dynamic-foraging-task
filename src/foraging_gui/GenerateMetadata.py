@@ -606,6 +606,7 @@ class generate_metadata:
 
         # Determine list of experimenters
         experimenter_list = [self.Obj["Experimenter"]]
+        print(self.Obj["Scientist"])
         if (
             hasattr(self.Obj, "Scientist")
             and self.Obj["Experimenter"] != self.Obj["Scientist"]
