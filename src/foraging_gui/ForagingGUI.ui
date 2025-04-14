@@ -866,7 +866,7 @@
                           </widget>
                          </item>
                          <item row="5" column="4" colspan="2">
-                          <widget class="QLineEdit" name="PositionZ">
+                          <widget class="QLabel" name="PositionZ">
                            <property name="sizePolicy">
                             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                              <horstretch>0</horstretch>
@@ -893,7 +893,7 @@
                           </widget>
                          </item>
                          <item row="4" column="4" colspan="2">
-                          <widget class="QLineEdit" name="PositionY">
+                          <widget class="QLabel" name="PositionY">
                            <property name="sizePolicy">
                             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                              <horstretch>0</horstretch>
@@ -920,7 +920,7 @@
                           </widget>
                          </item>
                          <item row="3" column="4" colspan="2">
-                          <widget class="QLineEdit" name="PositionX">
+                          <widget class="QLabel" name="PositionX">
                            <property name="sizePolicy">
                             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                              <horstretch>0</horstretch>
