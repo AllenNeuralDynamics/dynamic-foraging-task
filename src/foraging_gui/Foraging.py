@@ -642,6 +642,8 @@ class Window(QMainWindow):
                     logging.info("Coordinates in loaded operational control model come from newscale stage which does "
                                  "not match current stage. Checking slims for location.")
                     last_positions = self.slims_handler.get_loaded_mouse_offset()   # check if slims has offset
+                    if last_positions == none_pos:
+                        logging.info("No offset coordinates found in Slims. Not moving stage.")
 
                 positions = {
                     0: positions['x'] if last_positions['x'] is None else float(last_positions["x"]),
