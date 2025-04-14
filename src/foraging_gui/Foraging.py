@@ -657,7 +657,7 @@ class Window(QMainWindow):
             # check newscale stage
             elif hasattr(self, "current_stage") and last_positions != none_pos:  # newscale stage
                 # coordinates in oc model come from same newscale stage and can be used
-                if oc.stage_specs.stage_name == "newscale" and oc.rig_name == self.current_box:
+                if oc.stage_specs.stage_name == "newscale" and oc.stage_specs.rig_name == self.current_box:
                     logging.info("Using coordinates in loaded operational control model.")
                     last_positions = {k: v if v is not None else positions[k] for k, v in last_positions.items()}
                     last_positions_lst = list(last_positions.values())
@@ -666,7 +666,7 @@ class Window(QMainWindow):
                 else:
                     # don't do anything if oc model stage isn't newscal and not from box being used
                     logging.info(f"Cannot move stage since last session was run using {oc.stage_specs.stage_name} and"
-                                 f"on {oc.rig_name}")
+                                 f" on {oc.stage_specs.rig_name}")
 
             # update operational control model with latest stage coords
             self.update_operational_control_stage_positions()
@@ -1113,7 +1113,7 @@ class Window(QMainWindow):
             logging.info('Grabbing current stage position')
             current_stage = self.current_stage
             current_position = current_stage.get_position()
-            #self._UpdatePosition(current_position, (0, 0, 0))
+            self._UpdatePosition(current_position, (0, 0, 0))
             return {axis: float(pos) for axis, pos in zip(['x', 'y', 'z'], current_position)}
         elif self.stage_widget is not None:  # aind stage
             # Get absolute position of motors in AIND stage
