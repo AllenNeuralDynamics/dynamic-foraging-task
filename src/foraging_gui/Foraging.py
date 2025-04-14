@@ -2851,6 +2851,8 @@ class Window(QMainWindow):
 
         self.modelsChanged.emit()
 
+        logging.info(f"Successfully loaded mouse {self.session_model.subject}.", extra={'tags': [self.warning_log_tag]})
+
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
         self.ToInitializeVisual = 1
@@ -3201,8 +3203,9 @@ class Window(QMainWindow):
         self.fip_widget.setEnabled(True)
         self.on_curriculum.setEnabled(True)
 
-        # add session to slims
+        # add session to slims and clear loaded mouse
         self.write_curriculum()
+        self.slims_handler.clear_loaded_mouse()
 
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully == 0:
