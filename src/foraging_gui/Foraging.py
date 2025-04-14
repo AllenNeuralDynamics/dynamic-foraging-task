@@ -4407,6 +4407,7 @@ class Window(QMainWindow):
         self.ID.returnPressed.emit()
         self._GetProjectName(mouse_id)
         self._GetProtocol(mouse_id)
+        self.Scientist = self._GetInfoFromSchedule(mouse_id, 'PI')
         self.TargetRatio.setText("0.85")
         self.keyPressEvent(allow_reset=True)
 
@@ -4895,6 +4896,7 @@ class Window(QMainWindow):
         self.ID.returnPressed.emit()  # Mimic the return press event to auto-engage AutoTrain
         self._GetProjectName(self.behavior_session_model.subject)
         self._GetProtocol(self.behavior_session_model.subject)
+        self.Scientist = self._GetInfoFromSchedule(self.behavior_session_model.subject, 'PI')
 
     def _LoadVisualization(self):
         """To visulize the training when loading a session"""

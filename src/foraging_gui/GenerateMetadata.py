@@ -604,8 +604,17 @@ class generate_metadata:
         self._combine_data_streams()
         # self.data_streams = self.ephys_streams+self.ophys_streams+self.high_speed_camera_streams
 
+        # Determine list of experimenters
+        experimenter_list = [self.Obj["Experimenter"]]
+        if (
+            hasattr(self.Obj, "Scientist")
+            and self.Obj["Experimenter"] != self.Obj["Scientist"]
+            and self.Obj["Scientist"] is not None
+            and self.Obj["Scientist"] != ""
+        ):
+            experimenter_list.append(self.Obj["Scientist"])
         session_params = {
-            "experimenter_full_name": [self.Obj["Experimenter"]],
+            "experimenter_full_name": experimenter_list,
             "subject_id": self.Obj["ID"],
             "session_start_time": self.session_start_time,
             "session_end_time": self.session_end_time,
