@@ -14,7 +14,7 @@ class OperationControlWidget(SchemaWidgetBase):
         super().__init__(schema)
 
         # hide unnecessary widgets
-        self.schema_fields_widgets["stage_position"].hide()
+        self.schema_fields_widgets["stage_specs"].hide()
         self.schema_fields_widgets["name"].hide()
 
         # add range for auto stop widgets
