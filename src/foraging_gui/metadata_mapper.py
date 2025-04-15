@@ -132,63 +132,65 @@ def behavior_json_to_task_logic_model(behavior_json: dict) -> AindDynamicForagin
     behavior = {k: v[-1] for k, v in behavior_json.items() if type(v) == list and len(v) != 0}
 
     return AindDynamicForagingTaskLogic(
-        block_parameters=BlockParameters(
-            min=0 if behavior["TP_BlockMinReward"] == "" else float(behavior["TP_BlockMinReward"]),
-            max=0 if behavior["TP_BlockMaxReward"] else float(behavior["TP_BlockMaxReward"]),
-            beta=0 if behavior["TP_BlockBetaReward"] else float(behavior["TP_BlockBetaReward"])),
-        reward_probability=RewardProbability(
-            base_reward_sum=0 if behavior["TP_BaseRewardSum"] else float(behavior["TP_BaseRewardSum"]),
-            family=0 if behavior["TP_RewardFamily"] else float(behavior["TP_RewardFamily"]),
-            pairs_n=0 if behavior["TP_RewardPairsN"] else float(behavior["TP_RewardPairsN"])),
-        uncoupled_reward=None if behavior["TP_UncoupledReward"][-1] == "" else ast.literal_eval(
-            behavior["TP_UncoupledReward"]),
-        randomness=0 if behavior["TP_Randomness"] else float(behavior["TP_Randomness"]),
-        delay_period=DelayPeriod(
-            min=0 if behavior["TP_DelayMin"] else float(behavior["TP_DelayMin"]),
-            max=0 if behavior["TP_DelayMax"] else float(behavior["TP_DelayMax"]),
-            beta=0 if behavior["TP_DelayBeta"] else float(behavior["TP_DelayBeta"])
-        ),
-        reward_delay=0 if behavior["TP_RewardDelay"] == "" else float(behavior["TP_RewardDelay"]),
-        auto_water=None if not behavior["TP_AutoReward"] else AutoWater(
-            auto_water_type=behavior["TP_AutoWaterType"],
-            multiplier=0 if behavior["TP_Multiplier"] == "" else float(behavior["TP_Multiplier"]),
-            unrewarded=0 if behavior["TP_Unrewarded"] == "" else float(behavior["TP_Unrewarded"]),
-            ignored=0 if behavior["TP_Ignored"] == "" else float(behavior["TP_Ignored"]),
-            include_reward=0 if behavior["TP_IncludeAutoReward"] == "" else float(behavior["TP_IncludeAutoReward"])
-        ),
-        inter_trial_interval=InterTrialInterval(min=0 if behavior["TP_ITIMin"] == "" else float(behavior["TP_ITIMin"]),
-                                                max=0 if behavior["TP_ITIMax"] == "" else float(behavior["TP_ITIMax"]),
-                                                beta=0 if behavior["TP_ITIBeta"] == "" else float(
-                                                    behavior["TP_ITIBeta"]),
-                                                increase=0 if behavior["TP_ITIIncrease"] == "" else float(
-                                                    behavior["TP_ITIIncrease"])),
-        response_time=ResponseTime(
-            response_time=0 if behavior["TP_ResponseTime"] == "" else float(behavior["TP_ResponseTime"]),
-            reward_consume_time=0 if behavior["TP_RewardConsumeTime"] == "" else float(behavior["TP_RewardConsumeTime"])
+        task_parameters=AindDynamicForagingTaskParameters(
+            block_parameters=BlockParameters(
+                min=0 if behavior["TP_BlockMinReward"] == "" else float(behavior["TP_BlockMinReward"]),
+                max=0 if behavior["TP_BlockMinReward"] else float(behavior["TP_BlockMinReward"]),
+                beta=0 if behavior["TP_BlockBeta"] else float(behavior["TP_BlockBeta"])),
+            reward_probability=RewardProbability(
+                base_reward_sum=0 if behavior["TP_BaseRewardSum"] else float(behavior["TP_BaseRewardSum"]),
+                family=0 if behavior["TP_RewardFamily"] else float(behavior["TP_RewardFamily"]),
+                pairs_n=0 if behavior["TP_RewardPairsN"] else float(behavior["TP_RewardPairsN"])),
+            uncoupled_reward=None if behavior["TP_UncoupledReward"][-1] == "" else list(ast.literal_eval(
+                behavior["TP_UncoupledReward"])),
+            randomness=behavior["TP_Randomness"],
+            delay_period=DelayPeriod(
+                min=0 if behavior["TP_DelayMin"] else float(behavior["TP_DelayMin"]),
+                max=0 if behavior["TP_DelayMax"] else float(behavior["TP_DelayMax"]),
+                beta=0 if behavior["TP_DelayBeta"] else float(behavior["TP_DelayBeta"])
+            ),
+            reward_delay=0 if behavior["TP_RewardDelay"] == "" else float(behavior["TP_RewardDelay"]),
+            auto_water=None if not behavior["TP_AutoReward"] else AutoWater(
+                auto_water_type=behavior["TP_AutoWaterType"],
+                multiplier=0 if behavior["TP_Multiplier"] == "" else float(behavior["TP_Multiplier"]),
+                unrewarded=0 if behavior["TP_Unrewarded"] == "" else float(behavior["TP_Unrewarded"]),
+                ignored=0 if behavior["TP_Ignored"] == "" else float(behavior["TP_Ignored"]),
+                include_reward=0 if behavior["TP_IncludeAutoReward"] == "" else float(behavior["TP_IncludeAutoReward"])
+            ),
+            inter_trial_interval=InterTrialInterval(min=0 if behavior["TP_ITIMin"] == "" else float(behavior["TP_ITIMin"]),
+                                                    max=0 if behavior["TP_ITIMax"] == "" else float(behavior["TP_ITIMax"]),
+                                                    beta=0 if behavior["TP_ITIBeta"] == "" else float(
+                                                        behavior["TP_ITIBeta"]),
+                                                    increase=0 if behavior["TP_ITIIncrease"] == "" else float(
+                                                        behavior["TP_ITIIncrease"])),
+            response_time=ResponseTime(
+                response_time=0 if behavior["TP_ResponseTime"] == "" else float(behavior["TP_ResponseTime"]),
+                reward_consume_time=0 if behavior["TP_RewardConsumeTime"] == "" else float(behavior["TP_RewardConsumeTime"])
 
-        ),
-        auto_block=None if behavior["TP_AdvancedBlockAuto"] else AutoBlock(
-            advanced_block_auto=behavior["TP_AdvancedBlockAuto"],
-            switch_thr=0 if behavior["TP_SwitchThr"] == "" else float(behavior["TP_SwitchThr"]),
-            points_in_a_row=0 if behavior["TP_PointsInARow"] == "" else float(behavior["TP_PointsInARow"])
-        ),
-        warmup=None if not behavior["TP_warmup"] else Warmup(
-            min_trial=0 if behavior["TP_warm_min_trial"] == "" else float(behavior["TP_warm_min_trial"]),
-            max_choice_ratio_bias=0 if behavior["warm_max_choice_ratio_bias"] == "" else float(
-                behavior["warm_max_choice_ratio_bias"]),
-            min_finish_ratio=0 if behavior["TP_warm_min_finish_ratio"] == "" else float(
-                behavior["TP_warm_min_finish_ratio"]),
-            windowsize=0 if behavior["TP_warm_windowsize"] == "" else float(behavior["TP_warm_windowsize"])
-        ),
-        reward_size=RewardSize(
-            right_value_volume=0 if behavior["TP_RightValue_volume"] == "" else float(behavior["TP_RightValue_volume"]),
-            left_value_volume=0 if behavior["TP_LeftValue_volume"] == "" else float(behavior["TP_LeftValue_volume"])
-        ),
+            ),
+            auto_block=None if behavior["TP_AdvancedBlockAuto"] else AutoBlock(
+                advanced_block_auto=behavior["TP_AdvancedBlockAuto"],
+                switch_thr=0 if behavior["TP_SwitchThr"] == "" else float(behavior["TP_SwitchThr"]),
+                points_in_a_row=0 if behavior["TP_PointsInARow"] == "" else float(behavior["TP_PointsInARow"])
+            ),
+            warmup=None if not behavior["TP_warmup"] else Warmup(
+                min_trial=0 if behavior["TP_warm_min_trial"] == "" else float(behavior["TP_warm_min_trial"]),
+                max_choice_ratio_bias=0 if behavior["TP_warm_max_choice_ratio_bias"] == "" else float(
+                    behavior["TP_warm_max_choice_ratio_bias"]),
+                min_finish_ratio=0 if behavior["TP_warm_min_finish_ratio"] == "" else float(
+                    behavior["TP_warm_min_finish_ratio"]),
+                windowsize=0 if behavior["TP_warm_windowsize"] == "" else float(behavior["TP_warm_windowsize"])
+            ),
+            reward_size=RewardSize(
+                right_value_volume=0 if behavior["TP_RightValue_volume"] == "" else float(behavior["TP_RightValue_volume"]),
+                left_value_volume=0 if behavior["TP_LeftValue_volume"] == "" else float(behavior["TP_LeftValue_volume"])
+            ),
 
-        no_response_trial_addition=behavior["TP_AddOneTrialForNoresponse"],
-        reward_n=None if behavior["TP_Task"] != "RewardN" else RewardN(
-            initial_inactive_trials=0 if behavior["TP_InitiallyInactiveN"] == "" else float(
-                behavior["TP_InitiallyInactiveN"])
+            no_response_trial_addition=True if behavior["TP_AddOneTrialForNoresponse"] == "Yes" else False,
+            reward_n=None if behavior["TP_Task"] != "RewardN" else RewardN(
+                initial_inactive_trials=0 if behavior["TP_InitiallyInactiveN"] == "" else float(
+                    behavior["TP_InitiallyInactiveN"])
+            )
         )
     )
 

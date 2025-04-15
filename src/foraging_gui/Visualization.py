@@ -86,10 +86,10 @@ class PlotV(FigureCanvas):
         except Exception as e:
             logging.error(str(e))
 
-        try:
-            self._PlotChoice()
-        except Exception as e:
-            logging.error(str(e))
+        #try:
+        self._PlotChoice()
+        # except Exception as e:
+        #     logging.error(str(e))
 
         try:
             self._PlotLicks()
@@ -217,7 +217,10 @@ class PlotV(FigureCanvas):
             self.ax1.plot(self.B_ManualRightWaterStartTime, np.zeros(len(self.B_ManualRightWaterStartTime)) + 0.7,
                           'bs', markerfacecolor=(0, 1, 0, 1), markersize=self.MarkerSize, label='ManualWater')
 
-        non_none_conditions = [condition.name for condition in self.B_SelectedCondition if condition is not None]
+        # backwards compatible for opening old behavior jsons
+        non_none_conditions = [x for x in self.B_SelectedCondition if x !=0] if \
+            all(isinstance(x, (int, np.int64)) for x in self.B_SelectedCondition) \
+            else [condition.name for condition in self.B_SelectedCondition if condition is not None]
         condition_list = list(set(non_none_conditions))
         for condition in condition_list:
             Optogenetics_On = np.where(np.logical_and(self.B_LaserOnTrial[:-1] == 1, non_none_conditions == condition))

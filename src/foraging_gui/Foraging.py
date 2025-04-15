@@ -59,6 +59,15 @@ from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
 from foraging_gui.loaded_mouse_slims_handler import LoadedMouseSlimsHandler
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_slims_api.models.behavior_session import SlimsBehaviorSession
+
+from foraging_gui.metadata_mapper import (
+    behavior_json_to_task_logic_model,
+    behavior_json_to_session_model,
+    behavior_json_to_fip_model,
+    behavior_json_to_opto_model,
+    behavior_json_to_operational_control_model
+)
+
 from aind_behavior_dynamic_foraging.CurriculumManager.trainer import (
     DynamicForagingTrainerState,
     TrainerState,
@@ -2691,7 +2700,7 @@ class Window(QMainWindow):
         self.validate_and_save_model(AindDynamicForagingTaskLogic, self.task_logic, task_model_path)
 
         # validate operation_control_model and document validation errors if any
-        oc_path = os.path.join(self.session_model.root_path, f'behavior_operational_control_{id_name}.json')
+        oc_path = os.path.join(self.session_model.root_path, f'behavior_operational_control_model_{id_name}.json')
         self.validate_and_save_model(OperationalControl, self.operation_control_model, oc_path)
 
         # validate opto_model and document validation errors if any
@@ -2770,51 +2779,40 @@ class Window(QMainWindow):
         logging.info('User selected: {}'.format(folder_path))
 
         if folder_path:
-
+            # dict to easily access model class and function to translate behavior json into model
+            schema_map = {"task_logic": {"model": AindDynamicForagingTaskLogic,
+                                         "map": behavior_json_to_task_logic_model},
+                          "session": {"model": AindBehaviorSessionModel,
+                                      "map": behavior_json_to_session_model},
+                          "optogenetics": {"model": Optogenetics,
+                                           "map": behavior_json_to_opto_model},
+                          "fiber_photometry": {"model": FiberPhotometry,
+                                               "map": behavior_json_to_fip_model},
+                          "operational_control": {"model": OperationalControl,
+                                                  "map": behavior_json_to_operational_control_model}}
             # dict to keep track if all models are in folder
-            loaded = {"task": False,
-                      "session": False,
-                      "opto": False,
-                      "fip": False,
-                      "oc": False,
-                      "behavior_json": False}
+            loaded = {**{k: False for k in schema_map.keys()}, "behavior_json": False}
+            # regex to check filename starts against schema_map key
+            pattern = re.compile(rf"^behavior_({'|'.join(re.escape(k) for k in schema_map.keys())})_model")
 
             # iterate through files
             for filename in os.listdir(folder_path):
                 joined = os.path.join(folder_path, filename)
-                if filename.startswith("behavior_task_logic_model"):    # check and load task model
 
-                    loaded["task"] = True
+                # check if file is serialized model based on regex
+                match = pattern.match(filename)
+                if match:
+                    key = match.group(1)
+                    model = schema_map[key]["model"]
                     with open(joined, 'r') as f:
-                        task_logic = AindDynamicForagingTaskLogic(**json.load(f))
-
-                elif filename.startswith("behavior_session_model"):   # check and load session model
-                    loaded["session"] = True
-                    with open(joined, 'r') as f:
-                        session_model = AindBehaviorSessionModel(**json.load(f))
-
-                elif filename.startswith("behavior_optogenetics_model"):   # check and load optogenetic model
-                    loaded["opto"] = True
-                    with open(joined, 'r') as f:
-                        opto_model = Optogenetics(**json.load(f))
-
-                elif filename.startswith("behavior_fiber_photometry_model"):   # check and load fip model
-                    loaded["fip"] = True
-                    with open(joined, 'r') as f:
-                        fip_model = FiberPhotometry(**json.load(f))
-
-                elif filename.startswith("behavior_operational_control"):   # check and load operational model
-                    loaded["oc"] = True
-                    with open(joined, 'r') as f:
-                        operation_control_model = OperationalControl(**json.load(f))
+                        loaded[key] = model(**json.load(f))
 
                 # check and load behavior json
-                elif re.fullmatch(r"\b\d{6}_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json\b", filename):
+                elif re.fullmatch(r"^\d+_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json$", filename):
                     loaded["behavior_json"] = True
                     with open(joined, 'r') as f:
                         Obj = json.load(f)
-
-                elif re.fullmatch(r"\b\d{6}_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.mat\b", filename):
+                elif re.fullmatch(r"^\d+_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.mat$", filename):
                     loaded["behavior_json"] = True
                     Obj = loadmat(joined)
                     # this is a bug to use the scipy.io.loadmat or savemat (it will change the dimension of the nparray)
@@ -2825,22 +2823,30 @@ class Window(QMainWindow):
                     Obj.B_GoCueTime = Obj.B_GoCueTime[0]
                     Obj.B_RewardOutcomeTime = Obj.B_RewardOutcomeTime[0]
 
-            if any(not value for value in loaded.values()):
-                logger.warning(f"Can't load mouse in folder {folder_path} because "
-                               f"{[key for key, value in loaded.items() if not value]} are not found. Please add files "
-                               f"or load another session.")
-                return
+            if any(not value for value in loaded.values()):         # if any of the required files are missing
+                not_loaded = [key for key, value in loaded.items() if not value]
+                try:
+                    if "behavior_json" not in not_loaded:
+                        logger.info(f"Models {[key for key, value in loaded.items() if not value]} are not found."
+                                    "Trying to create necessary models from behavior json.")
+                        for key in not_loaded:
+                            loaded[key] = schema_map[key]["map"](Obj)
+                    else:
+                        raise ValueError("behavior json not found so models cannot be reconstructed.")
 
+                except Exception as e:
+                    logger.warning(f"Can't load mouse in folder {folder_path}: {str(e)}")
+            print(loaded)
             # update models
-            self.task_logic = task_logic
+            self.task_logic = loaded["task_logic"]
             # TODO: Should I update the path and the date for the session model?
-            self.session_model.experiment = session_model.experiment
-            self.session_model.experimenter = session_model.experimenter
-            self.session_model.subject = session_model.subject
-            self.session_model.notes = session_model.notes
-            self.operation_control_model = operation_control_model
-            self.opto_model = opto_model
-            self.fip_model = fip_model
+            self.session_model.experiment = loaded["session"].experiment
+            self.session_model.experimenter = loaded["session"].experimenter
+            self.session_model.subject = loaded["session"].subject
+            self.session_model.notes = loaded["session"].notes
+            self.operation_control_model = loaded["operational_control"]
+            self.opto_model = loaded["optogenetics"]
+            self.fip_model = loaded["fiber_photometry"]
 
             self.Obj = Obj
             self._LoadVisualization()
@@ -2848,19 +2854,16 @@ class Window(QMainWindow):
             # Set stage position to last position
             self.update_stage_positions_from_operational_control()
 
-            # TODO: should we add mouse as loaded in slims handler?
-            # self.slims_handler.set_loaded_mouse(self.session_model.subject, metrics, self.task_logic, curriculum)
-
             # check dropping frames
             self.to_check_drop_frames = 1
             self._check_drop_frames(save_tag=0)
 
             self.StartExcitation.setChecked(False)
-            self.load_tag = 1
+            #self.load_tag = 1  #TODO: Do we need this to be set?
 
             self.modelsChanged.emit()
 
-            logging.info(f"Successfully loaded mouse {self.session_model.subject}.", extra={'tags': [self.warning_log_tag]})
+            logging.info(f"Successfully opened mouse {self.session_model.subject}.", extra={'tags': [self.warning_log_tag]})
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
