@@ -2817,6 +2817,14 @@ class Window(QMainWindow):
                 elif re.fullmatch(r"\b\d{6}_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.mat\b", filename):
                     loaded["behavior_json"] = True
                     Obj = loadmat(joined)
+                    # this is a bug to use the scipy.io.loadmat or savemat (it will change the dimension of the nparray)
+                    Obj.B_AnimalResponseHistory = Obj.B_AnimalResponseHistory[0]
+                    Obj.B_TrialStartTime = Obj.B_TrialStartTime[0]
+                    Obj.B_DelayStartTime = Obj.B_DelayStartTime[0]
+                    Obj.B_TrialEndTime = Obj.B_TrialEndTime[0]
+                    Obj.B_GoCueTime = Obj.B_GoCueTime[0]
+                    Obj.B_RewardOutcomeTime = Obj.B_RewardOutcomeTime[0]
+
             if any(not value for value in loaded.values()):
                 logger.warning(f"Can't load mouse in folder {folder_path} because "
                                f"{[key for key, value in loaded.items() if not value]} are not found. Please add files "
@@ -2835,23 +2843,24 @@ class Window(QMainWindow):
             self.fip_model = fip_model
 
             self.Obj = Obj
+            self._LoadVisualization()
 
-        # Set stage position to last position
-        self.update_stage_positions_from_operational_control()
+            # Set stage position to last position
+            self.update_stage_positions_from_operational_control()
 
-        # TODO: should we add mouse as loaded in slims handler?
-        # self.slims_handler.set_loaded_mouse(self.session_model.subject, metrics, self.task_logic, curriculum)
+            # TODO: should we add mouse as loaded in slims handler?
+            # self.slims_handler.set_loaded_mouse(self.session_model.subject, metrics, self.task_logic, curriculum)
 
-        # check dropping frames
-        self.to_check_drop_frames = 1
-        self._check_drop_frames(save_tag=0)
+            # check dropping frames
+            self.to_check_drop_frames = 1
+            self._check_drop_frames(save_tag=0)
 
-        self.StartExcitation.setChecked(False)
-        self.load_tag = 1
+            self.StartExcitation.setChecked(False)
+            self.load_tag = 1
 
-        self.modelsChanged.emit()
+            self.modelsChanged.emit()
 
-        logging.info(f"Successfully loaded mouse {self.session_model.subject}.", extra={'tags': [self.warning_log_tag]})
+            logging.info(f"Successfully loaded mouse {self.session_model.subject}.", extra={'tags': [self.warning_log_tag]})
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -2882,16 +2891,7 @@ class Window(QMainWindow):
         if self.GeneratedTrials.B_AnimalResponseHistory.size == 0:
             del self.GeneratedTrials
             return
-        # for mat file
-        if self.fname.endswith('.mat'):
-            # this is a bug to use the scipy.io.loadmat or savemat (it will change the dimension of the nparray)
-            self.GeneratedTrials.B_AnimalResponseHistory = self.GeneratedTrials.B_AnimalResponseHistory[0]
-            self.GeneratedTrials.B_TrialStartTime = self.GeneratedTrials.B_TrialStartTime[0]
-            self.GeneratedTrials.B_DelayStartTime = self.GeneratedTrials.B_DelayStartTime[0]
-            self.GeneratedTrials.B_TrialEndTime = self.GeneratedTrials.B_TrialEndTime[0]
-            self.GeneratedTrials.B_GoCueTime = self.GeneratedTrials.B_GoCueTime[0]
-            self.GeneratedTrials.B_RewardOutcomeTime = self.GeneratedTrials.B_RewardOutcomeTime[0]
-
+    
         self.PlotM = PlotV(win=self, GeneratedTrials=self.GeneratedTrials, width=5, height=4)
         self.PlotM.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
         layout = self.Visualization.layout()
