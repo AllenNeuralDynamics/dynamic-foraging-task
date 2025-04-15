@@ -1780,9 +1780,9 @@ class GenerateTrials():
         multiplier = 1 if self.task_logic.task_parameters.auto_water is None else \
             self.task_logic.task_parameters.auto_water.multiplier
         if self.CurrentAutoRewardTrial[0] == 1:
-            self._set_valve_time_left(Channel3, float(self.win.left_valve_open_time, multiplier))
+            self._set_valve_time_left(Channel3, float(self.win.left_valve_open_time), multiplier)
         if self.CurrentAutoRewardTrial[1] == 1:
-            self._set_valve_time_right(Channel3, float(self.win.right_valve_open_time, multiplier))
+            self._set_valve_time_right(Channel3, float(self.win.right_valve_open_time), multiplier)
 
         if self.CurrentStartType == 3:  # no delay timestamp
             ReceiveN = 9
