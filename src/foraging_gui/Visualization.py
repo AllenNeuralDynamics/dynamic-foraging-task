@@ -5,7 +5,7 @@ from scipy import stats
 from matplotlib.figure import Figure
 from matplotlib.gridspec import GridSpec
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-
+from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import LaserColors
 
 class PlotV(FigureCanvas):
     def __init__(self, win, GeneratedTrials=None, parent=None, dpi=100, width=5, height=4):
@@ -219,7 +219,7 @@ class PlotV(FigureCanvas):
 
         # backwards compatible for opening old behavior jsons
         non_none_conditions = [x for x in self.B_SelectedCondition if x !=0] if \
-            all(isinstance(x, (int, np.int64)) for x in self.B_SelectedCondition) \
+            all(not isinstance(x, LaserColors) for x in self.B_SelectedCondition) \
             else [condition.name for condition in self.B_SelectedCondition if condition is not None]
         condition_list = list(set(non_none_conditions))
         for condition in condition_list:

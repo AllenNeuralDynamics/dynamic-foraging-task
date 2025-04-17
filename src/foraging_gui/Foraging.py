@@ -9,7 +9,7 @@ import math
 import logging
 import requests
 from hashlib import md5
-from typing import Literal, get_args
+from typing import Literal, get_args, Union
 from pydantic import BaseModel
 import re
 from importlib import import_module
@@ -300,9 +300,12 @@ class Window(QMainWindow):
 
         # create slims handler to handle waterlog and curriculum management
         self.slims_handler = LoadedMouseSlimsHandler()
+        if self.slims_handler.slims_client is None:     # error connecting to slims
+            logging.warning("Cannot connect to slims. If mouse needs to be run, load in parameters locally.",
+                            extra={'tags': [self.warning_log_tag]})
 
         # initialize mouse selector
-        slims_mice = self.slims_handler.get_added_mice()[-100:]  # grab 100 latest mice from slims
+        slims_mice = self.slims_handler.get_added_mice()[-100:]     # grab 100 latest mice from slims
         self.mouse_selector_dialog = MouseSelectorDialog([mouse.barcode for mouse in slims_mice], self.box_letter)
 
         # create label giff to indicate mouse is being loaded
@@ -466,7 +469,8 @@ class Window(QMainWindow):
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
         self.action_Calibration.triggered.connect(self._WaterCalibration)
         self.actionLaser_Calibration.triggered.connect(self._LaserCalibration)
-        self.action_Open.triggered.connect(self._Open)
+        self.action_continue_session.triggered.connect(lambda: self.load_local_session(continuation=True))
+        self.action_create_from_local_session.triggered.connect(self.load_local_session)
         self.action_Save.triggered.connect(self._Save)
         self.actionForce_save.triggered.connect(self._ForceSave)
         self.SaveAs.triggered.connect(self._SaveAs)
@@ -693,7 +697,7 @@ class Window(QMainWindow):
             self.update_operational_control_stage_positions()
 
             logging.info(f"Successfully loaded mouse {mouse_id}", extra={'tags': [self.warning_log_tag]})
-            self.load_tag = 1
+
         except Exception as e:
             logging.error(str(e), extra={'tags': [self.warning_log_tag]})
             self.Load.setEnabled(True)
@@ -799,6 +803,125 @@ class Window(QMainWindow):
 
         return ts, sbs, ts.stage.task, self.session_model, self.opto_model, self.fip_model, self.operation_control_model
 
+    def load_local_session(self, continuation: bool=False) -> None:
+
+        """
+            Load session from local drive.
+
+            :param continuation: boolean indicating if session should be continued or a new session should be created
+            based on loaded session.
+        """
+
+        # stop current session first
+        self._StopCurrentSession()
+
+        # check if user wants to load new session
+        new_session = self._NewSession()
+
+        if not new_session:
+            return
+
+        # Open dialog box
+        folder_path = QFileDialog.getExistingDirectory(self, "Select Folder",
+                                                    self.default_openFolder + '\\' + self.current_box)
+        logging.info('User selected: {}'.format(folder_path))
+
+        if not folder_path:
+            return
+
+        # dict to easily access model class and function to translate behavior json into model
+        schema_map = {"task_logic": {"model": AindDynamicForagingTaskLogic, "map": behavior_json_to_task_logic_model},
+                      "session": {"model": AindBehaviorSessionModel, "map": behavior_json_to_session_model},
+                      "optogenetics": {"model": Optogenetics, "map": behavior_json_to_opto_model},
+                      "fiber_photometry": {"model": FiberPhotometry, "map": behavior_json_to_fip_model},
+                      "operational_control": {"model": OperationalControl,
+                                              "map": behavior_json_to_operational_control_model}}
+
+        # dict to keep track if all models are in folder
+        loaded = {**{k: False for k in schema_map.keys()}, "behavior_json": False}
+        # regex to check filename starts against schema_map key
+        pattern = re.compile(rf"^behavior_({'|'.join(re.escape(k) for k in schema_map.keys())})_model")
+
+        # iterate through files
+        for filename in os.listdir(folder_path):
+            joined = os.path.join(folder_path, filename)
+
+            # check if file is serialized model based on regex
+            match = pattern.match(filename)
+            if match:
+                key = match.group(1)
+                model = schema_map[key]["model"]
+                with open(joined, 'r') as f:
+                    loaded[key] = model(**json.load(f))
+
+            # check and load behavior json
+            elif re.fullmatch(r"^\d+_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json$", filename):
+                loaded["behavior_json"] = True
+                with open(joined, 'r') as f:
+                    Obj = json.load(f)
+            elif re.fullmatch(r"^\d+_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.mat$", filename):
+                loaded["behavior_json"] = True
+                Obj = loadmat(joined)
+                # this is a bug to use the scipy.io.loadmat or savemat (it will change the dimension of the nparray)
+                Obj.B_AnimalResponseHistory = Obj.B_AnimalResponseHistory[0]
+                Obj.B_TrialStartTime = Obj.B_TrialStartTime[0]
+                Obj.B_DelayStartTime = Obj.B_DelayStartTime[0]
+                Obj.B_TrialEndTime = Obj.B_TrialEndTime[0]
+                Obj.B_GoCueTime = Obj.B_GoCueTime[0]
+                Obj.B_RewardOutcomeTime = Obj.B_RewardOutcomeTime[0]
+
+        if any(not value for value in loaded.values()):         # if any of the required files are missing
+            not_loaded = [key for key, value in loaded.items() if not value]
+            try:
+                if "behavior_json" not in not_loaded:
+                    logger.info(f"Models {not_loaded} are not found. Trying to create models from behavior json.")
+                    for key in not_loaded:
+                        loaded[key] = schema_map[key]["map"](Obj)
+                else:
+                    raise ValueError("behavior json not found so models cannot be reconstructed.")
+
+            except Exception as e:
+                logger.warning(f"Can't load mouse in folder {folder_path}: {str(e)}")
+                return
+
+        try:  # check slims for curriculum and go off curriculum if user would like
+            ts, slims_session, *args = self.slims_handler.load_mouse_curriculum(loaded["session"].subject)
+            if ts is not None and slims_session.is_curriculum_suggestion:  # mouse has next session set in slims
+                reply = self.off_curriculum(False)  # check if user wants to go off curriculum for this mouse
+                if reply == QMessageBox.No:  # return before updating models
+                    return
+        except Exception as e:
+            if 'No record found' not in str(e):  # mouse may exist but another error occured
+                logging.error(f"Error loading mouse {loaded['session'].subject} curriculum loaded from Slims. {e}")
+
+        # update models
+        self.task_logic = loaded["task_logic"]
+        # TODO: Should I update the path and the date for the session model?
+        self.session_model.experiment = loaded["session"].experiment
+        self.session_model.experimenter = loaded["session"].experimenter
+        self.session_model.subject = loaded["session"].subject
+        self.session_model.notes = loaded["session"].notes
+        self.operation_control_model = loaded["operational_control"]
+        self.opto_model = loaded["optogenetics"]
+        self.fip_model = loaded["fiber_photometry"]
+
+        if continuation:
+            self.Obj = Obj
+            self._LoadVisualization()
+            # check dropping frames
+            self.to_check_drop_frames = 1
+            self._check_drop_frames(save_tag=0)
+            self.StartExcitation.setChecked(False)
+
+        # Set stage position to last position
+        self.update_stage_positions_from_operational_control()
+
+        self.modelsChanged.emit()
+
+        logging.info(f"Successfully opened mouse {self.session_model.subject}.",
+                     extra={'tags': [self.warning_log_tag]})
+        self.load_tag = 1
+
     def write_curriculum(self):
         """
             Write curriculum to slims for next session
@@ -806,8 +929,7 @@ class Window(QMainWindow):
         # add session to slims if there are trials and mouse loaded
         if hasattr(self, "GeneratedTrials") and self.slims_handler.curriculum is not None:
             try:
-                trainer_state = self.slims_handler.write_loaded_mouse(self.on_curriculum.isChecked(),
-                                                                      self.GeneratedTrials.B_for_eff_optimal,
+                trainer_state = self.slims_handler.write_loaded_mouse(self.GeneratedTrials.B_for_eff_optimal,
                                                                       self.GeneratedTrials.B_CurrentTrialN,
                                                                       self.task_logic,
                                                                       self.session_model,
@@ -930,7 +1052,7 @@ class Window(QMainWindow):
         else:
             widget.setStyleSheet(unchecked_color)
 
-    def off_curriculum(self, checked) -> None:
+    def off_curriculum(self, checked) -> Union[QMessageBox.StandardButton, None]:
         """
             Function to handle going off curriculum.
             :param checked: if on_curriculum checkbox is checked or not
@@ -955,6 +1077,9 @@ class Window(QMainWindow):
                 self.fip_widget.setEnabled(True)
                 self.Opto_dialog.opto_widget.setEnabled(True)
                 self.on_curriculum.setEnabled(False)
+                self.slims_handler.go_off_curriculum()  # update slims model to be off curriculum
+
+            return reply
 
     def _check_drop_frames(self, save_tag=1):
         '''check if there are any drop frames in the video'''
@@ -2681,8 +2806,8 @@ class Window(QMainWindow):
         self.fip_widget.apply_schema(self.fip_model)
         self.operation_control_widget.apply_schema(self.operation_control_model)
 
-        # check if on_curriculum needs to be visible
-        self.on_curriculum.setVisible(self.on_curriculum.isChecked())
+        # Set on_curriculum to be visible if loaded mouse
+        self.on_curriculum.setVisible(self.slims_handler.loaded_mouse_id is not None)
 
     def save_task_models(self):
         """
@@ -2761,109 +2886,6 @@ class Window(QMainWindow):
                 elif isinstance(widget, QtWidgets.QComboBox):
                     Obj[keyname][widget.objectName()] = widget.currentText()
         return Obj
-
-    def _Open(self):
-
-        # stop current session first
-        self._StopCurrentSession()
-
-        # check if user wants to load new session
-        new_session = self._NewSession()
-
-        if not new_session:
-            return
-
-        # Open dialog box
-        folder_path = QFileDialog.getExistingDirectory(self, "Select Folder",
-                                                    self.default_openFolder + '\\' + self.current_box)
-        logging.info('User selected: {}'.format(folder_path))
-
-        if folder_path:
-            # dict to easily access model class and function to translate behavior json into model
-            schema_map = {"task_logic": {"model": AindDynamicForagingTaskLogic,
-                                         "map": behavior_json_to_task_logic_model},
-                          "session": {"model": AindBehaviorSessionModel,
-                                      "map": behavior_json_to_session_model},
-                          "optogenetics": {"model": Optogenetics,
-                                           "map": behavior_json_to_opto_model},
-                          "fiber_photometry": {"model": FiberPhotometry,
-                                               "map": behavior_json_to_fip_model},
-                          "operational_control": {"model": OperationalControl,
-                                                  "map": behavior_json_to_operational_control_model}}
-            # dict to keep track if all models are in folder
-            loaded = {**{k: False for k in schema_map.keys()}, "behavior_json": False}
-            # regex to check filename starts against schema_map key
-            pattern = re.compile(rf"^behavior_({'|'.join(re.escape(k) for k in schema_map.keys())})_model")
-
-            # iterate through files
-            for filename in os.listdir(folder_path):
-                joined = os.path.join(folder_path, filename)
-
-                # check if file is serialized model based on regex
-                match = pattern.match(filename)
-                if match:
-                    key = match.group(1)
-                    model = schema_map[key]["model"]
-                    with open(joined, 'r') as f:
-                        loaded[key] = model(**json.load(f))
-
-                # check and load behavior json
-                elif re.fullmatch(r"^\d+_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json$", filename):
-                    loaded["behavior_json"] = True
-                    with open(joined, 'r') as f:
-                        Obj = json.load(f)
-                elif re.fullmatch(r"^\d+_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.mat$", filename):
-                    loaded["behavior_json"] = True
-                    Obj = loadmat(joined)
-                    # this is a bug to use the scipy.io.loadmat or savemat (it will change the dimension of the nparray)
-                    Obj.B_AnimalResponseHistory = Obj.B_AnimalResponseHistory[0]
-                    Obj.B_TrialStartTime = Obj.B_TrialStartTime[0]
-                    Obj.B_DelayStartTime = Obj.B_DelayStartTime[0]
-                    Obj.B_TrialEndTime = Obj.B_TrialEndTime[0]
-                    Obj.B_GoCueTime = Obj.B_GoCueTime[0]
-                    Obj.B_RewardOutcomeTime = Obj.B_RewardOutcomeTime[0]
-
-            if any(not value for value in loaded.values()):         # if any of the required files are missing
-                not_loaded = [key for key, value in loaded.items() if not value]
-                try:
-                    if "behavior_json" not in not_loaded:
-                        logger.info(f"Models {[key for key, value in loaded.items() if not value]} are not found."
-                                    "Trying to create necessary models from behavior json.")
-                        for key in not_loaded:
-                            loaded[key] = schema_map[key]["map"](Obj)
-                    else:
-                        raise ValueError("behavior json not found so models cannot be reconstructed.")
-
-                except Exception as e:
-                    logger.warning(f"Can't load mouse in folder {folder_path}: {str(e)}")
-            print(loaded)
-            # update models
-            self.task_logic = loaded["task_logic"]
-            # TODO: Should I update the path and the date for the session model?
-            self.session_model.experiment = loaded["session"].experiment
-            self.session_model.experimenter = loaded["session"].experimenter
-            self.session_model.subject = loaded["session"].subject
-            self.session_model.notes = loaded["session"].notes
-            self.operation_control_model = loaded["operational_control"]
-            self.opto_model = loaded["optogenetics"]
-            self.fip_model = loaded["fiber_photometry"]
-
-            self.Obj = Obj
-            self._LoadVisualization()
-
-            # Set stage position to last position
-            self.update_stage_positions_from_operational_control()
-
-            # check dropping frames
-            self.to_check_drop_frames = 1
-            self._check_drop_frames(save_tag=0)
-
-            self.StartExcitation.setChecked(False)
-            #self.load_tag = 1  #TODO: Do we need this to be set?
-
-            self.modelsChanged.emit()
-
-            logging.info(f"Successfully opened mouse {self.session_model.subject}.", extra={'tags': [self.warning_log_tag]})
 
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
@@ -3388,9 +3410,6 @@ class Window(QMainWindow):
     def _Start(self):
         '''start trial loop'''
 
-        # set the load tag to zero
-        self.load_tag = 0
-
         # post weight not entered and session ran
         if self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
             reply = QMessageBox.critical(self,
@@ -3507,6 +3526,28 @@ class Window(QMainWindow):
                     logging.info('User selected not to start excitation')
                     self.Start.setChecked(False)
                     return
+
+            # if mouse is loaded, update attachments with what actually ran
+            if self.slims_handler.loaded_slims_session:
+                try:
+                    self.slims_handler.update_loaded_session_attachments(AindBehaviorSessionModel.__name__,
+                                                                         self.session_model.model_dump_json())
+                    self.slims_handler.update_loaded_session_attachments(self.operation_control_model.name,
+                                                                         self.operation_control_model.model_dump_json())
+                    self.slims_handler.update_loaded_session_attachments(self.fip_model.name,
+                                                                         self.fip_model.model_dump_json())
+                    self.slims_handler.update_loaded_session_attachments(self.opto_model.name,
+                                                                         self.opto_model.model_dump_json())
+                    # Update with curriculum that actually ran
+                    if not self.slims_handler.loaded_slims_session.is_curriculum_suggestion:
+                        ts, *args = self.slims_handler.load_mouse_curriculum(self.session_model.subject)
+                        ts.stage.task = self.task_logic
+                        self.slims_handler.update_loaded_session_attachments("TrainerState", ts.model_dump_json())
+                except KeyError as e:
+                    logging.error(f"Error updating mouse {self.session_model.subject} session in slims: {e}")
+
+            # set the load tag to zero
+            self.load_tag = 0
 
             # empty post weight after pass through checks in case user cancels run
             self.WeightAfter.setText('')
