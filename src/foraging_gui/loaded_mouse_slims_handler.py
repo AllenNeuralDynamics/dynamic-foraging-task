@@ -84,7 +84,7 @@ class LoadedMouseSlimsHandler:
             self.log.info('Attempting to connect to Slims')
             slims_client = SlimsClient(username=username if username else os.environ['SLIMS_USERNAME'],
                                        password=password if password else os.environ['SLIMS_PASSWORD'],
-                                       url="https://aind.us.slims.agilent.com/slimsrest/")
+                                       )
         except KeyError as e:
             raise KeyError('SLIMS_USERNAME and SLIMS_PASSWORD do not exist as '
                            f'environment variables on machine. Please add. {e}')
