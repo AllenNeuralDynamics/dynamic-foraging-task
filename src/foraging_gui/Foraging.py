@@ -46,7 +46,6 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
 )
 from scipy.io import loadmat, savemat
-from StageWidget.main import get_stage_widget
 
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
