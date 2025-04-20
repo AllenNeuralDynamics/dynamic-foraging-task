@@ -1987,7 +1987,7 @@ class Window(QMainWindow):
                 return
             else:
                 logging.error(
-                    f"While fetching mouse {session.subject_id} model, unexpected error occurred."
+                    f"While fetching mouse {session.subject_id} model, unexpected error occurred: {e}"
                 )
                 raise e
 
@@ -4002,9 +4002,15 @@ class Window(QMainWindow):
                         "9",
                         "10",
                     ]
+                    and session is not None
                 ):
                     self._AddWaterLogResult(session)
-
+                elif self.BaseWeight.text() == "" or self.WeightAfter.text() == "":
+                    logging.error(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims "
+                                  f"due do unrecorded weight information.")
+                elif session is None:
+                    logging.error(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims "
+                                 f"due do metadata generation failure.")
         except Exception as e:
             logging.warning(
                 "Meta data is not saved!",
