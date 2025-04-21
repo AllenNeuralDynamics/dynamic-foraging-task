@@ -86,10 +86,10 @@ class PlotV(FigureCanvas):
         except Exception as e:
             logging.error(str(e))
 
-        #try:
-        self._PlotChoice()
-        # except Exception as e:
-        #     logging.error(str(e))
+        try:
+            self._PlotChoice()
+        except Exception as e:
+            logging.error(str(e))
 
         try:
             self._PlotLicks()

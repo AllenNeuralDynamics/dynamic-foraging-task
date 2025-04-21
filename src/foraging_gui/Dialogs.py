@@ -19,11 +19,8 @@ from PyQt5.QtCore import QThreadPool, Qt, QAbstractTableModel, QTimer, pyqtSigna
 
 from foraging_gui.MyFunctions import Worker
 from foraging_gui.Visualization import PlotWaterCalibration
-from aind_auto_train.schema.curriculum import DynamicForagingCurriculum
 from foraging_gui.schema_widgets.opto_parameters_widget import OptoParametersWidget
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import Optogenetics
-
-codebase_curriculum_schema_version = DynamicForagingCurriculum.model_fields['curriculum_schema_version'].default
 
 logger = logging.getLogger(__name__)
 
@@ -120,6 +117,7 @@ class OptogeneticsDialog(QDialog):
     def __init__(self, MainWindow, opto_model: Optogenetics, parent=None):
         super().__init__(parent)
         uic.loadUi('Optogenetics.ui', self)
+
         self.opto_model = opto_model
         self.opto_widget = OptoParametersWidget(self.opto_model)
         # initialize model as no optogenetics
@@ -127,7 +125,8 @@ class OptogeneticsDialog(QDialog):
         self.opto_model.session_control = None
         self.opto_widget.apply_schema(self.opto_model)
         self.QScrollOptogenetics.setWidget(self.opto_widget)
-
+        self.QScrollOptogenetics.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.QScrollOptogenetics.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.MainWindow = MainWindow
 
     def _connectSignalsSlots(self):
