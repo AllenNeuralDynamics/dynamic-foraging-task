@@ -6278,12 +6278,13 @@ class Window(QMainWindow):
         start_time = time.time()
 
         # create habituation timer label and update every minute
-        hab_timer_label = QLabel(f"Time elapsed: {(time.time() - start_time) / 60}")
+        hab_timer_label = QLabel()
         hab_timer_label.setStyleSheet(f"color: {self.default_warning_color};")
         self.warning_widget.layout().insertWidget(0, hab_timer_label)
         update_hab_timer = QtCore.QTimer(
-            timeout=lambda: hab_timer_label.setText(f"Time elapsed: {(time.time() - start_time) / 60}"),
-            interval=60000)
+            timeout=lambda: hab_timer_label.setText(f"Time elapsed: {round((time.time() - start_time) // 60)} minutes"
+                                                    f" {round((time.time() - start_time) % 60)} seconds"),
+            interval=1000)
         update_hab_timer.start()
 
         logging.info(f"Waiting {self.hab_time_box.value()} min before starting session.")

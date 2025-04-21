@@ -263,19 +263,6 @@
          </widget>
         </item>
         <item row="2" column="3">
-         <widget class="QLabel" name="hab_time_label">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Habituation:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="4">
          <widget class="QSpinBox" name="hab_time_box">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -291,6 +278,9 @@
            </property>
            <property name="suffix">
            <string> min</string>
+          </property>
+          <property name="prefix">
+           <string> Habituation: </string>
           </property>
          </widget>
         </item>
