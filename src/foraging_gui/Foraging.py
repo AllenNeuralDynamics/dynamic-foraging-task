@@ -59,6 +59,7 @@ from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
 from foraging_gui.loaded_mouse_slims_handler import LoadedMouseSlimsHandler
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_slims_api.models.behavior_session import SlimsBehaviorSession
+from aind_behavior_dynamic_foraging.CurriculumManager.curriculum_schedule_mapper import CURRICULUM_SCHEDULE_NAME_MAPPER
 
 from foraging_gui.metadata_mapper import (
     behavior_json_to_task_logic_model,
@@ -719,10 +720,7 @@ class Window(QMainWindow):
         """
 
         # define mapping between schedule and curriculums
-        curriculum_mapping = {"Uncoupled Without Baiting 2.3.1rwdDelay159": "uncoupled_no_baiting_rd_2p3p1",
-                              "Uncoupled Without Baiting 2.3": "uncoupled_no_baiting_2p3",
-                              "Uncoupled Baiting 2.3": "uncoupled_baiting_2p3",
-                              "Coupled Baiting 2.3": "coupled_baiting_2p3"}
+        curriculum_mapping = CURRICULUM_SCHEDULE_NAME_MAPPER
 
         # gather keys from schedule
         logging.info("Gathering curriculum keys from schedule.")
@@ -743,12 +741,12 @@ class Window(QMainWindow):
 
         # create trainer state
         stages = curriculum.see_stages()
-        stage_mapping = ["1.1", "1.2", "2", "3", "4", "FINAL", "GRADUATED"] if len(stages) == 7 else \
-            ["1.1", "1.2", "2", "3", "FINAL", "GRADUATED"]
+        stage_mapping = {math.nan: 0, "1.1": 0, "1.2": 1, "FINAL": -1, "GRADUATED": -2}
         stage = self._GetInfoFromSchedule(mouse_id, "Current Stage")
-        stage = "1.1" if isinstance(stage, float) and math.isnan(stage) else stage  # account for blank schedule
+
+        index =stage_mapping.get(stage, int(stage))     # map index if need be, else just use the schedule index
         logging.info("Creating trainer state")
-        ts = TrainerState(stage=stages[stage_mapping.index(stage)],
+        ts = TrainerState(stage=stages[index],
                           curriculum=curriculum,
                           is_on_curriculum=True)
 
@@ -767,7 +765,7 @@ class Window(QMainWindow):
             foraging_efficiency=foraging_efficiency,
             finished_trials=finished_trials,
             session_total=session_total,
-            session_at_current_stage=0  # TODO: Just a guess? I'm not sure how to know this with only session.json
+            session_at_current_stage=0
         )
 
         # set loaded mouse in slims handler to be able to write after session
@@ -792,6 +790,12 @@ class Window(QMainWindow):
             )
             # check if current stage is past stage_start and enable if so
             self.fip_model.enabled = stage_list.index(ts.stage.name) >= stage_list.index(self.fip_model.stage_start)
+
+        else:   # set fip model to clear
+            self.fip_model.enabled = False
+
+        # clear opto info
+        self.opto_model.laser_colors = []
 
         # create slims session model
         sbs = SlimsBehaviorSession(
@@ -938,6 +942,11 @@ class Window(QMainWindow):
                                                                       self.operation_control_model)
                 logging.info(f"Writing next session to Slims successful. Mouse {self.session_model.subject} will run"
                              f" on {trainer_state.stage.name} next session.", extra={'tags': [self.warning_log_tag]})
+                # save trainer_state
+                id_name = self.session_model.session_name.split("behavior_")[-1]
+                with open(os.path.join(self.session_model.root_path, f"trainer_state_{id_name}.json"), "w") as outfile:
+                    outfile.write(trainer_state.model_dump_json(indent=1))
+
                 self.on_curriculum.setChecked(False)
                 self.on_curriculum.setVisible(False)
                 self.label_curriculum_stage.setText("")
