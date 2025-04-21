@@ -9,8 +9,9 @@ import math
 import logging
 import requests
 from hashlib import md5
-from typing import Literal, get_args
+from typing import Literal, get_args, Union
 from pydantic import BaseModel
+import re
 from importlib import import_module
 
 import logging_loki
@@ -36,6 +37,7 @@ import webbrowser
 from pydantic import ValidationError
 from StageWidget.main import get_stage_widget
 
+
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
 from foraging_gui.Visualization import PlotV, PlotLickDistribution, PlotTimeDistribution
@@ -54,9 +56,18 @@ from foraging_gui.schema_widgets.operation_control_widget import OperationContro
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.RigJsonBuilder import build_rig_json
 from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
-from foraging_gui.slims_handler import SlimsHandler
+from foraging_gui.loaded_mouse_slims_handler import LoadedMouseSlimsHandler
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_slims_api.models.behavior_session import SlimsBehaviorSession
+
+from foraging_gui.metadata_mapper import (
+    behavior_json_to_task_logic_model,
+    behavior_json_to_session_model,
+    behavior_json_to_fip_model,
+    behavior_json_to_opto_model,
+    behavior_json_to_operational_control_model
+)
+
 from aind_behavior_dynamic_foraging.CurriculumManager.trainer import (
     DynamicForagingTrainerState,
     TrainerState,
@@ -85,7 +96,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
 
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import FiberPhotometry, STAGE_STARTS
 
-from aind_behavior_dynamic_foraging.DataSchemas.operation_control import OperationalControl
+from aind_behavior_dynamic_foraging.DataSchemas.operation_control import OperationalControl, StageSpecs
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear()  # clear handlers so console output can be configured
@@ -197,7 +208,10 @@ class Window(QMainWindow):
         self.task_widget.volumeChanged.connect(self.update_valve_open_time)
 
         # create OperationControl model and widget to be used and referenced for session info
-        self.operation_control_model = OperationalControl()
+        self.operation_control_model = OperationalControl(stage_specs=StageSpecs(
+            stage_name="AIND" if self.Settings[f'newscale_serial_num_box{self.box_number}'] == '' else "newscale",
+            rig_name=self.current_box,
+        ))
         self.operation_control_widget = OperationControlWidget(self.operation_control_model)
 
         # create layout for task and operation widget
@@ -285,10 +299,13 @@ class Window(QMainWindow):
         self.Other_manual_water_right_time = []  # the valve open time of manual water given by the right valve each time
 
         # create slims handler to handle waterlog and curriculum management
-        self.slims_handler = SlimsHandler()
+        self.slims_handler = LoadedMouseSlimsHandler()
+        if self.slims_handler.slims_client is None:     # error connecting to slims
+            logging.warning("Cannot connect to slims. If mouse needs to be run, load in parameters locally.",
+                            extra={'tags': [self.warning_log_tag]})
 
         # initialize mouse selector
-        slims_mice = self.slims_handler.get_added_mice()[-100:]  # grab 100 latest mice from slims
+        slims_mice = self.slims_handler.get_added_mice()[-100:]     # grab 100 latest mice from slims
         self.mouse_selector_dialog = MouseSelectorDialog([mouse.barcode for mouse in slims_mice], self.box_letter)
 
         # create label giff to indicate mouse is being loaded
@@ -317,7 +334,10 @@ class Window(QMainWindow):
         self.ManualWaterVolume = [0, 0]
         self._StopPhotometry()  # Make sure photoexcitation is stopped
 
-        # create QTimer to flash start Fbutton color
+        # update operational control positions once stage is loaded
+        self.update_operational_control_stage_positions()
+
+        # create QTimer to flash start button color
         self.start_flash = QTimer(timeout=self.toggle_save_color, interval=500)
         self.is_purple = False
 
@@ -449,14 +469,14 @@ class Window(QMainWindow):
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
         self.action_Calibration.triggered.connect(self._WaterCalibration)
         self.actionLaser_Calibration.triggered.connect(self._LaserCalibration)
-        self.action_Open.triggered.connect(self._Open)
+        self.action_continue_session.triggered.connect(lambda: self.load_local_session(continuation=True))
+        self.action_create_from_local_session.triggered.connect(self.load_local_session)
         self.action_Save.triggered.connect(self._Save)
         self.actionForce_save.triggered.connect(self._ForceSave)
         self.SaveAs.triggered.connect(self._SaveAs)
         self.Save_continue.triggered.connect(self._Save_continue)
         self.action_Exit.triggered.connect(self._Exit)
         self.action_New.triggered.connect(self._NewSession)
-        self.action_Clear.triggered.connect(self._Clear)
         self.action_Start.triggered.connect(self.Start.click)
         self.action_NewSession.triggered.connect(self.NewSession.click)
         self.actionConnectBonsai.triggered.connect(self._ConnectBonsai)
@@ -464,7 +484,6 @@ class Window(QMainWindow):
         self.Load.clicked.connect(self.mouse_selector_dialog.show)
         self.Save.setCheckable(True)
         self.Save.clicked.connect(self._Save)
-        self.Clear.clicked.connect(self._Clear)
         self.Start.clicked.connect(self._Start)
         self.GiveLeft.clicked.connect(lambda: self.give_manual_water("Left"))
         self.GiveRight.clicked.connect(lambda: self.give_manual_water("Right"))
@@ -494,8 +513,6 @@ class Window(QMainWindow):
         self.MoveZN.clicked.connect(self._MoveZN)
         self.StageStop.clicked.connect(self._StageStop)
         self.GetPositions.clicked.connect(self._GetPositions)
-        self.Sessionlist.currentIndexChanged.connect(self._session_list)
-        self.SessionlistSpin.textChanged.connect(self._session_list_spin)
         self.StartEphysRecording.clicked.connect(self._StartEphysRecording)
         self.SetReference.clicked.connect(self._set_reference)
         self.Opto_dialog.laser_1_calibration_voltage.textChanged.connect(self._toggle_save_color)
@@ -521,16 +538,118 @@ class Window(QMainWindow):
         self.WeightAfter.setValidator(double_validator)
         self.SuggestedWater.setValidator(double_validator)
 
-        # add validator for stage position fields if using newscale stage widget
-        if not hasattr(self, "stage_widget"):
-            double_validator = QtGui.QIntValidator()
-            self.PositionZ.setValidator(double_validator)
-            self.PositionY.setValidator(double_validator)
-            self.PositionX.setValidator(double_validator)
-            self.Step.setValidator(double_validator)
+        if hasattr(self, "current_stage"): # Connect newscale button to update operational control model
+            self.MoveXP.clicked.connect(self.update_operational_control_stage_positions)
+            self.MoveYP.clicked.connect(self.update_operational_control_stage_positions)
+            self.MoveZP.clicked.connect(self.update_operational_control_stage_positions)
+            self.MoveXN.clicked.connect(self.update_operational_control_stage_positions)
+            self.MoveYN.clicked.connect(self.update_operational_control_stage_positions)
+            self.MoveZN.clicked.connect(self.update_operational_control_stage_positions)
+
+        elif self.stage_widget is not None:
+            # connect aind stage widgets to update loaded mouse offset if text has been changed by user or button press
+            self.stage_widget.movement_page_view.lineEdit_z.textChanged.connect(lambda v: threading.Thread(target=self.update_loaded_mouse_offset).start())
+            self.stage_widget.movement_page_view.lineEdit_x.textChanged.connect(lambda v: threading.Thread(target=self.update_loaded_mouse_offset).start())
+            self.stage_widget.movement_page_view.lineEdit_y1.textChanged.connect(lambda v: threading.Thread(target=self.update_loaded_mouse_offset).start())
+            self.stage_widget.movement_page_view.lineEdit_y2.textChanged.connect(lambda v: threading.Thread(target=self.update_loaded_mouse_offset).start())
+            # Connect aind stage widgets to update operational control model
+            self.stage_widget.movement_page_view.lineEdit_z.textChanged.connect(self.update_operational_control_stage_positions)
+            self.stage_widget.movement_page_view.lineEdit_x.textChanged.connect(self.update_operational_control_stage_positions)
+            self.stage_widget.movement_page_view.lineEdit_y1.textChanged.connect(self.update_operational_control_stage_positions)
+            self.stage_widget.movement_page_view.lineEdit_y2.textChanged.connect(self.update_operational_control_stage_positions)
 
         # update model widgets if models have changed
         self.modelsChanged.connect(self.update_model_widgets)
+
+    def update_loaded_mouse_offset(self):
+        """
+            Update the stage offset associated with mouse model from slims with aind stage coordinates
+        """
+        current_positions = self._GetPositions()
+        if current_positions is None:
+            logging.info("Can't update loaded mouse position because no stage is connected.")
+            return
+
+        elif list(current_positions.keys()) == ["x", "y", "z"]:
+            logging.info("Can't update loaded mouse offset with non AIND stage coordinates.")
+        else:
+            x = self.stage_widget.movement_page_view.lineEdit_x.text()
+            y = self.stage_widget.movement_page_view.lineEdit_y1.text()
+            z = self.stage_widget.movement_page_view.lineEdit_z.text()
+            # use widget values since current position isn't updated yet
+            self.slims_handler.set_loaded_mouse_offset(None if x == '' else float(x),
+                                                       None if y == '' else float(y),
+                                                       None if z == '' else float(z))
+
+    def update_operational_control_stage_positions(self, *args):
+        """
+            Update operational control model with the latest stage coordinates
+
+            :params args: catchall for signal emit values
+        """
+
+        current_positions = self._GetPositions()
+        if current_positions is None:
+            logging.info("Can't update loaded mouse position because no stage is connected.")
+            return
+
+        self.operation_control_model.stage_specs.x = current_positions["x"]
+        self.operation_control_model.stage_specs.z = current_positions["z"]
+        # use y key and default to y1 key if not in dict
+        self.operation_control_model.stage_specs.y = current_positions.get("y") or current_positions.get("y1")
+
+    def update_stage_positions_from_operational_control(self, oc: OperationalControl = None) -> None:
+        """
+            Update stage position based on operational control model
+
+            :param oc: optional model to use for stage position. If None, use operational_control attribute.
+        """
+
+        oc = oc if oc is not None else self.operation_control_model
+
+        if oc.stage_specs is None:
+            logging.info("Cannot move stage as stage specs are not defined in operational control model.")
+            return
+        # determine how stage should be moved.
+        last_positions = {"x": oc.stage_specs.x, "y": oc.stage_specs.y, "z": oc.stage_specs.z}
+        positions = self._GetPositions()
+        none_pos = {"x": None, "y": None, "z": None}
+
+        # check aind stage
+        if self.stage_widget is not None and last_positions != none_pos:
+            if oc.stage_specs.stage_name == "AIND":  # coordinates in oc model also come from aind stage
+                logging.info("Using coordinates in loaded operational control model.")
+                last_positions = {"x": oc.stage_specs.x, "y": oc.stage_specs.y, "z": oc.stage_specs.z}
+
+            else:  # coordinates in oc model also come from newscale stage and can't be applied
+                logging.info("Coordinates in loaded operational control model come from newscale stage which does "
+                             "not match current stage. Checking slims for location.")
+                last_positions = self.slims_handler.get_loaded_mouse_offset()  # check if slims has offset
+                if last_positions == none_pos:
+                    logging.info("No offset coordinates found in Slims. Not moving stage.", extra={'tags': [self.warning_log_tag]})
+
+            positions = {
+                0: positions['x'] if last_positions['x'] is None else float(last_positions["x"]),
+                1: positions['y1'] if last_positions['y'] is None else float(last_positions["y"]),
+                2: positions['y2'] if last_positions['y'] is None else float(last_positions["y"]),
+                3: positions['z'] if last_positions['z'] is None else float(last_positions["z"]),
+            }
+            self.stage_widget.stage_model.update_position(positions)
+            self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
+
+        # check newscale stage
+        elif hasattr(self, "current_stage") and last_positions != none_pos:  # newscale stage
+            # coordinates in oc model come from same newscale stage and can be used
+            if oc.stage_specs.stage_name == "newscale" and oc.stage_specs.rig_name == self.current_box:
+                logging.info("Using coordinates in loaded operational control model.")
+                last_positions = {k: v if v is not None else positions[k] for k, v in last_positions.items()}
+                last_positions_lst = list(last_positions.values())
+                self.current_stage.move_absolute_3d(*last_positions_lst)
+                self._UpdatePosition(last_positions_lst, (0, 0, 0))
+            else:
+                # don't do anything if oc model stage isn't newscal and not from box being used
+                logging.info(f"Cannot move stage since last session was run using {oc.stage_specs.stage_name} and"
+                             f" on {oc.stage_specs.rig_name}", extra={'tags': [self.warning_log_tag]})
 
     def load_curriculum(self, mouse_id: str) -> None:
         """
@@ -553,7 +672,6 @@ class Window(QMainWindow):
 
             # update models
             self.task_logic = task
-            self.operation_control_model = oc
             self.opto_model = opto if opto else self.opto_model
             self.fip_model = fip if fip else self.fip_model
 
@@ -572,6 +690,11 @@ class Window(QMainWindow):
             # set state of on_curriculum check
             self.on_curriculum.setChecked(slims_session.is_curriculum_suggestion)
             self.on_curriculum.setEnabled(slims_session.is_curriculum_suggestion)
+
+            self.update_stage_positions_from_operational_control(oc)
+
+            # update operational control model with latest stage coords
+            self.update_operational_control_stage_positions()
 
             logging.info(f"Successfully loaded mouse {mouse_id}", extra={'tags': [self.warning_log_tag]})
 
@@ -680,6 +803,125 @@ class Window(QMainWindow):
 
         return ts, sbs, ts.stage.task, self.session_model, self.opto_model, self.fip_model, self.operation_control_model
 
+    def load_local_session(self, continuation: bool=False) -> None:
+
+        """
+            Load session from local drive.
+
+            :param continuation: boolean indicating if session should be continued or a new session should be created
+            based on loaded session.
+        """
+
+        # stop current session first
+        self._StopCurrentSession()
+
+        # check if user wants to load new session
+        new_session = self._NewSession()
+
+        if not new_session:
+            return
+
+        # Open dialog box
+        folder_path = QFileDialog.getExistingDirectory(self, "Select Folder",
+                                                    self.default_openFolder + '\\' + self.current_box)
+        logging.info('User selected: {}'.format(folder_path))
+
+        if not folder_path:
+            return
+
+        # dict to easily access model class and function to translate behavior json into model
+        schema_map = {"task_logic": {"model": AindDynamicForagingTaskLogic, "map": behavior_json_to_task_logic_model},
+                      "session": {"model": AindBehaviorSessionModel, "map": behavior_json_to_session_model},
+                      "optogenetics": {"model": Optogenetics, "map": behavior_json_to_opto_model},
+                      "fiber_photometry": {"model": FiberPhotometry, "map": behavior_json_to_fip_model},
+                      "operational_control": {"model": OperationalControl,
+                                              "map": behavior_json_to_operational_control_model}}
+
+        # dict to keep track if all models are in folder
+        loaded = {**{k: False for k in schema_map.keys()}, "behavior_json": False}
+        # regex to check filename starts against schema_map key
+        pattern = re.compile(rf"^behavior_({'|'.join(re.escape(k) for k in schema_map.keys())})_model")
+
+        # iterate through files
+        for filename in os.listdir(folder_path):
+            joined = os.path.join(folder_path, filename)
+
+            # check if file is serialized model based on regex
+            match = pattern.match(filename)
+            if match:
+                key = match.group(1)
+                model = schema_map[key]["model"]
+                with open(joined, 'r') as f:
+                    loaded[key] = model(**json.load(f))
+
+            # check and load behavior json
+            elif re.fullmatch(r"^\d+_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json$", filename):
+                loaded["behavior_json"] = True
+                with open(joined, 'r') as f:
+                    Obj = json.load(f)
+            elif re.fullmatch(r"^\d+_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.mat$", filename):
+                loaded["behavior_json"] = True
+                Obj = loadmat(joined)
+                # this is a bug to use the scipy.io.loadmat or savemat (it will change the dimension of the nparray)
+                Obj.B_AnimalResponseHistory = Obj.B_AnimalResponseHistory[0]
+                Obj.B_TrialStartTime = Obj.B_TrialStartTime[0]
+                Obj.B_DelayStartTime = Obj.B_DelayStartTime[0]
+                Obj.B_TrialEndTime = Obj.B_TrialEndTime[0]
+                Obj.B_GoCueTime = Obj.B_GoCueTime[0]
+                Obj.B_RewardOutcomeTime = Obj.B_RewardOutcomeTime[0]
+
+        if any(not value for value in loaded.values()):         # if any of the required files are missing
+            not_loaded = [key for key, value in loaded.items() if not value]
+            try:
+                if "behavior_json" not in not_loaded:
+                    logger.info(f"Models {not_loaded} are not found. Trying to create models from behavior json.")
+                    for key in not_loaded:
+                        loaded[key] = schema_map[key]["map"](Obj)
+                else:
+                    raise ValueError("behavior json not found so models cannot be reconstructed.")
+
+            except Exception as e:
+                logger.warning(f"Can't load mouse in folder {folder_path}: {str(e)}")
+                return
+
+        try:  # check slims for curriculum and go off curriculum if user would like
+            ts, slims_session, *args = self.slims_handler.load_mouse_curriculum(loaded["session"].subject)
+            if ts is not None and slims_session.is_curriculum_suggestion:  # mouse has next session set in slims
+                reply = self.off_curriculum(False)  # check if user wants to go off curriculum for this mouse
+                if reply == QMessageBox.No:  # return before updating models
+                    return
+        except Exception as e:
+            if 'No record found' not in str(e):  # mouse may exist but another error occured
+                logging.error(f"Error loading mouse {loaded['session'].subject} curriculum loaded from Slims. {e}")
+
+        # update models
+        self.task_logic = loaded["task_logic"]
+        # TODO: Should I update the path and the date for the session model?
+        self.session_model.experiment = loaded["session"].experiment
+        self.session_model.experimenter = loaded["session"].experimenter
+        self.session_model.subject = loaded["session"].subject
+        self.session_model.notes = loaded["session"].notes
+        self.operation_control_model = loaded["operational_control"]
+        self.opto_model = loaded["optogenetics"]
+        self.fip_model = loaded["fiber_photometry"]
+
+        if continuation:
+            self.Obj = Obj
+            self._LoadVisualization()
+            # check dropping frames
+            self.to_check_drop_frames = 1
+            self._check_drop_frames(save_tag=0)
+            self.StartExcitation.setChecked(False)
+
+        # Set stage position to last position
+        self.update_stage_positions_from_operational_control()
+
+        self.modelsChanged.emit()
+
+        logging.info(f"Successfully opened mouse {self.session_model.subject}.",
+                     extra={'tags': [self.warning_log_tag]})
+        self.load_tag = 1
+
     def write_curriculum(self):
         """
             Write curriculum to slims for next session
@@ -687,15 +929,13 @@ class Window(QMainWindow):
         # add session to slims if there are trials and mouse loaded
         if hasattr(self, "GeneratedTrials") and self.slims_handler.curriculum is not None:
             try:
-                trainer_state = self.slims_handler.write_loaded_mouse(self.session_model.subject,
-                                                                          self.on_curriculum.isChecked(),
-                                                                          self.GeneratedTrials.B_for_eff_optimal,
-                                                                          self.GeneratedTrials.B_CurrentTrialN,
-                                                                          self.task_logic,
-                                                                          self.session_model,
-                                                                          self.opto_model,
-                                                                          self.fip_model,
-                                                                          self.operation_control_model)
+                trainer_state = self.slims_handler.write_loaded_mouse(self.GeneratedTrials.B_for_eff_optimal,
+                                                                      self.GeneratedTrials.B_CurrentTrialN,
+                                                                      self.task_logic,
+                                                                      self.session_model,
+                                                                      self.opto_model,
+                                                                      self.fip_model,
+                                                                      self.operation_control_model)
                 logging.info(f"Writing next session to Slims successful. Mouse {self.session_model.subject} will run"
                              f" on {trainer_state.stage.name} next session.", extra={'tags': [self.warning_log_tag]})
                 self.on_curriculum.setChecked(False)
@@ -812,7 +1052,7 @@ class Window(QMainWindow):
         else:
             widget.setStyleSheet(unchecked_color)
 
-    def off_curriculum(self, checked) -> None:
+    def off_curriculum(self, checked) -> Union[QMessageBox.StandardButton, None]:
         """
             Function to handle going off curriculum.
             :param checked: if on_curriculum checkbox is checked or not
@@ -837,79 +1077,9 @@ class Window(QMainWindow):
                 self.fip_widget.setEnabled(True)
                 self.Opto_dialog.opto_widget.setEnabled(True)
                 self.on_curriculum.setEnabled(False)
+                self.slims_handler.go_off_curriculum()  # update slims model to be off curriculum
 
-    def _session_list(self):
-        '''show all sessions of the current animal and load the selected session by drop down list'''
-        if not hasattr(self, 'fname'):
-            return 0
-        # open the selected session
-        if self.Sessionlist.currentText() != '':
-            selected_index = self.Sessionlist.currentIndex()
-            fname = self.session_full_path_list[self.Sessionlist.currentIndex()]
-            self._Open(input_file=fname)
-            # set the selected index back to the current session
-            self._connect_Sessionlist(connect=False)
-            self.Sessionlist.setCurrentIndex(selected_index)
-            self.SessionlistSpin.setValue(int(selected_index + 1))
-            self._connect_Sessionlist(connect=True)
-
-    def _session_list_spin(self):
-        '''show all sessions of the current animal and load the selected session by spin box'''
-        if not hasattr(self, 'fname'):
-            return 0
-        if self.SessionlistSpin.text() != '':
-            self._connect_Sessionlist(connect=False)
-            if int(self.SessionlistSpin.text()) > self.Sessionlist.count():
-                self.SessionlistSpin.setValue(int(self.Sessionlist.count()))
-            if int(self.SessionlistSpin.text()) < 1:
-                self.SessionlistSpin.setValue(1)
-            fname = self.session_full_path_list[int(self.SessionlistSpin.text()) - 1]
-            self.Sessionlist.setCurrentIndex(int(self.SessionlistSpin.text()) - 1)
-            self._connect_Sessionlist(connect=True)
-            self._Open(input_file=fname)
-
-    def _connect_Sessionlist(self, connect=True):
-        '''connect or disconnect the Sessionlist and SessionlistSpin'''
-        if connect:
-            self.Sessionlist.currentIndexChanged.connect(self._session_list)
-            self.SessionlistSpin.textChanged.connect(self._session_list_spin)
-        else:
-            self.Sessionlist.disconnect()
-            self.SessionlistSpin.disconnect()
-
-    def _show_sessions(self):
-        '''list all sessions of the current animal'''
-        if not hasattr(self, 'fname'):
-            return 0
-        animal_folder = os.path.dirname(os.path.dirname(os.path.dirname(self.fname)))
-        session_full_path_list = []
-        session_path_list = []
-        for session_folder in os.listdir(animal_folder):
-            training_folder_old = os.path.join(animal_folder, session_folder, 'TrainingFolder')
-            training_folder_new = os.path.join(animal_folder, session_folder, 'behavior')
-            if os.path.exists(training_folder_old):
-                for file_name in os.listdir(training_folder_old):
-                    if file_name.endswith('.json'):
-                        session_full_path_list.append(os.path.join(training_folder_old, file_name))
-                        session_path_list.append(session_folder)
-            elif os.path.exists(training_folder_new):
-                for file_name in os.listdir(training_folder_new):
-                    if file_name.endswith('.json'):
-                        session_full_path_list.append(os.path.join(training_folder_new, file_name))
-                        session_path_list.append(session_folder)
-
-        sorted_indices = sorted(enumerate(session_path_list), key=lambda x: x[1], reverse=True)
-        sorted_dates = [date for index, date in sorted_indices]
-        # Extract just the indices
-        indices = [index for index, date in sorted_indices]
-        # Apply sorted index
-        self.session_full_path_list = [session_full_path_list[index] for index in indices]
-        self.session_path_list = sorted_dates
-
-        self._connect_Sessionlist(connect=False)
-        self.Sessionlist.clear()
-        self.Sessionlist.addItems(sorted_dates)
-        self._connect_Sessionlist(connect=True)
+            return reply
 
     def _check_drop_frames(self, save_tag=1):
         '''check if there are any drop frames in the video'''
@@ -1048,7 +1218,6 @@ class Window(QMainWindow):
                 logging.info('Move Stage pressed, but no current stage')
                 return
             logging.info('Moving stage')
-            self.StageStop.click
             current_stage = self.current_stage
             current_position = current_stage.get_position()
             current_stage.set_speed(3000)
@@ -1906,75 +2075,6 @@ class Window(QMainWindow):
         '''Restart the formal logging'''
         self.Ot_log_folder = self._restartlogging()
 
-    def _set_parameters(self, key, widget_dict, parameters):
-        '''Set the parameters in the GUI
-            key: the parameter name you want to change
-            widget_dict: the dictionary of all the widgets in the GUI
-            parameters: the dictionary of all the parameters containing the key you want to change
-        '''
-        if key in parameters:
-            # skip some keys
-            if key == 'ExtraWater' or key == 'WeightAfter' or key == 'SuggestedWater':
-                self.WeightAfter.setText('')
-                return
-            widget = widget_dict[key]
-            try:  # load the paramter used by last trial
-                value = np.array([parameters[key]])
-                loading_parameters_type = 0
-            # sometimes we only have training parameters, no behavior parameters
-            except Exception as e:
-                logging.error(traceback.format_exc())
-                value = parameters[key]
-                loading_parameters_type = 1
-            if isinstance(widget, QtWidgets.QPushButton):
-                pass
-            if type(value) == bool:
-                loading_parameters_type = 1
-            else:
-                if len(value) == 0:
-                    value = np.array([''], dtype='<U1')
-                    loading_parameters_type = 0
-            if type(value) == np.ndarray:
-                loading_parameters_type = 0
-            if isinstance(widget, QtWidgets.QLineEdit):
-                if loading_parameters_type == 0:
-                    widget.setText(value[-1])
-                elif loading_parameters_type == 1:
-                    widget.setText(value)
-            elif isinstance(widget, QtWidgets.QComboBox):
-                if loading_parameters_type == 0:
-                    index = widget.findText(value[-1])
-                elif loading_parameters_type == 1:
-                    index = widget.findText(value)
-                if index != -1:
-                    widget.setCurrentIndex(index)
-            elif isinstance(widget, QtWidgets.QDoubleSpinBox):
-                if loading_parameters_type == 0:
-                    widget.setValue(float(value[-1]))
-                elif loading_parameters_type == 1:
-                    widget.setValue(float(value))
-            elif isinstance(widget, QtWidgets.QSpinBox):
-                if loading_parameters_type == 0:
-                    widget.setValue(int(value[-1]))
-                elif loading_parameters_type == 1:
-                    widget.setValue(int(value))
-            elif isinstance(widget, QtWidgets.QTextEdit):
-                if loading_parameters_type == 0:
-                    widget.setText(value[-1])
-                elif loading_parameters_type == 1:
-                    widget.setText(value)
-            elif isinstance(widget, QtWidgets.QPushButton):
-                if key == 'AutoReward':
-                    if loading_parameters_type == 0:
-                        widget.setChecked(bool(value[-1]))
-                    elif loading_parameters_type == 1:
-                        widget.setChecked(value)
-        else:
-            widget = widget_dict[key]
-            if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
-                pass
-                # widget.clear()
-
     def _QComboBoxUpdate(self, parameter, value):
         logging.info('Field updated: {}:{}'.format(parameter, value))
 
@@ -2593,9 +2693,6 @@ class Window(QMainWindow):
             else:
                 logging.warning('Saving of loaded files is not allowed!', extra={'tags': [self.warning_log_tag]})
 
-            self.SessionlistSpin.setEnabled(True)
-            self.Sessionlist.setEnabled(True)
-
             if self.StartEphysRecording.isChecked():
                 QMessageBox.warning(self, '',
                                     'Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!')
@@ -2709,8 +2806,8 @@ class Window(QMainWindow):
         self.fip_widget.apply_schema(self.fip_model)
         self.operation_control_widget.apply_schema(self.operation_control_model)
 
-        # check if on_curriculum needs to be visible
-        self.on_curriculum.setVisible(self.on_curriculum.isChecked())
+        # Set on_curriculum to be visible if loaded mouse
+        self.on_curriculum.setVisible(self.slims_handler.loaded_mouse_id is not None)
 
     def save_task_models(self):
         """
@@ -2718,28 +2815,26 @@ class Window(QMainWindow):
         """
 
         id_name = self.session_model.session_name.split("behavior_")[-1]
-        session_model_path = os.path.join(self.session_model.root_path, f'behavior_session_model_{id_name}.json')
-        task_model_path = os.path.join(self.session_model.root_path, f'behavior_task_logic_model_{id_name}.json')
 
         # validate behavior session model and document validation errors if any
+        session_model_path = os.path.join(self.session_model.root_path, f'behavior_session_model_{id_name}.json')
         self.validate_and_save_model(AindBehaviorSessionModel, self.session_model, session_model_path)
 
         # validate behavior task logic model and document validation errors if any
+        task_model_path = os.path.join(self.session_model.root_path, f'behavior_task_logic_model_{id_name}.json')
         self.validate_and_save_model(AindDynamicForagingTaskLogic, self.task_logic, task_model_path)
 
         # validate operation_control_model and document validation errors if any
-        self.validate_and_save_model(OperationalControl, self.operation_control_model, task_model_path)
+        oc_path = os.path.join(self.session_model.root_path, f'behavior_operational_control_model_{id_name}.json')
+        self.validate_and_save_model(OperationalControl, self.operation_control_model, oc_path)
 
-        # check if opto ran
-        if self.opto_model.laser_colors != []:
-            opto_model_path = os.path.join(self.session_model.root_path, f'behavior_optogenetics_model_{id_name}.json')
-            self.validate_and_save_model(Optogenetics, self.opto_model, opto_model_path)
+        # validate opto_model and document validation errors if any
+        opto_model_path = os.path.join(self.session_model.root_path, f'behavior_optogenetics_model_{id_name}.json')
+        self.validate_and_save_model(Optogenetics, self.opto_model, opto_model_path)
 
-        # check if fip ran
-        if self.fip_model.enabled:
-            fip_model_path = os.path.join(self.session_model.root_path,
-                                          f'behavior_fiber_photometry_model_{id_name}.json')
-            self.validate_and_save_model(FiberPhotometry, self.fip_model, fip_model_path)
+        # validate fip_model and document validation errors if any
+        fip_model_path = os.path.join(self.session_model.root_path, f'behavior_fiber_photometry_model_{id_name}.json')
+        self.validate_and_save_model(FiberPhotometry, self.fip_model, fip_model_path)
 
     def validate_and_save_model(self, schema: BaseModel, model, path: str):
         """
@@ -2792,246 +2887,6 @@ class Window(QMainWindow):
                     Obj[keyname][widget.objectName()] = widget.currentText()
         return Obj
 
-    def _Open(self, input_file=''):
-        if input_file == '':
-            # stop current session first
-            self._StopCurrentSession()
-
-            # Open dialog box
-            fname, _ = QFileDialog.getOpenFileName(self, 'Open file',
-                                                   self.default_openFolder + '\\' + self.current_box,
-                                                   "Behavior JSON files (*.json);;Behavior MAT files (*.mat);;JSON parameters (*_par.json)")
-            logging.info('User selected: {}'.format(fname))
-            if fname != '':
-                self.default_openFolder = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(fname))))
-
-            self.fname = fname
-
-        else:
-            fname = input_file
-            self.fname = fname
-        if fname:
-            # Start new session
-            self.NewSession.setChecked(True)
-            new_session = self._NewSession()
-            if not new_session:
-                return
-
-            if fname.endswith('.mat'):
-                Obj = loadmat(fname)
-            elif fname.endswith('.json'):
-                f = open(fname, "r")
-                Obj = json.loads(f.read())
-                f.close()
-            self.Obj = Obj
-
-            widget_dict = {}
-            dialogs = ['LaserCalibration_dialog', 'Opto_dialog', 'Camera_dialog', 'centralwidget', 'TrainingParameters']
-            for dialog_name in dialogs:
-                if hasattr(self, dialog_name):
-                    widget_types = (QtWidgets.QPushButton, QtWidgets.QLineEdit, QtWidgets.QTextEdit,
-                                    QtWidgets.QComboBox, QtWidgets.QDoubleSpinBox, QtWidgets.QSpinBox)
-                    widget_dict.update(
-                        {w.objectName(): w for w in getattr(self, dialog_name).findChildren(widget_types)})
-            # Adding widgets starting with 'Laser1_power' and 'Laser2_power' to widget_keys to allow the second update.
-            widget_keys = list(widget_dict.keys())
-            for key in widget_dict.keys():
-                if key.startswith('Laser1_power') or key.startswith('Laser2_power') or key.startswith(
-                        'Location_') or key.startswith('Frequency_'):
-                    widget_keys.append(key)
-            try:
-                for key in widget_keys:
-                    try:
-                        widget = widget_dict[key]
-                        if widget.parent().objectName() in ['Optogenetics', 'Optogenetics_trial_parameters',
-                                                            'SessionParameters']:
-                            CurrentObj = Obj['Opto_dialog']
-                        elif widget.parent().objectName() == 'Camera':
-                            CurrentObj = Obj['Camera_dialog']
-                        elif widget.parent().objectName() == 'CalibrationLaser':
-                            CurrentObj = Obj['LaserCalibration_dialog']
-                        elif widget.parent().objectName() == 'MetaData':
-                            CurrentObj = Obj['Metadata_dialog']
-                        else:
-                            CurrentObj = Obj.copy()
-                    except Exception as e:
-                        logging.error(traceback.format_exc())
-                        continue
-                    if key in CurrentObj:
-                        # skip LeftValue, RightValue, GiveWaterL, GiveWaterR if WaterCalibrationResults is not empty as they will be set by the corresponding volume.
-                        if (key in ['LeftValue', 'RightValue', 'GiveWaterL',
-                                    'GiveWaterR']) and self.WaterCalibrationResults != {}:
-                            continue
-                        # skip some keys
-                        if key in ['Start', 'warmup', 'SessionlistSpin', 'StartPreview', 'StartRecording']:
-                            self.WeightAfter.setText('')
-                            continue
-                        widget = widget_dict[key]
-
-                        # loading_parameters_type=0, get the last value of saved training parameters for each trial; loading_parameters_type=1, get the current value for single value data directly from the window.
-                        if 'TP_{}'.format(key) in CurrentObj:
-                            value = np.array([CurrentObj['TP_' + key][-2]])
-                            loading_parameters_type = 0
-                        else:
-                            value = CurrentObj[key]
-                            loading_parameters_type = 1
-
-                        if key in {'BaseWeight', 'TotalWater', 'TargetWeight', 'WeightAfter', 'SuggestedWater',
-                                   'TargetRatio'}:
-                            self.BaseWeight.disconnect()
-                            self.TargetRatio.disconnect()
-                            self.WeightAfter.disconnect()
-                            value = CurrentObj[key]
-                            loading_parameters_type = 1
-
-                        # tag=0, get the last value for ndarray; tag=1, get the current value for single value data
-                        if type(value) == bool:
-                            loading_parameters_type = 1
-                        else:
-                            if len(value) == 0:
-                                value = np.array([''], dtype='<U1')
-                                loading_parameters_type = 0
-                        if type(value) == np.ndarray:
-                            loading_parameters_type = 0
-
-                        if loading_parameters_type == 0:
-                            final_value = value[-1]
-                        elif loading_parameters_type == 1:
-                            final_value = value
-
-                        if isinstance(widget, QtWidgets.QLineEdit):
-                            widget.setText(final_value)
-                            if key in {'BaseWeight', 'TotalWater', 'TargetWeight', 'WeightAfter', 'SuggestedWater',
-                                       'TargetRatio'}:
-                                self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
-                                self.WeightAfter.textChanged.connect(self._PostWeightChange)
-                                self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
-                        elif isinstance(widget, QtWidgets.QComboBox):
-                            index = widget.findText(final_value)
-                            if key.startswith('Frequency_'):
-                                condition = key.split('_')[1]
-                                if CurrentObj['Protocol_' + condition] in ['Pulse']:
-                                    widget.setEditable(True)
-                                    widget.lineEdit().setText(final_value)
-                                    continue
-
-                            if index != -1:
-                                # Alternating on/off for SessionStartWith if SessionAlternating is on
-                                if key == 'SessionStartWith' and 'Opto_dialog' in Obj:
-                                    if 'SessionAlternating' in Obj['Opto_dialog'] and 'SessionWideControl' in Obj[
-                                        'Opto_dialog']:
-                                        if Obj['Opto_dialog']['SessionAlternating'] == 'on' and Obj[
-                                            'OptogeneticsB'] == 'on' and Obj['Opto_dialog'][
-                                            'SessionWideControl'] == 'on':
-                                            index = 1 - index
-                                            widget.setCurrentIndex(index)
-                                        else:
-                                            widget.setCurrentIndex(index)
-                                    else:
-                                        widget.setCurrentIndex(index)
-                                else:
-                                    widget.setCurrentIndex(index)
-                        elif isinstance(widget, QtWidgets.QDoubleSpinBox):
-                            widget.setValue(float(final_value))
-                        elif isinstance(widget, QtWidgets.QSpinBox):
-                            widget.setValue(int(final_value))
-                        elif isinstance(widget, QtWidgets.QTextEdit):
-                            widget.setText(final_value)
-                        elif isinstance(widget, QtWidgets.QPushButton):
-                            widget.setChecked(bool(final_value))
-                    else:
-                        widget = widget_dict[key]
-                        if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
-                            widget.clear()
-            except Exception as e:
-                # Catch the exception and print error information
-                logging.error(traceback.format_exc())
-            try:
-                # visualization when loading the data
-                self._LoadVisualization()
-            except Exception as e:
-                # Catch the exception and print error information
-                logging.error(traceback.format_exc())
-                # delete GeneratedTrials
-                del self.GeneratedTrials
-            # show basic information
-            if self.default_ui == 'ForagingGUI.ui':
-                if 'info_task' in Obj:
-                    self.label_info_task.setText(Obj['info_task'])
-                if 'info_performance_others' in Obj:
-                    self.label_info_performance_others.setText(Obj['info_performance_others'])
-                if 'info_performance_essential_1' in Obj:
-                    self.label_info_performance_essential_1.setText(Obj['info_performance_essential_1'])
-                if 'info_performance_essential_2' in Obj:
-                    self.label_info_performance_essential_2.setText(Obj['info_performance_essential_2'])
-            elif self.default_ui == 'ForagingGUI_Ephys.ui':
-                if 'Other_inforTitle' in Obj:
-                    self.infor.setTitle(Obj['Other_inforTitle'])
-                if 'Other_BasicTitle' in Obj:
-                    self.Basic.setTitle(Obj['Other_BasicTitle'])
-                if 'Other_BasicText' in Obj:
-                    self.ShowBasic.setText(Obj['Other_BasicText'])
-
-            # Set stage position to last position
-            try:
-                if 'B_StagePositions' in Obj.keys() and len(Obj['B_StagePositions']) != 0:
-                    last_positions = Obj['B_StagePositions'][-1]
-                    if hasattr(self, 'current_stage'):  # newscale stage
-                        self.current_stage.move_absolute_3d(float(last_positions['x']),
-                                                            float(last_positions['y']),
-                                                            float(last_positions['z']))
-                        self._UpdatePosition((float(last_positions['x']),
-                                              float(last_positions['y']),
-                                              float(last_positions['z'])), (0, 0, 0))
-                    elif self.stage_widget is not None:  # aind stage
-                        # Move AIND stage to the last session positions
-                        positions = {
-                            0: float(last_positions['x']),
-                            1: float(last_positions['y1']),
-                            2: float(last_positions['y2']),
-                            3: float(last_positions['z'])
-                        }
-                        self.stage_widget.stage_model.update_position(positions)
-                        step_size = self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
-                elif 'B_NewscalePositions' in Obj.keys() and len(
-                        Obj['B_NewscalePositions']) != 0:  # cross compatibility for mice run on older version of code.
-                    last_positions = Obj['B_NewscalePositions'][-1]
-                    self.current_stage.move_absolute_3d(float(last_positions[0]),
-                                                        float(last_positions[1]),
-                                                        float(last_positions[2]))
-                    self._UpdatePosition((float(last_positions[0]),
-                                          float(last_positions[1]),
-                                          float(last_positions[2])),
-                                         (0, 0, 0))
-                else:
-                    pass
-
-            except Exception as e:
-                logging.error(traceback.format_exc())
-
-            # load metadata to the metadata dialog
-            if 'meta_data_dialog' in Obj:
-                if 'session_metadata' in Obj['meta_data_dialog']:
-                    self.Metadata_dialog.meta_data['session_metadata'] = Obj['meta_data_dialog']['session_metadata']
-                self.Metadata_dialog._update_metadata()
-
-            # show session list related to that animal
-            tag = self._show_sessions()
-            if tag != 0:
-                fname_session_folder = os.path.basename(os.path.dirname(os.path.dirname(fname)))
-                Ind = self.Sessionlist.findText(fname_session_folder)
-                self._connect_Sessionlist(connect=False)
-                self.Sessionlist.setCurrentIndex(Ind)
-                self.SessionlistSpin.setValue(Ind + 1)
-                self._connect_Sessionlist(connect=True)
-            # check dropping frames
-            self.to_check_drop_frames = 1
-            self._check_drop_frames(save_tag=0)
-        else:
-            self.NewSession.setDisabled(False)
-        self.StartExcitation.setChecked(False)
-        self.load_tag=1
-
     def _LoadVisualization(self):
         '''To visulize the training when loading a session'''
         self.ToInitializeVisual = 1
@@ -3061,16 +2916,7 @@ class Window(QMainWindow):
         if self.GeneratedTrials.B_AnimalResponseHistory.size == 0:
             del self.GeneratedTrials
             return
-        # for mat file
-        if self.fname.endswith('.mat'):
-            # this is a bug to use the scipy.io.loadmat or savemat (it will change the dimension of the nparray)
-            self.GeneratedTrials.B_AnimalResponseHistory = self.GeneratedTrials.B_AnimalResponseHistory[0]
-            self.GeneratedTrials.B_TrialStartTime = self.GeneratedTrials.B_TrialStartTime[0]
-            self.GeneratedTrials.B_DelayStartTime = self.GeneratedTrials.B_DelayStartTime[0]
-            self.GeneratedTrials.B_TrialEndTime = self.GeneratedTrials.B_TrialEndTime[0]
-            self.GeneratedTrials.B_GoCueTime = self.GeneratedTrials.B_GoCueTime[0]
-            self.GeneratedTrials.B_RewardOutcomeTime = self.GeneratedTrials.B_RewardOutcomeTime[0]
-
+    
         self.PlotM = PlotV(win=self, GeneratedTrials=self.GeneratedTrials, width=5, height=4)
         self.PlotM.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
         layout = self.Visualization.layout()
@@ -3090,39 +2936,6 @@ class Window(QMainWindow):
         self.bias_indicator.clear()
         self.PlotM._Update(GeneratedTrials=self.GeneratedTrials)
         self.PlotLick._Update(GeneratedTrials=self.GeneratedTrials)
-
-    def _Clear(self):
-        # Stop current session first
-        self._StopCurrentSession()
-
-        # Verify user wants to clear parameters
-        if self.unsaved_data:
-            reply = QMessageBox.critical(self,
-                                         'Box {}, Clear parameters:'.format(self.box_letter),
-                                         'Unsaved data exists! Do you want to clear training parameters?',
-                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-
-        # post weight not entered and session ran and new session button was clicked
-        elif self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
-            reply = QMessageBox.critical(self,
-                                         'Box {}, Foraging Close'.format(self.box_letter),
-                                         'Post weight appears to not be entered. Do you want to clear training parameters?',
-                                         QMessageBox.Yes, QMessageBox.No)
-        else:
-            reply = QMessageBox.question(self,
-                                         'Box {}, Clear parameters:'.format(self.box_letter),
-                                         'Do you want to clear training parameters?',
-                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-
-        # If yes, clear parameters
-        if reply == QMessageBox.Yes:
-            for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit) + self.centralwidget.findChildren(
-                    QtWidgets.QLineEdit):
-                if child.isEnabled():
-                    child.clear()
-        else:
-            logging.info('Clearing declined')
-            return
 
     def _StartFIP(self):
         self.StartFIP.setChecked(False)
@@ -3415,8 +3228,9 @@ class Window(QMainWindow):
         self.fip_widget.setEnabled(True)
         self.on_curriculum.setEnabled(True)
 
-        # add session to slims
+        # add session to slims and clear loaded mouse
         self.write_curriculum()
+        self.slims_handler.clear_loaded_mouse()
 
         self._ConnectBonsai()
         if self.InitializeBonsaiSuccessfully == 0:
@@ -3596,9 +3410,6 @@ class Window(QMainWindow):
     def _Start(self):
         '''start trial loop'''
 
-        # set the load tag to zero
-        self.load_tag = 0
-
         # post weight not entered and session ran
         if self.WeightAfter.text() == '' and self.session_run and not self.unsaved_data:
             reply = QMessageBox.critical(self,
@@ -3615,14 +3426,6 @@ class Window(QMainWindow):
             self.Start.setChecked(False)
             self.Start.setStyleSheet('background-color:none;')
             return
-
-        # clear the session list
-        self._connect_Sessionlist(connect=False)
-        self.Sessionlist.clear()
-        self.SessionlistSpin.setValue(1)
-        self._connect_Sessionlist(connect=True)
-        self.SessionlistSpin.setEnabled(False)
-        self.Sessionlist.setEnabled(False)
 
         # Clear warnings
         self.NewSession.setDisabled(False)
@@ -3724,6 +3527,28 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     return
 
+            # if mouse is loaded, update attachments with what actually ran
+            if self.slims_handler.loaded_slims_session:
+                try:
+                    self.slims_handler.update_loaded_session_attachments(AindBehaviorSessionModel.__name__,
+                                                                         self.session_model.model_dump_json())
+                    self.slims_handler.update_loaded_session_attachments(self.operation_control_model.name,
+                                                                         self.operation_control_model.model_dump_json())
+                    self.slims_handler.update_loaded_session_attachments(self.fip_model.name,
+                                                                         self.fip_model.model_dump_json())
+                    self.slims_handler.update_loaded_session_attachments(self.opto_model.name,
+                                                                         self.opto_model.model_dump_json())
+                    # Update with curriculum that actually ran
+                    if not self.slims_handler.loaded_slims_session.is_curriculum_suggestion:
+                        ts, *args = self.slims_handler.load_mouse_curriculum(self.session_model.subject)
+                        ts.stage.task = self.task_logic
+                        self.slims_handler.update_loaded_session_attachments("TrainerState", ts.model_dump_json())
+                except KeyError as e:
+                    logging.error(f"Error updating mouse {self.session_model.subject} session in slims: {e}")
+
+            # set the load tag to zero
+            self.load_tag = 0
+
             # empty post weight after pass through checks in case user cancels run
             self.WeightAfter.setText('')
 
@@ -3733,6 +3558,9 @@ class Window(QMainWindow):
             self.NewSession.setChecked(False)
             # disable metadata fields
             self._set_metadata_enabled(False)
+
+            # update slims with latest stage offset value for loaded mouse
+            self.update_loaded_mouse_offset()
 
             # Set IACUC protocol in metadata based on schedule
             protocol = self._GetInfoFromSchedule(mouse_id, 'Protocol')

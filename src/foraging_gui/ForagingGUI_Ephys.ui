@@ -142,25 +142,6 @@
      <string>Save</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="Clear">
-    <property name="geometry">
-     <rect>
-      <x>1120</x>
-      <y>10</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="text">
-     <string>Clear</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="Start">
     <property name="enabled">
      <bool>true</bool>
@@ -441,66 +422,6 @@
        <string>fraction R</string>
       </property>
      </item>
-    </widget>
-    <widget class="QLabel" name="label_73">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>10</y>
-       <width>121</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>session=</string>
-     </property>
-     <property name="textFormat">
-      <enum>Qt::AutoText</enum>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-    <widget class="QSpinBox" name="SessionlistSpin">
-     <property name="geometry">
-      <rect>
-       <x>510</x>
-       <y>10</y>
-       <width>41</width>
-       <height>22</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="maximum">
-      <number>100000</number>
-     </property>
-     <property name="value">
-      <number>1</number>
-     </property>
-     <property name="displayIntegerBase">
-      <number>10</number>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="Sessionlist">
-     <property name="geometry">
-      <rect>
-       <x>320</x>
-       <y>10</y>
-       <width>191</width>
-       <height>22</height>
-      </rect>
-     </property>
     </widget>
    </widget>
    <widget class="QComboBox" name="OptogeneticsB">
@@ -1515,7 +1436,7 @@
          <string>Get positions</string>
         </property>
        </widget>
-       <widget class="QLineEdit" name="PositionY">
+       <widget class="QLabel" name="PositionY">
         <property name="geometry">
          <rect>
           <x>240</x>
@@ -1578,7 +1499,7 @@
          <string>Move left</string>
         </property>
        </widget>
-       <widget class="QLineEdit" name="PositionX">
+       <widget class="QLabel" name="PositionX">
         <property name="geometry">
          <rect>
           <x>240</x>
@@ -1597,7 +1518,7 @@
          <string/>
         </property>
        </widget>
-       <widget class="QLineEdit" name="PositionZ">
+       <widget class="QLabel" name="PositionZ">
         <property name="geometry">
          <rect>
           <x>240</x>
@@ -1885,7 +1806,6 @@
    <zorder>line_2</zorder>
    <zorder>Load</zorder>
    <zorder>Save</zorder>
-   <zorder>Clear</zorder>
    <zorder>Start</zorder>
    <zorder>NextBlock</zorder>
    <zorder>NewSession</zorder>
@@ -1939,7 +1859,8 @@
      <string>File</string>
     </property>
     <addaction name="action_New"/>
-    <addaction name="action_Open"/>
+    <addaction name="action_continue_session"/>
+    <addaction name="action_create_from_local_session"/>
     <addaction name="action_Save"/>
     <addaction name="action_Exit"/>
     <addaction name="action_Clear"/>
@@ -2073,7 +1994,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="action_New"/>
-   <addaction name="action_Open"/>
+   <addaction name="action_continue_session"/>
    <addaction name="action_Save"/>
    <addaction name="separator"/>
   </widget>
@@ -2152,16 +2073,21 @@
     <string>Ctrl+N</string>
    </property>
   </action>
-  <action name="action_Open">
+  <action name="action_continue_session">
    <property name="icon">
     <iconset>
      <normaloff>resources/file-open.png</normaloff>resources/file-open.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Open</string>
+    <string>&amp;Load and continue local session</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="action_create_from_local_session">
+   <property name="text">
+    <string>&amp;Load and replicate past session</string>
    </property>
   </action>
   <action name="action_Save">
