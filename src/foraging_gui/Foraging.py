@@ -741,10 +741,9 @@ class Window(QMainWindow):
 
         # create trainer state
         stages = curriculum.see_stages()
-        stage_mapping = {math.nan: 0, "1.1": 0, "1.2": 1, "FINAL": -1, "GRADUATED": -2}
+        stage_mapping = {"nan": 0, "1.1": 0, "1.2": 1, "FINAL": -1, "GRADUATED": -2}
         stage = self._GetInfoFromSchedule(mouse_id, "Current Stage")
-
-        index =stage_mapping.get(stage, int(stage))     # map index if need be, else just use the schedule index
+        index = 0 if isinstance(stage, float) and math.isnan(stage) else stage_mapping.get(stage, int(stage))
         logging.info("Creating trainer state")
         ts = TrainerState(stage=stages[index],
                           curriculum=curriculum,
