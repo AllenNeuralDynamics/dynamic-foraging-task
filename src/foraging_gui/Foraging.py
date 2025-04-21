@@ -2761,6 +2761,7 @@ class Window(QMainWindow):
                         "laser_2_calibration_power",
                         "laser_1_calibration_voltage",
                         "laser_2_calibration_voltage",
+                        "hab_time_box"
                     }:
                         continue
                     if child.objectName() == "UncoupledReward":
@@ -6266,16 +6267,35 @@ class Window(QMainWindow):
             logging.info("No active session logger")
 
     def _StartTrialLoop(self, GeneratedTrials, worker1, worker_save):
-        if self.Start.isChecked():
-            logging.info("starting trial loop")
-        else:
+        if not self.Start.isChecked():
             logging.info("ending trial loop")
+            return
+
+        else:
+            logging.info("starting trial loop")
+
+        # pause for specified habituation time
+        start_time = time.time()
+
+        # create habituation timer label and update every minute
+        hab_timer_label = QLabel(f"Time elapsed: {(time.time() - start_time) / 60}")
+        hab_timer_label.setStyleSheet(f"color: {self.default_warning_color};")
+        self.warning_widget.layout().insertWidget(0, hab_timer_label)
+        update_hab_timer = QtCore.QTimer(
+            timeout=lambda: hab_timer_label.setText(f"Time elapsed: {(time.time() - start_time) / 60}"),
+            interval=60000)
+        update_hab_timer.start()
+
+        logging.info(f"Waiting {self.hab_time_box.value()} min before starting session.")
+        while time.time() - start_time < self.hab_time_box.value() * 60:
+            QApplication.processEvents()
+        update_hab_timer.stop()
+        logging.info(f"Starting session.")
 
         # Track elapsed time in case Bonsai Stalls
         last_trial_start = time.time()
         stall_iteration = 1
         stall_duration = 5 * 60
-
         while self.Start.isChecked():
             QApplication.processEvents()
             if (
