@@ -5461,7 +5461,7 @@ class Window(QMainWindow):
 
         self.unsaved_data = False
         self.ManualWaterVolume = [0, 0]
-        self.baseline_min_elapsed = 0
+        self.baseline_min_elapsed = 0   # variable to track baseline time elapsed before session for start/stop
 
         # Clear Plots
         if hasattr(self, "PlotM") and self.clear_figure_after_save:
@@ -6296,6 +6296,7 @@ class Window(QMainWindow):
         elapsed = self.baseline_min_elapsed
         while self.baseline_min_elapsed < self.hab_time_box.value() and self.behavior_baseline_period.is_set():
             QApplication.processEvents()
+            # update baseline time elapsed before session for start/stop logic
             self.baseline_min_elapsed = ((time.time() - start_time) / 60) + elapsed
 
         update_hab_timer.stop()
