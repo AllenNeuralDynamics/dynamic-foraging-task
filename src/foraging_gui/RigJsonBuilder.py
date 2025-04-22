@@ -14,7 +14,6 @@ from deepdiff import DeepDiff
 
 from foraging_gui.Visualization import GetWaterCalibration
 
-
 def build_rig_json(
     existing_rig_json, settings, water_calibration, laser_calibration
 ):

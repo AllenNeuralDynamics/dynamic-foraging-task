@@ -112,6 +112,15 @@ from foraging_gui.MyFunctions import (
     Worker,
 )
 from foraging_gui.RigJsonBuilder import build_rig_json
+from foraging_gui.settings_model import BonsaiSettingsModel, DFTSettingsModel
+from foraging_gui.sound_button import SoundButton
+from foraging_gui.stage import Stage
+from foraging_gui.Visualization import (
+    PlotLickDistribution,
+    PlotTimeDistribution,
+    PlotV,
+)
+from foraging_gui.warning_widget import WarningWidget
 from foraging_gui.schema_widgets.behavior_parameters_widget import (
     BehaviorParametersWidget,
 )
@@ -4608,13 +4617,9 @@ class Window(QMainWindow):
                         )
 
     def _thread_complete(self):
-        """complete of a trial"""
-        if self.NewTrialRewardOrder == 0:
+        '''complete of a trial'''
+        if self.NewTrialRewardOrder==0:
             self.GeneratedTrials._GenerateATrial()
-        self.ANewTrial = 1
-        """complete of a trial"""
-        if self.NewTrialRewardOrder == 0:
-            self.GeneratedTrials._GenerateATrial(self.Channel4)
         self.ANewTrial = 1
 
     def _thread_complete2(self):
@@ -4938,6 +4943,9 @@ class Window(QMainWindow):
             # disable sound button
             self.sound_button.setEnabled(False)
 
+            # disable sound button
+            self.sound_button.setEnabled(False)
+
             # empty post weight after pass through checks in case user cancels run
             self.WeightAfter.setText("")
 
@@ -4950,20 +4958,8 @@ class Window(QMainWindow):
             self._set_metadata_enabled(False)
             self.session_run = True  # session has been started
 
-
             # update slims with latest stage offset value for loaded mouse
             self.update_loaded_mouse_offset()
-
-            # Set IACUC protocol in metadata based on schedule
-            protocol = self._GetInfoFromSchedule(mouse_id, "Protocol")
-            if protocol is not None:
-                self.Metadata_dialog.meta_data["session_metadata"][
-                    "IACUCProtocol"
-                ] = str(int(protocol))
-                self.Metadata_dialog._update_metadata(
-                    update_rig_metadata=False, update_session_metadata=True
-                )
-                logging.info("Setting IACUC Protocol: {}".format(protocol))
 
             # Set Project Name in metadata based on schedule
             self.project_name = self._GetProjectName(mouse_id)
@@ -5762,11 +5758,9 @@ class Window(QMainWindow):
         """toggle the color of the save button to mediumorchid"""
         self.unsaved_data = True
         self.start_flash.start()
-        # self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
 
     def _PostWeightChange(self):
         self.unsaved_data = True
-        # self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
         self.start_flash.start()
         self._UpdateSuggestedWater()
 
@@ -5923,7 +5917,7 @@ class Window(QMainWindow):
                 # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
                 # Random offset reduces strain on downstream servers getting many requests at once
                 schedule = (
-                    self.session_model.date.strftime(
+                    self.behavior_session_model.date.strftime(
                         date_format
                     ).split("_")[0]
                     + "_20-30-00"
@@ -5934,7 +5928,7 @@ class Window(QMainWindow):
             else:
                 # Session started after 5:30
                 # upload time is current time plus 3 hours plus a random offset
-                schedule_time = self.session_model.date + timedelta(
+                schedule_time = self.behavior_session_model.date + timedelta(
                     hours=3, seconds=np.random.randint(30 * 60)
                 )
             capsule_id = "0ae9703f-9012-4d0b-ad8d-b6a00858b80d"

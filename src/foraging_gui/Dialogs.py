@@ -4,6 +4,7 @@ import math
 import os
 import subprocess
 import time
+import webbrowser
 from datetime import datetime
 from typing import Literal
 

@@ -189,32 +189,12 @@ class PlotV(FigureCanvas):
 
         # Colors for different optogenetics conditions
         color_mapping = {
-            "ConditionLaserColorOne": (
-                0,
-                191 / 255,
-                255 / 255,
-                1,
-            ),  # Deep Sky Blue
-            "ConditionLaserColorTwo": (
-                255 / 255,
-                127 / 255,
-                80 / 255,
-                1,
-            ),  # Coral Red
-            "ConditionLaserColorThree": (
-                34 / 255,
-                139 / 255,
-                34 / 255,
-                1,
-            ),  # Forest Green
-            "ConditionLaserColorFour": (
-                218 / 255,
-                165 / 255,
-                32 / 255,
-                1,
-            ),  # Goldenrod
-            "ConditionLaserColorFive": (255 / 255, 0 / 255, 0 / 255, 1),  # Red
-            "ConditionLaserColorSix": (0 / 255, 0 / 255, 255 / 255, 1),  # Blue
+            "Condition1": (0, 191 / 255, 255 / 255, 1),  # Deep Sky Blue
+            "Condition2": (255 / 255, 127 / 255, 80 / 255, 1),  # Coral Red
+            "Condition3": (34 / 255, 139 / 255, 34 / 255, 1),  # Forest Green
+            "Condition4": (218 / 255, 165 / 255, 32 / 255, 1),  # Goldenrod
+            "Condition5": (255 / 255, 0 / 255, 0 / 255, 1),  # Red
+            "Condition6": (0 / 255, 0 / 255, 255 / 255, 1),  # Blue
         }
 
         # Define trial types
@@ -890,7 +870,7 @@ class PlotLickDistribution(FigureCanvas):
         self.ax3.set_title("Left to right licks", fontsize=8)
         self.ax4.set_title("Right to left licks", fontsize=8)
         self.ax5.set_title("All licks", fontsize=8)
-        if GeneratedTrials == None:
+        if GeneratedTrials is None:
             return
         # Custom x-axis values
         custom_x_values = np.linspace(-0.3, 0.3, 100)

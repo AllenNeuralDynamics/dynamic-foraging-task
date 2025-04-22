@@ -51,7 +51,7 @@ from aind_data_schema_models.units import (
     PowerUnit,
     SizeUnit,
     SoundIntensityUnit,
-    TimeUnit,
+    TimeUnit
 )
 
 import foraging_gui

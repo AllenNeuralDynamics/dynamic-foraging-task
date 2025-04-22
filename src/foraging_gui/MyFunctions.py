@@ -2151,6 +2151,8 @@ class GenerateTrials:
 
             self.win.session_end_tasks()
 
+            self.win.session_end_tasks()
+
     def _CheckAutoWater(self):
         """Check if it should be an auto water trial"""
         if self.task_logic.task_parameters.auto_water is not None:
@@ -2391,6 +2393,27 @@ class GenerateTrials:
                     )
                     RampingDown = np.concatenate((Constant, RD), axis=0)
                     self.my_wave = self.my_wave * RampingDown
+        """Add ramping down to the waveform"""
+        if self.CLP_RampingDown > 0:
+            if self.CLP_RampingDown > self.CLP_CurrentDuration:
+                logging.warning(
+                    "Ramping down is longer than the laser duration!",
+                    extra={"tags": [self.win.warning_log_tag]},
+                )
+            else:
+                Constant = np.ones(
+                    int(
+                        (self.CLP_CurrentDuration - self.CLP_RampingDown)
+                        * self.CLP_SampleFrequency
+                    )
+                )
+                RD = np.arange(
+                    1,
+                    0,
+                    -1 / (np.shape(self.my_wave)[0] - np.shape(Constant)[0]),
+                )
+                RampingDown = np.concatenate((Constant, RD), axis=0)
+                self.my_wave = self.my_wave * RampingDown
 
     def _add_offset(self):
         """Add offset to the waveform"""
@@ -2403,6 +2426,11 @@ class GenerateTrials:
                 self.opto_model.sample_frequency
                 * self.selected_condition.start.offset
             )
+            Offset = np.zeros(OffsetPoints)
+            self.my_wave = np.concatenate((Offset, self.my_wave), axis=0)
+        """Add offset to the waveform"""
+        if self.CLP_OffsetStart > 0:
+            OffsetPoints = int(self.CLP_SampleFrequency * self.CLP_OffsetStart)
             Offset = np.zeros(OffsetPoints)
             self.my_wave = np.concatenate((Offset, self.my_wave), axis=0)
 
