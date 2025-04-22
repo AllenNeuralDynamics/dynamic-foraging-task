@@ -30,18 +30,21 @@ class IOWorker(QObject):
                     cmd.execute()
                     if not cmd.blocking:
                         while not cmd.done() and not self.halt_requested:
-                            while not self.qfast.empty() and not self.halt_requested:
+                            while (
+                                not self.qfast.empty()
+                                and not self.halt_requested
+                            ):
                                 fc = self.qfast.get()
                                 fc.execute()
                             time.sleep(TIME_SLEEP)
                 except:
-                    cmd._done=True
+                    cmd._done = True
             while not self.qfast.empty() and not self.halt_requested:
                 try:
                     fc = self.qfast.get()
                     fc.execute()
                 except:
-                    fc._done=True
+                    fc._done = True
             if self.halt_requested:
                 self.device.halt()
                 self.clear_queues()
@@ -63,6 +66,7 @@ class IOWorker(QObject):
 
     def halt(self):
         self.halt_requested = True
+
 
 class Stage(QObject):
     connected = True
@@ -87,7 +91,7 @@ class Stage(QObject):
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
 
-        self.z_safe = 0.
+        self.z_safe = 0.0
 
     def __del__(self):
         self.clean()
@@ -108,12 +112,12 @@ class Stage(QObject):
         self.worker.queue_command(cmd)
         while not cmd.done():
             time.sleep(TIME_SLEEP)
-        result = cmd.result()       
-        
-        # check if command was a failure 
+        result = cmd.result()
+
+        # check if command was a failure
         if result is None:
-            self.connected=False
-    
+            self.connected = False
+
         return result
 
     def get_speed(self):
@@ -121,47 +125,46 @@ class Stage(QObject):
         self.worker.queue_command(cmd)
         while not cmd.done():
             time.sleep(TIME_SLEEP)
-        return cmd.result() # vx, vy, vz
+        return cmd.result()  # vx, vy, vz
 
     def set_speed(self, speed):
         cmd = io.SetSpeedCommand(self.device, speed)
         self.worker.queue_command(cmd)
 
     def move_absolute_3d(self, x, y, z, safe=False):
-        z_newscale = 15000 - z # invert z for newscale
+        z_newscale = 15000 - z  # invert z for newscale
         xi, yi, zi = self.get_position()
         if safe and ((z > self.z_safe) or (zi > self.z_safe)):
             z_safe_newscale = 15000 - self.z_safe
-            cmd = io.MoveAbsolute1dCommand(self.device, 'z', z_safe_newscale)
+            cmd = io.MoveAbsolute1dCommand(self.device, "z", z_safe_newscale)
             self.worker.queue_command(cmd)
-            cmd = io.MoveAbsolute1dCommand(self.device, 'x', x)
+            cmd = io.MoveAbsolute1dCommand(self.device, "x", x)
             self.worker.queue_command(cmd)
-            cmd = io.MoveAbsolute1dCommand(self.device, 'y', y)
+            cmd = io.MoveAbsolute1dCommand(self.device, "y", y)
             self.worker.queue_command(cmd)
-            cmd = io.MoveAbsolute1dCommand(self.device, 'z', z_newscale)
+            cmd = io.MoveAbsolute1dCommand(self.device, "z", z_newscale)
             self.worker.queue_command(cmd)
         else:
-            pos = (x,y,z_newscale)
+            pos = (x, y, z_newscale)
             cmd = io.MoveAbsolute3dCommand(self.device, pos)
             self.worker.queue_command(cmd)
 
     def move_absolute_1d(self, axis, position):
-        if axis == 'z':
-            position = 15000 - position # invert z for newscale
+        if axis == "z":
+            position = 15000 - position  # invert z for newscale
         cmd = io.MoveAbsolute1dCommand(self.device, axis, position)
         self.worker.queue_command(cmd)
 
     def move_relative_3d(self, dx, dy, dz):
         dz = (-1) * dz  # invert z for newscale
-        cmd = io.MoveRelative3dCommand(self.device, (dx,dy,dz))
+        cmd = io.MoveRelative3dCommand(self.device, (dx, dy, dz))
         self.worker.queue_command(cmd)
 
     def move_relative_1d(self, axis, distance):
-        if axis == 'z':
+        if axis == "z":
             distance = (-1) * distance  # invert z for newscale
         cmd = io.MoveRelative1dCommand(self.device, axis, distance)
         self.worker.queue_command(cmd)
 
     def halt(self):
         self.worker.halt()
-
