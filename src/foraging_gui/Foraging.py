@@ -104,9 +104,7 @@ class Window(QMainWindow):
         logging.info("Creating Window")
 
         # create warning widget
-        self.warning_log_tag = (
-            "warning_widget"  # TODO: How to set this or does it matter?
-        )
+        self.warning_log_tag = "warning_widget"  # TODO: How to set this or does it matter?
 
         super().__init__(parent)
 
@@ -122,25 +120,15 @@ class Window(QMainWindow):
         self.start_bonsai_ide = start_bonsai_ide
 
         # Load Settings that are specific to this computer
-        self.SettingFolder = os.path.join(
-            os.path.expanduser("~"), "Documents", "ForagingSettings"
-        )
-        self.SettingFile = os.path.join(
-            self.SettingFolder, "ForagingSettings.json"
-        )
-        self.SettingsBoxFile = os.path.join(
-            self.SettingFolder, "Settings_box" + str(self.box_number) + ".csv"
-        )
+        self.SettingFolder = os.path.join(os.path.expanduser("~"), "Documents", "ForagingSettings")
+        self.SettingFile = os.path.join(self.SettingFolder, "ForagingSettings.json")
+        self.SettingsBoxFile = os.path.join(self.SettingFolder, "Settings_box" + str(self.box_number) + ".csv")
         self._GetSettings()
         self._LoadSchedule()
 
         # Load Settings that are specific to this box
-        self.LaserCalibrationFiles = os.path.join(
-            self.SettingFolder, "LaserCalibration_{}.json".format(box_number)
-        )
-        self.WaterCalibrationFiles = os.path.join(
-            self.SettingFolder, "WaterCalibration_{}.json".format(box_number)
-        )
+        self.LaserCalibrationFiles = os.path.join(self.SettingFolder, "LaserCalibration_{}.json".format(box_number))
+        self.WaterCalibrationFiles = os.path.join(self.SettingFolder, "WaterCalibration_{}.json".format(box_number))
         self.WaterCalibrationParFiles = os.path.join(
             self.SettingFolder,
             "WaterCalibrationPar_{}.json".format(box_number),
@@ -166,12 +154,8 @@ class Window(QMainWindow):
             subject=self.ID.text(),
             experiment_version=foraging_gui.__version__,
             notes=self.ShowNotes.toPlainText(),
-            commit_hash=subprocess.check_output(["git", "rev-parse", "HEAD"])
-            .decode("ascii")
-            .strip(),
-            allow_dirty_repo=subprocess.check_output(
-                ["git", "diff-index", "--name-only", "HEAD"]
-            )
+            commit_hash=subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip(),
+            allow_dirty_repo=subprocess.check_output(["git", "diff-index", "--name-only", "HEAD"])
             .decode("ascii")
             .strip()
             != "",
@@ -200,9 +184,7 @@ class Window(QMainWindow):
         self.previous_backup_completed = 1  # permission to save backup data; 0, the previous saving has not finished, and it will not trigger the next saving; 1, it is allowed to save backup data
         self.unsaved_data = False  # Setting unsaved data to False
         self.to_check_drop_frames = 1  # 1, to check drop frames during saving data; 0, not to check drop frames
-        self.session_run = (
-            False  # flag to indicate if session has been run or not
-        )
+        self.session_run = False  # flag to indicate if session has been run or not
 
         # Stage Widget
         self.stage_widget = None
@@ -220,9 +202,7 @@ class Window(QMainWindow):
                 "            - Short description of the last thing done on the GUI before the error. (ex. overnight bleaching, closed gui, opened gui - error)<br>"
                 "Thank you, with your efforts hopefully we can vanquish this error and never see it again...<br>"
             )
-            show_msg_box(
-                "Stage Widget Error", "Stage Widget Error Diagnostic Help", msg
-            )
+            show_msg_box("Stage Widget Error", "Stage Widget Error Diagnostic Help", msg)
             raise e
 
         # Connect to Bonsai
@@ -245,21 +225,13 @@ class Window(QMainWindow):
 
         # create bias indicator
         self.bias_n_size = 200
-        self.bias_indicator = BiasIndicator(
-            x_range=self.bias_n_size, data_lock=self.data_lock
-        )
-        self.bias_indicator.biasValue.connect(
-            self.bias_calculated
-        )  # update dashboard value
-        self.bias_indicator.setSizePolicy(
-            QSizePolicy.Maximum, QSizePolicy.Maximum
-        )
+        self.bias_indicator = BiasIndicator(x_range=self.bias_n_size, data_lock=self.data_lock)
+        self.bias_indicator.biasValue.connect(self.bias_calculated)  # update dashboard value
+        self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         self.bias_thread = threading.Thread()  # dummy thread
 
         # create sound button
-        self.sound_button = SoundButton(
-            attenuation=int(self.SettingsBox["AttenuationLeft"])
-        )
+        self.sound_button = SoundButton(attenuation=int(self.SettingsBox["AttenuationLeft"]))
         self.toolBar_3.addWidget(self.sound_button)
 
         # Set up more parameters
@@ -276,16 +248,12 @@ class Window(QMainWindow):
         self.TimeDistribution_ToInitializeVisual = 1
         self.finish_Timer = 1  # for photometry baseline recordings
         self.PhotometryRun = 0  # 1. Photometry has been run; 0. Photometry has not been carried out.
-        self.ignore_timer = (
-            False  # Used for canceling the photometry baseline timer
-        )
+        self.ignore_timer = False  # Used for canceling the photometry baseline timer
         self.give_left_volume_reserved = 0  # the reserved volume of the left valve (usually given after go cue)
         self.give_right_volume_reserved = 0  # the reserved volume of the right valve (usually given after go cue)
         self.give_left_time_reserved = 0  # the reserved open time of the left valve (usually given after go cue)
         self.give_right_time_reserved = 0  # the reserved open time of the right valve (usually given after go cue)
-        self.load_tag = (
-            0  # 1, a session has been loaded; 0, no session has been loaded
-        )
+        self.load_tag = 0  # 1, a session has been loaded; 0, no session has been loaded
         # the volume of manual water given by the left valve each time
         self.Other_manual_water_left_volume = []
         # the valve open time of manual water given by the left valve each time
@@ -323,9 +291,7 @@ class Window(QMainWindow):
         self._WaterVolumnManage2()
         self._LickSta()
         self._warmup()
-        self.CreateNewFolder = (
-            1  # to create new folder structure (a new session)
-        )
+        self.CreateNewFolder = 1  # to create new folder structure (a new session)
         self.ManualWaterVolume = [0, 0]
         self._StopPhotometry()  # Make sure photoexcitation is stopped
         # Initialize open ephys saving dictionary
@@ -357,35 +323,22 @@ class Window(QMainWindow):
     def _show_disk_space(self):
         """Show the disk space of the current computer"""
         total, used, free = shutil.disk_usage(self.default_saveFolder)
-        self.diskspace.setText(
-            f"Used space: {used / 1024**3:.2f}GB    Free space: {free / 1024**3:.2f}GB"
-        )
+        self.diskspace.setText(f"Used space: {used / 1024**3:.2f}GB    Free space: {free / 1024**3:.2f}GB")
         self.DiskSpaceProgreeBar.setValue(int(used / total * 100))
         if free / 1024**3 < 100 or used / total > 0.9:
             self.DiskSpaceProgreeBar.setStyleSheet(
                 f"QProgressBar::chunk {{background-color: {self.default_warning_color};}}"
             )
-            logging.warning(
-                f"Low disk space  Used space: {used / 1024**3:.2f}GB    Free space: {free / 1024**3:.2f}GB"
-            )
+            logging.warning(f"Low disk space  Used space: {used / 1024**3:.2f}GB    Free space: {free / 1024**3:.2f}GB")
         else:
-            self.DiskSpaceProgreeBar.setStyleSheet(
-                "QProgressBar::chunk {background-color: green;}"
-            )
+            self.DiskSpaceProgreeBar.setStyleSheet("QProgressBar::chunk {background-color: green;}")
 
     def _load_stage(self) -> None:
         """
         Check whether newscale stage is defined in the config. If not, initialize and inject stage widget.
         """
-        if (
-            self.Settings["newscale_serial_num_box{}".format(self.box_number)]
-            == ""
-        ):
-            widget_to_replace = (
-                "motor_stage_widget"
-                if self.default_ui == "ForagingGUI_Ephys.ui"
-                else "widget_2"
-            )
+        if self.Settings["newscale_serial_num_box{}".format(self.box_number)] == "":
+            widget_to_replace = "motor_stage_widget" if self.default_ui == "ForagingGUI_Ephys.ui" else "widget_2"
             self._insert_stage_widget(widget_to_replace)
         else:
             self._GetPositions()
@@ -441,9 +394,7 @@ class Window(QMainWindow):
         # create QTimer to deliver constant tone
         self.beep_loop = QtCore.QTimer(timeout=self.play_beep, interval=10)
         self.sound_button.toggled.connect(
-            lambda checked: (
-                self.beep_loop.start() if checked else self.beep_loop.stop()
-            )
+            lambda checked: (self.beep_loop.start() if checked else self.beep_loop.stop())
         )
         self.sound_button.attenuationChanged.connect(self.change_attenuation)
 
@@ -478,32 +429,20 @@ class Window(QMainWindow):
         self.StartExcitation.clicked.connect(self._StartExcitation)
         self.StartBleaching.clicked.connect(self._StartBleaching)
         self.NextBlock.clicked.connect(self._NextBlock)
-        self.OptogeneticsB.activated.connect(
-            self._OptogeneticsB
-        )  # turn on/off optogenetics
+        self.OptogeneticsB.activated.connect(self._OptogeneticsB)  # turn on/off optogenetics
         self.OptogeneticsB.currentIndexChanged.connect(
-            lambda: self._QComboBoxUpdate(
-                "Optogenetics", self.OptogeneticsB.currentText()
-            )
+            lambda: self._QComboBoxUpdate("Optogenetics", self.OptogeneticsB.currentText())
         )
         self.PhotometryB.currentIndexChanged.connect(
-            lambda: self._QComboBoxUpdate(
-                "Photometry", self.PhotometryB.currentText()
-            )
+            lambda: self._QComboBoxUpdate("Photometry", self.PhotometryB.currentText())
         )
-        self.FIPMode.currentIndexChanged.connect(
-            lambda: self._QComboBoxUpdate(
-                "FIPMode", self.FIPMode.currentText()
-            )
-        )
+        self.FIPMode.currentIndexChanged.connect(lambda: self._QComboBoxUpdate("FIPMode", self.FIPMode.currentText()))
         self.AdvancedBlockAuto.currentIndexChanged.connect(self._keyPressEvent)
         self.AutoWaterType.currentIndexChanged.connect(self._keyPressEvent)
         self.UncoupledReward.textChanged.connect(self._ShowRewardPairs)
         self.UncoupledReward.returnPressed.connect(self._ShowRewardPairs)
         # Connect to ID change in the mainwindow
-        self.ID.returnPressed.connect(
-            lambda: self.AutoTrain_dialog.update_auto_train_lock(engaged=False)
-        )
+        self.ID.returnPressed.connect(lambda: self.AutoTrain_dialog.update_auto_train_lock(engaged=False))
         self.ID.returnPressed.connect(
             lambda: self.AutoTrain_dialog.update_auto_train_fields(
                 subject_id=self.behavior_session_model.subject,
@@ -511,35 +450,21 @@ class Window(QMainWindow):
             )
         )
         self.AutoTrain.clicked.connect(self._auto_train_clicked)
-        self.pushButton_streamlit.clicked.connect(
-            self._open_mouse_on_streamlit
-        )
+        self.pushButton_streamlit.clicked.connect(self._open_mouse_on_streamlit)
         self.Task.currentIndexChanged.connect(self._ShowRewardPairs)
         self.Task.currentIndexChanged.connect(self._Task)
-        self.AdvancedBlockAuto.currentIndexChanged.connect(
-            self._AdvancedBlockAuto
-        )
+        self.AdvancedBlockAuto.currentIndexChanged.connect(self._AdvancedBlockAuto)
         self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
         self.WeightAfter.textChanged.connect(self._PostWeightChange)
         self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
         self.Randomness.currentIndexChanged.connect(self._Randomness)
-        self.actionTemporary_Logging.triggered.connect(
-            self._startTemporaryLogging
-        )
+        self.actionTemporary_Logging.triggered.connect(self._startTemporaryLogging)
         self.actionFormal_logging.triggered.connect(self._startFormalLogging)
-        self.actionOpen_logging_folder.triggered.connect(
-            self._OpenLoggingFolder
-        )
-        self.actionOpen_behavior_folder.triggered.connect(
-            self._OpenBehaviorFolder
-        )
+        self.actionOpen_logging_folder.triggered.connect(self._OpenLoggingFolder)
+        self.actionOpen_behavior_folder.triggered.connect(self._OpenBehaviorFolder)
         self.actionOpenSettingFolder.triggered.connect(self._OpenSettingFolder)
-        self.actionOpen_rig_metadata_folder.triggered.connect(
-            self._OpenRigMetadataFolder
-        )
-        self.actionOpen_metadata_dialog_folder.triggered.connect(
-            self._OpenMetadataDialogFolder
-        )
+        self.actionOpen_rig_metadata_folder.triggered.connect(self._OpenRigMetadataFolder)
+        self.actionOpen_metadata_dialog_folder.triggered.connect(self._OpenMetadataDialogFolder)
         self.actionOpen_video_folder.triggered.connect(self._OpenVideoFolder)
         self.LeftValue.textChanged.connect(self._WaterVolumnManage1)
         self.RightValue.textChanged.connect(self._WaterVolumnManage1)
@@ -559,35 +484,15 @@ class Window(QMainWindow):
         self.SessionlistSpin.textChanged.connect(self._session_list_spin)
         self.StartEphysRecording.clicked.connect(self._StartEphysRecording)
         self.SetReference.clicked.connect(self._set_reference)
-        self.Opto_dialog.laser_1_calibration_voltage.textChanged.connect(
-            self._toggle_save_color
-        )
-        self.Opto_dialog.laser_2_calibration_voltage.textChanged.connect(
-            self._toggle_save_color
-        )
-        self.Opto_dialog.laser_1_calibration_power.textChanged.connect(
-            self._toggle_save_color
-        )
-        self.Opto_dialog.laser_2_calibration_power.textChanged.connect(
-            self._toggle_save_color
-        )
+        self.Opto_dialog.laser_1_calibration_voltage.textChanged.connect(self._toggle_save_color)
+        self.Opto_dialog.laser_2_calibration_voltage.textChanged.connect(self._toggle_save_color)
+        self.Opto_dialog.laser_1_calibration_power.textChanged.connect(self._toggle_save_color)
+        self.Opto_dialog.laser_2_calibration_power.textChanged.connect(self._toggle_save_color)
 
         # update parameters in behavior session model if widgets change
-        self.Task.currentTextChanged.connect(
-            lambda task: setattr(
-                self.behavior_session_model, "experiment", task
-            )
-        )
-        self.Experimenter.textChanged.connect(
-            lambda text: setattr(
-                self.behavior_session_model, "experimenter", [text]
-            )
-        )
-        self.ID.textChanged.connect(
-            lambda subject: setattr(
-                self.behavior_session_model, "subject", subject
-            )
-        )
+        self.Task.currentTextChanged.connect(lambda task: setattr(self.behavior_session_model, "experiment", task))
+        self.Experimenter.textChanged.connect(lambda text: setattr(self.behavior_session_model, "experimenter", [text]))
+        self.ID.textChanged.connect(lambda subject: setattr(self.behavior_session_model, "subject", subject))
         self.ShowNotes.textChanged.connect(
             lambda: setattr(
                 self.behavior_session_model,
@@ -601,16 +506,12 @@ class Window(QMainWindow):
             reward_volume_widget = getattr(self, f"{side}Value_volume")
             manual_volume_widget = getattr(self, f"GiveWater{side[0]}_volume")
             manual_volume_widget.setValue(reward_volume_widget.value())
-            reward_volume_widget.valueChanged.connect(
-                manual_volume_widget.setValue
-            )
+            reward_volume_widget.valueChanged.connect(manual_volume_widget.setValue)
 
             reward_time_widget = getattr(self, f"{side}Value")
             manual_time_widget = getattr(self, f"GiveWater{side[0]}")
             manual_time_widget.setValue(reward_time_widget.value())
-            reward_time_widget.valueChanged.connect(
-                manual_time_widget.setValue
-            )
+            reward_time_widget.valueChanged.connect(manual_time_widget.setValue)
 
         # check the change of all of the QLineEdit, QDoubleSpinBox and QSpinBox
         for container in [
@@ -661,9 +562,7 @@ class Window(QMainWindow):
             self._toggle_color(self.StartEphysRecording)
             return
 
-        if (
-            self.Start.isChecked() or self.ANewTrial == 0
-        ) and self.StartEphysRecording.isChecked():
+        if (self.Start.isChecked() or self.ANewTrial == 0) and self.StartEphysRecording.isChecked():
             reply = QMessageBox.question(
                 self,
                 "",
@@ -736,23 +635,13 @@ class Window(QMainWindow):
                         return
 
                 self.openephys_stop_recording_time = str(datetime.now())
-                response = (
-                    EphysControl.get_open_ephys_recording_configuration()
-                )
-                response["openephys_start_recording_time"] = (
-                    self.openephys_start_recording_time
-                )
-                response["openephys_stop_recording_time"] = (
-                    self.openephys_stop_recording_time
-                )
-                response["recording_type"] = (
-                    self.OpenEphysRecordingType.currentText()
-                )
+                response = EphysControl.get_open_ephys_recording_configuration()
+                response["openephys_start_recording_time"] = self.openephys_start_recording_time
+                response["openephys_stop_recording_time"] = self.openephys_stop_recording_time
+                response["recording_type"] = self.OpenEphysRecordingType.currentText()
                 self.open_ephys.append(response)
                 self.unsaved_data = True
-                self.Save.setStyleSheet(
-                    "color: white;background-color : mediumorchid;"
-                )
+                self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
                 EphysControl.stop_open_ephys_recording()
                 QMessageBox.warning(
                     self,
@@ -812,9 +701,7 @@ class Window(QMainWindow):
             warning_labels = [warning_labels]
         for warning_label in warning_labels:
             warning_label.setText(warning_text)
-            warning_label.setStyleSheet(
-                f"color: {self.default_warning_color};"
-            )
+            warning_label.setStyleSheet(f"color: {self.default_warning_color};")
 
     def _session_list(self):
         """show all sessions of the current animal and load the selected session by drop down list"""
@@ -823,9 +710,7 @@ class Window(QMainWindow):
         # open the selected session
         if self.Sessionlist.currentText() != "":
             selected_index = self.Sessionlist.currentIndex()
-            fname = self.session_full_path_list[
-                self.Sessionlist.currentIndex()
-            ]
+            fname = self.session_full_path_list[self.Sessionlist.currentIndex()]
             self._Open(input_file=fname)
             # set the selected index back to the current session
             self._connect_Sessionlist(connect=False)
@@ -843,12 +728,8 @@ class Window(QMainWindow):
                 self.SessionlistSpin.setValue(int(self.Sessionlist.count()))
             if int(self.SessionlistSpin.text()) < 1:
                 self.SessionlistSpin.setValue(1)
-            fname = self.session_full_path_list[
-                int(self.SessionlistSpin.text()) - 1
-            ]
-            self.Sessionlist.setCurrentIndex(
-                int(self.SessionlistSpin.text()) - 1
-            )
+            fname = self.session_full_path_list[int(self.SessionlistSpin.text()) - 1]
+            self.Sessionlist.setCurrentIndex(int(self.SessionlistSpin.text()) - 1)
             self._connect_Sessionlist(connect=True)
             self._Open(input_file=fname)
 
@@ -865,43 +746,29 @@ class Window(QMainWindow):
         """list all sessions of the current animal"""
         if not hasattr(self, "fname"):
             return 0
-        animal_folder = os.path.dirname(
-            os.path.dirname(os.path.dirname(self.fname))
-        )
+        animal_folder = os.path.dirname(os.path.dirname(os.path.dirname(self.fname)))
         session_full_path_list = []
         session_path_list = []
         for session_folder in os.listdir(animal_folder):
-            training_folder_old = os.path.join(
-                animal_folder, session_folder, "TrainingFolder"
-            )
-            training_folder_new = os.path.join(
-                animal_folder, session_folder, "behavior"
-            )
+            training_folder_old = os.path.join(animal_folder, session_folder, "TrainingFolder")
+            training_folder_new = os.path.join(animal_folder, session_folder, "behavior")
             if os.path.exists(training_folder_old):
                 for file_name in os.listdir(training_folder_old):
                     if file_name.endswith(".json"):
-                        session_full_path_list.append(
-                            os.path.join(training_folder_old, file_name)
-                        )
+                        session_full_path_list.append(os.path.join(training_folder_old, file_name))
                         session_path_list.append(session_folder)
             elif os.path.exists(training_folder_new):
                 for file_name in os.listdir(training_folder_new):
                     if file_name.endswith(".json"):
-                        session_full_path_list.append(
-                            os.path.join(training_folder_new, file_name)
-                        )
+                        session_full_path_list.append(os.path.join(training_folder_new, file_name))
                         session_path_list.append(session_folder)
 
-        sorted_indices = sorted(
-            enumerate(session_path_list), key=lambda x: x[1], reverse=True
-        )
+        sorted_indices = sorted(enumerate(session_path_list), key=lambda x: x[1], reverse=True)
         sorted_dates = [date for index, date in sorted_indices]
         # Extract just the indices
         indices = [index for index, date in sorted_indices]
         # Apply sorted index
-        self.session_full_path_list = [
-            session_full_path_list[index] for index in indices
-        ]
+        self.session_full_path_list = [session_full_path_list[index] for index in indices]
         self.session_path_list = sorted_dates
 
         self._connect_Sessionlist(connect=False)
@@ -915,9 +782,7 @@ class Window(QMainWindow):
             return_tag = 0
             if save_tag == 0:
                 if "drop_frames_warning_text" in self.Obj:
-                    self.drop_frames_warning_text = self.Obj[
-                        "drop_frames_warning_text"
-                    ]
+                    self.drop_frames_warning_text = self.Obj["drop_frames_warning_text"]
                     self.drop_frames_tag = self.Obj["drop_frames_tag"]
                     self.trigger_length = self.Obj["trigger_length"]
                     self.frame_num = self.Obj["frame_num"]
@@ -953,17 +818,13 @@ class Window(QMainWindow):
                         "VideoFolder",
                     )  # old folder structure
                     if not os.path.exists(HarpFolder):
-                        HarpFolder = os.path.join(
-                            os.path.dirname(self.fname), "raw.harp"
-                        )  # new folder structure
+                        HarpFolder = os.path.join(os.path.dirname(self.fname), "raw.harp")  # new folder structure
                         video_folder = os.path.join(
                             os.path.dirname(os.path.dirname(self.fname)),
                             "behavior-videos",
                         )  # new folder structure
 
-                camera_trigger_file = os.path.join(
-                    HarpFolder, "BehaviorEvents", "Event_94.bin"
-                )
+                camera_trigger_file = os.path.join(HarpFolder, "BehaviorEvents", "Event_94.bin")
                 if os.path.exists(camera_trigger_file):
                     # sleep some time to wait for the finish of saving video
                     time.sleep(5)
@@ -974,50 +835,34 @@ class Window(QMainWindow):
                     self.trigger_length = 0
                     self.to_check_drop_frames = 0
                     return
-                elif ("HighSpeedCamera" in self.SettingsBox) and (
-                    self.SettingsBox["HighSpeedCamera"] == 1
-                ):
+                elif ("HighSpeedCamera" in self.SettingsBox) and (self.SettingsBox["HighSpeedCamera"] == 1):
                     self.trigger_length = 0
-                    logging.error(
-                        "Saved video data, but no camera trigger file found"
-                    )
+                    logging.error("Saved video data, but no camera trigger file found")
                     logging.info(
                         "No camera trigger file found!",
                         extra={"tags": [self.warning_log_tag]},
                     )
                     return
                 else:
-                    logging.info(
-                        "Saved video data, but not using high speed camera - skipping drop frame check"
-                    )
+                    logging.info("Saved video data, but not using high speed camera - skipping drop frame check")
                     self.trigger_length = 0
                     self.to_check_drop_frames = 0
                     return
-                csv_files = [
-                    file
-                    for file in os.listdir(video_folder)
-                    if file.endswith(".csv")
-                ]
-                avi_files = [
-                    file
-                    for file in os.listdir(video_folder)
-                    if file.endswith(".avi")
-                ]
+                csv_files = [file for file in os.listdir(video_folder) if file.endswith(".csv")]
+                avi_files = [file for file in os.listdir(video_folder) if file.endswith(".avi")]
 
                 for avi_file in avi_files:
                     csv_file = avi_file.replace(".avi", ".csv")
                     camera_name = avi_file.replace(".avi", "")
                     if csv_file not in csv_files:
-                        self.drop_frames_warning_text += (
-                            f"No csv file found for {avi_file}"
-                        )
+                        self.drop_frames_warning_text += f"No csv file found for {avi_file}"
                     else:
-                        current_frames = pd.read_csv(
-                            os.path.join(video_folder, csv_file), header=None
-                        )
+                        current_frames = pd.read_csv(os.path.join(video_folder, csv_file), header=None)
                         num_frames = len(current_frames)
                         if num_frames != self.trigger_length:
-                            this_text = f"Error: {avi_file} has {num_frames} frames, but {self.trigger_length} triggers. "
+                            this_text = (
+                                f"Error: {avi_file} has {num_frames} frames, but {self.trigger_length} triggers. "
+                            )
                             self.drop_frames_warning_text += this_text
                             logging.error(
                                 this_text,
@@ -1025,7 +870,9 @@ class Window(QMainWindow):
                             )
                             self.drop_frames_tag = 1
                         else:
-                            this_text = f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers. "
+                            this_text = (
+                                f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers. "
+                            )
                             self.drop_frames_warning_text += this_text
                             logging.info(
                                 this_text,
@@ -1068,16 +915,12 @@ class Window(QMainWindow):
 
             self.AutoReward.setChecked(True)
             self._AutoReward()
-            self.AutoWaterType.setCurrentIndex(
-                self.AutoWaterType.findText("Natural")
-            )
+            self.AutoWaterType.setCurrentIndex(self.AutoWaterType.findText("Natural"))
             self.Multiplier.setText("0.8")
             self.Unrewarded.setText("0")
             self.Ignored.setText("0")
             # turn advanced block auto off
-            self.AdvancedBlockAuto.setCurrentIndex(
-                self.AdvancedBlockAuto.findText("off")
-            )
+            self.AdvancedBlockAuto.setCurrentIndex(self.AdvancedBlockAuto.findText("off"))
             self._ShowRewardPairs()
         elif self.warmup.currentText() == "off":
             # set parameters back to the previous parameters before warm up
@@ -1102,9 +945,7 @@ class Window(QMainWindow):
                 and attr_name != "WarmupBackup_"
                 and attr_name != "WarmupBackup_warmup"
             ):
-                parameters[attr_name.replace("WarmupBackup_", "")] = getattr(
-                    self, attr_name
-                )
+                parameters[attr_name.replace("WarmupBackup_", "")] = getattr(self, attr_name)
         widget_dict = {
             w.objectName(): w
             for w in self.TrainingParameters.findChildren(
@@ -1144,22 +985,15 @@ class Window(QMainWindow):
         """get the current position of the stage"""
         self._CheckStageConnection()
 
-        if (
-            hasattr(self, "current_stage") and self.current_stage.connected
-        ):  # newscale stage
+        if hasattr(self, "current_stage") and self.current_stage.connected:  # newscale stage
             logging.info("Grabbing current stage position")
             current_stage = self.current_stage
             current_position = current_stage.get_position()
             self._UpdatePosition(current_position, (0, 0, 0))
-            return {
-                axis: float(pos)
-                for axis, pos in zip(["x", "y", "z"], current_position)
-            }
+            return {axis: float(pos) for axis, pos in zip(["x", "y", "z"], current_position)}
         elif self.stage_widget is not None:  # aind stage
             # Get absolute position of motors in AIND stage
-            positions = (
-                self.stage_widget.stage_model.get_current_positions_mm()
-            )
+            positions = self.stage_widget.stage_model.get_current_positions_mm()
             return {
                 "x": positions[0],
                 "y1": positions[1],
@@ -1184,9 +1018,7 @@ class Window(QMainWindow):
         """Move stage"""
         self._CheckStageConnection()
         try:
-            if (not hasattr(self, "current_stage")) or (
-                not self.current_stage.connected
-            ):
+            if (not hasattr(self, "current_stage")) or (not self.current_stage.connected):
                 logging.info("Move Stage pressed, but no current stage")
                 return
             logging.info("Moving stage")
@@ -1269,9 +1101,7 @@ class Window(QMainWindow):
         try:
             self.instances = NewScaleSerialY.get_instances()
         except Exception as e:
-            logging.error(
-                "Could not find instances of NewScale Stage: {}".format(str(e))
-            )
+            logging.error("Could not find instances of NewScale Stage: {}".format(str(e)))
             self._no_stage()
             return
 
@@ -1287,15 +1117,11 @@ class Window(QMainWindow):
         logging.info("found {} newscale stages".format(len(self.instances)))
 
         # Get the serial num from settings
-        if not hasattr(
-            self, "newscale_serial_num_box{}".format(self.box_number)
-        ):
+        if not hasattr(self, "newscale_serial_num_box{}".format(self.box_number)):
             logging.error("Cannot determine newscale serial num")
             self._no_stage()
             return
-        self.newscale_serial_num = eval(
-            "self.newscale_serial_num_box" + str(self.box_number)
-        )
+        self.newscale_serial_num = eval("self.newscale_serial_num_box" + str(self.box_number))
         if self.newscale_serial_num == "":
             logging.warning("No newscale serial number in settings file")
             self._no_stage()
@@ -1303,9 +1129,7 @@ class Window(QMainWindow):
 
         # See if the serial num from settings is in the instances we found
         stage_index = 0
-        stage_names = np.array(
-            [str(instance.sn) for instance in self.instances]
-        )
+        stage_names = np.array([str(instance.sn) for instance in self.instances])
         index = np.where(stage_names == str(self.newscale_serial_num))[0]
         if len(index) == 0:
             self._no_stage()
@@ -1328,9 +1152,7 @@ class Window(QMainWindow):
             self.Warning_Newscale.setText("Lost newscale stage connection")
         else:
             self.Warning_Newscale.setText("Newscale stage not connected")
-        self.Warning_Newscale.setStyleSheet(
-            f"color: {self.default_warning_color};"
-        )
+        self.Warning_Newscale.setStyleSheet(f"color: {self.default_warning_color};")
 
     def _connect_stage(self, instance):
         """connect to a stage"""
@@ -1343,11 +1165,7 @@ class Window(QMainWindow):
             logging.error(traceback.format_exc())
             self._no_stage()
         else:
-            logging.info(
-                "Successfully connected to newscale stage: {}".format(
-                    instance.sn
-                )
-            )
+            logging.info("Successfully connected to newscale stage: {}".format(instance.sn))
 
     def _ConnectBonsai(self):
         """
@@ -1362,9 +1180,7 @@ class Window(QMainWindow):
                 self._ConnectOSC()
                 self.InitializeBonsaiSuccessfully = 1
                 logging.info("Connected to Bonsai")
-                subprocess.Popen(
-                    "title Box{}".format(self.box_letter), shell=True
-                )
+                subprocess.Popen("title Box{}".format(self.box_letter), shell=True)
             except Exception:
                 logging.error(traceback.format_exc())
                 logging.warning(
@@ -1388,9 +1204,7 @@ class Window(QMainWindow):
             self.client3.close()
             self.client4.close()
         except Exception as e:
-            logging.info(
-                "could not close bonsai connection: {}".format(str(e))
-            )
+            logging.info("could not close bonsai connection: {}".format(str(e)))
         else:
             logging.info("bonsai connection closed")
 
@@ -1403,9 +1217,7 @@ class Window(QMainWindow):
             trial generation loops indefinitiely. See issue #166. I cannot understand
             the root cause, so I am warning users to start a new session.
         """
-        if self.InitializeBonsaiSuccessfully == 1 and hasattr(
-            self, "GeneratedTrials"
-        ):
+        if self.InitializeBonsaiSuccessfully == 1 and hasattr(self, "GeneratedTrials"):
             msg = "Reconnected to Bonsai. Start a new session before running more trials"
             QMessageBox.information(
                 self,
@@ -1414,7 +1226,7 @@ class Window(QMainWindow):
                 QMessageBox.Ok,
             )
 
-    def _restartlogging(self, log_folder=None,start_from_camera=False):
+    def _restartlogging(self, log_folder=None, start_from_camera=False):
         """Restarting logging"""
         logging.info("Restarting logging")
         # stop the current session except it is a new session
@@ -1422,7 +1234,7 @@ class Window(QMainWindow):
             pass
         else:
             self._StopCurrentSession()
-        
+
         # We don't need to stop the recording when the start_from_camera is True as the logging is from the camera
         if start_from_camera == False:
             # Turn off the camera recording if it it on
@@ -1431,10 +1243,7 @@ class Window(QMainWindow):
                 self.Camera_dialog.StartRecording()
 
         # Turn off the preview if it is on and the autocontrol is on, which can make sure the trigger is off before starting the logging.
-        if (
-            self.Camera_dialog.AutoControl.currentText() == "Yes"
-            and self.Camera_dialog.StartPreview.isChecked()
-        ):
+        if self.Camera_dialog.AutoControl.currentText() == "Yes" and self.Camera_dialog.StartPreview.isChecked():
             self.Camera_dialog.StartPreview.setChecked(False)
             # sleep for 1 second to make sure the trigger is off
             time.sleep(1)
@@ -1447,21 +1256,15 @@ class Window(QMainWindow):
             self.CreateNewFolder = 0
             log_folder = self.HarpFolder
             self.unsaved_data = True
-            self.Save.setStyleSheet(
-                "color: white;background-color : mediumorchid"
-            )
+            self.Save.setStyleSheet("color: white;background-color : mediumorchid")
         else:
             # temporary logging
             loggingtype = 1
             current_time = datetime.now()
             formatted_datetime = current_time.strftime("%Y-%m-%d_%H-%M-%S")
-            log_folder = os.path.join(
-                log_folder, formatted_datetime, "behavior", "raw.harp"
-            )
+            log_folder = os.path.join(log_folder, formatted_datetime, "behavior", "raw.harp")
             # create video folder
-            video_folder = os.path.join(
-                log_folder, "..", "..", "behavior-videos"
-            )
+            video_folder = os.path.join(log_folder, "..", "..", "behavior-videos")
             if not os.path.exists(video_folder):
                 os.makedirs(video_folder)
         # stop the logging first
@@ -1471,9 +1274,7 @@ class Window(QMainWindow):
         if Rec[0].address == "/loggerstarted":
             pass
 
-        self.logging_type = (
-            loggingtype  # 0 for formal logging, 1 for temporary logging
-        )
+        self.logging_type = loggingtype  # 0 for formal logging, 1 for temporary logging
 
         # if we are starting a new logging, we should initialize/empty some fields
         self._empty_initialize_fields()
@@ -1513,9 +1314,7 @@ class Window(QMainWindow):
                     self.WaterCalibrationResults.keys(),
                     key=self._custom_sort_key,
                 )
-                self.RecentWaterCalibration = self.WaterCalibrationResults[
-                    sorted_dates[-1]
-                ]
+                self.RecentWaterCalibration = self.WaterCalibrationResults[sorted_dates[-1]]
                 self.RecentWaterCalibrationDate = sorted_dates[-1]
             logging.info("Loaded Water Calibration")
         else:
@@ -1553,19 +1352,13 @@ class Window(QMainWindow):
         if os.path.exists(self.Settings["schedule_path"]):
             schedule = pd.read_csv(self.Settings["schedule_path"])
             self.schedule_mice = [
-                x
-                for x in schedule["Mouse ID"].unique()
-                if isinstance(x, str) and (len(x) > 3) and ("/" not in x)
+                x for x in schedule["Mouse ID"].unique() if isinstance(x, str) and (len(x) > 3) and ("/" not in x)
             ]
             self.schedule = schedule.dropna(subset=["Mouse ID", "Box"]).copy()
             logging.info("Loaded behavior schedule")
         else:
             self.schedule_mice = None
-            logging.info(
-                "Could not find schedule at {}".format(
-                    self.Settings["schedule_path"]
-                )
-            )
+            logging.info("Could not find schedule at {}".format(self.Settings["schedule_path"]))
             logging.error(
                 "Could not find schedule",
                 extra={"tags": [self.warning_log_tag]},
@@ -1588,27 +1381,19 @@ class Window(QMainWindow):
         protocol = self._GetInfoFromSchedule(mouse_id, "Protocol")
         if (protocol is None) or (protocol == "") or (np.isnan(protocol)):
             if not self.Settings["add_default_project_name"]:
-                logging.info(
-                    "Protocol not on schedule, not using default because add_default_project_name=False"
-                )
+                logging.info("Protocol not on schedule, not using default because add_default_project_name=False")
                 return
             else:
                 logging.info("Protocol not on schedule, using default: 2414")
                 protocol = 2414
 
-        self.Metadata_dialog.meta_data["session_metadata"]["IACUCProtocol"] = (
-            str(int(protocol))
-        )
-        self.Metadata_dialog._update_metadata(
-            update_rig_metadata=False, update_session_metadata=True
-        )
+        self.Metadata_dialog.meta_data["session_metadata"]["IACUCProtocol"] = str(int(protocol))
+        self.Metadata_dialog._update_metadata(update_rig_metadata=False, update_session_metadata=True)
         logging.info("Setting IACUC Protocol: {}".format(protocol))
 
     def _GetProjectName(self, mouse_id):
         if not self.Settings["check_schedule"]:
-            logging.info(
-                "not setting project name because check_schedule=False"
-            )
+            logging.info("not setting project name because check_schedule=False")
             return
         logging.info("Getting Project name")
         project_name = self._GetInfoFromSchedule(mouse_id, "Project Name")
@@ -1618,23 +1403,15 @@ class Window(QMainWindow):
         if project_name is None:
             logging.info("Project name not on schedule, using default")
         elif project_name not in self._GetApprovedAINDProjectNames():
-            logging.error(
-                "Project name {} is not valid, using default, please correct schedule".format(
-                    project_name
-                )
-            )
+            logging.error("Project name {} is not valid, using default, please correct schedule".format(project_name))
             project_name = None
 
         # If we have a valid name update the metadata dialog
         if project_name is not None:
             if self.Metadata_dialog.ProjectName.findText(project_name) != -1:
                 # If project name is valid, update metadata
-                self.Metadata_dialog.meta_data["session_metadata"][
-                    "ProjectName"
-                ] = project_name
-                self.Metadata_dialog._update_metadata(
-                    update_rig_metadata=False, update_session_metadata=True
-                )
+                self.Metadata_dialog.meta_data["session_metadata"]["ProjectName"] = project_name
+                self.Metadata_dialog._update_metadata(update_rig_metadata=False, update_session_metadata=True)
                 logging.info("Setting project name: {}".format(project_name))
                 add_default = False
 
@@ -1654,9 +1431,7 @@ class Window(QMainWindow):
         if response.ok:
             return json.loads(response.content)["data"]
         else:
-            logging.error(
-                f"Failed to fetch project names from endpoint. {response.content}"
-            )
+            logging.error(f"Failed to fetch project names from endpoint. {response.content}")
             return []
 
     def _GetSettings(self):
@@ -1667,43 +1442,25 @@ class Window(QMainWindow):
         # Try to load Settings_box#.csv
         self.SettingsBox = {}
         if not os.path.exists(self.SettingsBoxFile):
-            logging.error(
-                "Could not find settings_box file at: {}".format(
-                    self.SettingsBoxFile
-                )
-            )
-            raise Exception(
-                "Could not find settings_box file at: {}".format(
-                    self.SettingsBoxFile
-                )
-            )
+            logging.error("Could not find settings_box file at: {}".format(self.SettingsBoxFile))
+            raise Exception("Could not find settings_box file at: {}".format(self.SettingsBoxFile))
         try:
             # Open the csv settings file
             df = pd.read_csv(self.SettingsBoxFile, index_col=None, header=None)
             self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
             logging.info("Loaded settings_box file")
         except Exception as e:
-            logging.error(
-                "Could not load settings_box file at: {}, {}".format(
-                    self.SettingsBoxFile, str(e)
-                )
-            )
+            logging.error("Could not load settings_box file at: {}, {}".format(self.SettingsBoxFile, str(e)))
             e.args = (
-                "Could not load settings box file at: {}".format(
-                    self.SettingsBoxFile
-                ),
+                "Could not load settings box file at: {}".format(self.SettingsBoxFile),
                 *e.args,
             )
             raise e
 
         # check that there is a newline for final entry of csv files
         if not self._check_line_terminator(self.SettingsBoxFile):
-            logging.error(
-                "Settings box file does not have a newline at the end"
-            )
-            raise Exception(
-                "Settings box file does not have a newline at the end"
-            )
+            logging.error("Settings box file does not have a newline at the end")
+            raise Exception("Settings box file does not have a newline at the end")
 
         # Validate Bonsai Settings file
         BonsaiSettingsModel(**self.SettingsBox)
@@ -1711,22 +1468,15 @@ class Window(QMainWindow):
 
         # Get default settings for ForagingSettings.JSON
         defaults = {
-            "default_saveFolder": os.path.join(
-                os.path.expanduser("~"), "Documents"
-            )
-            + "\\",
+            "default_saveFolder": os.path.join(os.path.expanduser("~"), "Documents") + "\\",
             "current_box": "",
-            "temporary_video_folder": os.path.join(
-                os.path.expanduser("~"), "Documents", "temporaryvideo"
-            ),
+            "temporary_video_folder": os.path.join(os.path.expanduser("~"), "Documents", "temporaryvideo"),
             "Teensy_COM_box1": "",
             "Teensy_COM_box2": "",
             "Teensy_COM_box3": "",
             "Teensy_COM_box4": "",
             "FIP_workflow_path": "",
-            "FIP_settings": os.path.join(
-                os.path.expanduser("~"), "Documents", "FIPSettings"
-            ),
+            "FIP_settings": os.path.join(os.path.expanduser("~"), "Documents", "FIPSettings"),
             "bonsai_path": os.path.join(
                 os.path.expanduser("~"),
                 "Documents",
@@ -1759,17 +1509,9 @@ class Window(QMainWindow):
             "show_log_info_in_console": False,
             "default_ui": "ForagingGUI.ui",
             "open_ephys_machine_ip_address": "",
-            "metadata_dialog_folder": os.path.join(
-                self.SettingFolder, "metadata_dialog"
-            )
-            + "\\",
-            "rig_metadata_folder": os.path.join(
-                self.SettingFolder, "rig_metadata"
-            )
-            + "\\",
-            "schedule_path": os.path.join(
-                "Z:\\", "dynamic_foraging", "DynamicForagingSchedule.csv"
-            ),
+            "metadata_dialog_folder": os.path.join(self.SettingFolder, "metadata_dialog") + "\\",
+            "rig_metadata_folder": os.path.join(self.SettingFolder, "rig_metadata") + "\\",
+            "schedule_path": os.path.join("Z:\\", "dynamic_foraging", "DynamicForagingSchedule.csv"),
             "go_cue_decibel_box1": 60,
             "go_cue_decibel_box2": 60,
             "go_cue_decibel_box3": 60,
@@ -1778,9 +1520,7 @@ class Window(QMainWindow):
             "lick_spout_distance_box2": 5000,
             "lick_spout_distance_box3": 5000,
             "lick_spout_distance_box4": 5000,
-            "name_mapper_file": os.path.join(
-                self.SettingFolder, "name_mapper.json"
-            ),
+            "name_mapper_file": os.path.join(self.SettingFolder, "name_mapper.json"),
             "create_rig_metadata": True,
             "save_each_trial": True,
             "AutomaticUpload": True,
@@ -1799,23 +1539,15 @@ class Window(QMainWindow):
         # Try to load the ForagingSettings.json file
         self.Settings = {}
         if not os.path.exists(self.SettingFile):
-            logging.error(
-                "Could not find settings file at: {}".format(self.SettingFile)
-            )
-            raise Exception(
-                "Could not find settings file at: {}".format(self.SettingFile)
-            )
+            logging.error("Could not find settings file at: {}".format(self.SettingFile))
+            raise Exception("Could not find settings file at: {}".format(self.SettingFile))
         try:
             # Open the JSON settings file
             with open(self.SettingFile, "r") as f:
                 self.Settings = json.load(f)
             logging.info("Loaded settings file")
         except Exception as e:
-            logging.error(
-                "Could not load settings file at: {}, {}".format(
-                    self.SettingFile, str(e)
-                )
-            )
+            logging.error("Could not load settings file at: {}, {}".format(self.SettingFile, str(e)))
             e.args = (
                 "Could not load settings file at: {}".format(self.SettingFile),
                 *e.args,
@@ -1826,27 +1558,17 @@ class Window(QMainWindow):
         for key in defaults:
             if key not in self.Settings:
                 self.Settings[key] = defaults[key]
-                logging.warning(
-                    "Missing setting ({}), using default: {}".format(
-                        key, self.Settings[key]
-                    )
-                )
+                logging.warning("Missing setting ({}), using default: {}".format(key, self.Settings[key]))
                 if key in ["default_saveFolder", "current_box"]:
-                    logging.error(
-                        "Missing setting ({}), is required".format(key)
-                    )
-                    raise Exception(
-                        "Missing setting ({}), is required".format(key)
-                    )
+                    logging.error("Missing setting ({}), is required".format(key))
+                    raise Exception("Missing setting ({}), is required".format(key))
 
         # Check that settings are valid
         DFTSettingsModel(**self.Settings)
         logging.info("ForagingSettings.json validated")
 
         if "default_openFolder" not in self.Settings:
-            self.Settings["default_openFolder"] = self.Settings[
-                "default_saveFolder"
-            ]
+            self.Settings["default_openFolder"] = self.Settings["default_saveFolder"]
 
         # Save all settings
         # TODO, should always use the values in self.Settings[x], not self.x
@@ -1854,53 +1576,31 @@ class Window(QMainWindow):
         self.default_openFolder = self.Settings["default_openFolder"]
         self.current_box = self.Settings["current_box"]
         self.temporary_video_folder = self.Settings["temporary_video_folder"]
-        self.Teensy_COM = self.Settings[
-            "Teensy_COM_box" + str(self.box_number)
-        ]
+        self.Teensy_COM = self.Settings["Teensy_COM_box" + str(self.box_number)]
         self.FIP_workflow_path = self.Settings["FIP_workflow_path"]
         self.bonsai_path = self.Settings["bonsai_path"]
         self.bonsaiworkflow_path = self.Settings["bonsaiworkflow_path"]
-        self.newscale_serial_num_box1 = self.Settings[
-            "newscale_serial_num_box1"
-        ]
-        self.newscale_serial_num_box2 = self.Settings[
-            "newscale_serial_num_box2"
-        ]
-        self.newscale_serial_num_box3 = self.Settings[
-            "newscale_serial_num_box3"
-        ]
-        self.newscale_serial_num_box4 = self.Settings[
-            "newscale_serial_num_box4"
-        ]
+        self.newscale_serial_num_box1 = self.Settings["newscale_serial_num_box1"]
+        self.newscale_serial_num_box2 = self.Settings["newscale_serial_num_box2"]
+        self.newscale_serial_num_box3 = self.Settings["newscale_serial_num_box3"]
+        self.newscale_serial_num_box4 = self.Settings["newscale_serial_num_box4"]
         self.default_ui = self.Settings["default_ui"]
-        self.open_ephys_machine_ip_address = self.Settings[
-            "open_ephys_machine_ip_address"
-        ]
+        self.open_ephys_machine_ip_address = self.Settings["open_ephys_machine_ip_address"]
         self.metadata_dialog_folder = self.Settings["metadata_dialog_folder"]
         self.rig_metadata_folder = self.Settings["rig_metadata_folder"]
         self.go_cue_decibel_box1 = self.Settings["go_cue_decibel_box1"]
         self.go_cue_decibel_box2 = self.Settings["go_cue_decibel_box2"]
         self.go_cue_decibel_box3 = self.Settings["go_cue_decibel_box3"]
         self.go_cue_decibel_box4 = self.Settings["go_cue_decibel_box4"]
-        self.lick_spout_distance_box1 = self.Settings[
-            "lick_spout_distance_box1"
-        ]
-        self.lick_spout_distance_box2 = self.Settings[
-            "lick_spout_distance_box2"
-        ]
-        self.lick_spout_distance_box3 = self.Settings[
-            "lick_spout_distance_box3"
-        ]
-        self.lick_spout_distance_box4 = self.Settings[
-            "lick_spout_distance_box4"
-        ]
+        self.lick_spout_distance_box1 = self.Settings["lick_spout_distance_box1"]
+        self.lick_spout_distance_box2 = self.Settings["lick_spout_distance_box2"]
+        self.lick_spout_distance_box3 = self.Settings["lick_spout_distance_box3"]
+        self.lick_spout_distance_box4 = self.Settings["lick_spout_distance_box4"]
         self.name_mapper_file = self.Settings["name_mapper_file"]
         self.save_each_trial = self.Settings["save_each_trial"]
         self.auto_engage = self.Settings["auto_engage"]
         self.clear_figure_after_save = self.Settings["clear_figure_after_save"]
-        self.add_default_project_name = self.Settings[
-            "add_default_project_name"
-        ]
+        self.add_default_project_name = self.Settings["add_default_project_name"]
 
         # Also stream log info to the console if enabled
         if self.Settings["show_log_info_in_console"]:
@@ -1913,16 +1613,10 @@ class Window(QMainWindow):
         # Determine box
         if self.current_box in ["447-1", "447-2", "447-3"]:
             mapper = {1: "A", 2: "B", 3: "C", 4: "D"}
-            self.current_box = "{}-{}".format(
-                self.current_box, mapper[self.box_number]
-            )
+            self.current_box = "{}-{}".format(self.current_box, mapper[self.box_number])
         self.Other_current_box = self.current_box
-        self.Other_go_cue_decibel = self.Settings[
-            "go_cue_decibel_box" + str(self.box_number)
-        ]
-        self.Other_lick_spout_distance = self.Settings[
-            "lick_spout_distance_box" + str(self.box_number)
-        ]
+        self.Other_go_cue_decibel = self.Settings["go_cue_decibel_box" + str(self.box_number)]
+        self.Other_lick_spout_distance = self.Settings["lick_spout_distance_box" + str(self.box_number)]
         self.rig_name = "{}".format(self.current_box)
 
     def _ConnectSlims(self):
@@ -1937,27 +1631,20 @@ class Window(QMainWindow):
             )
         except KeyError as e:
             raise KeyError(
-                "SLIMS_USERNAME and SLIMS_PASSWORD do not exist as "
-                f"environment variables on machine. Please add. {e}"
+                f"SLIMS_USERNAME and SLIMS_PASSWORD do not exist as environment variables on machine. Please add. {e}"
             )
 
         try:
-            self.slims_client.fetch_model(
-                models.SlimsMouseContent, barcode="00000000"
-            )
+            self.slims_client.fetch_model(models.SlimsMouseContent, barcode="00000000")
         except Exception as e:
-            if "Status 401 – Unauthorized" in str(
-                e
-            ):  # catch error if username and password are incorrect
+            if "Status 401 – Unauthorized" in str(e):  # catch error if username and password are incorrect
                 raise Exception(
                     f"Exception trying to read from Slims: {e}.\n"
                     f" Please check credentials:\n"
                     f"Username: {os.environ['SLIMS_USERNAME']}\n"
                     f"Password: {os.environ['SLIMS_PASSWORD']}"
                 )
-            elif "No record found" not in str(
-                e
-            ):  # bypass if mouse doesn't exist
+            elif "No record found" not in str(e):  # bypass if mouse doesn't exist
                 raise Exception(f"Exception trying to read from Slims: {e}.\n")
         logging.info("Successfully connected to Slims")
 
@@ -1970,43 +1657,29 @@ class Window(QMainWindow):
         """
 
         try:  # try and find mouse
-            logging.info(
-                f"Attempting to fetch mouse {session.subject_id} from Slims"
-            )
-            mouse = self.slims_client.fetch_model(
-                models.SlimsMouseContent, barcode=session.subject_id
-            )
+            logging.info(f"Attempting to fetch mouse {session.subject_id} from Slims")
+            mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=session.subject_id)
         except Exception as e:
-            if "No record found" in str(
-                e
-            ):  # if no mouse found or validation errors on mouse
+            if "No record found" in str(e):  # if no mouse found or validation errors on mouse
                 logging.warning(
-                    f'"No record found" error while trying to fetch mouse {session.subject_id}. '
-                    f"Will not log water."
+                    f'"No record found" error while trying to fetch mouse {session.subject_id}. Will not log water.'
                 )
                 return
             else:
-                logging.error(
-                    f"While fetching mouse {session.subject_id} model, unexpected error occurred: {e}"
-                )
+                logging.error(f"While fetching mouse {session.subject_id} model, unexpected error occurred: {e}")
                 raise e
 
         # extract water information
         logging.info("Extracting water information from first stimulus epoch")
         water_json = session.stimulus_epochs[0].output_parameters.water.items()
-        water = {
-            k: v if not (isinstance(v, float) and math.isnan(v)) else None
-            for k, v in water_json
-        }
+        water = {k: v if not (isinstance(v, float) and math.isnan(v)) else None for k, v in water_json}
 
         # extract software information
         logging.info("Extracting software information from first data stream")
         software = session.stimulus_epochs[0].software[0]
 
         # create model
-        logging.info(
-            "Creating SlimsWaterlogResult based on session information."
-        )
+        logging.info("Creating SlimsWaterlogResult based on session information.")
         model = models.SlimsWaterlogResult(
             mouse_pk=mouse.pk,
             date=session.session_start_time,
@@ -2020,26 +1693,16 @@ class Window(QMainWindow):
             workstation=session.rig_id,
             sw_source=software.url,
             sw_version=software.version,
-            test_pk=self.slims_client.fetch_pk(
-                "Test", test_name="test_waterlog"
-            ),
+            test_pk=self.slims_client.fetch_pk("Test", test_name="test_waterlog"),
         )
 
         # check if mouse already has waterlog for at session time and if, so update model
-        logging.info(
-            f"Fetching previous waterlog for mouse {session.subject_id}"
-        )
-        waterlog = self.slims_client.fetch_models(
-            models.SlimsWaterlogResult, mouse_pk=mouse.pk, start=0, end=1
-        )
-        if waterlog != [] and waterlog[0].date.strftime(
-            "%Y-%m-%d %H:%M:%S"
-        ) == session.session_start_time.astimezone(timezone.utc).strftime(
-            "%Y-%m-%d %H:%M:%S"
-        ):
-            logging.info(
-                "Waterlog information already exists for this session. Updating waterlog in Slims."
-            )
+        logging.info(f"Fetching previous waterlog for mouse {session.subject_id}")
+        waterlog = self.slims_client.fetch_models(models.SlimsWaterlogResult, mouse_pk=mouse.pk, start=0, end=1)
+        if waterlog != [] and waterlog[0].date.strftime("%Y-%m-%d %H:%M:%S") == session.session_start_time.astimezone(
+            timezone.utc
+        ).strftime("%Y-%m-%d %H:%M:%S"):
+            logging.info("Waterlog information already exists for this session. Updating waterlog in Slims.")
             model.pk = waterlog[0].pk
             self.slims_client.update_model(model=model)
         else:
@@ -2087,30 +1750,17 @@ class Window(QMainWindow):
                 self._ConnectOSC()
             except Exception as e:
                 # We could not connect
-                logging.info(
-                    "Could not connect, total waiting time {} seconds: ".format(
-                        wait
-                    )
-                    + str(e)
-                )
+                logging.info("Could not connect, total waiting time {} seconds: ".format(wait) + str(e))
             else:
                 # We could connect
-                logging.info(
-                    "Connected to Bonsai after {} seconds".format(wait)
-                )
+                logging.info("Connected to Bonsai after {} seconds".format(wait))
                 logging.info("Bonsai started successfully")
                 self.InitializeBonsaiSuccessfully = 1
-                subprocess.Popen(
-                    "title Box{}".format(self.box_letter), shell=True
-                )
+                subprocess.Popen("title Box{}".format(self.box_letter), shell=True)
                 return
 
         # Could not connect and we timed out
-        logging.info(
-            "Could not connect to bonsai with max wait time {} seconds".format(
-                max_wait
-            )
-        )
+        logging.info("Could not connect to bonsai with max wait time {} seconds".format(max_wait))
         logging.warning(
             "Started without bonsai connected!",
             extra={"tags": [self.warning_log_tag]},
@@ -2253,11 +1903,7 @@ class Window(QMainWindow):
     def _load_most_recent_rig_json(self, error_if_none=True):
         # See if rig metadata folder exists
         if not os.path.exists(self.Settings["rig_metadata_folder"]):
-            print(
-                "making directory: {}".format(
-                    self.Settings["rig_metadata_folder"]
-                )
-            )
+            print("making directory: {}".format(self.Settings["rig_metadata_folder"]))
             os.makedirs(self.Settings["rig_metadata_folder"])
 
         # Load most recent rig_json
@@ -2266,11 +1912,7 @@ class Window(QMainWindow):
             key=os.path.getmtime,
         )
         files = [f.__str__().split("\\")[-1] for f in files]
-        files = [
-            f
-            for f in files
-            if (f.startswith("rig_" + self.rig_name) and f.endswith(".json"))
-        ]
+        files = [f for f in files if (f.startswith("rig_" + self.rig_name) and f.endswith(".json"))]
 
         if len(files) == 0:
             # No rig.jsons found
@@ -2283,13 +1925,9 @@ class Window(QMainWindow):
                     extra={"tags": self.warning_log_tag},
                 )
             else:
-                logging.info(
-                    "Did not find any existing rig.json files"
-                )  # FIXME: is this really the right message
+                logging.info("Did not find any existing rig.json files")  # FIXME: is this really the right message
         else:
-            rig_json_path = os.path.join(
-                self.Settings["rig_metadata_folder"], files[-1]
-            )
+            rig_json_path = os.path.join(self.Settings["rig_metadata_folder"], files[-1])
             logging.info("Found existing rig.json: {}".format(files[-1]))
             with open(rig_json_path, "r") as f:
                 rig_json = json.load(f)
@@ -2299,27 +1937,19 @@ class Window(QMainWindow):
     def _LoadRigJson(self):
         # User can skip this step if they make rig metadata themselves
         if not self.Settings["create_rig_metadata"]:
-            logging.info(
-                "Skipping rig metadata creation because create_rig_metadata=False"
-            )
+            logging.info("Skipping rig metadata creation because create_rig_metadata=False")
             return
 
-        existing_rig_json, rig_json_path = self._load_most_recent_rig_json(
-            error_if_none=False
-        )
+        existing_rig_json, rig_json_path = self._load_most_recent_rig_json(error_if_none=False)
 
         # Builds a new rig.json, and saves if there are changes with the most recent
         rig_settings = self.Settings.copy()
         rig_settings["rig_name"] = self.rig_name
         rig_settings["box_number"] = self.box_number
         df = pd.read_csv(self.SettingsBoxFile, index_col=None, header=None)
-        rig_settings["box_settings"] = {
-            row[0]: row[1] for index, row in df.iterrows()
-        }
+        rig_settings["box_settings"] = {row[0]: row[1] for index, row in df.iterrows()}
         rig_settings["computer_name"] = socket.gethostname()
-        rig_settings["bonsai_version"] = self._get_bonsai_version(
-            rig_settings["bonsai_config_path"]
-        )
+        rig_settings["bonsai_version"] = self._get_bonsai_version(rig_settings["bonsai_config_path"])
 
         if hasattr(self, "LaserCalibrationResults"):
             LaserCalibrationResults = self.LaserCalibrationResults
@@ -2331,24 +1961,16 @@ class Window(QMainWindow):
             WaterCalibrationResults = {}
 
         # Load CMOS serial numbers for FIP if they exist
-        green_cmos = os.path.join(
-            self.Settings["FIP_settings"], "CameraSerial_Green.csv"
-        )
-        red_cmos = os.path.join(
-            self.Settings["FIP_settings"], "CameraSerial_Red.csv"
-        )
+        green_cmos = os.path.join(self.Settings["FIP_settings"], "CameraSerial_Green.csv")
+        red_cmos = os.path.join(self.Settings["FIP_settings"], "CameraSerial_Red.csv")
         if os.path.isfile(green_cmos):
             with open(green_cmos, "r") as f:
                 green_cmos_sn = f.read()
-            rig_settings["box_settings"]["FipGreenCMOSSerialNumber"] = (
-                green_cmos_sn.strip("\n")
-            )
+            rig_settings["box_settings"]["FipGreenCMOSSerialNumber"] = green_cmos_sn.strip("\n")
         if os.path.isfile(red_cmos):
             with open(red_cmos, "r") as f:
                 red_cmos_sn = f.read()
-            rig_settings["box_settings"]["FipRedCMOSSerialNumber"] = (
-                red_cmos_sn.strip("\n")
-            )
+            rig_settings["box_settings"]["FipRedCMOSSerialNumber"] = red_cmos_sn.strip("\n")
 
         build_rig_json(
             existing_rig_json,
@@ -2388,12 +2010,8 @@ class Window(QMainWindow):
         # use the latest calibration result
         if hasattr(self, "WaterCalibration_dialog"):
             if hasattr(self.WaterCalibration_dialog, "PlotM"):
-                if hasattr(
-                    self.WaterCalibration_dialog.PlotM, "FittingResults"
-                ):
-                    FittingResults = (
-                        self.WaterCalibration_dialog.PlotM.FittingResults
-                    )
+                if hasattr(self.WaterCalibration_dialog.PlotM, "FittingResults"):
+                    FittingResults = self.WaterCalibration_dialog.PlotM.FittingResults
                     tag = 1
         if tag == 1:
             self._GetLatestFitting(FittingResults)
@@ -2432,12 +2050,8 @@ class Window(QMainWindow):
         # use the latest calibration result
         if hasattr(self, "WaterCalibration_dialog"):
             if hasattr(self.WaterCalibration_dialog, "PlotM"):
-                if hasattr(
-                    self.WaterCalibration_dialog.PlotM, "FittingResults"
-                ):
-                    FittingResults = (
-                        self.WaterCalibration_dialog.PlotM.FittingResults
-                    )
+                if hasattr(self.WaterCalibration_dialog.PlotM, "FittingResults"):
+                    FittingResults = self.WaterCalibration_dialog.PlotM.FittingResults
                     tag = 1
         if tag == 1:
             self._GetLatestFitting(FittingResults)
@@ -2463,9 +2077,7 @@ class Window(QMainWindow):
         self.LeftValue_volume.textChanged.connect(self._WaterVolumnManage2)
         self.RightValue_volume.textChanged.connect(self._WaterVolumnManage2)
 
-    def _ValvetimeVolumnTransformation(
-        self, widget1, widget2, direction, valve
-    ):
+    def _ValvetimeVolumnTransformation(self, widget1, widget2, direction, valve):
         """Transformation between valve open time the the water volume"""
         # widget1 is the source widget and widget2 is the target widget
         try:
@@ -2480,14 +2092,10 @@ class Window(QMainWindow):
                 widget2.setEnabled(True)
                 widget1.setEnabled(True)
             if direction == 1:
-                widget2.setValue(
-                    float(widget1.text()) * self.latest_fitting[valve][0]
-                    + self.latest_fitting[valve][1]
-                )
+                widget2.setValue(float(widget1.text()) * self.latest_fitting[valve][0] + self.latest_fitting[valve][1])
             elif direction == -1:
                 widget2.setValue(
-                    (float(widget1.text()) - self.latest_fitting[valve][1])
-                    / self.latest_fitting[valve][0]
+                    (float(widget1.text()) - self.latest_fitting[valve][1]) / self.latest_fitting[valve][0]
                 )
         except Exception:
             logging.error(traceback.format_exc())
@@ -2519,14 +2127,10 @@ class Window(QMainWindow):
                 self.current_box,
                 self.behavior_session_model.subject,
             )
-            logging.warning(
-                f"Save folder unspecified, so opening {AnimalFolder}"
-            )
+            logging.warning(f"Save folder unspecified, so opening {AnimalFolder}")
             subprocess.Popen(["explorer", AnimalFolder])
         else:
-            logging.warning(
-                "Save folder unspecified", extra={"tags": self.warning_log_tag}
-            )
+            logging.warning("Save folder unspecified", extra={"tags": self.warning_log_tag})
 
     def _OpenLoggingFolder(self):
         """Open the logging folder"""
@@ -2551,11 +2155,7 @@ class Window(QMainWindow):
         """
         if key in parameters:
             # skip some keys
-            if (
-                key == "ExtraWater"
-                or key == "WeightAfter"
-                or key == "SuggestedWater"
-            ):
+            if key == "ExtraWater" or key == "WeightAfter" or key == "SuggestedWater":
                 self.WeightAfter.setText("")
                 return
             widget = widget_dict[key]
@@ -2613,10 +2213,7 @@ class Window(QMainWindow):
                     self._AutoReward()
         else:
             widget = widget_dict[key]
-            if not (
-                isinstance(widget, QtWidgets.QComboBox)
-                or isinstance(widget, QtWidgets.QPushButton)
-            ):
+            if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
                 pass
                 # widget.clear()
 
@@ -2672,11 +2269,7 @@ class Window(QMainWindow):
 
         # move newscale stage
         if hasattr(self, "current_stage"):
-            if (
-                (self.PositionX.text() != "")
-                and (self.PositionY.text() != "")
-                and (self.PositionZ.text() != "")
-            ):
+            if (self.PositionX.text() != "") and (self.PositionY.text() != "") and (self.PositionZ.text() != ""):
                 try:
                     self.StageStop.click
                     self.current_stage.move_absolute_3d(
@@ -2694,9 +2287,7 @@ class Window(QMainWindow):
         else:
             Parameters = self
         if event is None or not isinstance(event, QtGui.QKeyEvent):
-            event = QtGui.QKeyEvent(
-                QtCore.QEvent.KeyPress, Qt.Key_Return, Qt.KeyboardModifiers()
-            )
+            event = QtGui.QKeyEvent(QtCore.QEvent.KeyPress, Qt.Key_Return, Qt.KeyboardModifiers())
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
             # handle the return key press event here
             logging.info("processing parameter changes")
@@ -2721,10 +2312,7 @@ class Window(QMainWindow):
                     if child.objectName() == "qt_spinbox_lineedit":
                         continue
 
-                    if not (
-                        hasattr(self, "AutoTrain_dialog")
-                        and self.AutoTrain_dialog.auto_train_engaged
-                    ):
+                    if not (hasattr(self, "AutoTrain_dialog") and self.AutoTrain_dialog.auto_train_engaged):
                         # Only run _Task again if AutoTrain is NOT engaged
                         # To avoid the _Task() function overwriting the AutoTrain UI locks
                         # resolves https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/239
@@ -2766,9 +2354,7 @@ class Window(QMainWindow):
                     if child.objectName() == "UncoupledReward":
                         Correct = self._CheckFormat(child)
                         if Correct == 0:  # incorrect format; don't change
-                            child.setText(
-                                getattr(Parameters, "TP_" + child.objectName())
-                            )
+                            child.setText(getattr(Parameters, "TP_" + child.objectName()))
                         continue
                     if (
                         child.objectName()
@@ -2799,13 +2385,8 @@ class Window(QMainWindow):
                         # These attributes can have the empty string, but we can't set the value as the empty string, unless we allow resets
                         if allow_reset:
                             continue
-                        if (
-                            hasattr(Parameters, "TP_" + child.objectName())
-                            and child.objectName() != ""
-                        ):
-                            child.setText(
-                                getattr(Parameters, "TP_" + child.objectName())
-                            )
+                        if hasattr(Parameters, "TP_" + child.objectName()) and child.objectName() != "":
+                            child.setText(getattr(Parameters, "TP_" + child.objectName()))
                         continue
                     if child.objectName() in [
                         "LatestCalibrationDate",
@@ -2819,54 +2400,24 @@ class Window(QMainWindow):
                     except Exception:
                         # Invalid float. Do not change the parameter, reset back to previous value
                         logging.warning(
-                            "Cannot convert input to float: {}, '{}'".format(
-                                child.objectName(), child.text()
-                            )
+                            "Cannot convert input to float: {}, '{}'".format(child.objectName(), child.text())
                         )
                         if isinstance(child, QtWidgets.QDoubleSpinBox):
-                            child.setValue(
-                                float(
-                                    getattr(
-                                        Parameters, "TP_" + child.objectName()
-                                    )
-                                )
-                            )
+                            child.setValue(float(getattr(Parameters, "TP_" + child.objectName())))
                         elif isinstance(child, QtWidgets.QSpinBox):
-                            child.setValue(
-                                int(
-                                    getattr(
-                                        Parameters, "TP_" + child.objectName()
-                                    )
-                                )
-                            )
+                            child.setValue(int(getattr(Parameters, "TP_" + child.objectName())))
                         else:
-                            if (
-                                hasattr(Parameters, "TP_" + child.objectName())
-                                and child.objectName() != ""
-                            ):
-                                child.setText(
-                                    getattr(
-                                        Parameters, "TP_" + child.objectName()
-                                    )
-                                )
+                            if hasattr(Parameters, "TP_" + child.objectName()) and child.objectName() != "":
+                                child.setText(getattr(Parameters, "TP_" + child.objectName()))
                     else:
-                        if (
-                            hasattr(Parameters, "TP_" + child.objectName())
-                            and child.objectName() != ""
-                        ):
+                        if hasattr(Parameters, "TP_" + child.objectName()) and child.objectName() != "":
                             # If this parameter changed, add the change to the log
-                            old = getattr(
-                                Parameters, "TP_" + child.objectName()
-                            )
+                            old = getattr(Parameters, "TP_" + child.objectName())
                             if old != "":
                                 old = float(old)
                             new = float(child.text())
                             if new != old:
-                                logging.info(
-                                    "Changing parameter: {}, {} -> {}".format(
-                                        child.objectName(), old, new
-                                    )
-                                )
+                                logging.info("Changing parameter: {}, {} -> {}".format(child.objectName(), old, new))
 
             # update the current training parameters
             self._GetTrainingParameters()
@@ -2893,8 +2444,7 @@ class Window(QMainWindow):
                 )
             ):
                 if (
-                    child.objectName() in ["qt_spinbox_lineedit", None, ""]
-                    or child.isEnabled() == False
+                    child.objectName() in ["qt_spinbox_lineedit", None, ""] or child.isEnabled() == False
                 ):  # I don't understand where the qt_spinbox_lineedit comes from.
                     continue
                 if (
@@ -2904,15 +2454,10 @@ class Window(QMainWindow):
                 ) and (child.text() != ""):
                     Correct = self._CheckFormat(child)
                     if Correct == 0:  # incorrect format; don't change
-                        child.setText(
-                            getattr(Parameters, "TP_" + child.objectName())
-                        )
+                        child.setText(getattr(Parameters, "TP_" + child.objectName()))
                     self._ShowRewardPairs()
                 try:
-                    if (
-                        getattr(Parameters, "TP_" + child.objectName())
-                        != child.text()
-                    ):
+                    if getattr(Parameters, "TP_" + child.objectName()) != child.text():
                         # Changes are not allowed until press is typed except for PositionX, PositionY and PositionZ
                         if child.objectName() not in (
                             "PositionX",
@@ -2936,17 +2481,11 @@ class Window(QMainWindow):
                             "laser_1_calibration_voltage",
                             "laser_2_calibration_voltage",
                         }:
-                            child.setStyleSheet(
-                                f"color: {self.default_text_color};"
-                            )
+                            child.setStyleSheet(f"color: {self.default_text_color};")
                             self.Continue = 1
-                        if (
-                            child.text() == ""
-                        ):  # If empty, change background color and wait for confirmation
+                        if child.text() == "":  # If empty, change background color and wait for confirmation
                             self.UpdateParameters = 0
-                            child.setStyleSheet(
-                                f"background-color: {self.default_text_background_color};"
-                            )
+                            child.setStyleSheet(f"background-color: {self.default_text_background_color};")
                             self.Continue = 1
                         if child.objectName() in {
                             "RunLength",
@@ -2966,9 +2505,7 @@ class Window(QMainWindow):
                                 child.setStyleSheet("background-color: white;")
                         if self.Continue == 1:
                             continue
-                        child.setStyleSheet(
-                            f"color: {self.default_text_color};"
-                        )
+                        child.setStyleSheet(f"color: {self.default_text_color};")
                         try:
                             # it's valid float
                             float(child.text())
@@ -3001,14 +2538,8 @@ class Window(QMainWindow):
                                     )
                                 )
                             else:
-                                child.setText(
-                                    getattr(
-                                        Parameters, "TP_" + child.objectName()
-                                    )
-                                )
-                            child.setText(
-                                getattr(Parameters, "TP_" + child.objectName())
-                            )
+                                child.setText(getattr(Parameters, "TP_" + child.objectName()))
+                            child.setText(getattr(Parameters, "TP_" + child.objectName()))
                             child.setStyleSheet("color: black;")
                             self.UpdateParameters = 0
                     else:
@@ -3025,18 +2556,8 @@ class Window(QMainWindow):
         ):  # When we change the RewardFamily, sometimes the RewardPairsN is larger than available reward pairs in this family.
             try:
                 self.RewardFamilies[int(self.RewardFamily.text()) - 1]
-                if int(self.RewardPairsN.text()) > len(
-                    self.RewardFamilies[int(self.RewardFamily.text()) - 1]
-                ):
-                    self.RewardPairsN.setText(
-                        str(
-                            len(
-                                self.RewardFamilies[
-                                    int(self.RewardFamily.text()) - 1
-                                ]
-                            )
-                        )
-                    )
+                if int(self.RewardPairsN.text()) > len(self.RewardFamilies[int(self.RewardFamily.text()) - 1]):
+                    self.RewardPairsN.setText(str(len(self.RewardFamilies[int(self.RewardFamily.text()) - 1])))
                 return 1
             except Exception:
                 logging.error(traceback.format_exc())
@@ -3047,12 +2568,10 @@ class Window(QMainWindow):
             or child.objectName() == "BaseRewardSum"
         ):
             try:
-                self.RewardPairs = self.RewardFamilies[
-                    int(self.RewardFamily.text()) - 1
-                ][: int(self.RewardPairsN.text())]
-                if int(self.RewardPairsN.text()) > len(
-                    self.RewardFamilies[int(self.RewardFamily.text()) - 1]
-                ):
+                self.RewardPairs = self.RewardFamilies[int(self.RewardFamily.text()) - 1][
+                    : int(self.RewardPairsN.text())
+                ]
+                if int(self.RewardPairsN.text()) > len(self.RewardFamilies[int(self.RewardFamily.text()) - 1]):
                     return 0
                 else:
                     return 1
@@ -3065,11 +2584,7 @@ class Window(QMainWindow):
                 if input_string == "":  # do not permit empty uncoupled reward
                     return 0
                 # remove any square brackets and spaces from the string
-                input_string = (
-                    input_string.replace("[", "")
-                    .replace("]", "")
-                    .replace(",", " ")
-                )
+                input_string = input_string.replace("[", "").replace("]", "").replace(",", " ")
                 # split the remaining string into a list of individual numbers
                 num_list = input_string.split()
                 # convert each number in the list to a float
@@ -3118,12 +2633,8 @@ class Window(QMainWindow):
 
     def _Task(self):
         """hide and show some fields based on the task type"""
-        self.label_43.setStyleSheet(
-            "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;"
-        )
-        self.ITIIncrease.setStyleSheet(
-            "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;"
-        )
+        self.label_43.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;")
+        self.ITIIncrease.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;")
         self._Randomness()
 
         if self.Task.currentText() in [
@@ -3147,21 +2658,15 @@ class Window(QMainWindow):
             self.label_12.setStyleSheet("color: black;")
             self.label_11.setStyleSheet("color: black;")
             self.label_14.setStyleSheet("color: black;")
-            self.BlockBeta.setStyleSheet(
-                "color: black;border: 1px solid gray;"
-            )
+            self.BlockBeta.setStyleSheet("color: black;border: 1px solid gray;")
             self.BlockMin.setStyleSheet("color: black;border: 1px solid gray;")
             self.BlockMax.setStyleSheet("color: black;border: 1px solid gray;")
 
             self.label_27.setEnabled(False)
             self.InitiallyInactiveN.setEnabled(False)
-            self.label_27.setStyleSheet(
-                "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);"
-                "border: none;"
-            )
+            self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;")
             self.InitiallyInactiveN.setStyleSheet(
-                "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);"
-                "border: none;"
+                "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;"
             )
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
@@ -3200,21 +2705,15 @@ class Window(QMainWindow):
             self.label_12.setStyleSheet("color: black;")
             self.label_11.setStyleSheet("color: black;")
             self.label_14.setStyleSheet("color: black;")
-            self.BlockBeta.setStyleSheet(
-                "color: black;border: 1px solid gray;"
-            )
+            self.BlockBeta.setStyleSheet("color: black;border: 1px solid gray;")
             self.BlockMin.setStyleSheet("color: black;border: 1px solid gray;")
             self.BlockMax.setStyleSheet("color: black;border: 1px solid gray;")
 
             self.label_27.setEnabled(False)
             self.InitiallyInactiveN.setEnabled(False)
-            self.label_27.setStyleSheet(
-                "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);"
-                "border: none;"
-            )
+            self.label_27.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;")
             self.InitiallyInactiveN.setStyleSheet(
-                "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);"
-                "border: none;"
+                "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;"
             )
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(1081, 23, 80, 20))
             # change name of min reward each block
@@ -3243,13 +2742,9 @@ class Window(QMainWindow):
             self.RewardFamily.setEnabled(True)
             self.label_20.setEnabled(False)
             self.UncoupledReward.setEnabled(False)
-            self.label_20.setStyleSheet(
-                "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);"
-                "border: none;"
-            )
+            self.label_20.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;")
             self.UncoupledReward.setStyleSheet(
-                "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);"
-                "border: none;"
+                "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;"
             )
             # block
             self.BlockMinReward.setEnabled(True)
@@ -3257,37 +2752,17 @@ class Window(QMainWindow):
             self.BlockBeta.setEnabled(False)
             self.BlockMin.setEnabled(False)
             self.BlockMax.setEnabled(False)
-            self.label_14.setStyleSheet(
-                "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);"
-                "border: none;"
-            )
-            self.label_12.setStyleSheet(
-                "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);"
-                "border: none;"
-            )
-            self.label_11.setStyleSheet(
-                "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);"
-                "border: none;"
-            )
-            self.BlockBeta.setStyleSheet(
-                "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);"
-                "border: none;"
-            )
-            self.BlockMin.setStyleSheet(
-                "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);"
-                "border: none;"
-            )
-            self.BlockMax.setStyleSheet(
-                "background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);"
-                "border: none;"
-            )
+            self.label_14.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;")
+            self.label_12.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;")
+            self.label_11.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;")
+            self.BlockBeta.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;")
+            self.BlockMin.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;")
+            self.BlockMax.setStyleSheet("background-color: rgba(0, 0, 0, 0); color: rgba(0, 0, 0, 0);border: none;")
             # block; no reward when initially active
             self.label_27.setEnabled(True)
             self.InitiallyInactiveN.setEnabled(True)
             self.label_27.setStyleSheet("color: black;")
-            self.InitiallyInactiveN.setStyleSheet(
-                "color: black;border: 1px solid gray;"
-            )
+            self.InitiallyInactiveN.setStyleSheet("color: black;border: 1px solid gray;")
             self.InitiallyInactiveN.setGeometry(QtCore.QRect(403, 128, 80, 20))
             # change name of min reward each block
             self.label_13.setText("RewardN=")
@@ -3309,9 +2784,9 @@ class Window(QMainWindow):
                 "Coupled Without Baiting",
                 "RewardN",
             ]:
-                self.RewardPairs = self.RewardFamilies[
-                    int(self.RewardFamily.text()) - 1
-                ][: int(self.RewardPairsN.text())]
+                self.RewardPairs = self.RewardFamilies[int(self.RewardFamily.text()) - 1][
+                    : int(self.RewardPairsN.text())
+                ]
                 self.RewardProb = (
                     np.array(self.RewardPairs)
                     / np.expand_dims(np.sum(self.RewardPairs, axis=1), axis=1)
@@ -3323,11 +2798,7 @@ class Window(QMainWindow):
             ]:
                 input_string = self.UncoupledReward.text()
                 # remove any square brackets and spaces from the string
-                input_string = (
-                    input_string.replace("[", "")
-                    .replace("]", "")
-                    .replace(",", " ")
-                )
+                input_string = input_string.replace("[", "").replace("]", "").replace(",", " ")
                 # split the remaining string into a list of individual numbers
                 num_list = input_string.split()
                 # convert each number in the list to a float
@@ -3349,17 +2820,13 @@ class Window(QMainWindow):
                         + "Current pair:\n"
                         + str(
                             np.round(
-                                self.GeneratedTrials.B_RewardProHistory[
-                                    :, self.GeneratedTrials.B_CurrentTrialN
-                                ],
+                                self.GeneratedTrials.B_RewardProHistory[:, self.GeneratedTrials.B_CurrentTrialN],
                                 2,
                             )
                         )
                     )
                     if self.default_ui == "ForagingGUI.ui":
-                        self.ShowRewardPairs_2.setText(
-                            self.ShowRewardPairs.text()
-                        )
+                        self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
                 else:
                     self.ShowRewardPairs.setText(
                         "Reward pairs:\n"
@@ -3368,9 +2835,7 @@ class Window(QMainWindow):
                         + "Current pair:\n "
                     )
                     if self.default_ui == "ForagingGUI.ui":
-                        self.ShowRewardPairs_2.setText(
-                            self.ShowRewardPairs.text()
-                        )
+                        self.ShowRewardPairs_2.setText(self.ShowRewardPairs.text())
         except Exception:
             # Catch the exception and log error information
             logging.warning(traceback.format_exc())
@@ -3391,11 +2856,7 @@ class Window(QMainWindow):
                 event.ignore()
                 return
         # post weight not entered and session ran
-        elif (
-            self.WeightAfter.text() == ""
-            and self.session_run
-            and not self.unsaved_data
-        ):
+        elif self.WeightAfter.text() == "" and self.session_run and not self.unsaved_data:
             reply = QMessageBox.critical(
                 self,
                 "Box {}, Foraging Close".format(self.box_letter),
@@ -3435,9 +2896,7 @@ class Window(QMainWindow):
         self.Camera_dialog.close()
         self.LaserCalibration_dialog.close()
         self.WaterCalibration_dialog.close()
-        self._StopPhotometry(
-            closing=True
-        )  # Make sure photo excitation is stopped
+        self._StopPhotometry(closing=True)  # Make sure photo excitation is stopped
 
         print("GUI Window closed")
         logging.info("GUI Window closed")
@@ -3517,9 +2976,7 @@ class Window(QMainWindow):
 
     def _WaterCalibration(self):
         if self.OpenWaterCalibration == 0:
-            self.WaterCalibration_dialog = WaterCalibrationDialog(
-                MainWindow=self
-            )
+            self.WaterCalibration_dialog = WaterCalibrationDialog(MainWindow=self)
             self.OpenWaterCalibration = 1
         if self.action_Calibration.isChecked() == True:
             self.WaterCalibration_dialog.show()
@@ -3528,9 +2985,7 @@ class Window(QMainWindow):
 
     def _LaserCalibration(self):
         if self.OpenLaserCalibration == 0:
-            self.LaserCalibration_dialog = LaserCalibrationDialog(
-                MainWindow=self
-            )
+            self.LaserCalibration_dialog = LaserCalibrationDialog(MainWindow=self)
             self.OpenLaserCalibration = 1
         if self.actionLaser_Calibration.isChecked() == True:
             self.LaserCalibration_dialog.show()
@@ -3540,13 +2995,9 @@ class Window(QMainWindow):
     def _TimeDistribution(self):
         """Plot simulated ITI/delay/block distribution"""
         if self.TimeDistribution == 0:
-            self.TimeDistribution_dialog = TimeDistributionDialog(
-                MainWindow=self
-            )
+            self.TimeDistribution_dialog = TimeDistributionDialog(MainWindow=self)
             self.TimeDistribution = 1
-            self.TimeDistribution_dialog.setWindowTitle(
-                "Simulated time distribution"
-            )
+            self.TimeDistribution_dialog.setWindowTitle("Simulated time distribution")
         if self.actionTime_distribution.isChecked() == True:
             self.TimeDistribution_dialog.show()
         else:
@@ -3560,9 +3011,7 @@ class Window(QMainWindow):
                     layout.itemAt(i).widget().setParent(None)
                 layout.invalidate()
             if layout is None:
-                layout = QVBoxLayout(
-                    self.TimeDistribution_dialog.VisualizeTimeDist
-                )
+                layout = QVBoxLayout(self.TimeDistribution_dialog.VisualizeTimeDist)
             toolbar = NavigationToolbar(PlotTime, self)
             toolbar.setMaximumHeight(20)
             toolbar.setMaximumWidth(300)
@@ -3616,12 +3065,7 @@ class Window(QMainWindow):
         QMessageBox.about(
             self,
             "Foraging",
-            "<p>Version 1</p>"
-            "<p>Date: Dec 1, 2022</p>"
-            "<p>Behavior control</p>"
-            "<p>Visualization</p>"
-            "<p>Analysis</p>"
-            "<p></p>",
+            "<p>Version 1</p><p>Date: Dec 1, 2022</p><p>Behavior control</p><p>Visualization</p><p>Analysis</p><p></p>",
         )
 
     def _Save_continue(self):
@@ -3639,9 +3083,7 @@ class Window(QMainWindow):
             BackupSave (int): 1, save the current session without stopping the current session and without prompting the user for a save file, 0, save the current session and prompt the user for a save file
         """
 
-        save_clicked = (
-            self.Save.isChecked()
-        )  # save if function was called by save button press
+        save_clicked = self.Save.isChecked()  # save if function was called by save button press
 
         if BackupSave == 1:
             ForceSave = 1
@@ -3660,15 +3102,11 @@ class Window(QMainWindow):
         if ForceSave == 0:
             self._StopCurrentSession()  # stop the current session first
         if (
-            self.BaseWeight.text() == ""
-            or self.WeightAfter.text() == ""
-            or self.TargetRatio.text() == ""
+            self.BaseWeight.text() == "" or self.WeightAfter.text() == "" or self.TargetRatio.text() == ""
         ) and BackupSave == 0:
             response = QMessageBox.question(
                 self,
-                "Box {}, Save without weight or extra water:".format(
-                    self.box_letter
-                ),
+                "Box {}, Save without weight or extra water:".format(self.box_letter),
                 "Do you want to save without weight or extra water information provided?",
                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
                 QMessageBox.Yes,
@@ -3702,9 +3140,7 @@ class Window(QMainWindow):
         ):
             response = QMessageBox.question(
                 self,
-                "Box {}, Save without laser target or laser power:".format(
-                    self.box_letter
-                ),
+                "Box {}, Save without laser target or laser power:".format(self.box_letter),
                 "Do you want to save without complete laser target or laser power calibration information provided?",
                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
                 QMessageBox.Yes,
@@ -3731,11 +3167,7 @@ class Window(QMainWindow):
             logging.info("Stopping excitation before saving")
 
         # get iregular timestamp
-        if (
-            hasattr(self, "GeneratedTrials")
-            and self.InitializeBonsaiSuccessfully == 1
-            and BackupSave == 0
-        ):
+        if hasattr(self, "GeneratedTrials") and self.InitializeBonsaiSuccessfully == 1 and BackupSave == 0:
             self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
 
         # Create new folders.
@@ -3745,9 +3177,7 @@ class Window(QMainWindow):
 
         if not os.path.exists(os.path.dirname(self.SaveFileJson)):
             os.makedirs(os.path.dirname(self.SaveFileJson))
-            logging.info(
-                f"Created new folder: {os.path.dirname(self.SaveFileJson)}"
-            )
+            logging.info(f"Created new folder: {os.path.dirname(self.SaveFileJson)}")
 
         # Save in the standard location
         if SaveAs == 0:
@@ -3794,12 +3224,7 @@ class Window(QMainWindow):
                 )
             }
             widget_dict.update(
-                {
-                    w.objectName(): w
-                    for w in self.TrainingParameters.findChildren(
-                        QtWidgets.QDoubleSpinBox
-                    )
-                }
+                {w.objectName(): w for w in self.TrainingParameters.findChildren(QtWidgets.QDoubleSpinBox)}
             )
             self._Concat(widget_dict, Obj, "None")
             dialogs = [
@@ -3830,22 +3255,13 @@ class Window(QMainWindow):
                 # Do something if self has the GeneratedTrials attribute
                 # Iterate over all attributes of the GeneratedTrials object
                 for attr_name in dir(getattr(self, behavior_data_field)):
-                    if attr_name.startswith("B_") or attr_name.startswith(
-                        "BS_"
-                    ):
-                        if (
-                            attr_name == "B_RewardFamilies"
-                            and self.SaveFile.endswith(".mat")
-                        ):
+                    if attr_name.startswith("B_") or attr_name.startswith("BS_"):
+                        if attr_name == "B_RewardFamilies" and self.SaveFile.endswith(".mat"):
                             pass
                         else:
-                            Value = getattr(
-                                getattr(self, behavior_data_field), attr_name
-                            )
+                            Value = getattr(getattr(self, behavior_data_field), attr_name)
                             try:
-                                if isinstance(Value, float) or isinstance(
-                                    Value, int
-                                ):
+                                if isinstance(Value, float) or isinstance(Value, int):
                                     if math.isnan(Value):
                                         Obj[attr_name] = "nan"
                                     else:
@@ -3853,24 +3269,18 @@ class Window(QMainWindow):
                                 else:
                                     Obj[attr_name] = Value
                             except Exception:
-                                logging.info(
-                                    f"{attr_name} is not a real scalar, save it as it is."
-                                )
+                                logging.info(f"{attr_name} is not a real scalar, save it as it is.")
                                 Obj[attr_name] = Value
 
             # save other events, e.g. session start time
             for attr_name in dir(self):
-                if attr_name.startswith("Other_") or attr_name.startswith(
-                    "info_"
-                ):
+                if attr_name.startswith("Other_") or attr_name.startswith("info_"):
                     Obj[attr_name] = getattr(self, attr_name)
             # save laser calibration results (only for the calibration session)
             if hasattr(self, "LaserCalibration_dialog"):
                 for attr_name in dir(self.LaserCalibration_dialog):
                     if attr_name.startswith("LCM_"):
-                        Obj[attr_name] = getattr(
-                            self.LaserCalibration_dialog, attr_name
-                        )
+                        Obj[attr_name] = getattr(self.LaserCalibration_dialog, attr_name)
 
             # save laser calibration results from the json file
             if hasattr(self, "LaserCalibrationResults"):
@@ -3888,9 +3298,7 @@ class Window(QMainWindow):
                     Obj[attr_name] = getattr(self, attr_name)
 
             if hasattr(self, "fiber_photometry_start_time"):
-                Obj["fiber_photometry_start_time"] = (
-                    self.fiber_photometry_start_time
-                )
+                Obj["fiber_photometry_start_time"] = self.fiber_photometry_start_time
                 if hasattr(self, "fiber_photometry_end_time"):
                     end_time = self.fiber_photometry_end_time
                 else:
@@ -3908,9 +3316,7 @@ class Window(QMainWindow):
             Obj["commit_ID"] = self.behavior_session_model.commit_hash
             Obj["repo_url"] = self.repo_url
             Obj["current_branch"] = self.current_branch
-            Obj["repo_dirty_flag"] = (
-                self.behavior_session_model.allow_dirty_repo
-            )
+            Obj["repo_dirty_flag"] = self.behavior_session_model.allow_dirty_repo
             Obj["dirty_files"] = self.dirty_files
             Obj["version"] = self.behavior_session_model.experiment_version
 
@@ -3938,12 +3344,8 @@ class Window(QMainWindow):
             Obj["ManualWaterVolume"] = self.ManualWaterVolume
 
             # save camera start/stop time
-            Obj["Camera_dialog"][
-                "camera_start_time"
-            ] = self.Camera_dialog.camera_start_time
-            Obj["Camera_dialog"][
-                "camera_stop_time"
-            ] = self.Camera_dialog.camera_stop_time
+            Obj["Camera_dialog"]["camera_start_time"] = self.Camera_dialog.camera_start_time
+            Obj["Camera_dialog"]["camera_stop_time"] = self.Camera_dialog.camera_stop_time
 
             # save the saving type (normal saving, backup saving or force saving)
             Obj["saving_type_label"] = saving_type_label
@@ -3963,9 +3365,7 @@ class Window(QMainWindow):
             self.Metadata_dialog._save_metadata_dialog_parameters()
             Obj["meta_data_dialog"] = self.Metadata_dialog.meta_data
             # generate the metadata file
-            generated_metadata = generate_metadata(
-                session_model=self.behavior_session_model, Obj=Obj
-            )
+            generated_metadata = generate_metadata(session_model=self.behavior_session_model, Obj=Obj)
             session = generated_metadata._session()
 
             if BackupSave == 0:
@@ -3977,12 +3377,8 @@ class Window(QMainWindow):
                     + str(generated_metadata.rig_metadata_success)
                 )
                 logging.warning(text, extra={"tags": [self.warning_log_tag]})
-            Obj["generate_session_metadata_success"] = (
-                generated_metadata.session_metadata_success
-            )
-            Obj["generate_rig_metadata_success"] = (
-                generated_metadata.rig_metadata_success
-            )
+            Obj["generate_session_metadata_success"] = generated_metadata.session_metadata_success
+            Obj["generate_rig_metadata_success"] = generated_metadata.rig_metadata_success
             # create water log result if weight after filled and uncheck save
             if save_clicked:
                 if (
@@ -4006,11 +3402,15 @@ class Window(QMainWindow):
                 ):
                     self._AddWaterLogResult(session)
                 elif self.BaseWeight.text() == "" or self.WeightAfter.text() == "":
-                    logging.error(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims "
-                                  f"due do unrecorded weight information.")
+                    logging.error(
+                        f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims "
+                        f"due do unrecorded weight information."
+                    )
                 elif session is None:
-                    logging.error(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims "
-                                 f"due do metadata generation failure.")
+                    logging.error(
+                        f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims "
+                        f"due do metadata generation failure."
+                    )
         except Exception as e:
             logging.warning(
                 "Meta data is not saved!",
@@ -4064,9 +3464,7 @@ class Window(QMainWindow):
                     "Data saved successfully! However, the ephys recording is still running. Make sure to stop ephys recording and save the data again!",
                 )
                 self.unsaved_data = True
-                self.Save.setStyleSheet(
-                    "color: white;background-color : mediumorchid;"
-                )
+                self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
 
             self.Save.setChecked(False)  # uncheck button
 
@@ -4083,9 +3481,7 @@ class Window(QMainWindow):
         """
 
         if self.load_tag == 0:
-            self.behavior_session_model.date = (
-                datetime.now()
-            )  # update session model with correct date
+            self.behavior_session_model.date = datetime.now()  # update session model with correct date
             self._get_folder_structure_new()
             self.behavior_session_model.session_name = (
                 f"behavior_{self.behavior_session_model.subject}_"
@@ -4105,9 +3501,7 @@ class Window(QMainWindow):
             logging.info(f"Created new folder: {self.MetadataFolder}")
         if not os.path.exists(self.behavior_session_model.root_path):
             os.makedirs(self.behavior_session_model.root_path)
-            logging.info(
-                f"Created new folder: {self.behavior_session_model.root_path}"
-            )
+            logging.info(f"Created new folder: {self.behavior_session_model.root_path}")
         if not os.path.exists(self.HarpFolder):
             os.makedirs(self.HarpFolder)
             logging.info(f"Created new folder: {self.HarpFolder}")
@@ -4124,13 +3518,9 @@ class Window(QMainWindow):
         :return string of the date used to name folders
         """
         formatted_datetime = (
-            os.path.basename(self.fname).split("_")[1]
-            + "_"
-            + os.path.basename(self.fname).split("_")[-1].split(".")[0]
+            os.path.basename(self.fname).split("_")[1] + "_" + os.path.basename(self.fname).split("_")[-1].split(".")[0]
         )
-        self.behavior_session_model.date = datetime.strptime(
-            formatted_datetime, "%Y-%m-%d_%H-%M-%S"
-        )
+        self.behavior_session_model.date = datetime.strptime(formatted_datetime, "%Y-%m-%d_%H-%M-%S")
         if os.path.basename(os.path.dirname(self.fname)) == "TrainingFolder":
             # old data format
             self._get_folder_structure_old()
@@ -4153,23 +3543,13 @@ class Window(QMainWindow):
             session_name,
         )
         self.MetadataFolder = os.path.join(self.SessionFolder, "metadata-dir")
-        self.behavior_session_model.root_path = os.path.join(
-            self.SessionFolder, "TrainingFolder"
-        )
+        self.behavior_session_model.root_path = os.path.join(self.SessionFolder, "TrainingFolder")
         self.HarpFolder = os.path.join(self.SessionFolder, "HarpFolder")
         self.VideoFolder = os.path.join(self.SessionFolder, "VideoFolder")
-        self.PhotometryFolder = os.path.join(
-            self.SessionFolder, "PhotometryFolder"
-        )
-        self.SaveFileMat = os.path.join(
-            self.behavior_session_model.root_path, f"{id_name}.mat"
-        )
-        self.SaveFileJson = os.path.join(
-            self.behavior_session_model.root_path, f"{id_name}.json"
-        )
-        self.SaveFileParJson = os.path.join(
-            self.behavior_session_model.root_path, f"{id_name}.json"
-        )
+        self.PhotometryFolder = os.path.join(self.SessionFolder, "PhotometryFolder")
+        self.SaveFileMat = os.path.join(self.behavior_session_model.root_path, f"{id_name}.mat")
+        self.SaveFileJson = os.path.join(self.behavior_session_model.root_path, f"{id_name}.json")
+        self.SaveFileParJson = os.path.join(self.behavior_session_model.root_path, f"{id_name}.json")
 
     def _get_folder_structure_new(self):
         """get the folder structure for the new data format"""
@@ -4186,25 +3566,15 @@ class Window(QMainWindow):
             self.behavior_session_model.subject,
             session_name,
         )
-        self.behavior_session_model.root_path = os.path.join(
-            self.SessionFolder, "behavior"
-        )
-        self.SaveFileMat = os.path.join(
-            self.behavior_session_model.root_path, f"{id_name}.mat"
-        )
-        self.SaveFileJson = os.path.join(
-            self.behavior_session_model.root_path, f"{id_name}.json"
-        )
-        self.SaveFileParJson = os.path.join(
-            self.behavior_session_model.root_path, f"{id_name}_par.json"
-        )
+        self.behavior_session_model.root_path = os.path.join(self.SessionFolder, "behavior")
+        self.SaveFileMat = os.path.join(self.behavior_session_model.root_path, f"{id_name}.mat")
+        self.SaveFileJson = os.path.join(self.behavior_session_model.root_path, f"{id_name}.json")
+        self.SaveFileParJson = os.path.join(self.behavior_session_model.root_path, f"{id_name}_par.json")
         self.behavior_session_modelJson = os.path.join(
             self.behavior_session_model.root_path,
             f"behavior_session_model_{id_name}.json",
         )
-        self.HarpFolder = os.path.join(
-            self.behavior_session_model.root_path, "raw.harp"
-        )
+        self.HarpFolder = os.path.join(self.behavior_session_model.root_path, "raw.harp")
         self.VideoFolder = os.path.join(self.SessionFolder, "behavior-videos")
         self.PhotometryFolder = os.path.join(self.SessionFolder, "fib")
         self.MetadataFolder = os.path.join(self.SessionFolder, "metadata-dir")
@@ -4265,37 +3635,23 @@ class Window(QMainWindow):
             reply = QMessageBox.critical(
                 self,
                 "Box {}, Load mouse".format(self.box_letter),
-                "Mouse ID {} does not have any saved sessions on this computer".format(
-                    mouse_id
-                ),
+                "Mouse ID {} does not have any saved sessions on this computer".format(mouse_id),
                 QMessageBox.Ok,
             )
-            logging.info(
-                "User input mouse id {}, which had no sessions on this computer".format(
-                    mouse_id
-                )
-            )
+            logging.info("User input mouse id {}, which had no sessions on this computer".format(mouse_id))
             return False, ""
 
         # Are there any session from this mouse?
-        session_dir = os.path.join(
-            self.default_saveFolder, self.current_box, mouse_id
-        )
+        session_dir = os.path.join(self.default_saveFolder, self.current_box, mouse_id)
         sessions = os.listdir(session_dir)
         if len(sessions) == 0:
             reply = QMessageBox.critical(
                 self,
                 "Box {}, Load mouse".format(self.box_letter),
-                "Mouse ID {} does not have any saved sessions on this computer".format(
-                    mouse_id
-                ),
+                "Mouse ID {} does not have any saved sessions on this computer".format(mouse_id),
                 QMessageBox.Ok,
             )
-            logging.info(
-                "User input mouse id {}, which had no sessions on this computer".format(
-                    mouse_id
-                )
-            )
+            logging.info("User input mouse id {}, which had no sessions on this computer".format(mouse_id))
             return False, ""
 
         # do any of the sessions have saved data? Grab the most recent
@@ -4312,13 +3668,7 @@ class Window(QMainWindow):
                 )
                 if os.path.isfile(json_file):
                     date = s.split("_")[2]
-                    session_date = (
-                        date.split("-")[1]
-                        + "/"
-                        + date.split("-")[2]
-                        + "/"
-                        + date.split("-")[0]
-                    )
+                    session_date = date.split("-")[1] + "/" + date.split("-")[2] + "/" + date.split("-")[0]
                     reply = QMessageBox.information(
                         self,
                         "Box {}, Please verify".format(self.box_letter),
@@ -4326,9 +3676,7 @@ class Window(QMainWindow):
                         "Mouse ID: {}</span><br>"
                         "Last session: {}<br>"
                         "Filename: {}<br>"
-                        "Experimenter: {}".format(
-                            mouse_id, session_date, s, experimenter
-                        ),
+                        "Experimenter: {}".format(mouse_id, session_date, s, experimenter),
                         QMessageBox.Ok | QMessageBox.Cancel,
                         QMessageBox.Ok,
                     )
@@ -4342,16 +3690,10 @@ class Window(QMainWindow):
         reply = QMessageBox.critical(
             self,
             "Box {}, Load mouse".format(self.box_letter),
-            "Mouse ID {} does not have any saved sessions on this computer".format(
-                mouse_id
-            ),
+            "Mouse ID {} does not have any saved sessions on this computer".format(mouse_id),
             QMessageBox.Ok,
         )
-        logging.info(
-            "User input mouse id {}, which had no sessions on this computer".format(
-                mouse_id
-            )
-        )
+        logging.info("User input mouse id {}, which had no sessions on this computer".format(mouse_id))
         return False, ""
 
     def _OpenNewMouse(self, mouse_id, experimenter):
@@ -4368,9 +3710,7 @@ class Window(QMainWindow):
             reply = QMessageBox.question(
                 self,
                 "Box {}, Load mouse".format(self.box_letter),
-                'No data for mouse <span style="color:purple;font-weight:bold">{}</span>'.format(
-                    mouse_id
-                )
+                'No data for mouse <span style="color:purple;font-weight:bold">{}</span>'.format(mouse_id)
                 + "<br>Experimenter: {}<br>".format(experimenter)
                 + "start new mouse?<br><br>"
                 + 'This mouse is <span style="color:purple;font-weight:bold">NOT ON THE SCHEDULE</span>',
@@ -4381,18 +3721,14 @@ class Window(QMainWindow):
             reply = QMessageBox.question(
                 self,
                 "Box {}, Load mouse".format(self.box_letter),
-                'No data for mouse <span style="color:purple;font-weight:bold">{}</span>'.format(
-                    mouse_id
-                )
+                'No data for mouse <span style="color:purple;font-weight:bold">{}</span>'.format(mouse_id)
                 + "<br>Experimenter: {}<br>".format(experimenter)
                 + "start new mouse?",
                 QMessageBox.Yes | QMessageBox.No,
                 QMessageBox.Yes,
             )
         if reply == QMessageBox.No:
-            logging.info(
-                "User declines to start new mouse: {}".format(mouse_id)
-            )
+            logging.info("User declines to start new mouse: {}".format(mouse_id))
             return reply
 
         # Set ID, clear weight information
@@ -4426,15 +3762,11 @@ class Window(QMainWindow):
         experimenters = []
 
         # If check_schedule, only show schedule mice as options
-        if self.Settings["check_schedule"] and (
-            self.schedule_mice is not None
-        ):
+        if self.Settings["check_schedule"] and (self.schedule_mice is not None):
             mouse_dirs = [x for x in mouse_dirs if x in self.schedule_mice]
 
         for m in mouse_dirs:
-            session_dir = os.path.join(
-                self.default_saveFolder, self.current_box, str(m)
-            )
+            session_dir = os.path.join(self.default_saveFolder, self.current_box, str(m))
             sessions = os.listdir(session_dir)
             sessions.sort(reverse=True)
             for s in sessions:
@@ -4455,20 +3787,9 @@ class Window(QMainWindow):
                             experimenters.append(name)
                             break
                         except:
-                            logging.info(
-                                "No Experimenter key in {}".format(json_file)
-                            )
-        dates = [
-            datetime.fromtimestamp(
-                os.path.getmtime(os.path.join(filepath, path))
-            )
-            for path in mouse_dirs
-        ]
-        two_week = [
-            mouse_dir
-            for mouse_dir, mod_date in zip(mice, dates)
-            if (now - mod_date).days <= 14
-        ]
+                            logging.info("No Experimenter key in {}".format(json_file))
+        dates = [datetime.fromtimestamp(os.path.getmtime(os.path.join(filepath, path))) for path in mouse_dirs]
+        two_week = [mouse_dir for mouse_dir, mod_date in zip(mice, dates) if (now - mod_date).days <= 14]
         return mice, experimenters, two_week
 
     def _Open(self, open_last=False, input_file=""):
@@ -4490,11 +3811,7 @@ class Window(QMainWindow):
                     W.combo.currentText(),
                 )
                 mouse_id = info.split(" ", 1)[0]
-                experimenter = (
-                    None
-                    if mouse_id not in mice
-                    else experimenters[mice.index(mouse_id)]
-                )
+                experimenter = None if mouse_id not in mice else experimenters[mice.index(mouse_id)]
                 if not ok:
                     logging.info("Quick load failed, user hit cancel or X")
                     return
@@ -4502,18 +3819,10 @@ class Window(QMainWindow):
                 # Mouse ID not in list of mice:
                 if mouse_id not in mice:
                     # figureout out new Mouse
-                    logging.info(
-                        "User entered the ID for a mouse with no data: {}".format(
-                            mouse_id
-                        )
-                    )
-                    experimenter = self._GetInfoFromSchedule(
-                        mouse_id, "Trainer"
-                    )
+                    logging.info("User entered the ID for a mouse with no data: {}".format(mouse_id))
+                    experimenter = self._GetInfoFromSchedule(mouse_id, "Trainer")
                     if experimenter is None:
-                        experimenter = (
-                            self.behavior_session_model.experimenter[0]
-                        )
+                        experimenter = self.behavior_session_model.experimenter[0]
                     reply = self._OpenNewMouse(mouse_id, experimenter)
                     if reply != QMessageBox.No:  # user pressed yes
                         self.NewSession.setChecked(True)
@@ -4521,9 +3830,7 @@ class Window(QMainWindow):
                     return
 
                 # attempt to load last session from mouse
-                good_load, fname = self._OpenLast_find_session(
-                    mouse_id, experimenter
-                )
+                good_load, fname = self._OpenLast_find_session(mouse_id, experimenter)
                 if not good_load:
                     logging.info("Quick load failed")
                     return
@@ -4538,11 +3845,7 @@ class Window(QMainWindow):
                 )
                 logging.info("User selected: {}".format(fname))
                 if fname != "":
-                    self.default_openFolder = os.path.dirname(
-                        os.path.dirname(
-                            os.path.dirname(os.path.dirname(fname))
-                        )
-                    )
+                    self.default_openFolder = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(fname))))
 
             self.fname = fname
 
@@ -4583,12 +3886,7 @@ class Window(QMainWindow):
                         QtWidgets.QSpinBox,
                     )
                     widget_dict.update(
-                        {
-                            w.objectName(): w
-                            for w in getattr(self, dialog_name).findChildren(
-                                widget_types
-                            )
-                        }
+                        {w.objectName(): w for w in getattr(self, dialog_name).findChildren(widget_types)}
                     )
             # Adding widgets starting with 'Laser1_power' and 'Laser2_power' to widget_keys to allow the second update.
             widget_keys = list(widget_dict.keys())
@@ -4612,9 +3910,7 @@ class Window(QMainWindow):
                             CurrentObj = Obj["Opto_dialog"]
                         elif widget.parent().objectName() == "Camera":
                             CurrentObj = Obj["Camera_dialog"]
-                        elif (
-                            widget.parent().objectName() == "CalibrationLaser"
-                        ):
+                        elif widget.parent().objectName() == "CalibrationLaser":
                             CurrentObj = Obj["LaserCalibration_dialog"]
                         elif widget.parent().objectName() == "MetaData":
                             CurrentObj = Obj["Metadata_dialog"]
@@ -4649,12 +3945,8 @@ class Window(QMainWindow):
 
                         # loading_parameters_type=0, get the last value of saved training parameters for each trial;
                         # loading_parameters_type=1, get the current value for single value data directly from the window.
-                        if ("TP_{}".format(key) in CurrentObj) and (
-                            len(CurrentObj["TP_{}".format(key)]) > 1
-                        ):
-                            value = np.array(
-                                [CurrentObj["TP_{}".format(key)][-2]]
-                            )
+                        if ("TP_{}".format(key) in CurrentObj) and (len(CurrentObj["TP_{}".format(key)]) > 1):
+                            value = np.array([CurrentObj["TP_{}".format(key)][-2]])
                             loading_parameters_type = 0
                         else:
                             value = CurrentObj[key]
@@ -4699,48 +3991,29 @@ class Window(QMainWindow):
                                 "SuggestedWater",
                                 "TargetRatio",
                             }:
-                                self.TargetRatio.textChanged.connect(
-                                    self._UpdateSuggestedWater
-                                )
-                                self.WeightAfter.textChanged.connect(
-                                    self._PostWeightChange
-                                )
-                                self.BaseWeight.textChanged.connect(
-                                    self._UpdateSuggestedWater
-                                )
+                                self.TargetRatio.textChanged.connect(self._UpdateSuggestedWater)
+                                self.WeightAfter.textChanged.connect(self._PostWeightChange)
+                                self.BaseWeight.textChanged.connect(self._UpdateSuggestedWater)
                         elif isinstance(widget, QtWidgets.QComboBox):
                             index = widget.findText(final_value)
                             if key.startswith("Frequency_"):
                                 condition = key.split("_")[1]
-                                if CurrentObj["Protocol_" + condition] in [
-                                    "Pulse"
-                                ]:
+                                if CurrentObj["Protocol_" + condition] in ["Pulse"]:
                                     widget.setEditable(True)
                                     widget.lineEdit().setText(final_value)
                                     continue
 
                             if index != -1:
                                 # Alternating on/off for SessionStartWith if SessionAlternating is on
-                                if (
-                                    key == "SessionStartWith"
-                                    and "Opto_dialog" in Obj
-                                ):
+                                if key == "SessionStartWith" and "Opto_dialog" in Obj:
                                     if (
-                                        "SessionAlternating"
-                                        in Obj["Opto_dialog"]
-                                        and "SessionWideControl"
-                                        in Obj["Opto_dialog"]
+                                        "SessionAlternating" in Obj["Opto_dialog"]
+                                        and "SessionWideControl" in Obj["Opto_dialog"]
                                     ):
                                         if (
-                                            Obj["Opto_dialog"][
-                                                "SessionAlternating"
-                                            ]
-                                            == "on"
+                                            Obj["Opto_dialog"]["SessionAlternating"] == "on"
                                             and Obj["OptogeneticsB"] == "on"
-                                            and Obj["Opto_dialog"][
-                                                "SessionWideControl"
-                                            ]
-                                            == "on"
+                                            and Obj["Opto_dialog"]["SessionWideControl"] == "on"
                                         ):
                                             index = 1 - index
                                             widget.setCurrentIndex(index)
@@ -4764,10 +4037,7 @@ class Window(QMainWindow):
                                 self._NextBlock()
                     else:
                         widget = widget_dict[key]
-                        if not (
-                            isinstance(widget, QtWidgets.QComboBox)
-                            or isinstance(widget, QtWidgets.QPushButton)
-                        ):
+                        if not (isinstance(widget, QtWidgets.QComboBox) or isinstance(widget, QtWidgets.QPushButton)):
                             widget.clear()
             except Exception:
                 # Catch the exception and print error information
@@ -4785,17 +4055,11 @@ class Window(QMainWindow):
                 if "info_task" in Obj:
                     self.label_info_task.setText(Obj["info_task"])
                 if "info_performance_others" in Obj:
-                    self.label_info_performance_others.setText(
-                        Obj["info_performance_others"]
-                    )
+                    self.label_info_performance_others.setText(Obj["info_performance_others"])
                 if "info_performance_essential_1" in Obj:
-                    self.label_info_performance_essential_1.setText(
-                        Obj["info_performance_essential_1"]
-                    )
+                    self.label_info_performance_essential_1.setText(Obj["info_performance_essential_1"])
                 if "info_performance_essential_2" in Obj:
-                    self.label_info_performance_essential_2.setText(
-                        Obj["info_performance_essential_2"]
-                    )
+                    self.label_info_performance_essential_2.setText(Obj["info_performance_essential_2"])
             elif self.default_ui == "ForagingGUI_Ephys.ui":
                 if "Other_inforTitle" in Obj:
                     self.infor.setTitle(Obj["Other_inforTitle"])
@@ -4806,10 +4070,7 @@ class Window(QMainWindow):
 
             # Set stage position to last position
             try:
-                if (
-                    "B_StagePositions" in Obj.keys()
-                    and len(Obj["B_StagePositions"]) != 0
-                ):
+                if "B_StagePositions" in Obj.keys() and len(Obj["B_StagePositions"]) != 0:
                     last_positions = Obj["B_StagePositions"][-1]
                     if last_positions is not None:
                         if hasattr(self, "current_stage"):  # newscale stage
@@ -4834,15 +4095,10 @@ class Window(QMainWindow):
                                 2: float(last_positions["y2"]),
                                 3: float(last_positions["z"]),
                             }
-                            self.stage_widget.stage_model.update_position(
-                                positions
-                            )
-                            (
-                                self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
-                            )
+                            self.stage_widget.stage_model.update_position(positions)
+                            (self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit())
                 elif (
-                    "B_NewscalePositions" in Obj.keys()
-                    and len(Obj["B_NewscalePositions"]) != 0
+                    "B_NewscalePositions" in Obj.keys() and len(Obj["B_NewscalePositions"]) != 0
                 ):  # cross compatibility for mice run on older version of code.
                     last_positions = Obj["B_NewscalePositions"][-1]
                     if last_positions is not None:
@@ -4868,17 +4124,13 @@ class Window(QMainWindow):
             # load metadata to the metadata dialog
             if "meta_data_dialog" in Obj:
                 if "session_metadata" in Obj["meta_data_dialog"]:
-                    self.Metadata_dialog.meta_data["session_metadata"] = Obj[
-                        "meta_data_dialog"
-                    ]["session_metadata"]
+                    self.Metadata_dialog.meta_data["session_metadata"] = Obj["meta_data_dialog"]["session_metadata"]
                 self.Metadata_dialog._update_metadata()
 
             # show session list related to that animal
             tag = self._show_sessions()
             if tag != 0:
-                fname_session_folder = os.path.basename(
-                    os.path.dirname(os.path.dirname(fname))
-                )
+                fname_session_folder = os.path.basename(os.path.dirname(os.path.dirname(fname)))
                 Ind = self.Sessionlist.findText(fname_session_folder)
                 self._connect_Sessionlist(connect=False)
                 self.Sessionlist.setCurrentIndex(Ind)
@@ -4911,9 +4163,7 @@ class Window(QMainWindow):
                     else:
                         value = Obj[attr_name]
                     # transfer list to numpy array
-                    if isinstance(
-                        getattr(self.GeneratedTrials, attr_name), np.ndarray
-                    ):
+                    if isinstance(getattr(self.GeneratedTrials, attr_name), np.ndarray):
                         value = np.array(value)
                     # Set the attribute in the GeneratedTrials object
                     setattr(self.GeneratedTrials, attr_name, value)
@@ -4925,31 +4175,15 @@ class Window(QMainWindow):
         # for mat file
         if self.fname.endswith(".mat"):
             # this is a bug to use the scipy.io.loadmat or savemat (it will change the dimension of the nparray)
-            self.GeneratedTrials.B_AnimalResponseHistory = (
-                self.GeneratedTrials.B_AnimalResponseHistory[0]
-            )
-            self.GeneratedTrials.B_TrialStartTime = (
-                self.GeneratedTrials.B_TrialStartTime[0]
-            )
-            self.GeneratedTrials.B_DelayStartTime = (
-                self.GeneratedTrials.B_DelayStartTime[0]
-            )
-            self.GeneratedTrials.B_TrialEndTime = (
-                self.GeneratedTrials.B_TrialEndTime[0]
-            )
-            self.GeneratedTrials.B_GoCueTime = (
-                self.GeneratedTrials.B_GoCueTime[0]
-            )
-            self.GeneratedTrials.B_RewardOutcomeTime = (
-                self.GeneratedTrials.B_RewardOutcomeTime[0]
-            )
+            self.GeneratedTrials.B_AnimalResponseHistory = self.GeneratedTrials.B_AnimalResponseHistory[0]
+            self.GeneratedTrials.B_TrialStartTime = self.GeneratedTrials.B_TrialStartTime[0]
+            self.GeneratedTrials.B_DelayStartTime = self.GeneratedTrials.B_DelayStartTime[0]
+            self.GeneratedTrials.B_TrialEndTime = self.GeneratedTrials.B_TrialEndTime[0]
+            self.GeneratedTrials.B_GoCueTime = self.GeneratedTrials.B_GoCueTime[0]
+            self.GeneratedTrials.B_RewardOutcomeTime = self.GeneratedTrials.B_RewardOutcomeTime[0]
 
-        self.PlotM = PlotV(
-            win=self, GeneratedTrials=self.GeneratedTrials, width=5, height=4
-        )
-        self.PlotM.setSizePolicy(
-            QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding
-        )
+        self.PlotM = PlotV(win=self, GeneratedTrials=self.GeneratedTrials, width=5, height=4)
+        self.PlotM.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
         layout = self.Visualization.layout()
         if layout is not None:
             for i in reversed(range(layout.count())):
@@ -4983,11 +4217,7 @@ class Window(QMainWindow):
             )
 
         # post weight not entered and session ran and new session button was clicked
-        elif (
-            self.WeightAfter.text() == ""
-            and self.session_run
-            and not self.unsaved_data
-        ):
+        elif self.WeightAfter.text() == "" and self.session_run and not self.unsaved_data:
             reply = QMessageBox.critical(
                 self,
                 "Box {}, Foraging Close".format(self.box_letter),
@@ -5006,9 +4236,9 @@ class Window(QMainWindow):
 
         # If yes, clear parameters
         if reply == QMessageBox.Yes:
-            for child in self.TrainingParameters.findChildren(
+            for child in self.TrainingParameters.findChildren(QtWidgets.QLineEdit) + self.centralwidget.findChildren(
                 QtWidgets.QLineEdit
-            ) + self.centralwidget.findChildren(QtWidgets.QLineEdit):
+            ):
                 if child.isEnabled():
                     child.clear()
         else:
@@ -5055,9 +4285,7 @@ class Window(QMainWindow):
                 QMessageBox.No,
             )
             if reply == QMessageBox.No:
-                logging.warning(
-                    "FIP workflow already started, user declines to restart"
-                )
+                logging.warning("FIP workflow already started, user declines to restart")
                 return
             else:
                 logging.warning(
@@ -5074,16 +4302,9 @@ class Window(QMainWindow):
             CWD = os.path.dirname(self.FIP_workflow_path)
             logging.info("Starting FIP workflow in directory: {}".format(CWD))
             folder_path = ' -p session="{}"'.format(self.SessionFolder)
-            camera = ' -p RunCamera="{}"'.format(
-                not self.Camera_dialog.StartRecording.isChecked()
-            )
+            camera = ' -p RunCamera="{}"'.format(not self.Camera_dialog.StartRecording.isChecked())
             process = subprocess.Popen(
-                self.bonsai_path
-                + " "
-                + self.FIP_workflow_path
-                + folder_path
-                + camera
-                + " --start",
+                self.bonsai_path + " " + self.FIP_workflow_path + folder_path + camera + " --start",
                 cwd=CWD,
                 shell=True,
                 stdout=subprocess.PIPE,
@@ -5125,11 +4346,7 @@ class Window(QMainWindow):
             return 0
 
         if self.StartExcitation.isChecked():
-            logging.info(
-                "StartExcitation is checked, photometry mode: {}".format(
-                    self.FIPMode.currentText()
-                )
-            )
+            logging.info("StartExcitation is checked, photometry mode: {}".format(self.FIPMode.currentText()))
             self.StartExcitation.setStyleSheet("background-color : green;")
             try:
                 ser = serial.Serial(self.Teensy_COM, 9600, timeout=1)
@@ -5197,9 +4414,7 @@ class Window(QMainWindow):
                 "No Teensy COM configured for this box, cannot start bleaching",
                 extra={"tags": [self.warning_log_tag]},
             )
-            msg = (
-                "No Teensy COM configured for this box, cannot start bleaching"
-            )
+            msg = "No Teensy COM configured for this box, cannot start bleaching"
             reply = QMessageBox.information(
                 self,
                 "Box {}, StartBleaching".format(self.box_letter),
@@ -5245,9 +4460,7 @@ class Window(QMainWindow):
                 # Trigger Teensy with the above specified exp mode
                 ser.write(b"d")
                 ser.close()
-                logging.info(
-                    "Start bleaching!", extra={"tags": [self.warning_log_tag]}
-                )
+                logging.info("Start bleaching!", extra={"tags": [self.warning_log_tag]})
             except Exception as e:
                 logging.error(traceback.format_exc())
 
@@ -5269,12 +4482,8 @@ class Window(QMainWindow):
             else:
                 # Bleaching continues until user stops
                 msgbox = QMessageBox()
-                msgbox.setWindowTitle(
-                    "Box {}, bleaching:".format(self.box_letter)
-                )
-                msgbox.setText(
-                    "Photobleaching in progress, do not close the GUI."
-                )
+                msgbox.setWindowTitle("Box {}, bleaching:".format(self.box_letter))
+                msgbox.setText("Photobleaching in progress, do not close the GUI.")
                 msgbox.setStandardButtons(QMessageBox.Ok)
                 button = msgbox.button(QMessageBox.Ok)
                 button.setText("Stop bleaching")
@@ -5308,10 +4517,7 @@ class Window(QMainWindow):
             ser.write(b"s")
             ser.close()
         except Exception as e:
-            logging.info(
-                "Could not stop photometry, most likely this means photometry is not running: "
-                + str(e)
-            )
+            logging.info("Could not stop photometry, most likely this means photometry is not running: " + str(e))
         else:
             logging.info("Photometry excitation stopped")
         finally:
@@ -5324,9 +4530,7 @@ class Window(QMainWindow):
 
         if (FIP_was_running) & (not closing):
             self.FIP_msgbox = QMessageBox()
-            self.FIP_msgbox.setWindowTitle(
-                "Box {}, New Session:".format(self.box_letter)
-            )
+            self.FIP_msgbox.setWindowTitle("Box {}, New Session:".format(self.box_letter))
             self.FIP_msgbox.setText("Please restart the FIP workflow")
             self.FIP_msgbox.setStandardButtons(QMessageBox.Ok)
             self.FIP_msgbox.setModal(False)
@@ -5399,10 +4603,7 @@ class Window(QMainWindow):
                 return False
         # post weight not entered and session ran and new session button was clicked
         elif (
-            self.WeightAfter.text() == ""
-            and self.session_run
-            and not self.unsaved_data
-            and self.NewSession.isChecked()
+            self.WeightAfter.text() == "" and self.session_run and not self.unsaved_data and self.NewSession.isChecked()
         ):
             reply = QMessageBox.critical(
                 self,
@@ -5507,12 +4708,8 @@ class Window(QMainWindow):
                 QApplication.processEvents()
                 if self.ANewTrial == 1:
                     break
-                elif (
-                    time.time() - start_time
-                ) > stall_duration * stall_iteration:
-                    elapsed_time = int(
-                        np.floor(stall_duration * stall_iteration / 60)
-                    )
+                elif (time.time() - start_time) > stall_duration * stall_iteration:
+                    elapsed_time = int(np.floor(stall_duration * stall_iteration / 60))
                     message = "{} minutes have elapsed since trial stopped was initiated. Force stop?".format(
                         elapsed_time
                     )
@@ -5524,20 +4721,12 @@ class Window(QMainWindow):
                         QMessageBox.Yes,
                     )
                     if reply == QMessageBox.Yes:
-                        logging.error(
-                            "trial stalled {} minutes, user force stopped trials".format(
-                                elapsed_time
-                            )
-                        )
+                        logging.error("trial stalled {} minutes, user force stopped trials".format(elapsed_time))
                         self.ANewTrial = 1
                         break
                     else:
                         stall_iteration += 1
-                        logging.info(
-                            "trial stalled {} minutes, user did not force stopped trials".format(
-                                elapsed_time
-                            )
-                        )
+                        logging.info("trial stalled {} minutes, user did not force stopped trials".format(elapsed_time))
 
     def _thread_complete(self):
         """complete of a trial"""
@@ -5576,9 +4765,7 @@ class Window(QMainWindow):
         if len(str(seconds)) == 1:
             seconds = "0{}".format(seconds)
         if not self.ignore_timer:
-            self.photometry_timer_label.setText(
-                "Running photometry baseline: {}:{}".format(minutes, seconds)
-            )
+            self.photometry_timer_label.setText("Running photometry baseline: {}:{}".format(minutes, seconds))
 
     def _set_metadata_enabled(self, enable: bool):
         """Enable or disable metadata fields"""
@@ -5589,9 +4776,7 @@ class Window(QMainWindow):
         """Set default project information"""
         project_name = "Behavior Platform"
         logging.error(
-            "Setting default project name for mouse {}: {}".format(
-                self.behavior_session_model.subject, project_name
-            )
+            "Setting default project name for mouse {}: {}".format(self.behavior_session_model.subject, project_name)
         )
 
         # Check if Behavior Platform is in project list
@@ -5599,12 +4784,8 @@ class Window(QMainWindow):
             self.Metadata_dialog.ProjectName.addItem(project_name)
 
         # Set project name
-        self.Metadata_dialog.meta_data["session_metadata"][
-            "ProjectName"
-        ] = project_name
-        self.Metadata_dialog._update_metadata(
-            update_rig_metadata=False, update_session_metadata=True
-        )
+        self.Metadata_dialog.meta_data["session_metadata"]["ProjectName"] = project_name
+        self.Metadata_dialog._update_metadata(update_rig_metadata=False, update_session_metadata=True)
 
         return project_name
 
@@ -5656,11 +4837,7 @@ class Window(QMainWindow):
         self.load_tag = 0
 
         # post weight not entered and session ran
-        if (
-            self.WeightAfter.text() == ""
-            and self.session_run
-            and not self.unsaved_data
-        ):
+        if self.WeightAfter.text() == "" and self.session_run and not self.unsaved_data:
             reply = QMessageBox.critical(
                 self,
                 "Box {}, Foraging Close".format(self.box_letter),
@@ -5699,39 +4876,25 @@ class Window(QMainWindow):
             if (
                 hasattr(self, "schedule")
                 and mouse_id in self.schedule["Mouse ID"].values
-                and mouse_id
-                not in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+                and mouse_id not in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
             ):
                 fip_mode = self._GetInfoFromSchedule(mouse_id, "FIP Mode")
-                fip_is_nan = (
-                    isinstance(fip_mode, float) and math.isnan(fip_mode)
-                ) or fip_mode is None
+                fip_is_nan = (isinstance(fip_mode, float) and math.isnan(fip_mode)) or fip_mode is None
                 # remove STAGE_ string for consistency between schedule and auto-train. Schedule denotes final stage as
                 # FINAL and auto-train has STAGE_FINAL
-                first_fip_stage = str(
-                    self._GetInfoFromSchedule(mouse_id, "First FP Stage")
-                ).split("STAGE_")[-1]
-                current_stage = self.AutoTrain_dialog.stage_in_use.split(
-                    "STAGE_"
-                )[-1]
-                stages = (
-                    ["nan"]
-                    + [ts.name.split("STAGE_")[-1] for ts in TrainingStage]
-                    + ["unknown training stage"]
-                )
+                first_fip_stage = str(self._GetInfoFromSchedule(mouse_id, "First FP Stage")).split("STAGE_")[-1]
+                current_stage = self.AutoTrain_dialog.stage_in_use.split("STAGE_")[-1]
+                stages = ["nan"] + [ts.name.split("STAGE_")[-1] for ts in TrainingStage] + ["unknown training stage"]
                 if fip_is_nan and self.PhotometryB.currentText() == "on":
                     reply = QMessageBox.critical(
                         self,
                         "Box {}, Start".format(self.box_letter),
-                        'Photometry is set to "on", but the FIP Mode is not in schedule. '
-                        "Continue anyways?",
+                        'Photometry is set to "on", but the FIP Mode is not in schedule. Continue anyways?',
                         QMessageBox.Yes | QMessageBox.No,
                     )
                     if reply == QMessageBox.No:
                         self.Start.setChecked(False)
-                        logging.info(
-                            "User declines starting session due to conflicting FIP information"
-                        )
+                        logging.info("User declines starting session due to conflicting FIP information")
                         return
                     else:
                         # Allow the session to continue, but log error
@@ -5744,21 +4907,17 @@ class Window(QMainWindow):
                     not fip_is_nan
                     and self.PhotometryB.currentText() == "off"
                     and first_fip_stage in stages
-                    and stages.index(current_stage)
-                    >= stages.index(first_fip_stage)
+                    and stages.index(current_stage) >= stages.index(first_fip_stage)
                 ):
                     reply = QMessageBox.critical(
                         self,
                         "Box {}, Start".format(self.box_letter),
-                        f'Photometry is set to "off" but schedule indicate '
-                        f"FIP Mode is {fip_mode}. Continue anyways?",
+                        f'Photometry is set to "off" but schedule indicate FIP Mode is {fip_mode}. Continue anyways?',
                         QMessageBox.Yes | QMessageBox.No,
                     )
                     if reply == QMessageBox.No:
                         self.Start.setChecked(False)
-                        logging.info(
-                            "User declines starting session due to conflicting FIP information"
-                        )
+                        logging.info("User declines starting session due to conflicting FIP information")
                         return
                     else:
                         # Allow the session to continue, but log error
@@ -5770,9 +4929,7 @@ class Window(QMainWindow):
                         )
 
                 elif (
-                    not fip_is_nan
-                    and fip_mode != self.FIPMode.currentText()
-                    and self.PhotometryB.currentText() == "on"
+                    not fip_is_nan and fip_mode != self.FIPMode.currentText() and self.PhotometryB.currentText() == "on"
                 ):
                     reply = QMessageBox.critical(
                         self,
@@ -5783,9 +4940,7 @@ class Window(QMainWindow):
                     )
                     if reply == QMessageBox.No:
                         self.Start.setChecked(False)
-                        logging.info(
-                            "User declines starting session due to conflicting FIP information"
-                        )
+                        logging.info("User declines starting session due to conflicting FIP information")
                         return
                     else:
                         # Allow the session to continue, but log error
@@ -5822,16 +4977,11 @@ class Window(QMainWindow):
                 self.Start.setChecked(False)
                 logging.info("User declines using default name")
                 return
-            logging.info(
-                "Starting session, with experimenter: {}".format(
-                    self.behavior_session_model.experimenter[0]
-                )
-            )
+            logging.info("Starting session, with experimenter: {}".format(self.behavior_session_model.experimenter[0]))
 
             # check repo status
             if (self.current_branch not in ["main", "production_testing"]) & (
-                self.behavior_session_model.subject
-                not in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+                self.behavior_session_model.subject not in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
             ):
                 # Prompt user over off-pipeline branch
                 reply = QMessageBox.critical(
@@ -5846,25 +4996,18 @@ class Window(QMainWindow):
                 if reply == QMessageBox.No:
                     # Stop session
                     self.Start.setChecked(False)
-                    logging.info(
-                        "User declines starting session on branch: {}".format(
-                            self.current_branch
-                        )
-                    )
+                    logging.info("User declines starting session on branch: {}".format(self.current_branch))
                     return
                 else:
                     # Allow the session to continue, but log error
                     logging.error(
-                        "Starting session on branch: {}".format(
-                            self.current_branch
-                        ),
+                        "Starting session on branch: {}".format(self.current_branch),
                         extra={"tags": [self.warning_log_tag]},
                     )
 
             # Check for untracked local changes
             if self.behavior_session_model.allow_dirty_repo & (
-                self.behavior_session_model.subject
-                not in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+                self.behavior_session_model.subject not in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
             ):
                 # prompt user over untracked local changes
                 reply = QMessageBox.critical(
@@ -5877,24 +5020,18 @@ class Window(QMainWindow):
                 if reply == QMessageBox.No:
                     # Stop session
                     self.Start.setChecked(False)
-                    logging.info(
-                        "User declines starting session with untracked changes"
-                    )
+                    logging.info("User declines starting session with untracked changes")
                     return
                 else:
                     # Allow the session to continue, but log error
                     logging.error(
-                        "Starting session with untracked local changes: {}".format(
-                            self.dirty_files
-                        ),
+                        "Starting session with untracked local changes: {}".format(self.dirty_files),
                         extra={"tags": [self.warning_log_tag]},
                     )
             elif self.behavior_session_model.allow_dirty_repo is None:
                 logging.error("Could not check for untracked local changes")
 
-            if self.PhotometryB.currentText() == "on" and (
-                not self.FIP_started
-            ):
+            if self.PhotometryB.currentText() == "on" and (not self.FIP_started):
                 reply = QMessageBox.critical(
                     self,
                     "Box {}, Start".format(self.box_letter),
@@ -5902,18 +5039,12 @@ class Window(QMainWindow):
                     QMessageBox.Ok,
                 )
                 self.Start.setChecked(False)
-                logging.info(
-                    "Cannot start session without starting FIP workflow"
-                )
+                logging.info("Cannot start session without starting FIP workflow")
                 return
 
             # Check if photometry excitation is running or not
-            if self.PhotometryB.currentText() == "on" and (
-                not self.StartExcitation.isChecked()
-            ):
-                logging.warning(
-                    'photometry is set to "on", but excitation is not running'
-                )
+            if self.PhotometryB.currentText() == "on" and (not self.StartExcitation.isChecked()):
+                logging.warning('photometry is set to "on", but excitation is not running')
 
                 reply = QMessageBox.question(
                     self,
@@ -5933,9 +5064,7 @@ class Window(QMainWindow):
                             "Could not start excitation, therefore cannot start the session",
                             QMessageBox.Ok,
                         )
-                        logging.info(
-                            "could not start session, due to failure to start excitation"
-                        )
+                        logging.info("could not start session, due to failure to start excitation")
                         self.Start.setChecked(False)
                         return
                 else:
@@ -6032,15 +5161,11 @@ class Window(QMainWindow):
                 # camera will start recording
                 self.Camera_dialog.StartRecording.setChecked(True)
             self.SessionStartTime = datetime.now()
-            self.Other_SessionStartTime = str(
-                self.SessionStartTime
-            )  # for saving
+            self.Other_SessionStartTime = str(self.SessionStartTime)  # for saving
             GeneratedTrials = GenerateTrials(self)
             self.GeneratedTrials = GeneratedTrials
             self.StartANewSession = 0
-            PlotM = PlotV(
-                win=self, GeneratedTrials=GeneratedTrials, width=5, height=4
-            )
+            PlotM = PlotV(win=self, GeneratedTrials=GeneratedTrials, width=5, height=4)
             # PlotM.finish=1
             self.PlotM = PlotM
             # generate the first trial outside the loop, only for new session
@@ -6064,9 +5189,7 @@ class Window(QMainWindow):
 
         if self.ToInitializeVisual == 1:  # only run once
             self.PlotM = PlotM
-            self.PlotM.setSizePolicy(
-                QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding
-            )
+            self.PlotM.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
             layout = self.Visualization.layout()
             if layout is not None:
                 for i in reversed(range(layout.count())):
@@ -6091,9 +5214,7 @@ class Window(QMainWindow):
                 self.data_lock,
             )
             worker1.signals.finished.connect(self._thread_complete)
-            workerLick = Worker(
-                GeneratedTrials._get_irregular_timestamp, self.Channel2
-            )
+            workerLick = Worker(GeneratedTrials._get_irregular_timestamp, self.Channel2)
             workerLick.signals.finished.connect(self._thread_complete2)
             workerPlot = Worker(
                 PlotM._Update,
@@ -6101,12 +5222,8 @@ class Window(QMainWindow):
                 Channel=self.Channel2,
             )
             workerPlot.signals.finished.connect(self._thread_complete3)
-            workerGenerateAtrial = Worker(
-                GeneratedTrials._GenerateATrial, self.Channel4
-            )
-            workerGenerateAtrial.signals.finished.connect(
-                self._thread_complete4
-            )
+            workerGenerateAtrial = Worker(GeneratedTrials._GenerateATrial, self.Channel4)
+            workerGenerateAtrial.signals.finished.connect(self._thread_complete4)
             workerStartTrialLoop = Worker(
                 self._StartTrialLoop,
                 GeneratedTrials,
@@ -6114,9 +5231,7 @@ class Window(QMainWindow):
                 workerPlot,
                 workerGenerateAtrial,
             )
-            workerStartTrialLoop1 = Worker(
-                self._StartTrialLoop1, GeneratedTrials
-            )
+            workerStartTrialLoop1 = Worker(self._StartTrialLoop1, GeneratedTrials)
             worker_save = Worker(self._perform_backup, BackupSave=1)
             worker_save.signals.finished.connect(self._thread_complete6)
             self.worker1 = worker1
@@ -6137,11 +5252,7 @@ class Window(QMainWindow):
             worker_save = self.worker_save
 
         # collecting the base signal for photometry. Only run once
-        if (
-            self.Start.isChecked()
-            and self.PhotometryB.currentText() == "on"
-            and self.PhotometryRun == 0
-        ):
+        if self.Start.isChecked() and self.PhotometryB.currentText() == "on" and self.PhotometryRun == 0:
             logging.info("Starting photometry baseline timer")
             self.finish_Timer = 0
             self.PhotometryRun = 1
@@ -6149,20 +5260,14 @@ class Window(QMainWindow):
 
             # create label to display time remaining on photometry label and add to warning widget
             self.photometry_timer_label = QLabel()
-            self.photometry_timer_label.setStyleSheet(
-                f"color: {self.default_warning_color};"
-            )
-            self.warning_widget.layout().insertWidget(
-                0, self.photometry_timer_label
-            )
+            self.photometry_timer_label.setStyleSheet(f"color: {self.default_warning_color};")
+            self.warning_widget.layout().insertWidget(0, self.photometry_timer_label)
 
             # If we already created a workertimer and thread we can reuse them
             if not hasattr(self, "workertimer"):
                 self.workertimer = TimerWorker()
                 self.workertimer_thread = QThread()
-                self.workertimer.progress.connect(
-                    self._update_photometery_timer
-                )
+                self.workertimer.progress.connect(self._update_photometery_timer)
                 self.workertimer.finished.connect(self._thread_complete_timer)
                 self.Time.connect(self.workertimer._Timer)
                 self.workertimer.moveToThread(self.workertimer_thread)
@@ -6178,9 +5283,7 @@ class Window(QMainWindow):
 
         if self.actionDrawing_after_stopping.isChecked() == True:
             try:
-                self.PlotM._Update(
-                    GeneratedTrials=GeneratedTrials, Channel=self.Channel2
-                )
+                self.PlotM._Update(GeneratedTrials=GeneratedTrials, Channel=self.Channel2)
             except Exception:
                 logging.error(traceback.format_exc())
 
@@ -6194,32 +5297,22 @@ class Window(QMainWindow):
             # fill out GenerateTrials B_Bias
             last_bias = self.GeneratedTrials.B_Bias[-1]
             b_bias_len = len(self.GeneratedTrials.B_Bias)
-            bias_filler = [last_bias] * (
-                (self.GeneratedTrials.B_CurrentTrialN + 1) - b_bias_len
-            )
-            self.GeneratedTrials.B_Bias = np.concatenate(
-                (self.GeneratedTrials.B_Bias, bias_filler), axis=0
-            )
+            bias_filler = [last_bias] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_bias_len)
+            self.GeneratedTrials.B_Bias = np.concatenate((self.GeneratedTrials.B_Bias, bias_filler), axis=0)
 
             # fill out GenerateTrials B_Bias_CI
             last_ci = self.GeneratedTrials.B_Bias_CI[-1]
             b_ci_len = len(self.GeneratedTrials.B_Bias_CI)
-            ci_filler = [last_ci] * (
-                (self.GeneratedTrials.B_CurrentTrialN + 1) - b_ci_len
-            )
+            ci_filler = [last_ci] * ((self.GeneratedTrials.B_CurrentTrialN + 1) - b_ci_len)
             if ci_filler != []:
-                self.GeneratedTrials.B_Bias_CI = np.concatenate(
-                    (self.GeneratedTrials.B_Bias_CI, ci_filler), axis=0
-                )
+                self.GeneratedTrials.B_Bias_CI = np.concatenate((self.GeneratedTrials.B_Bias_CI, ci_filler), axis=0)
 
             # stop lick interval calculation
             self.GeneratedTrials.lick_interval_time.stop()
 
         # validate behavior session model and document validation errors if any
         try:
-            AindBehaviorSessionModel(
-                **self.behavior_session_model.model_dump()
-            )
+            AindBehaviorSessionModel(**self.behavior_session_model.model_dump())
         except ValidationError as e:
             logging.error(str(e), extra={"tags": [self.warning_log_tag]})
 
@@ -6232,9 +5325,7 @@ class Window(QMainWindow):
         Setup a log handler to write logs during session to TrainingFolder
         """
 
-        logging_filename = os.path.join(
-            self.behavior_session_model.root_path, "python_gui_log.txt"
-        )
+        logging_filename = os.path.join(self.behavior_session_model.root_path, "python_gui_log.txt")
 
         # Format the log file:
         log_format = "%(asctime)s:%(levelname)s:%(module)s:%(filename)s:%(funcName)s:line %(lineno)d:%(message)s"
@@ -6246,9 +5337,7 @@ class Window(QMainWindow):
         self.session_log_handler.setLevel(logging.INFO)
         logger.root.addHandler(self.session_log_handler)
 
-        logging.info(
-            f"Starting log file at {self.behavior_session_model.root_path}"
-        )
+        logging.info(f"Starting log file at {self.behavior_session_model.root_path}")
 
     def end_session_log(self) -> None:
         """
@@ -6256,9 +5345,7 @@ class Window(QMainWindow):
         """
 
         if self.session_log_handler is not None:
-            logging.info(
-                f"Closing log file at {self.session_log_handler.baseFilename}"
-            )
+            logging.info(f"Closing log file at {self.session_log_handler.baseFilename}")
             self.session_log_handler.close()
             logger.root.removeHandler(self.session_log_handler)
             self.session_log_handler = None
@@ -6278,11 +5365,7 @@ class Window(QMainWindow):
 
         while self.Start.isChecked():
             QApplication.processEvents()
-            if (
-                self.ANewTrial == 1
-                and self.Start.isChecked()
-                and self.finish_Timer == 1
-            ):
+            if self.ANewTrial == 1 and self.Start.isChecked() and self.finish_Timer == 1:
                 # Reset stall timer
                 last_trial_start = time.time()
                 stall_iteration = 1
@@ -6290,19 +5373,12 @@ class Window(QMainWindow):
                 # can start a new trial when we receive the trial end signal from Bonsai
                 self.ANewTrial = 0
                 GeneratedTrials.B_CurrentTrialN += 1
-                print(
-                    "Current trial: "
-                    + str(GeneratedTrials.B_CurrentTrialN + 1)
-                )
-                logging.info(
-                    "Current trial: "
-                    + str(GeneratedTrials.B_CurrentTrialN + 1)
-                )
+                print("Current trial: " + str(GeneratedTrials.B_CurrentTrialN + 1))
+                logging.info("Current trial: " + str(GeneratedTrials.B_CurrentTrialN + 1))
                 if (
                     self.GeneratedTrials.TP_AutoReward
                     or int(self.GeneratedTrials.TP_BlockMinReward) > 0
-                    or self.GeneratedTrials.TP_Task
-                    in ["Uncoupled Baiting", "Uncoupled Without Baiting"]
+                    or self.GeneratedTrials.TP_Task in ["Uncoupled Baiting", "Uncoupled Without Baiting"]
                 ) or self.AddOneTrialForNoresponse.currentText() == "Yes":
                     # The next trial parameters must be dependent on the current trial's choice
                     # get animal response and then generate a new trial
@@ -6314,9 +5390,7 @@ class Window(QMainWindow):
 
                 # initiate the generated trial
                 try:
-                    GeneratedTrials._InitiateATrial(
-                        self.Channel, self.Channel4
-                    )
+                    GeneratedTrials._InitiateATrial(self.Channel, self.Channel4)
                 except Exception as e:
                     if "ConnectionAbortedError" in str(e):
                         logging.info("lost bonsai connection: InitiateATrial")
@@ -6338,9 +5412,7 @@ class Window(QMainWindow):
                             self._ReconnectBonsai()
                             logging.info("User selected reconnect bonsai")
                         else:
-                            logging.info(
-                                "User selected not to reconnect bonsai"
-                            )
+                            logging.info("User selected not to reconnect bonsai")
                         self.ANewTrial = 1
 
                         break
@@ -6358,9 +5430,7 @@ class Window(QMainWindow):
                         break
                 # receive licks and update figures
                 if self.actionDrawing_after_stopping.isChecked() == False:
-                    self.PlotM._Update(
-                        GeneratedTrials=GeneratedTrials, Channel=self.Channel2
-                    )
+                    self.PlotM._Update(GeneratedTrials=GeneratedTrials, Channel=self.Channel2)
                 # update licks statistics
                 if self.actionLicks_sta.isChecked():
                     self.PlotLick._Update(GeneratedTrials=GeneratedTrials)
@@ -6371,33 +5441,17 @@ class Window(QMainWindow):
                     self._generate_upload_manifest()
 
                 # calculate bias every 10 trials
-                if (
-                    GeneratedTrials.B_CurrentTrialN + 1
-                ) % 10 == 0 and GeneratedTrials.B_CurrentTrialN + 1 > 20:
+                if (GeneratedTrials.B_CurrentTrialN + 1) % 10 == 0 and GeneratedTrials.B_CurrentTrialN + 1 > 20:
                     # correctly format data for bias indicator
 
                     formatted_history = [
-                        np.nan if x == 2 else int(x)
-                        for x in self.GeneratedTrials.B_AnimalResponseHistory
+                        np.nan if x == 2 else int(x) for x in self.GeneratedTrials.B_AnimalResponseHistory
                     ]
-                    formatted_reward = [
-                        any(x)
-                        for x in np.column_stack(
-                            self.GeneratedTrials.B_RewardedHistory
-                        )
-                    ]
+                    formatted_reward = [any(x) for x in np.column_stack(self.GeneratedTrials.B_RewardedHistory)]
 
                     # only take last 200 trials if enough trials have happened
-                    choice_history = (
-                        formatted_history[-200:]
-                        if len(formatted_history) > 200
-                        else formatted_history
-                    )
-                    any_reward = (
-                        formatted_reward[-200:]
-                        if len(formatted_reward) > 200
-                        else formatted_reward
-                    )
+                    choice_history = formatted_history[-200:] if len(formatted_history) > 200 else formatted_history
+                    any_reward = formatted_reward[-200:] if len(formatted_reward) > 200 else formatted_reward
 
                     # add data to bias_indicator
                     if not self.bias_thread.is_alive():
@@ -6407,24 +5461,18 @@ class Window(QMainWindow):
                             kwargs={
                                 "trial_num": len(formatted_history),
                                 "choice_history": choice_history,
-                                "reward_history": np.array(any_reward).astype(
-                                    int
-                                ),
+                                "reward_history": np.array(any_reward).astype(int),
                                 "n_trial_back": 5,
                                 "cv": 1,
                             },
                         )
                         self.bias_thread.start()
                     else:
-                        logger.debug(
-                            "Skipping bias calculation as previous is still in progress. "
-                        )
+                        logger.debug("Skipping bias calculation as previous is still in progress. ")
 
                 # save the data everytrial
                 if GeneratedTrials.CurrentSimulation == True:
-                    GeneratedTrials._GetAnimalResponse(
-                        self.Channel, self.Channel3, self.data_lock
-                    )
+                    GeneratedTrials._GetAnimalResponse(self.Channel, self.Channel3, self.data_lock)
                     self.ANewTrial = 1
                     self.NewTrialRewardOrder = 1
                 else:
@@ -6447,29 +5495,22 @@ class Window(QMainWindow):
                 # show disk space
                 self._show_disk_space()
 
-            elif (
-                (time.time() - last_trial_start)
-                > stall_duration * stall_iteration
-            ) and (
-                (time.time() - self.Channel.last_message_time)
-                > stall_duration * stall_iteration
+            elif ((time.time() - last_trial_start) > stall_duration * stall_iteration) and (
+                (time.time() - self.Channel.last_message_time) > stall_duration * stall_iteration
             ):
                 # Elapsed time since last trial is more than tolerance
                 # and elapsed time since last harp message is more than tolerance
 
                 # Check if we are in the photometry baseline period.
                 if (self.finish_Timer == 0) & (
-                    (time.time() - last_trial_start)
-                    < (float(self.baselinetime.text()) * 60 + 10)
+                    (time.time() - last_trial_start) < (float(self.baselinetime.text()) * 60 + 10)
                 ):
                     # Extra 10 seconds is to avoid any race conditions
                     # We are in the photometry baseline period
                     continue
 
                 # Prompt user to stop trials
-                elapsed_time = int(
-                    np.floor(stall_duration * stall_iteration / 60)
-                )
+                elapsed_time = int(np.floor(stall_duration * stall_iteration / 60))
                 message = "{} minutes have elapsed since the last trial started. Bonsai may have stopped. Stop trials?".format(
                     elapsed_time
                 )
@@ -6510,11 +5551,7 @@ class Window(QMainWindow):
                     break
                 else:
                     # User continues, wait another stall_duration and prompt again
-                    logging.error(
-                        "trial stalled {} minutes, user continued trials".format(
-                            elapsed_time
-                        )
-                    )
+                    logging.error("trial stalled {} minutes, user continued trials".format(elapsed_time))
                     stall_iteration += 1
 
     def _perform_backup(self, BackupSave):
@@ -6539,56 +5576,31 @@ class Window(QMainWindow):
         self.B_Bias_R = bias
         # back-fill bias list with previous bias
         last_bias_filler = [self.GeneratedTrials.B_Bias[-1]] * (
-            self.GeneratedTrials.B_CurrentTrialN
-            - len(self.GeneratedTrials.B_Bias)
+            self.GeneratedTrials.B_CurrentTrialN - len(self.GeneratedTrials.B_Bias)
         )
-        self.GeneratedTrials.B_Bias = np.concatenate(
-            (self.GeneratedTrials.B_Bias, last_bias_filler), axis=0
-        )
-        self.GeneratedTrials.B_Bias[trial_number - 1 :] = (
-            bias  # set last value to newest bias
-        )
+        self.GeneratedTrials.B_Bias = np.concatenate((self.GeneratedTrials.B_Bias, last_bias_filler), axis=0)
+        self.GeneratedTrials.B_Bias[trial_number - 1 :] = bias  # set last value to newest bias
 
         # back-fill bias confidence interval list with previous bias CI
         last_ci_filler = [self.GeneratedTrials.B_Bias_CI[-1]] * (
-            self.GeneratedTrials.B_CurrentTrialN
-            - len(self.GeneratedTrials.B_Bias_CI)
+            self.GeneratedTrials.B_CurrentTrialN - len(self.GeneratedTrials.B_Bias_CI)
         )
         if last_ci_filler != []:
-            self.GeneratedTrials.B_Bias_CI = np.concatenate(
-                (self.GeneratedTrials.B_Bias_CI, last_ci_filler), axis=0
-            )
-            self.GeneratedTrials.B_Bias_CI[trial_number - 1 :] = (
-                confidence_interval  # set last value to newest bias CI
-            )
+            self.GeneratedTrials.B_Bias_CI = np.concatenate((self.GeneratedTrials.B_Bias_CI, last_ci_filler), axis=0)
+            self.GeneratedTrials.B_Bias_CI[trial_number - 1 :] = confidence_interval  # set last value to newest bias CI
 
         self.GeneratedTrials.B_Bias[trial_number - 1 :] = bias
 
-    def _StartTrialLoop1(
-        self, GeneratedTrials, worker1, workerPlot, workerGenerateAtrial
-    ):
+    def _StartTrialLoop1(self, GeneratedTrials, worker1, workerPlot, workerGenerateAtrial):
         logging.info("starting trial loop 1")
         while self.Start.isChecked():
             QApplication.processEvents()
-            if (
-                self.ANewTrial == 1
-                and self.ToGenerateATrial == 1
-                and self.Start.isChecked()
-            ):
+            if self.ANewTrial == 1 and self.ToGenerateATrial == 1 and self.Start.isChecked():
                 self.ANewTrial = 0  # can start a new trial when we receive the trial end signal from Bonsai
                 GeneratedTrials.B_CurrentTrialN += 1
-                print(
-                    "Current trial: "
-                    + str(GeneratedTrials.B_CurrentTrialN + 1)
-                )
-                logging.info(
-                    "Current trial: "
-                    + str(GeneratedTrials.B_CurrentTrialN + 1)
-                )
-                if not (
-                    self.GeneratedTrials.TP_AutoReward
-                    or int(self.GeneratedTrials.TP_BlockMinReward) > 0
-                ):
+                print("Current trial: " + str(GeneratedTrials.B_CurrentTrialN + 1))
+                logging.info("Current trial: " + str(GeneratedTrials.B_CurrentTrialN + 1))
+                if not (self.GeneratedTrials.TP_AutoReward or int(self.GeneratedTrials.TP_BlockMinReward) > 0):
                     # generate new trial and get reward
                     self.NewTrialRewardOrder = 1
                 else:
@@ -6598,9 +5610,7 @@ class Window(QMainWindow):
                 GeneratedTrials._InitiateATrial(self.Channel, self.Channel4)
                 # receive licks and update figures
                 if self.test == 1:
-                    self.PlotM._Update(
-                        GeneratedTrials=GeneratedTrials, Channel=self.Channel2
-                    )
+                    self.PlotM._Update(GeneratedTrials=GeneratedTrials, Channel=self.Channel2)
                 else:
                     if self.ToUpdateFigure == 1:
                         self.ToUpdateFigure = 0
@@ -6653,44 +5663,27 @@ class Window(QMainWindow):
             return
         if self.AlignToGoCue.currentText() == "yes":
             # Reserving the water after the go cue.Each click will add the water to the reserved water
-            self.give_left_volume_reserved = (
-                self.give_left_volume_reserved
-                + float(self.TP_GiveWaterL_volume)
-            )
+            self.give_left_volume_reserved = self.give_left_volume_reserved + float(self.TP_GiveWaterL_volume)
             if self.latest_fitting != {}:
                 self.give_left_time_reserved = (
-                    (
-                        float(self.give_left_volume_reserved)
-                        - self.latest_fitting["Left"][1]
-                    )
+                    (float(self.give_left_volume_reserved) - self.latest_fitting["Left"][1])
                     / self.latest_fitting["Left"][0]
                 ) * 1000
             else:
-                self.give_left_time_reserved = (
-                    self.give_left_time_reserved
-                    + float(self.TP_GiveWaterL) * 1000
-                )
+                self.give_left_time_reserved = self.give_left_time_reserved + float(self.TP_GiveWaterL) * 1000
         else:
-            self.Other_manual_water_left_volume.append(
-                float(self.TP_GiveWaterL_volume)
-            )
-            self.Other_manual_water_left_time.append(
-                float(self.TP_GiveWaterL) * 1000
-            )
+            self.Other_manual_water_left_volume.append(float(self.TP_GiveWaterL_volume))
+            self.Other_manual_water_left_time.append(float(self.TP_GiveWaterL) * 1000)
 
             self.Channel.LeftValue(float(self.TP_GiveWaterL) * 1000)
             time.sleep(0.01)
             self.Channel3.ManualWater_Left(int(1))
             time.sleep(0.01 + float(self.TP_GiveWaterL))
             self.Channel.LeftValue(float(self.TP_LeftValue) * 1000)
-            self.ManualWaterVolume[0] = (
-                self.ManualWaterVolume[0]
-                + float(self.TP_GiveWaterL_volume) / 1000
-            )
+            self.ManualWaterVolume[0] = self.ManualWaterVolume[0] + float(self.TP_GiveWaterL_volume) / 1000
             self._UpdateSuggestedWater()
             logger.info(
-                "Give left manual water (ul): "
-                + str(np.round(float(self.TP_GiveWaterL_volume), 3)),
+                "Give left manual water (ul): " + str(np.round(float(self.TP_GiveWaterL_volume), 3)),
                 extra={"tags": [self.warning_log_tag]},
             )
 
@@ -6704,16 +5697,9 @@ class Window(QMainWindow):
             self.Channel3.ManualWater_Left(int(1))
             time.sleep(0.01 + float(self.give_left_time_reserved) / 1000)
             self.Channel.LeftValue(float(self.TP_LeftValue) * 1000)
-            self.ManualWaterVolume[0] = (
-                self.ManualWaterVolume[0]
-                + self.give_left_volume_reserved / 1000
-            )
-            self.Other_manual_water_left_volume.append(
-                self.give_left_volume_reserved
-            )
-            self.Other_manual_water_left_time.append(
-                self.give_left_time_reserved
-            )
+            self.ManualWaterVolume[0] = self.ManualWaterVolume[0] + self.give_left_volume_reserved / 1000
+            self.Other_manual_water_left_volume.append(self.give_left_volume_reserved)
+            self.Other_manual_water_left_time.append(self.give_left_time_reserved)
             self.give_left_volume_reserved = 0
             self.give_left_time_reserved = 0
         elif valve == "right":
@@ -6724,16 +5710,9 @@ class Window(QMainWindow):
             self.Channel3.ManualWater_Right(int(1))
             time.sleep(0.01 + float(self.give_right_time_reserved) / 1000)
             self.Channel.RightValue(float(self.TP_RightValue) * 1000)
-            self.ManualWaterVolume[1] = (
-                self.ManualWaterVolume[1]
-                + self.give_right_volume_reserved / 1000
-            )
-            self.Other_manual_water_right_volume.append(
-                self.give_right_volume_reserved
-            )
-            self.Other_manual_water_right_time.append(
-                self.give_right_time_reserved
-            )
+            self.ManualWaterVolume[1] = self.ManualWaterVolume[1] + self.give_right_volume_reserved / 1000
+            self.Other_manual_water_right_volume.append(self.give_right_volume_reserved)
+            self.Other_manual_water_right_time.append(self.give_right_time_reserved)
             self.give_right_volume_reserved = 0
             self.give_right_time_reserved = 0
 
@@ -6744,59 +5723,38 @@ class Window(QMainWindow):
             return
         if self.AlignToGoCue.currentText() == "yes":
             # Reserving the water after the go cue.Each click will add the water to the reserved water
-            self.give_right_volume_reserved = (
-                self.give_right_volume_reserved
-                + float(self.TP_GiveWaterR_volume)
-            )
+            self.give_right_volume_reserved = self.give_right_volume_reserved + float(self.TP_GiveWaterR_volume)
             if self.latest_fitting != {}:
                 self.give_right_time_reserved = (
-                    (
-                        float(self.give_right_volume_reserved)
-                        - self.latest_fitting["Right"][1]
-                    )
+                    (float(self.give_right_volume_reserved) - self.latest_fitting["Right"][1])
                     / self.latest_fitting["Right"][0]
                 ) * 1000
             else:
-                self.give_right_time_reserved = (
-                    self.give_right_time_reserved
-                    + float(self.TP_GiveWaterR) * 1000
-                )
+                self.give_right_time_reserved = self.give_right_time_reserved + float(self.TP_GiveWaterR) * 1000
         else:
-            self.Other_manual_water_right_volume.append(
-                float(self.TP_GiveWaterR_volume)
-            )
-            self.Other_manual_water_right_time.append(
-                float(self.TP_GiveWaterR) * 1000
-            )
+            self.Other_manual_water_right_volume.append(float(self.TP_GiveWaterR_volume))
+            self.Other_manual_water_right_time.append(float(self.TP_GiveWaterR) * 1000)
 
             self.Channel.RightValue(float(self.TP_GiveWaterR) * 1000)
             time.sleep(0.01)
             self.Channel3.ManualWater_Right(int(1))
             time.sleep(0.01 + float(self.TP_GiveWaterR))
             self.Channel.RightValue(float(self.TP_RightValue) * 1000)
-            self.ManualWaterVolume[1] = (
-                self.ManualWaterVolume[1]
-                + float(self.TP_GiveWaterR_volume) / 1000
-            )
+            self.ManualWaterVolume[1] = self.ManualWaterVolume[1] + float(self.TP_GiveWaterR_volume) / 1000
             self._UpdateSuggestedWater()
             logger.info(
-                "Give right manual water (ul): "
-                + str(np.round(float(self.TP_GiveWaterR_volume), 3)),
+                "Give right manual water (ul): " + str(np.round(float(self.TP_GiveWaterR_volume), 3)),
                 extra={"tags": [self.warning_log_tag]},
             )
 
     def _toggle_save_color(self):
         """toggle the color of the save button to mediumorchid"""
         self.unsaved_data = True
-        self.Save.setStyleSheet(
-            "color: white;background-color : mediumorchid;"
-        )
+        self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
 
     def _PostWeightChange(self):
         self.unsaved_data = True
-        self.Save.setStyleSheet(
-            "color: white;background-color : mediumorchid;"
-        )
+        self.Save.setStyleSheet("color: white;background-color : mediumorchid;")
         self._UpdateSuggestedWater()
 
     def _UpdateSuggestedWater(self, ManualWater=0):
@@ -6816,16 +5774,12 @@ class Window(QMainWindow):
         try:
             if self.BaseWeight.text() != "" and self.TargetRatio.text() != "":
                 # set the target weight
-                target_weight = float(self.TargetRatio.text()) * float(
-                    self.BaseWeight.text()
-                )
+                target_weight = float(self.TargetRatio.text()) * float(self.BaseWeight.text())
                 self.TargetWeight.setText(str(np.round(target_weight, 3)))
 
             if hasattr(self, "GeneratedTrials"):
                 if hasattr(self.GeneratedTrials, "BS_TotalReward"):
-                    BS_TotalReward = (
-                        float(self.GeneratedTrials.BS_TotalReward) / 1000
-                    )
+                    BS_TotalReward = float(self.GeneratedTrials.BS_TotalReward) / 1000
                 else:
                     BS_TotalReward = 0
             else:
@@ -6837,15 +5791,9 @@ class Window(QMainWindow):
                 ManualWaterVolume = 0
             water_in_session = BS_TotalReward + ManualWaterVolume
             self.water_in_session = water_in_session
-            if (
-                self.WeightAfter.text() != ""
-                and self.BaseWeight.text() != ""
-                and self.TargetRatio.text() != ""
-            ):
+            if self.WeightAfter.text() != "" and self.BaseWeight.text() != "" and self.TargetRatio.text() != "":
                 # calculate the suggested water
-                suggested_water = target_weight - float(
-                    self.WeightAfter.text()
-                )
+                suggested_water = target_weight - float(self.WeightAfter.text())
                 # give at lease 1ml
                 if suggested_water < 1 - water_in_session:
                     suggested_water = 1 - water_in_session
@@ -6862,9 +5810,7 @@ class Window(QMainWindow):
                         self.TotalWaterWarning.setText(
                             "Supplemental water is >3.5! Health issue and \n LAS should be alerted!"
                         )
-                    self.TotalWaterWarning.setStyleSheet(
-                        f"color: {self.default_warning_color};"
-                    )
+                    self.TotalWaterWarning.setStyleSheet(f"color: {self.default_warning_color};")
                 else:
                     self.TotalWaterWarning.setText("")
                 self.SuggestedWater.setText(str(np.round(suggested_water, 3)))
@@ -6891,9 +5837,7 @@ class Window(QMainWindow):
         self.AutoTrain_dialog.show()
 
         # Check subject id each time the dialog is opened
-        self.AutoTrain_dialog.update_auto_train_fields(
-            subject_id=self.behavior_session_model.subject
-        )
+        self.AutoTrain_dialog.update_auto_train_fields(subject_id=self.behavior_session_model.subject)
 
     def _open_mouse_on_streamlit(self):
         """open the training history of the current mouse on the streamlit app"""
@@ -6924,42 +5868,26 @@ class Window(QMainWindow):
             "9",
             "10",
         ]:
-            logging.info(
-                "Skipping upload manifest, because this is the test mouse"
-            )
+            logging.info("Skipping upload manifest, because this is the test mouse")
             return
         # skip manifest generation if automatic upload is disabled
         if not self.Settings["AutomaticUpload"]:
-            logging.info(
-                "Skipping Automatic Upload based on ForagingSettings.json"
-            )
+            logging.info("Skipping Automatic Upload based on ForagingSettings.json")
             return
         # skip manifest generation if this is an ephys session
         if self.open_ephys != [] or self.StartEphysRecording.isChecked():
-            logging.info(
-                "Skipping upload manifest, because this is an ephys session"
-            )
+            logging.info("Skipping upload manifest, because this is an ephys session")
             return
 
         logging.info("Generating upload manifest")
         try:
             date_format = "%Y-%m-%d_%H-%M-%S"
-            if (
-                self.behavior_session_model.date.strftime("%H-%M-%S")
-                < "17-30-00"
-            ):
+            if self.behavior_session_model.date.strftime("%H-%M-%S") < "17-30-00":
                 # Session started before 5:30
                 # Upload time is 8:30 tonight, plus a random offset over a 30 minute period
                 # Random offset reduces strain on downstream servers getting many requests at once
-                schedule = (
-                    self.behavior_session_model.date.strftime(
-                        date_format
-                    ).split("_")[0]
-                    + "_20-30-00"
-                )
-                schedule_time = datetime.strptime(
-                    schedule, date_format
-                ) + timedelta(seconds=np.random.randint(30 * 60))
+                schedule = self.behavior_session_model.date.strftime(date_format).split("_")[0] + "_20-30-00"
+                schedule_time = datetime.strptime(schedule, date_format) + timedelta(seconds=np.random.randint(30 * 60))
             else:
                 # Session started after 5:30
                 # upload time is current time plus 3 hours plus a random offset
@@ -6970,20 +5898,12 @@ class Window(QMainWindow):
             mount = "FIP"
 
             modalities = {}
-            modalities["behavior"] = [
-                self.behavior_session_model.root_path.replace("\\", "/")
-            ]
+            modalities["behavior"] = [self.behavior_session_model.root_path.replace("\\", "/")]
             if self.Camera_dialog.camera_start_time != "":
-                modalities["behavior-videos"] = [
-                    self.VideoFolder.replace("\\", "/")
-                ]
-            if hasattr(self, "fiber_photometry_start_time") and (
-                self.fiber_photometry_start_time != ""
-            ):
+                modalities["behavior-videos"] = [self.VideoFolder.replace("\\", "/")]
+            if hasattr(self, "fiber_photometry_start_time") and (self.fiber_photometry_start_time != ""):
                 modalities["fib"] = [self.PhotometryFolder.replace("\\", "/")]
-                modalities["behavior-videos"] = [
-                    self.VideoFolder.replace("\\", "/")
-                ]
+                modalities["behavior-videos"] = [self.VideoFolder.replace("\\", "/")]
 
             # Define contents of manifest file
             contents = {
@@ -6998,12 +5918,8 @@ class Window(QMainWindow):
                 "processor_full_name": "AIND Behavior Team",
                 "modalities": modalities,
                 "schemas": [
-                    os.path.join(self.MetadataFolder, "session.json").replace(
-                        "\\", "/"
-                    ),
-                    os.path.join(self.MetadataFolder, "rig.json").replace(
-                        "\\", "/"
-                    ),
+                    os.path.join(self.MetadataFolder, "session.json").replace("\\", "/"),
+                    os.path.join(self.MetadataFolder, "rig.json").replace("\\", "/"),
                 ],
                 "schedule_time": schedule_time,
                 "project_name": self.Metadata_dialog.ProjectName.currentText(),
@@ -7023,32 +5939,23 @@ class Window(QMainWindow):
                 yaml.dump(contents, yaml_file, default_flow_style=False)
             logging.info("Finished generating manifest")
         except Exception as e:
-            logging.error(
-                "Could not generate upload manifest: {}".format(str(e))
-            )
+            logging.error("Could not generate upload manifest: {}".format(str(e)))
             QMessageBox.critical(
                 self,
                 "Upload manifest",
-                "Could not generate upload manifest. "
-                + "Please alert the mouse owner, and report on github.",
+                "Could not generate upload manifest. " + "Please alert the mouse owner, and report on github.",
             )
 
 
 def setup_loki_logging(box_number):
-    db_file = os.getenv(
-        "SIPE_DB_FILE", r"//allen/aibs/mpe/keepass/sipe_sw_passwords.kdbx"
-    )
+    db_file = os.getenv("SIPE_DB_FILE", r"//allen/aibs/mpe/keepass/sipe_sw_passwords.kdbx")
     key_file = os.getenv(
         "SIPE_KEY_FILE",
         r"c:\ProgramData\AIBS_MPE\.secrets\sipe_sw_passwords.keyx",
     )
     kp = PyKeePass(db_file, keyfile=key_file)
     entry = kp.find_entries(title="Loki Credentials", first=True)
-    session = md5(
-        (
-            "".join([str(datetime.now()), platform.node(), str(os.getpid())])
-        ).encode("utf-8")
-    ).hexdigest()[:7]
+    session = md5(("".join([str(datetime.now()), platform.node(), str(os.getpid())])).encode("utf-8")).hexdigest()[:7]
 
     handler = logging_loki.LokiHandler(
         url="http://eng-tools/loki/api/v1/push",
@@ -7081,9 +5988,7 @@ def start_gui_log_file(box_number):
     The name of the gui file is <hostname>-<box letter A/B/C/D>_gui_log_<date and time>.txt
     """
     # Check if the log folder exists, if it doesn't make it
-    logging_folder = os.path.join(
-        os.path.expanduser("~"), "Documents", "foraging_gui_logs"
-    )
+    logging_folder = os.path.join(os.path.expanduser("~"), "Documents", "foraging_gui_logs")
     if not os.path.exists(logging_folder):
         os.makedirs(logging_folder)
 
@@ -7128,69 +6033,33 @@ def log_git_hash():
     logging.info("Python version: {}".format(py_version))
     print("Python version: {}".format(py_version))
     if py_version_parse != "3.11":
-        logging.error(
-            "Incorrect version of python! Should be 3.11, got {}".format(
-                py_version_parse
-            )
-        )
+        logging.error("Incorrect version of python! Should be 3.11, got {}".format(py_version_parse))
 
     try:
         # Get information about task repository
-        git_hash = (
-            subprocess.check_output(["git", "rev-parse", "HEAD"])
-            .decode("ascii")
-            .strip()
-        )
-        git_branch = (
-            subprocess.check_output(["git", "branch", "--show-current"])
-            .decode("ascii")
-            .strip()
-        )
-        repo_url = (
-            subprocess.check_output(["git", "remote", "get-url", "origin"])
-            .decode("ascii")
-            .strip()
-        )
-        dirty_files = (
-            subprocess.check_output(
-                ["git", "diff-index", "--name-only", "HEAD"]
-            )
-            .decode("ascii")
-            .strip()
-        )
+        git_hash = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+        git_branch = subprocess.check_output(["git", "branch", "--show-current"]).decode("ascii").strip()
+        repo_url = subprocess.check_output(["git", "remote", "get-url", "origin"]).decode("ascii").strip()
+        dirty_files = subprocess.check_output(["git", "diff-index", "--name-only", "HEAD"]).decode("ascii").strip()
         version = foraging_gui.__version__
     except Exception as e:
         logging.error("Could not log git branch and hash: {}".format(str(e)))
         return None, None, None, None, None, None
 
     # Log branch and commit hash
-    logging.info(
-        "Current git commit branch, hash: {}, {}".format(git_branch, git_hash)
-    )
-    print(
-        "Current git commit branch, hash: {}, {}".format(git_branch, git_hash)
-    )
+    logging.info("Current git commit branch, hash: {}, {}".format(git_branch, git_hash))
+    print("Current git commit branch, hash: {}, {}".format(git_branch, git_hash))
 
     # Log gui version:
-    logging.info(
-        "Current foraging_gui version: {}".format(foraging_gui.__version__)
-    )
+    logging.info("Current foraging_gui version: {}".format(foraging_gui.__version__))
     print("Current foraging_gui version: {}".format(foraging_gui.__version__))
 
     # Check for untracked local changes
     repo_dirty_flag = dirty_files != ""
     if repo_dirty_flag:
         dirty_files = dirty_files.replace("\n", ", ")
-        logging.warning(
-            "local repository has untracked changes to the following files: {}".format(
-                dirty_files
-            )
-        )
-        print(
-            "local repository has untracked changes to the following files: {}".format(
-                dirty_files
-            )
-        )
+        logging.warning("local repository has untracked changes to the following files: {}".format(dirty_files))
+        print("local repository has untracked changes to the following files: {}".format(dirty_files))
     else:
         logging.warning("local repository is clean")
         print("local repository is clean")
@@ -7213,11 +6082,7 @@ def show_msg_box(window_title, title, msg):
     if QtWidgets.QApplication.instance() is not None:
         msg_box = QtWidgets.QMessageBox()
         msg_box.setWindowTitle(window_title)
-        msg_box.setText(
-            '<span style="color:purple;font-weight:bold"> {} </span> <br><br> {}'.format(
-                title, msg
-            )
-        )
+        msg_box.setText('<span style="color:purple;font-weight:bold"> {} </span> <br><br> {}'.format(title, msg))
         msg_box.exec_()
     else:
         logging.error("could not launch custom message box")
@@ -7247,9 +6112,7 @@ def show_exception_box(log_msg):
 
 def is_absolute_path(path):
     # Check if the path starts with a root directory identifier or drive letter (for Windows)
-    return path.startswith("/") or (
-        len(path) > 2 and path[1] == ":" and path[2] == "\\"
-    )
+    return path.startswith("/") or (len(path) > 2 and path[1] == ":" and path[2] == "\\")
 
 
 class UncaughtHook(QtCore.QObject):
@@ -7279,9 +6142,7 @@ class UncaughtHook(QtCore.QObject):
         """
 
         # Display in console
-        tb = "".join(
-            traceback.format_exception(exc_type, exc_value, exc_traceback)
-        )
+        tb = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         print("Encountered a fatal error: ")
         print(tb)
 
@@ -7289,9 +6150,7 @@ class UncaughtHook(QtCore.QObject):
         logging.error("FATAL ERROR: \n{}".format(tb))
 
         # Display alert box
-        tb = "<br><br>".join(
-            traceback.format_exception(exc_type, exc_value, exc_traceback)
-        )
+        tb = "<br><br>".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
         self._exception_caught.emit(self.box + tb)
 
 
@@ -7341,9 +6200,7 @@ if __name__ == "__main__":
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
     QApplication.setAttribute(Qt.AA_DisableHighDpiScaling, False)
     QApplication.setAttribute(Qt.AA_Use96Dpi, False)
-    QApplication.setHighDpiScaleFactorRoundingPolicy(
-        Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
-    )
+    QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
 
     # Start QApplication
     logging.info("Starting QApplication and Window")

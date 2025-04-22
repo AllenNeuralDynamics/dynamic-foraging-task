@@ -28,10 +28,7 @@ class IOWorker(QObject):
                     cmd.execute()
                     if not cmd.blocking:
                         while not cmd.done() and not self.halt_requested:
-                            while (
-                                not self.qfast.empty()
-                                and not self.halt_requested
-                            ):
+                            while not self.qfast.empty() and not self.halt_requested:
                                 fc = self.qfast.get()
                                 fc.execute()
                             time.sleep(TIME_SLEEP)

@@ -38,9 +38,7 @@ class WarningWidget(QWidget):
 
         super().__init__(*args, **kwargs)
 
-        self.logger = logging.getLogger(
-            f"{__name__}.{self.__class__.__name__}"
-        )
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
         # set color for labels
         self._warning_color = warning_color
@@ -55,17 +53,11 @@ class WarningWidget(QWidget):
         queue_handler = QueueHandler(self.queue)
         queue_handler.setLevel(log_level)
         queue_handler.addFilter(WarningFilter(log_tag))  # add filter
-        queue_handler.setFormatter(
-            logging.Formatter(
-                fmt="%(asctime)s: %(message)s", datefmt="%I:%M:%S %p"
-            )
-        )
+        queue_handler.setFormatter(logging.Formatter(fmt="%(asctime)s: %(message)s", datefmt="%I:%M:%S %p"))
         self.logger.root.addHandler(queue_handler)
 
         # create QTimer to periodically check queue
-        self.check_timer = QTimer(
-            timeout=self.check_warning_queue, interval=1000
-        )
+        self.check_timer = QTimer(timeout=self.check_warning_queue, interval=1000)
         self.check_timer.start()
 
     def check_warning_queue(self) -> None:
@@ -164,9 +156,7 @@ if __name__ == "__main__":
     stream_handler.setLevel("INFO")
     log_format = "%(asctime)s:%(levelname)s:%(module)s:%(filename)s:%(funcName)s:line %(lineno)d:%(message)s"
     log_datefmt = "%I:%M:%S %p"
-    stream_handler.setFormatter(
-        logging.Formatter(fmt=log_format, datefmt=log_datefmt)
-    )
+    stream_handler.setFormatter(logging.Formatter(fmt=log_format, datefmt=log_datefmt))
     logger.root.addHandler(stream_handler)
 
     scroll = QScrollArea()
@@ -187,22 +177,16 @@ if __name__ == "__main__":
     errors = ["error 7", "error 8", "error 9"]
 
     warning_timer = QTimer(
-        timeout=lambda: logger.warning(
-            warnings[randint(0, 5)], extra={"tags": "warning_widget"}
-        ),
+        timeout=lambda: logger.warning(warnings[randint(0, 5)], extra={"tags": "warning_widget"}),
         interval=1000,
     )
 
     info_timer = QTimer(
-        timeout=lambda: logger.info(
-            infos[randint(0, 2)], extra={"tags": "warning_widget"}
-        ),
+        timeout=lambda: logger.info(infos[randint(0, 2)], extra={"tags": "warning_widget"}),
         interval=1500,
     )
     error_timer = QTimer(
-        timeout=lambda: logger.error(
-            errors[randint(0, 2)], extra={"tags": "warning_widget"}
-        ),
+        timeout=lambda: logger.error(errors[randint(0, 2)], extra={"tags": "warning_widget"}),
         interval=1750,
     )
 

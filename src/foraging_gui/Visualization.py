@@ -74,55 +74,21 @@ class PlotV(FigureCanvas):
         self.B_AutoWaterTrial = GeneratedTrials.B_AutoWaterTrial
         self.MarchingType = GeneratedTrials.TP_MartchingType = ["log ratio"]
         # They are not harp time
-        self.B_ManualLeftWaterStartTime = (
-            GeneratedTrials.B_ManualLeftWaterStartTime.copy()
-        )
-        self.B_ManualRightWaterStartTime = (
-            GeneratedTrials.B_ManualRightWaterStartTime.copy()
-        )
-        self.B_EarnedLeftWaterStartTime = (
-            GeneratedTrials.B_EarnedLeftWaterStartTime.copy()
-        )
-        self.B_EarnedRightWaterStartTime = (
-            GeneratedTrials.B_EarnedRightWaterStartTime.copy()
-        )
-        self.B_AutoLeftWaterStartTime = (
-            GeneratedTrials.B_AutoLeftWaterStartTime.copy()
-        )
-        self.B_AutoRightWaterStartTime = (
-            GeneratedTrials.B_AutoRightWaterStartTime.copy()
-        )
-        self.B_SelectedCondition = np.array(
-            GeneratedTrials.B_SelectedCondition
-        )
+        self.B_ManualLeftWaterStartTime = GeneratedTrials.B_ManualLeftWaterStartTime.copy()
+        self.B_ManualRightWaterStartTime = GeneratedTrials.B_ManualRightWaterStartTime.copy()
+        self.B_EarnedLeftWaterStartTime = GeneratedTrials.B_EarnedLeftWaterStartTime.copy()
+        self.B_EarnedRightWaterStartTime = GeneratedTrials.B_EarnedRightWaterStartTime.copy()
+        self.B_AutoLeftWaterStartTime = GeneratedTrials.B_AutoLeftWaterStartTime.copy()
+        self.B_AutoRightWaterStartTime = GeneratedTrials.B_AutoRightWaterStartTime.copy()
+        self.B_SelectedCondition = np.array(GeneratedTrials.B_SelectedCondition)
         if self.B_CurrentTrialN > 0:
-            self.B_Time = (
-                self.B_RewardOutcomeTime - GeneratedTrials.B_TrialStartTime[0]
-            )
-            self.B_ManualLeftWaterStartTime = (
-                self.B_ManualLeftWaterStartTime
-                - GeneratedTrials.B_TrialStartTime[0]
-            )
-            self.B_ManualRightWaterStartTime = (
-                self.B_ManualRightWaterStartTime
-                - GeneratedTrials.B_TrialStartTime[0]
-            )
-            self.B_EarnedLeftWaterStartTime = (
-                self.B_EarnedLeftWaterStartTime
-                - GeneratedTrials.B_TrialStartTime[0]
-            )
-            self.B_EarnedRightWaterStartTime = (
-                self.B_EarnedRightWaterStartTime
-                - GeneratedTrials.B_TrialStartTime[0]
-            )
-            self.B_AutoLeftWaterStartTime = (
-                self.B_AutoLeftWaterStartTime
-                - GeneratedTrials.B_TrialStartTime[0]
-            )
-            self.B_AutoRightWaterStartTime = (
-                self.B_AutoRightWaterStartTime
-                - GeneratedTrials.B_TrialStartTime[0]
-            )
+            self.B_Time = self.B_RewardOutcomeTime - GeneratedTrials.B_TrialStartTime[0]
+            self.B_ManualLeftWaterStartTime = self.B_ManualLeftWaterStartTime - GeneratedTrials.B_TrialStartTime[0]
+            self.B_ManualRightWaterStartTime = self.B_ManualRightWaterStartTime - GeneratedTrials.B_TrialStartTime[0]
+            self.B_EarnedLeftWaterStartTime = self.B_EarnedLeftWaterStartTime - GeneratedTrials.B_TrialStartTime[0]
+            self.B_EarnedRightWaterStartTime = self.B_EarnedRightWaterStartTime - GeneratedTrials.B_TrialStartTime[0]
+            self.B_AutoLeftWaterStartTime = self.B_AutoLeftWaterStartTime - GeneratedTrials.B_TrialStartTime[0]
+            self.B_AutoRightWaterStartTime = self.B_AutoRightWaterStartTime - GeneratedTrials.B_TrialStartTime[0]
         else:
             self.B_Time = self.B_RewardOutcomeTime
 
@@ -170,9 +136,7 @@ class PlotV(FigureCanvas):
             label="p_R",
             alpha=1,
         )
-        Fraction = self.B_RewardProHistory[1] / self.B_RewardProHistory.sum(
-            axis=0
-        )
+        Fraction = self.B_RewardProHistory[1] / self.B_RewardProHistory.sum(axis=0)
         self.ax2.plot(
             self.B_Time,
             Fraction[0:Len],
@@ -230,34 +194,22 @@ class PlotV(FigureCanvas):
 
         # running average of reward and succuss rate
         RewardedHistoryT = self.B_AnimalResponseHistory.copy()
-        LeftRewarded = np.logical_and(
-            self.B_RewardedHistory[0] == 1, self.B_RewardedHistory[1] == 0
-        )
-        RightRewarded = np.logical_and(
-            self.B_RewardedHistory[1] == 1, self.B_RewardedHistory[0] == 0
-        )
-        NoReward = np.logical_and(
-            self.B_RewardedHistory[1] == 0, self.B_RewardedHistory[0] == 0
-        )
+        LeftRewarded = np.logical_and(self.B_RewardedHistory[0] == 1, self.B_RewardedHistory[1] == 0)
+        RightRewarded = np.logical_and(self.B_RewardedHistory[1] == 1, self.B_RewardedHistory[0] == 0)
+        NoReward = np.logical_and(self.B_RewardedHistory[1] == 0, self.B_RewardedHistory[0] == 0)
         RewardedHistoryT[LeftRewarded] = 0
         RewardedHistoryT[RightRewarded] = 1
         RewardedHistoryT[NoReward] = np.nan
         RewardedHistoryF = RewardedHistoryT.copy()
         SuccessHistoryT = self.B_AnimalResponseHistory.copy()
-        SuccessHistoryT[
-            np.logical_or(SuccessHistoryT == 1, SuccessHistoryT == 0)
-        ] = 1
+        SuccessHistoryT[np.logical_or(SuccessHistoryT == 1, SuccessHistoryT == 0)] = 1
         SuccessHistoryT[SuccessHistoryT == 2] = 0
         SuccessHistoryF = SuccessHistoryT.copy()
 
         # running average of response fraction
         for i in range(len(self.B_AnimalResponseHistory)):
             if i >= self.kernel_size - 1:
-                if all(
-                    np.isnan(
-                        ResponseHistoryT[i + 1 - self.kernel_size : i + 1]
-                    )
-                ):
+                if all(np.isnan(ResponseHistoryT[i + 1 - self.kernel_size : i + 1])):
                     ResponseHistoryF[i + 1 - self.kernel_size] = np.nan
                     RewardedHistoryF[i + 1 - self.kernel_size] = np.nan
                     SuccessHistoryF[i + 1 - self.kernel_size] = np.nan
@@ -277,14 +229,12 @@ class PlotV(FigureCanvas):
         NoResponse = np.where(self.B_AnimalResponseHistory == 2)
 
         if self.B_BaitHistory.shape[1] > self.B_AnimalResponseHistory.shape[0]:
-            LeftBait = np.where(self.B_BaitHistory[0][:-1]==True)
-            RightBait = np.where(self.B_BaitHistory[1][:-1]==True)
+            LeftBait = np.where(self.B_BaitHistory[0][:-1] == True)
+            RightBait = np.where(self.B_BaitHistory[1][:-1] == True)
             # plot the upcoming trial start time
             if self.B_CurrentTrialN > 0:
                 NewTrialStart = np.array(self.B_BTime[-1])
-                NewTrialStart2 = np.array(
-                    self.B_BTime[-1] + self.B_BTime[-1] / 40
-                )
+                NewTrialStart2 = np.array(self.B_BTime[-1] + self.B_BTime[-1] / 40)
             else:
                 NewTrialStart = np.array(self.B_BTime[-1] + 0.1)
                 NewTrialStart2 = np.array(self.B_BTime[-1])
@@ -323,9 +273,7 @@ class PlotV(FigureCanvas):
                     alpha=0.4,
                 )
             if self.B_LaserOnTrial[-1] == 1:
-                current_color = color_mapping[
-                    "Condition" + str(self.B_SelectedCondition[-1])
-                ]
+                current_color = color_mapping["Condition" + str(self.B_SelectedCondition[-1])]
                 self.ax1.plot(
                     NewTrialStart2,
                     1.5,
@@ -502,9 +450,7 @@ class PlotV(FigureCanvas):
     def _PlotMatching(self):
         if self.B_CurrentTrialN < 1:
             return
-        NumberOfDots = int(
-            (np.ptp(self.B_Time) - self.WindowSize) / self.StepSize
-        )
+        NumberOfDots = int((np.ptp(self.B_Time) - self.WindowSize) / self.StepSize)
         if NumberOfDots < 1:
             return
         choice_R_frac = np.empty(NumberOfDots)
@@ -526,12 +472,7 @@ class PlotV(FigureCanvas):
                 choice_R_frac[idx] = LeftChoiceN / (LeftChoiceN + RightChoiceN)
             if LeftRewardN + RightRewardN != 0:
                 reward_R_frac[idx] = LeftRewardN / (LeftRewardN + RightRewardN)
-            if (
-                (RightChoiceN != 0)
-                and (LeftChoiceN != 0)
-                and (RightRewardN != 0)
-                and (LeftRewardN != 0)
-            ):
+            if (RightChoiceN != 0) and (LeftChoiceN != 0) and (RightRewardN != 0) and (LeftRewardN != 0):
                 choice_log_ratio[idx] = np.log(RightChoiceN / LeftChoiceN)
                 reward_log_ratio[idx] = np.log(RightRewardN / LeftRewardN)
             WinStartN = WinStartN + self.StepSize
@@ -594,9 +535,7 @@ class PlotWaterCalibration(FigureCanvas):
         self.WaterCalibrationResults = self.water_win.WaterCalibrationResults
         current_item = self.water_win.showspecificcali.currentText()
         self.water_win.showspecificcali.clear()
-        sorted_dates = sorted(
-            self.WaterCalibrationResults.keys(), reverse=True
-        )
+        sorted_dates = sorted(self.WaterCalibrationResults.keys(), reverse=True)
         sorted_dates.insert(0, "NA")
         self.water_win.showspecificcali.addItems(sorted_dates)
         # remain the item unchanged
@@ -611,8 +550,7 @@ class PlotWaterCalibration(FigureCanvas):
         self.ax1.cla()
         if hasattr(self.water_win.MainWindow, "RecentWaterCalibrationDate"):
             self.water_win.VisuCalibration.setTitle(
-                "Last calibration date:"
-                + self.water_win.MainWindow.RecentWaterCalibrationDate
+                "Last calibration date:" + self.water_win.MainWindow.RecentWaterCalibrationDate
             )
         sorted_dates = sorted(self.WaterCalibrationResults.keys())
         showrecent = int(self.water_win.showrecent.text())
@@ -629,12 +567,8 @@ class PlotWaterCalibration(FigureCanvas):
             if iterator >= len(sorted_dates):
                 break
             iterator += 1
-            if (
-                "Left"
-                in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()
-            ) or (
-                "Right"
-                in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()
+            if ("Left" in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()) or (
+                "Right" in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()
             ):
                 counter += 1
         all_dates = sorted_dates[-iterator:]
@@ -670,13 +604,9 @@ class PlotWaterCalibration(FigureCanvas):
                             )
                         # fit the curve
                         color = line[0].get_color()
-                        slope, intercept = self._PlotFitting(
-                            sorted_X, sorted_Y, color, Plot=1
-                        )
+                        slope, intercept = self._PlotFitting(sorted_X, sorted_Y, color, Plot=1)
                     else:
-                        slope, intercept = self._PlotFitting(
-                            sorted_X, sorted_Y, "r", Plot=0
-                        )
+                        slope, intercept = self._PlotFitting(sorted_X, sorted_Y, "r", Plot=0)
                     # save fitting results
                     if current_date not in self.FittingResults:
                         self.FittingResults[current_date] = {}
@@ -686,9 +616,7 @@ class PlotWaterCalibration(FigureCanvas):
                         slope,
                         intercept,
                     ]
-                elif (current_valve in ["SpotLeft", "SpotRight"]) and (
-                    current_date in all_dates
-                ):
+                elif (current_valve in ["SpotLeft", "SpotRight"]) and (current_date in all_dates):
                     X, Y = self._GetWaterSpotCheck(
                         self.WaterCalibrationResults,
                         current_date,
@@ -741,20 +669,12 @@ class PlotWaterCalibration(FigureCanvas):
             self.ax1.plot(fit_x, fit_y, color=color, linestyle="--")
         return slope, intercept
 
-    def _GetWaterCalibration(
-        self, WaterCalibrationResult, current_date, current_valve
-    ):
-        x, y = GetWaterCalibration(
-            WaterCalibrationResult, current_date, current_valve
-        )
+    def _GetWaterCalibration(self, WaterCalibrationResult, current_date, current_valve):
+        x, y = GetWaterCalibration(WaterCalibrationResult, current_date, current_valve)
         return x, y
 
-    def _GetWaterSpotCheck(
-        self, WaterCalibrationResult, current_date, current_valve
-    ):
-        x, y = GetWaterSpotCheck(
-            WaterCalibrationResult, current_date, current_valve
-        )
+    def _GetWaterSpotCheck(self, WaterCalibrationResult, current_date, current_valve):
+        x, y = GetWaterSpotCheck(WaterCalibrationResult, current_date, current_valve)
         return x, y
 
 
@@ -763,12 +683,8 @@ def GetWaterSpotCheck(WaterCalibrationResult, date, valve):
     y = []
     for time in WaterCalibrationResult[date][valve].keys():
         for interval in WaterCalibrationResult[date][valve][time].keys():
-            for cycles in WaterCalibrationResult[date][valve][time][
-                interval
-            ].keys():
-                for measurement in WaterCalibrationResult[date][valve][time][
-                    interval
-                ][cycles]:
+            for cycles in WaterCalibrationResult[date][valve][time][interval].keys():
+                for measurement in WaterCalibrationResult[date][valve][time][interval][cycles]:
                     x.append(float(time))
                     y.append(float(measurement) / float(cycles))
     return x, y
@@ -778,24 +694,20 @@ def GetWaterCalibration(WaterCalibrationResults, current_date, current_valve):
     """Get the water calibration results from a specific date and valve"""
     X = []
     Y = []
-    all_valve_opentime = WaterCalibrationResults[current_date][
-        current_valve
-    ].keys()
+    all_valve_opentime = WaterCalibrationResults[current_date][current_valve].keys()
     for current_valve_opentime in all_valve_opentime:
         average_water = []
         X.append(current_valve_opentime)
-        all_valve_openinterval = WaterCalibrationResults[current_date][
-            current_valve
-        ][current_valve_opentime].keys()
+        all_valve_openinterval = WaterCalibrationResults[current_date][current_valve][current_valve_opentime].keys()
         for current_valve_openinterval in all_valve_openinterval:
-            all_cycle = WaterCalibrationResults[current_date][current_valve][
-                current_valve_opentime
-            ][current_valve_openinterval].keys()
+            all_cycle = WaterCalibrationResults[current_date][current_valve][current_valve_opentime][
+                current_valve_openinterval
+            ].keys()
             for current_cycle in all_cycle:
                 total_water = np.nanmean(
-                    WaterCalibrationResults[current_date][current_valve][
-                        current_valve_opentime
-                    ][current_valve_openinterval][current_cycle]
+                    WaterCalibrationResults[current_date][current_valve][current_valve_opentime][
+                        current_valve_openinterval
+                    ][current_cycle]
                 )
                 if total_water != "":
                     average_water.append(total_water / float(current_cycle))
@@ -821,18 +733,10 @@ class PlotLickDistribution(FigureCanvas):
         )
 
         self.ax1 = self.fig.add_subplot(gs[1:9, 2:11])
-        self.ax2 = self.fig.add_subplot(
-            gs[1:9, 12:21], sharey=self.ax1, sharex=self.ax1
-        )
-        self.ax3 = self.fig.add_subplot(
-            gs[1:9, 22:31], sharey=self.ax1, sharex=self.ax1
-        )
-        self.ax4 = self.fig.add_subplot(
-            gs[1:9, 32:41], sharey=self.ax1, sharex=self.ax1
-        )
-        self.ax5 = self.fig.add_subplot(
-            gs[1:9, 42:51], sharey=self.ax1, sharex=self.ax1
-        )
+        self.ax2 = self.fig.add_subplot(gs[1:9, 12:21], sharey=self.ax1, sharex=self.ax1)
+        self.ax3 = self.fig.add_subplot(gs[1:9, 22:31], sharey=self.ax1, sharex=self.ax1)
+        self.ax4 = self.fig.add_subplot(gs[1:9, 32:41], sharey=self.ax1, sharex=self.ax1)
+        self.ax5 = self.fig.add_subplot(gs[1:9, 42:51], sharey=self.ax1, sharex=self.ax1)
 
         self.ax2.set_yticks([])
         self.ax3.set_yticks([])
@@ -876,9 +780,7 @@ class PlotLickDistribution(FigureCanvas):
         )
         LeftLicksIndex = np.zeros_like(GeneratedTrials.B_LeftLickTime)
         RightLicksIndex = np.ones_like(GeneratedTrials.B_RightLickTime)
-        AllLicks = np.concatenate(
-            (GeneratedTrials.B_LeftLickTime, GeneratedTrials.B_RightLickTime)
-        )
+        AllLicks = np.concatenate((GeneratedTrials.B_LeftLickTime, GeneratedTrials.B_RightLickTime))
         AllLicksIndex = np.concatenate((LeftLicksIndex, RightLicksIndex))
         AllLicksSorted = np.sort(AllLicks)
         AllLicksSortedDiff = np.diff(AllLicksSorted)
@@ -983,21 +885,15 @@ class PlotTimeDistribution(FigureCanvas):
         self.ax1.set_xlabel("Block length (trial)")
         self.ax1.set_ylabel("counts")
         self.ax1.set_title(
-            "block length \n(average="
-            + str(np.round(np.nanmean(SampledBlockLen), 2))
-            + ")",
+            "block length \n(average=" + str(np.round(np.nanmean(SampledBlockLen), 2)) + ")",
             fontsize=10,
         )
         self.ax2.set_title(
-            "ITI time \n(average="
-            + str(np.round(np.nanmean(SampledITI), 2))
-            + ")",
+            "ITI time \n(average=" + str(np.round(np.nanmean(SampledITI), 2)) + ")",
             fontsize=10,
         )
         self.ax3.set_title(
-            "Delay time \n(average="
-            + str(np.round(np.nanmean(SampledDelay), 2))
-            + ")",
+            "Delay time \n(average=" + str(np.round(np.nanmean(SampledDelay), 2)) + ")",
             fontsize=10,
         )
         self.ax1.plot(

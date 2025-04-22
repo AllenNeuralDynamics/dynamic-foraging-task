@@ -28,9 +28,7 @@ class BiasIndicator(QMainWindow):
 
     biasOver = pyqtSignal(float, int)  # emit bias and trial number it occurred
     biasError = pyqtSignal(str, int)  # emit error and trial number it occurred
-    biasValue = pyqtSignal(
-        float, list, int
-    )  # emit bias, confidence intervals, and trial number it occurred
+    biasValue = pyqtSignal(float, list, int)  # emit bias, confidence intervals, and trial number it occurred
 
     def __init__(
         self,
@@ -64,18 +62,10 @@ class BiasIndicator(QMainWindow):
             xRange=[1, self.x_range],
             yRange=[-self.bias_threshold - 0.3, 0.3 + self.bias_threshold],
         )
-        self.bias_plot.setLabels(
-            left="Bias", bottom="Trial #"
-        )  # make label bigger
-        self.bias_plot.getAxis("left").setTicks(
-            [[(-bias_threshold, "L"), (bias_threshold, "R")]]
-        )
-        self.bias_plot.addLine(
-            y=0, pen="black"
-        )  # add line at 0 to help user see if slight bias
-        self.bias_plot.addLine(
-            y=bias_threshold, pen="b"
-        )  # add lines at threshold to make clearer when bias goes over
+        self.bias_plot.setLabels(left="Bias", bottom="Trial #")  # make label bigger
+        self.bias_plot.getAxis("left").setTicks([[(-bias_threshold, "L"), (bias_threshold, "R")]])
+        self.bias_plot.addLine(y=0, pen="black")  # add line at 0 to help user see if slight bias
+        self.bias_plot.addLine(y=bias_threshold, pen="b")  # add lines at threshold to make clearer when bias goes over
         self.bias_plot.addLine(y=-bias_threshold, pen="r")
         self.setCentralWidget(self.bias_plot)
 
@@ -116,14 +106,8 @@ class BiasIndicator(QMainWindow):
 
         # create bias label
         self.bias_label = TextItem(color="black", anchor=(-0.02, 0))
-        self.biasValue.connect(
-            lambda bias, c, trial: self.bias_label.setText(str(round(bias, 3)))
-        )
-        self.biasValue.connect(
-            lambda bias, c, trial: self.bias_label.setPos(
-                self._current_bias_point.pos[0][0], bias
-            )
-        )
+        self.biasValue.connect(lambda bias, c, trial: self.bias_label.setText(str(round(bias, 3))))
+        self.biasValue.connect(lambda bias, c, trial: self.bias_label.setPos(self._current_bias_point.pos[0][0], bias))
         self.bias_plot.addItem(self.bias_label)
 
     @property
@@ -139,9 +123,7 @@ class BiasIndicator(QMainWindow):
         """
         if not 0 <= value <= 1:
             self._bias_threshold = 0.7
-            raise ValueError(
-                "bias_threshold must be set between 0 and 1. Setting to .7"
-            )
+            raise ValueError("bias_threshold must be set between 0 and 1. Setting to .7")
         else:
             self._bias_threshold = value
 
@@ -156,11 +138,7 @@ class BiasIndicator(QMainWindow):
         total number of values displayed on the x axis as graph is scrolling
         :param value: int value to set x range to
         """
-        last_x = (
-            self._biases_scatter_item.xData[-1]
-            if self._biases_scatter_item.xData[-1] > value
-            else value
-        )
+        last_x = self._biases_scatter_item.xData[-1] if self._biases_scatter_item.xData[-1] > value else value
         self.bias_plot.setRange(xRange=[last_x - value, value])
         self._x_range = value
 
@@ -216,12 +194,8 @@ class BiasIndicator(QMainWindow):
                 self._biases.append(bias)
 
                 # add confidence intervals
-                upper = (
-                    lr["df_beta"].loc["bias"]["bootstrap_CI_upper"].values[0]
-                )
-                lower = (
-                    lr["df_beta"].loc["bias"]["bootstrap_CI_lower"].values[0]
-                )
+                upper = lr["df_beta"].loc["bias"]["bootstrap_CI_upper"].values[0]
+                lower = lr["df_beta"].loc["bias"]["bootstrap_CI_lower"].values[0]
             elif len(unique) == 0:
                 # no choices, report bias confidence as (-inf, +inf)
                 bias = 0
@@ -266,11 +240,7 @@ class BiasIndicator(QMainWindow):
                 if trial_num >= self.bias_plot.getAxis("bottom").range[1] - 50:
                     self.bias_plot.setRange(
                         xRange=[
-                            (
-                                trial_num - self.x_range
-                                if self.x_range < trial_num
-                                else 2
-                            ),
+                            (trial_num - self.x_range if self.x_range < trial_num else 2),
                             trial_num + 50,
                         ]
                     )
@@ -302,9 +272,7 @@ class BiasIndicator(QMainWindow):
 
         # re configure plot
         self.bias_plot.clear()
-        self.bias_plot.addLine(
-            y=0, pen="black"
-        )  # add line at 0 to help user see if slight bias
+        self.bias_plot.addLine(y=0, pen="black")  # add line at 0 to help user see if slight bias
         self.bias_plot.addLine(
             y=self.bias_threshold, pen="b"
         )  # add lines at threshold to make clearer when bias goes over

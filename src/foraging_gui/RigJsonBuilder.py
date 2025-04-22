@@ -15,10 +15,7 @@ from deepdiff import DeepDiff
 from foraging_gui.Visualization import GetWaterCalibration
 
 
-def build_rig_json(
-    existing_rig_json, settings, water_calibration, laser_calibration
-):
-
+def build_rig_json(existing_rig_json, settings, water_calibration, laser_calibration):
     # Build the new rig schema
     rig = build_rig_json_core(settings, water_calibration, laser_calibration)
     if rig is None:
@@ -33,9 +30,7 @@ def build_rig_json(
     # Remove the modification date, since that doesnt matter for comparison purposes
     values_to_ignore = ["modification_date", "rig_id"]
     for value in values_to_ignore:
-        if ("values_changed" in differences) and (
-            "root['{}']".format(value) in differences["values_changed"]
-        ):
+        if ("values_changed" in differences) and ("root['{}']".format(value) in differences["values_changed"]):
             differences["values_changed"].pop("root['{}']".format(value))
             if len(differences["values_changed"]) == 0:
                 differences.pop("values_changed")
@@ -43,15 +38,11 @@ def build_rig_json(
     # Determine which schema to use
     if len(differences) > 0:
         # If any differences remain save a new rig.json
-        logging.info(
-            "differences with existing rig json: {}".format(differences)
-        )
+        logging.info("differences with existing rig json: {}".format(differences))
         # Write to file
         time_str = datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
         filename = "_{}_{}.json".format(settings["rig_name"], time_str)
-        rig.write_standard_file(
-            suffix=filename, output_directory=settings["rig_metadata_folder"]
-        )
+        rig.write_standard_file(suffix=filename, output_directory=settings["rig_metadata_folder"])
         filename = "rig" + filename
         logging.info("Saving new rig json: {}".format(filename))
     else:
@@ -68,9 +59,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
 
     # Determine what extra components are present using settings files
     FIB = settings["Teensy_COM_box{}".format(settings["box_number"])] != ""
-    OPTO = ("HasOpto" in settings["box_settings"]) and (
-        settings["box_settings"]["HasOpto"] == "1"
-    )
+    OPTO = ("HasOpto" in settings["box_settings"]) and (settings["box_settings"]["HasOpto"] == "1")
     HIGH_SPEED_CAMERA = ("HighSpeedCamera" in settings["box_settings"]) and (
         settings["box_settings"]["HighSpeedCamera"] == "1"
     )
@@ -120,9 +109,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                         sensor_width=720,
                         sensor_height=540,
                         model="Blackfly S BFS-U3-04S2M",
-                        serial_number=settings["box_settings"][
-                            "SideCameraRight"
-                        ],
+                        serial_number=settings["box_settings"]["SideCameraRight"],
                     ),
                 )
             )
@@ -174,9 +161,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     chroma="Color",
                     cooling="Air",
                     bin_mode="Additive",
-                    recording_software=d.Software(
-                        name="Bonsai", version=settings["bonsai_version"]
-                    ),
+                    recording_software=d.Software(name="Bonsai", version=settings["bonsai_version"]),
                 ),
                 lens=d.Lens(
                     name="Xenocam 1",
@@ -204,9 +189,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
                     chroma="Color",
                     cooling="Air",
                     bin_mode="Additive",
-                    recording_software=d.Software(
-                        name="Bonsai", version=settings["bonsai_version"]
-                    ),
+                    recording_software=d.Software(name="Bonsai", version=settings["bonsai_version"]),
                 ),
                 lens=d.Lens(
                     name="Xenocam 2",
@@ -256,15 +239,10 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
 
     # Stimulus devices
     ###########################################################################
-    if (
-        settings["newscale_serial_num_box{}".format(settings["box_number"])]
-        != ""
-    ):
+    if settings["newscale_serial_num_box{}".format(settings["box_number"])] != "":
         stage = d.MotorizedStage(
             name="NewScaleMotor for LickSpouts",
-            serial_number=settings[
-                "newscale_serial_num_box{}".format(settings["box_number"])
-            ],
+            serial_number=settings["newscale_serial_num_box{}".format(settings["box_number"])],
             manufacturer=d.Organization.NEW_SCALE_TECHNOLOGIES,
             model="XYZ Stage with M30LS-3.4-15 linear stages",
             travel=15.0,
@@ -280,9 +258,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             notes="https://allenneuraldynamics.github.io/Bonsai.AllenNeuralDynamics/articles/aind-manipulator.html",
         )
 
-    if ("AINDLickDetector" in settings["box_settings"]) and (
-        settings["box_settings"]["AINDLickDetector"] == "1"
-    ):
+    if ("AINDLickDetector" in settings["box_settings"]) and (settings["box_settings"]["AINDLickDetector"] == "1"):
         lick_spout_manufacturer = d.Organization.AIND
     else:
         lick_spout_manufacturer = d.Organization.JANELIA
@@ -436,9 +412,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         components["detectors"] = [
             d.Detector(
                 name="Green CMOS",
-                serial_number=settings["box_settings"][
-                    "FipGreenCMOSSerialNumber"
-                ],
+                serial_number=settings["box_settings"]["FipGreenCMOSSerialNumber"],
                 manufacturer=d.Organization.FLIR,
                 model="BFS-U3-20S40M",
                 detector_type="Camera",
@@ -456,9 +430,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             ),
             d.Detector(
                 name="Red CMOS",
-                serial_number=settings["box_settings"][
-                    "FipRedCMOSSerialNumber"
-                ],
+                serial_number=settings["box_settings"]["FipRedCMOSSerialNumber"],
                 manufacturer=d.Organization.FLIR,
                 model="BFS-U3-20S40M",
                 detector_type="Camera",
@@ -479,9 +451,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         components["objectives"] = [
             d.Objective(
                 name="Objective",
-                serial_number=settings["box_settings"][
-                    "FipObjectiveSerialNumber"
-                ],
+                serial_number=settings["box_settings"]["FipObjectiveSerialNumber"],
                 manufacturer=d.Organization.NIKON,
                 model="CFI Plan Apochromat Lambda D 10x",
                 numerical_aperture=0.45,
@@ -578,9 +548,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
             )
         ]
 
-        components["additional_devices"] = [
-            d.Device(device_type="Photometry Clock", name="Photometry Clock")
-        ]
+        components["additional_devices"] = [d.Device(device_type="Photometry Clock", name="Photometry Clock")]
         components["daqs"][0].channels.append(
             d.DAQChannel(
                 channel_name="DI3",
@@ -635,33 +603,21 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
         )
 
         # laser calibration
-        components["calibrations"].extend(
-            parse_laser_calibration(laser_calibration)
-        )
+        components["calibrations"].extend(parse_laser_calibration(laser_calibration))
 
     # Generate Rig Schema
     ###########################################################################
     # Assemble rig schema
-    rig_id = "{}_{}".format(
-        settings["rig_name"], datetime.now().strftime("%Y%m%d")
-    )
-    if (
-        re.match(r.RIG_ID_PATTERN, rig_id) is None
-    ):  # rig_id does not match regex pattern reqs
+    rig_id = "{}_{}".format(settings["rig_name"], datetime.now().strftime("%Y%m%d"))
+    if re.match(r.RIG_ID_PATTERN, rig_id) is None:  # rig_id does not match regex pattern reqs
         try:  # assuming rigs are named in room-box-letter fashion
             room, box, letter = settings["rig_name"].split("-")
             rig_name = room + "_" + box + letter
-            rig_id = "{}_{}".format(
-                rig_name, datetime.now().strftime("%Y%m%d")
-            )
-            if (
-                re.match(r.RIG_ID_PATTERN, rig_id) is None
-            ):  # rig_id still does not match regex pattern reqs
+            rig_id = "{}_{}".format(rig_name, datetime.now().strftime("%Y%m%d"))
+            if re.match(r.RIG_ID_PATTERN, rig_id) is None:  # rig_id still does not match regex pattern reqs
                 raise ValueError
         except ValueError:
-            logging.error(
-                f"Cannot generate rig because rig_id cannot be configured to match {r.RIG_ID_PATTERN}"
-            )
+            logging.error(f"Cannot generate rig because rig_id cannot be configured to match {r.RIG_ID_PATTERN}")
             return
 
     rig = r.Rig(rig_id=rig_id, modification_date=date.today(), **components)
@@ -674,13 +630,9 @@ def parse_water_calibration(water_calibration):
     dates = sorted(water_calibration.keys())
     for this_date in dates[::-1]:
         if "Left" in water_calibration[this_date]:
-            left_times, left_volumes = GetWaterCalibration(
-                water_calibration, this_date, "Left"
-            )
+            left_times, left_volumes = GetWaterCalibration(water_calibration, this_date, "Left")
             left = d.Calibration(
-                calibration_date=datetime.strptime(
-                    this_date, "%Y-%m-%d"
-                ).date(),
+                calibration_date=datetime.strptime(this_date, "%Y-%m-%d").date(),
                 device_name="Lick spout Left",
                 description="Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delivered in microliters.",
                 input={"valve open time (s):": left_times},
@@ -689,13 +641,9 @@ def parse_water_calibration(water_calibration):
             calibrations.append(left)
             break
         elif "SpotLeft" in water_calibration[this_date]:
-            times, volumes = GetWaterCalibration(
-                water_calibration, this_date, "SpotLeft"
-            )
+            times, volumes = GetWaterCalibration(water_calibration, this_date, "SpotLeft")
             left = d.Calibration(
-                calibration_date=datetime.strptime(
-                    this_date, "%Y-%m-%d"
-                ).date(),
+                calibration_date=datetime.strptime(this_date, "%Y-%m-%d").date(),
                 device_name="Lick spout Left",
                 description="Spot check of water calibration for Lick spout Left. "
                 + "The input is the valve open time in seconds and the output is the "
@@ -709,13 +657,9 @@ def parse_water_calibration(water_calibration):
 
     for this_date in dates[::-1]:
         if "Right" in water_calibration[this_date]:
-            right_times, right_volumes = GetWaterCalibration(
-                water_calibration, this_date, "Right"
-            )
+            right_times, right_volumes = GetWaterCalibration(water_calibration, this_date, "Right")
             right = d.Calibration(
-                calibration_date=datetime.strptime(
-                    this_date, "%Y-%m-%d"
-                ).date(),
+                calibration_date=datetime.strptime(this_date, "%Y-%m-%d").date(),
                 device_name="Lick spout Right",
                 description="Water calibration for Lick spout Right. The input is the valve open time in seconds and the output is the volume of water delivered in microliters.",
                 input={"valve open time (s):": right_times},
@@ -724,13 +668,9 @@ def parse_water_calibration(water_calibration):
             calibrations.append(right)
             break
         elif "SpotRight" in water_calibration[this_date]:
-            times, volumes = GetWaterCalibration(
-                water_calibration, this_date, "SpotRight"
-            )
+            times, volumes = GetWaterCalibration(water_calibration, this_date, "SpotRight")
             right = d.Calibration(
-                calibration_date=datetime.strptime(
-                    this_date, "%Y-%m-%d"
-                ).date(),
+                calibration_date=datetime.strptime(this_date, "%Y-%m-%d").date(),
                 device_name="Lick spout Right",
                 description="Spot check of water calibration for Lick spout Right. "
                 + "The input is the valve open time in seconds and the output is the "
@@ -752,9 +692,7 @@ def parse_laser_calibration(laser_calibration):
     laser_colors = get_laser_names(laser_calibration)
     for laser in laser_colors:
         # find the last calibration for this laser color
-        latest_calibration_date = FindLatestCalibrationDate(
-            laser, laser_calibration
-        )
+        latest_calibration_date = FindLatestCalibrationDate(laser, laser_calibration)
         if latest_calibration_date == "NA":
             continue
 
@@ -764,25 +702,11 @@ def parse_laser_calibration(laser_calibration):
             if protocol == "Sine":
                 for freq in this_calibration[protocol]:
                     for laser_name in this_calibration[protocol][freq].keys():
-                        voltage = [
-                            x[0]
-                            for x in this_calibration[protocol][freq][
-                                laser_name
-                            ]["LaserPowerVoltage"]
-                        ]
-                        power = [
-                            x[1]
-                            for x in this_calibration[protocol][freq][
-                                laser_name
-                            ]["LaserPowerVoltage"]
-                        ]
-                        voltage, power = zip(
-                            *sorted(zip(voltage, power), key=lambda x: x[0])
-                        )
+                        voltage = [x[0] for x in this_calibration[protocol][freq][laser_name]["LaserPowerVoltage"]]
+                        power = [x[1] for x in this_calibration[protocol][freq][laser_name]["LaserPowerVoltage"]]
+                        voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
 
-                        datestr = datetime.strptime(
-                            latest_calibration_date, "%Y-%m-%d"
-                        ).date()
+                        datestr = datetime.strptime(latest_calibration_date, "%Y-%m-%d").date()
                         description = f"Optogenetic calibration for {laser} {laser_name}, protocol: {protocol}, frequency: {freq}."
                         calibrations.append(
                             d.Calibration(
@@ -795,25 +719,11 @@ def parse_laser_calibration(laser_calibration):
                         )
             elif protocol in ["Constant", "Pulse"]:
                 for laser_name in this_calibration[protocol].keys():
-                    voltage = [
-                        x[0]
-                        for x in this_calibration[protocol][laser_name][
-                            "LaserPowerVoltage"
-                        ]
-                    ]
-                    power = [
-                        x[1]
-                        for x in this_calibration[protocol][laser_name][
-                            "LaserPowerVoltage"
-                        ]
-                    ]
-                    voltage, power = zip(
-                        *sorted(zip(voltage, power), key=lambda x: x[0])
-                    )
+                    voltage = [x[0] for x in this_calibration[protocol][laser_name]["LaserPowerVoltage"]]
+                    power = [x[1] for x in this_calibration[protocol][laser_name]["LaserPowerVoltage"]]
+                    voltage, power = zip(*sorted(zip(voltage, power), key=lambda x: x[0]))
 
-                    datestr = datetime.strptime(
-                        latest_calibration_date, "%Y-%m-%d"
-                    ).date()
+                    datestr = datetime.strptime(latest_calibration_date, "%Y-%m-%d").date()
                     description = f"Optogenetic calibration for {laser} {laser_name}, protocol: {protocol}"
                     calibrations.append(
                         d.Calibration(

@@ -23,9 +23,7 @@ class RigClient:
         if message in self.photometry_messages:
             # We have seen this message before, check for tolerance
             now = time.time()
-            if (
-                now - self.photometry_messages[message]
-            ) < self.photometry_message_tolerance:
+            if (now - self.photometry_messages[message]) < self.photometry_message_tolerance:
                 # It has been less than tolerance, return False and do not display message
                 return False
             else:
@@ -55,18 +53,8 @@ class RigClient:
 
             if self.track_photometry_messages(msg.address):
                 # It was has been more than self.photometry_message_tolerance for this message
-                print(
-                    msg_str
-                    + ", displaying at {} Hz".format(
-                        1 / self.photometry_message_tolerance
-                    )
-                )
-                logging.info(
-                    msg_str
-                    + ", displaying at {} Hz".format(
-                        1 / self.photometry_message_tolerance
-                    )
-                )
+                print(msg_str + ", displaying at {} Hz".format(1 / self.photometry_message_tolerance))
+                logging.info(msg_str + ", displaying at {} Hz".format(1 / self.photometry_message_tolerance))
         else:
             # Print and add to log
             print(CurrentMessage)

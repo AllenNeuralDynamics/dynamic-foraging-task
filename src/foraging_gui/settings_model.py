@@ -8,12 +8,8 @@ class BonsaiSettingsModel(BaseModel):
     Defines a model for the Settings_box.csv file
     """
 
-    Behavior: str = Field(
-        pattern=r"^COM[0-9]+$", description="COM port for Harp Behavior Board"
-    )
-    Soundcard: str = Field(
-        pattern=r"^COM[0-9]+$", description="COM port for Harp Behavior Board"
-    )
+    Behavior: str = Field(pattern=r"^COM[0-9]+$", description="COM port for Harp Behavior Board")
+    Soundcard: str = Field(pattern=r"^COM[0-9]+$", description="COM port for Harp Behavior Board")
     BonsaiOsc1: str = Field(
         pattern=r"^40[0-9][0-9]$",
         description="OSC channel for python/bonsai communication",
@@ -30,22 +26,14 @@ class BonsaiSettingsModel(BaseModel):
         pattern=r"^40[0-9][0-9]$",
         description="OSC channel for python/bonsai communication",
     )
-    AttenuationLeft: int = Field(
-        description="Calibration parameter for the left channel sound stimulus"
-    )
-    AttenuationRight: int = Field(
-        description="Calibration parameter for the left channel sound stimulus"
-    )
+    AttenuationLeft: int = Field(description="Calibration parameter for the left channel sound stimulus")
+    AttenuationRight: int = Field(description="Calibration parameter for the left channel sound stimulus")
     current_box: str = Field(
         pattern=r"^[0-9][0-9][0-9](-[0-9]+-[ABCD]|_EPHYS[0-9]+|_Ephys[0-9]+)$",
         description="Box name in ROOM-TOWER-BOX format, or ROOM-EphysNUM",
     )
-    RunningWheel: Literal["0", "1"] = Field(
-        default="0", description="Using AIND running wheel"
-    )
-    AINDLickDetector: Literal["0", "1"] = Field(
-        default="0", description="Using AIND Lick Detector"
-    )
+    RunningWheel: Literal["0", "1"] = Field(default="0", description="Using AIND running wheel")
+    AINDLickDetector: Literal["0", "1"] = Field(default="0", description="Using AIND Lick Detector")
     LeftLickDetector: Optional[str] = Field(
         default="COM0",
         pattern=r"^COM[0-9]+$",
@@ -56,9 +44,7 @@ class BonsaiSettingsModel(BaseModel):
         pattern=r"^COM[0-9]+$",
         description="COM port for AIND Lick Detector",
     )
-    HighSpeedCamera: Literal["0", "1"] = Field(
-        default=0, description="Using High Speed cameras"
-    )
+    HighSpeedCamera: Literal["0", "1"] = Field(default=0, description="Using High Speed cameras")
     HasSideCameraLeft: Literal["0", "1"] = Field(
         default=0,
         description="Using high speed camera on the left side of the mouse",
@@ -75,66 +61,30 @@ class BonsaiSettingsModel(BaseModel):
         default=0,
         description="Using high speed camera on the body of the mouse",
     )
-    SideCameraLeft: int = Field(
-        default=0, description="Serial number for side camera left"
-    )
-    SideCameraRight: int = Field(
-        default=0, description="Serial number for side camera right"
-    )
-    BottomCamera: int = Field(
-        default=0, description="Serial number for bottom camera"
-    )
-    BodyCamera: int = Field(
-        default=0, description="Serial number for body camera"
-    )
+    SideCameraLeft: int = Field(default=0, description="Serial number for side camera left")
+    SideCameraRight: int = Field(default=0, description="Serial number for side camera right")
+    BottomCamera: int = Field(default=0, description="Serial number for bottom camera")
+    BodyCamera: int = Field(default=0, description="Serial number for body camera")
     codec: Optional[str] = Field(default="", description="Video codec")
-    HasOpto: Literal["0", "1"] = Field(
-        default=0, description="Using Optogenetics"
-    )
-    
+    HasOpto: Literal["0", "1"] = Field(default=0, description="Using Optogenetics")
+
     # TODO: Add optogenetic parameters as needed
     # OptoLaser<x>Manufacturer
     # OptoLaser<x>Wavelength
     # OptoLaser<x>Model
     # OptoLaser<x>SerialNumber
 
-    FipObjectiveCMOSSerialNumber: Optional[str] = Field(
-        default=0, description="Serial number for FIP CMOS Objective"
-    )
+    FipObjectiveCMOSSerialNumber: Optional[str] = Field(default=0, description="Serial number for FIP CMOS Objective")
 
     # NEW FIELDS FOR CAMERA EXPOSURE & GAIN
-    BottomCamera_ExposureTime: float = Field(
-        default=1000,
-        description="Exposure time for the bottom camera"
-    )
-    SideCameraLeft_ExposureTime: float = Field(
-        default=1000,
-        description="Exposure time for the left side camera"
-    )
-    SideCameraRight_ExposureTime: float = Field(
-        default=1000,
-        description="Exposure time for the right side camera"
-    )
-    BodyCamera_ExposureTime: float = Field(
-        default=1000,
-        description="Exposure time for the body camera"
-    )
-    BottomCamera_Gain: float = Field(
-        default=8,
-        description="Gain for the bottom camera"
-    )
-    SideCameraLeft_Gain: float = Field(
-        default=8,
-        description="Gain for the left side camera"
-    )
-    SideCameraRight_Gain: float = Field(
-        default=8,
-        description="Gain for the right side camera"
-    )
-    BodyCamera_Gain: float = Field(
-        default=8,
-        description="Gain for the body camera"
-    )
+    BottomCamera_ExposureTime: float = Field(default=1000, description="Exposure time for the bottom camera")
+    SideCameraLeft_ExposureTime: float = Field(default=1000, description="Exposure time for the left side camera")
+    SideCameraRight_ExposureTime: float = Field(default=1000, description="Exposure time for the right side camera")
+    BodyCamera_ExposureTime: float = Field(default=1000, description="Exposure time for the body camera")
+    BottomCamera_Gain: float = Field(default=8, description="Gain for the bottom camera")
+    SideCameraLeft_Gain: float = Field(default=8, description="Gain for the left side camera")
+    SideCameraRight_Gain: float = Field(default=8, description="Gain for the right side camera")
+    BodyCamera_Gain: float = Field(default=8, description="Gain for the body camera")
 
 
 class DFTSettingsModel(BaseModel):

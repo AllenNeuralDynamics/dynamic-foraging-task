@@ -30,12 +30,8 @@ def draw_dist_and_harzard(
 
     # Histogram
     ax_dist.set(title=title, ylim=(0, max(hist) * 1.5), ylabel="Density")
-    ax_dist.axvline(
-        samples.mean(), c="r", label=f"mean = {samples.mean():.2f}"
-    )
-    ax_dist.axvline(
-        np.median(samples), c="k", label=f"median = {np.median(samples):.2f}"
-    )
+    ax_dist.axvline(samples.mean(), c="r", label=f"mean = {samples.mean():.2f}")
+    ax_dist.axvline(np.median(samples), c="k", label=f"median = {np.median(samples):.2f}")
     ax_dist.legend()
 
     # Hazard function
@@ -43,9 +39,7 @@ def draw_dist_and_harzard(
     ax_hazard.set(ylabel="Hazard rate")
 
     # Zoomed in Hazard function
-    inset_ax = inset_axes(
-        ax_hazard, width="40%", height="40%", loc="upper left", borderpad=4
-    )
+    inset_ax = inset_axes(ax_hazard, width="40%", height="40%", loc="upper left", borderpad=4)
     inset_ax.plot(xx[:-1], hazard, color=color)
     inset_ax.set(ylim=(0, 0.1), title="Zoom-in")
 
@@ -67,7 +61,6 @@ def draw_dist_and_harzard(
 
 
 def test_truncexp(lower=20, upper=60, beta=20, n=100000):
-
     # TruncExp with Re-draw
     X = stats.truncexpon(b=(upper - lower) / beta, loc=lower, scale=beta)
     truncexp_redraw = X.rvs(n)
@@ -86,9 +79,7 @@ def test_truncexp(lower=20, upper=60, beta=20, n=100000):
     fig.clf()
     ax = fig.subplots(2, 4)
 
-    inset_ax_all = inset_axes(
-        ax[1, 3], width="40%", height="40%", loc="upper left", borderpad=4
-    )
+    inset_ax_all = inset_axes(ax[1, 3], width="40%", height="40%", loc="upper left", borderpad=4)
 
     draw_dist_and_harzard(
         samples=truncexp_redraw,
@@ -102,8 +93,7 @@ def test_truncexp(lower=20, upper=60, beta=20, n=100000):
     )
     draw_dist_and_harzard(
         samples=truncexp_trunc_at_max,
-        title=f"TruncExp (trunc_at_max: {truncated_ratio:.2%})\n"
-        f"min={lower}, max={upper}, beta={beta}",
+        title=f"TruncExp (trunc_at_max: {truncated_ratio:.2%})\nmin={lower}, max={upper}, beta={beta}",
         ax_dist=ax[0, 1],
         ax_hazard=ax[1, 1],
         ax_dist_all=ax[0, 3],

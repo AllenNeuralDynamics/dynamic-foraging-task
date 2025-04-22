@@ -20,7 +20,6 @@ class RandomWalkReward:
         sigma=[0.15, 0.15],  # L and R
         mean=[0, 0],  # L and R
     ) -> None:
-
         self.__dict__.update(locals())
 
         if not isinstance(sigma, list):
@@ -48,17 +47,13 @@ class RandomWalkReward:
     def first_trial(self):
         self.trial_now = 0
         for i, side in enumerate(["L", "R"]):
-            self.trial_rwd_prob[side].append(
-                np.random.uniform(self.p_min[i], self.p_max[i])
-            )
+            self.trial_rwd_prob[side].append(np.random.uniform(self.p_min[i], self.p_max[i]))
 
     def next_trial(self):
         self.trial_now += 1
         for i, side in enumerate(["L", "R"]):
             if not self.hold_this_block:
-                p = np.random.normal(
-                    self.trial_rwd_prob[side][-1] + self.mean[i], self.sigma[i]
-                )
+                p = np.random.normal(self.trial_rwd_prob[side][-1] + self.mean[i], self.sigma[i])
                 p = min(self.p_max[i], max(self.p_min[i], p))
             else:
                 p = self.trial_rwd_prob[side][-1]
@@ -87,22 +82,16 @@ class RandomWalkReward:
         )
 
         for s, col in zip(["L", "R"], ["r", "b"]):
-            ax[0, 0].plot(
-                self.trial_rwd_prob[s], col, marker=".", alpha=0.5, lw=2
-            )
+            ax[0, 0].plot(self.trial_rwd_prob[s], col, marker=".", alpha=0.5, lw=2)
             ax[0, 1].plot(self.auto_corr(self.trial_rwd_prob[s]), col)
 
         ax[1, 0].plot(
-            np.array(self.trial_rwd_prob["L"])
-            + np.array(self.trial_rwd_prob["R"]),
+            np.array(self.trial_rwd_prob["L"]) + np.array(self.trial_rwd_prob["R"]),
             label="sum",
         )
         ax[1, 0].plot(
             np.array(self.trial_rwd_prob["R"])
-            / (
-                np.array(self.trial_rwd_prob["L"])
-                + np.array(self.trial_rwd_prob["R"])
-            ),
+            / (np.array(self.trial_rwd_prob["L"]) + np.array(self.trial_rwd_prob["R"])),
             label="R/(L+R)",
         )
         ax[1, 0].legend()
@@ -116,9 +105,7 @@ class RandomWalkReward:
 if __name__ == "__main__":
     total_trial = 1000
 
-    reward_schedule = RandomWalkReward(
-        p_min=[0.1, 0.1], p_max=0.9, sigma=[0.1, 0.1], mean=[-0.0, 0.0]
-    )
+    reward_schedule = RandomWalkReward(p_min=[0.1, 0.1], p_max=0.9, sigma=[0.1, 0.1], mean=[-0.0, 0.0])
 
     while reward_schedule.trial_now <= total_trial:
         reward_schedule.next_trial()

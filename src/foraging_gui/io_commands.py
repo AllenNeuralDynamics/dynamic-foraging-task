@@ -133,9 +133,7 @@ class SetSpeedCommand(IOCommand):
     def execute(self):
         d = self.device.get_closed_loop_speed_and_accel("x", "y", "z")
         accel_x = d["x"][1]
-        self.device.set_closed_loop_speed_and_accel(
-            global_setting=(self.speed, accel_x)
-        )
+        self.device.set_closed_loop_speed_and_accel(global_setting=(self.speed, accel_x))
         self._done = True
 
     def done(self):
