@@ -243,6 +243,10 @@ class Window(QMainWindow):
         # initialize thread lock
         self.data_lock = threading.Lock()
 
+        # intialize behavior baseline time flag
+        self.behavior_baseline_period = threading.Event()
+
+
         # create bias indicator
         self.bias_n_size = 200
         self.bias_indicator = BiasIndicator(
@@ -6269,10 +6273,12 @@ class Window(QMainWindow):
     def _StartTrialLoop(self, GeneratedTrials, worker1, worker_save):
         if not self.Start.isChecked():
             logging.info("ending trial loop")
+            self.behavior_baseline_period.clear()
             return
 
         else:
             logging.info("starting trial loop")
+            self.behavior_baseline_period.set()
 
         # pause for specified habituation time
         start_time = time.time()
@@ -6288,10 +6294,11 @@ class Window(QMainWindow):
         update_hab_timer.start()
 
         logging.info(f"Waiting {self.hab_time_box.value()} min before starting session.")
-        while time.time() - start_time < self.hab_time_box.value() * 60:
+        while time.time() - start_time < self.hab_time_box.value() * 60 and self.behavior_baseline_period.is_set():
             QApplication.processEvents()
         update_hab_timer.stop()
         logging.info(f"Starting session.")
+        self.behavior_baseline_period.clear()
 
         # Track elapsed time in case Bonsai Stalls
         last_trial_start = time.time()
