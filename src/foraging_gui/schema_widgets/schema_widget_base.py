@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
     QSpinBox,
     QDoubleSpinBox,
     QSlider,
-    QCheckBox,
+    QCheckBox
 )
 from inspect import currentframe
 from importlib import import_module
@@ -23,22 +23,23 @@ from typing import Literal
 import logging
 import typing
 
-
 class SchemaWidgetBase(QMainWindow):
     ValueChangedOutside = pyqtSignal((str,))
     ValueChangedInside = pyqtSignal((str,))
 
     def __init__(self, schema: BaseModel):
+
         self.log = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
         super().__init__()
         self.schema = schema
         self.schema_module = import_module(self.schema.__module__)
-        widget = self.create_field_widgets(self.schema.model_dump(), "schema_fields")
+        widget = self.create_field_widgets(self.schema.model_dump(),
+                                           "schema_fields")
         self.setCentralWidget(create_widget("V", **widget))
         self.ValueChangedOutside[str].connect(self.update_field_widget)  # Trigger update when property value changes
 
-    def create_field_widgets(self, fields: dict, widget_field: str) -> dict:
+    def create_field_widgets(self, fields: dict,  widget_field: str) -> dict:
         """
         Create input widgets based on properties
         :param fields: dictionary containing properties within a class and mapping to values
@@ -58,19 +59,21 @@ class SchemaWidgetBase(QMainWindow):
                     boxes[name] = self.create_attribute_widget(name, "combo", input_specs)
                 # If no found options, create an editable text box or checkbox
                 else:
-                    box_type = "text" if bool not in type(value).__mro__ else "check"
+                    box_type = 'text' if bool not in type(value).__mro__ else 'check'
                     boxes[name] = self.create_attribute_widget(name, box_type, value)
 
             elif dict in type(value).__mro__:  # deal with dict like variables
                 boxes[name] = create_widget(
-                    "V", **self.create_field_widgets({f"{name}.{k}": v for k, v in value.items()}, name)
+                    "V", **self.create_field_widgets({f"{name}.{k}": v for k, v in value.items()},
+                                                     name)
                 )
-                setattr(self, name + "_widget", boxes[name])
+                setattr(self, name+"_widget", boxes[name])
             elif list in type(value).__mro__:  # deal with list like variables
                 boxes[name] = create_widget(
-                    "H", **self.create_field_widgets({f"{name}.{i}": v for i, v in enumerate(value)}, name)
+                    "H", **self.create_field_widgets({f"{name}.{i}": v for i, v in enumerate(value)},
+                                                     name)
                 )
-                setattr(self, name + "_widget", boxes[name])
+                setattr(self, name+"_widget", boxes[name])
             orientation = "H"
             if "." in name:  # see if parent list and format index label and input vertically
                 parent = self.path_get(self.schema, name_lst[0:-1])
@@ -102,9 +105,9 @@ class SchemaWidgetBase(QMainWindow):
 
     def create_attribute_widget(self, name, widget_type: Literal["combo", "text", "check"], values):
         """Create a widget and create corresponding attribute
-        :param name: name of property
-        :param widget_type: widget type ('combo', 'text', 'check')
-        :param values: input into widget"""
+                :param name: name of property
+                :param widget_type: widget type ('combo', 'text', 'check')
+                :param values: input into widget"""
 
         # options = values.keys() if widget_type == 'combo' else values
         box = getattr(self, f"create_{widget_type}_box")(name, values)
@@ -194,9 +197,7 @@ class SchemaWidgetBase(QMainWindow):
         """Update property widget. Triggers when attribute has been changed outside of widget
         :param name: name of attribute and widget"""
         value = self.path_get(self.schema, name.split("."))
-        if (
-            dict not in type(value).__mro__ and list not in type(value).__mro__ and BaseModel not in type(value).__mro__
-        ):  # not a dictionary or list like value
+        if dict not in type(value).__mro__ and list not in type(value).__mro__ and BaseModel not in type(value).__mro__:  # not a dictionary or list like value
             self._set_widget_text(name, value)
         elif dict in type(value).__mro__ or BaseModel in type(value).__mro__:
             value = value.model_dump() if BaseModel in type(value).__mro__ else value
@@ -222,7 +223,7 @@ class SchemaWidgetBase(QMainWindow):
                 value_type = type(self.path_get(self.schema, name.split(".")))
                 value = value.name if type(value_type) == enum.EnumMeta else value_type(value)
                 widget.setCurrentText(str(value))
-            elif hasattr(widget, "setChecked"):
+            elif hasattr(widget, 'setChecked'):
                 widget.setChecked(value)
             widget.blockSignals(False)
         else:
@@ -238,7 +239,7 @@ class SchemaWidgetBase(QMainWindow):
             try:
                 self.update_field_widget(name)
             except RuntimeError as e:
-                if "has been deleted" not in str(e):  # catch errors not related to deleted widgets
+                if "has been deleted" not in str(e):    # catch errors not related to deleted widgets
                     raise RuntimeError(e)
 
     def __setattr__(self, name, value):
@@ -247,7 +248,6 @@ class SchemaWidgetBase(QMainWindow):
         self.__dict__[name] = value
         if currentframe().f_back.f_locals.get("self", None) != self:  # call from outside so update widgets
             self.ValueChangedOutside.emit(name)
-
     @staticmethod
     def path_set(iterable: BaseModel, path: list[str], value) -> None:
         """
@@ -281,7 +281,6 @@ class SchemaWidgetBase(QMainWindow):
 
 
 # Convenience Functions
-
 
 def create_widget(struct: str, *args, **kwargs):
     """Creates either a horizontal or vertical layout populated with widgets
@@ -334,11 +333,11 @@ def label_maker(string):
     label = " ".join(label)
     return label
 
-
 #
-def add_border(
-    widget: SchemaWidgetBase, widget_group: dict = None, orientation: Literal["H", "V", "VH", "HV"] = "HV"
-) -> SchemaWidgetBase:
+def add_border(widget: SchemaWidgetBase,
+               widget_group: dict = None,
+               orientation: Literal['H', 'V', 'VH', 'HV'] = 'HV') \
+        -> SchemaWidgetBase:
     """
     Add border dividing property widgets in BaseDeviceWidget
     :param widget: widget to add dividers
@@ -355,7 +354,7 @@ def add_border(
         layout.addWidget(field_widget)
         frame.setStyleSheet(f".QFrame {{ border:1px solid grey }} ")
         widgets.append(frame)
-    if len(widgets) % 2 != 0 and orientation in ["VH", "HV"]:  # add dummy widget so all rows/colums can be created
+    if len(widgets) % 2 != 0 and orientation in ['VH', 'HV']:  # add dummy widget so all rows/colums can be created
         widgets.append(QWidget())
     widget.setCentralWidget(create_widget(orientation, *widgets))
 
@@ -371,18 +370,22 @@ if __name__ == "__main__":
         AindDynamicForagingTaskParameters,
         AutoWater,
         AutoBlock,
-        Warmup,
+        Warmup
     )
 
+
     def error_handler(etype, value, tb):
-        error_msg = "".join(traceback.format_exception(etype, value, tb))
+        error_msg = ''.join(traceback.format_exception(etype, value, tb))
         print(error_msg)
+
 
     sys.excepthook = error_handler  # redirect std error
     app = QApplication(sys.argv)
     task_model = AindDynamicForagingTaskLogic(
         task_parameters=AindDynamicForagingTaskParameters(
-            auto_water=AutoWater(), auto_block=AutoBlock(), warmup=Warmup()
+            auto_water=AutoWater(),
+            auto_block=AutoBlock(),
+            warmup=Warmup()
         ),
     )
     task_widget = SchemaWidgetBase(task_model.task_parameters)

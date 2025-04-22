@@ -8,8 +8,12 @@ class BonsaiSettingsModel(BaseModel):
     Defines a model for the Settings_box.csv file
     """
 
-    Behavior: str = Field(pattern=r"^COM[0-9]+$", description="COM port for Harp Behavior Board")
-    Soundcard: str = Field(pattern=r"^COM[0-9]+$", description="COM port for Harp Behavior Board")
+    Behavior: str = Field(
+        pattern=r"^COM[0-9]+$", description="COM port for Harp Behavior Board"
+    )
+    Soundcard: str = Field(
+        pattern=r"^COM[0-9]+$", description="COM port for Harp Behavior Board"
+    )
     BonsaiOsc1: str = Field(
         pattern=r"^40[0-9][0-9]$",
         description="OSC channel for python/bonsai communication",
@@ -26,14 +30,22 @@ class BonsaiSettingsModel(BaseModel):
         pattern=r"^40[0-9][0-9]$",
         description="OSC channel for python/bonsai communication",
     )
-    AttenuationLeft: int = Field(description="Calibration parameter for the left channel sound stimulus")
-    AttenuationRight: int = Field(description="Calibration parameter for the left channel sound stimulus")
+    AttenuationLeft: int = Field(
+        description="Calibration parameter for the left channel sound stimulus"
+    )
+    AttenuationRight: int = Field(
+        description="Calibration parameter for the left channel sound stimulus"
+    )
     current_box: str = Field(
         pattern=r"^[0-9][0-9][0-9](-[0-9]+-[ABCD]|_EPHYS[0-9]+|_Ephys[0-9]+)$",
         description="Box name in ROOM-TOWER-BOX format, or ROOM-EphysNUM",
     )
-    RunningWheel: Literal["0", "1"] = Field(default=0, description="Using AIND running wheel")
-    AINDLickDetector: Literal["0", "1"] = Field(default=0, description="Using AIND Lick Detector")
+    RunningWheel: Literal["0", "1"] = Field(
+        default=0, description="Using AIND running wheel"
+    )
+    AINDLickDetector: Literal["0", "1"] = Field(
+        default=0, description="Using AIND Lick Detector"
+    )
     LeftLickDetector: Optional[str] = Field(
         default="COM0",
         pattern=r"^COM[0-9]+$",
@@ -44,18 +56,28 @@ class BonsaiSettingsModel(BaseModel):
         pattern=r"^COM[0-9]+$",
         description="COM port for AIND Lick Detector",
     )
-    HighSpeedCamera: Literal["0", "1"] = Field(default=0, description="Using High Speed cameras")
+    HighSpeedCamera: Literal["0", "1"] = Field(
+        default=0, description="Using High Speed cameras"
+    )
     HasSideCameraLeft: Literal["0", "1"] = Field(
         default=0, description="Using high speed camera on the left side of the mouse"
     )
     HasSideCameraRight: Literal["0", "1"] = Field(
         default=0, description="Using high speed camera on the right side of the mouse"
     )
-    HasBottomCamera: Literal["0", "1"] = Field(default=0, description="Using high speed camera on the bottom the mouse")
-    HasBodyCamera: Literal["0", "1"] = Field(default=0, description="Using high speed camera on the body of the mouse")
+    HasBottomCamera: Literal["0", "1"] = Field(
+        default=0, description="Using high speed camera on the bottom the mouse"
+    )
+    HasBodyCamera: Literal["0", "1"] = Field(
+        default=0, description="Using high speed camera on the body of the mouse"
+    )
     # TODO, need to add a validator that these camera serial numbers are required if Has<camera> is 1
-    SideCameraLeft: int = Field(default=0, description="serial number for side camera left")
-    SideCameraRight: int = Field(default=0, description="serial number for side camera right")
+    SideCameraLeft: int = Field(
+        default=0, description="serial number for side camera left"
+    )
+    SideCameraRight: int = Field(
+        default=0, description="serial number for side camera right"
+    )
     BottomCamera: int = Field(default=0, description="serial number for bottom camera")
     BodyCamera: int = Field(default=0, description="serial number for body camera")
     codec: Optional[str] = Field(default="", description="Video codec")
@@ -65,7 +87,9 @@ class BonsaiSettingsModel(BaseModel):
     # TODO OptoLaser<x>Wavelength
     # TODO OptoLaser<x>Model
     # TODO OptoLaser<x>SerialNumber
-    FipObjectiveCMOSSerialNumber: Optional[str] = Field(default=0, description="Serial number for FIP CMOS Objective")
+    FipObjectiveCMOSSerialNumber: Optional[str] = Field(
+        default=0, description="Serial number for FIP CMOS Objective"
+    )
 
 
 class DFTSettingsModel(BaseModel):
