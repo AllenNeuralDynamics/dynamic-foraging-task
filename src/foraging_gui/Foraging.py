@@ -245,7 +245,7 @@ class Window(QMainWindow):
 
         # intialize behavior baseline time flag
         self.behavior_baseline_period = threading.Event()
-
+        self.baseline_min_elapsed = 0
 
         # create bias indicator
         self.bias_n_size = 200
@@ -5461,6 +5461,7 @@ class Window(QMainWindow):
 
         self.unsaved_data = False
         self.ManualWaterVolume = [0, 0]
+        self.baseline_min_elapsed = 0
 
         # Clear Plots
         if hasattr(self, "PlotM") and self.clear_figure_after_save:
@@ -6270,6 +6271,37 @@ class Window(QMainWindow):
         else:
             logging.info("No active session logger")
 
+    def wait_for_baseline(self) -> None:
+        """
+            Function to wait for a baseline time before behavior
+        """
+
+        # pause for specified habituation time
+        start_time = time.time()
+
+        # create habituation timer label and update every minute
+        hab_lab = QLabel()
+        hab_lab.setStyleSheet(f"color: {self.default_warning_color};")
+        self.warning_widget.layout().insertWidget(0, hab_lab)
+        update_hab_timer = QtCore.QTimer(
+            timeout=lambda: hab_lab.setText(f"Time elapsed: "
+                                            f"{round((self.baseline_min_elapsed * 60) // 60)} minutes"
+                                            f" {round((self.baseline_min_elapsed * 60) % 60)} seconds"),
+            interval=1000)
+        update_hab_timer.start()
+
+        logging.info(f"Waiting {round(self.hab_time_box.value() - self.baseline_min_elapsed)} min before starting "
+                     f"session.")
+
+        elapsed = self.baseline_min_elapsed
+        while self.baseline_min_elapsed < self.hab_time_box.value() and self.behavior_baseline_period.is_set():
+            QApplication.processEvents()
+            self.baseline_min_elapsed = ((time.time() - start_time) / 60) + elapsed
+
+        update_hab_timer.stop()
+        self.behavior_baseline_period.clear()
+
+
     def _StartTrialLoop(self, GeneratedTrials, worker1, worker_save):
         if not self.Start.isChecked():
             logging.info("ending trial loop")
@@ -6281,23 +6313,8 @@ class Window(QMainWindow):
             self.behavior_baseline_period.set()
 
         # pause for specified habituation time
-        start_time = time.time()
-
-        # create habituation timer label and update every minute
-        hab_timer_label = QLabel()
-        hab_timer_label.setStyleSheet(f"color: {self.default_warning_color};")
-        self.warning_widget.layout().insertWidget(0, hab_timer_label)
-        update_hab_timer = QtCore.QTimer(
-            timeout=lambda: hab_timer_label.setText(f"Time elapsed: {round((time.time() - start_time) // 60)} minutes"
-                                                    f" {round((time.time() - start_time) % 60)} seconds"),
-            interval=1000)
-        update_hab_timer.start()
-
-        logging.info(f"Waiting {self.hab_time_box.value()} min before starting session.")
-        while time.time() - start_time < self.hab_time_box.value() * 60 and self.behavior_baseline_period.is_set():
-            QApplication.processEvents()
-        update_hab_timer.stop()
-        self.behavior_baseline_period.clear()
+        if self.baseline_min_elapsed <= self.hab_time_box.value():
+            self.wait_for_baseline()
 
         # Track elapsed time in case Bonsai Stalls
         last_trial_start = time.time()
