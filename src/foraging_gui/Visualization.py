@@ -1,14 +1,12 @@
 import logging
 
 import numpy as np
-
-from matplotlib.figure import Figure
-from matplotlib.gridspec import GridSpec
+from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import LaserColors
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
 )
-from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import LaserColors
-
+from matplotlib.figure import Figure
+from matplotlib.gridspec import GridSpec
 from scipy import stats
 
 

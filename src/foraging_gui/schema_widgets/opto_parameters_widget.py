@@ -1,27 +1,28 @@
+
+from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
+    ConstantProtocol,
+    IntervalConditions,
+    LaserColorFive,
+    LaserColorFour,
+    LaserColorOne,
+    LaserColorSix,
+    LaserColorThree,
+    LaserColorTwo,
+    LocationOne,
+    LocationTwo,
+    Optogenetics,
+    PulseProtocol,
+    SessionControl,
+    SineProtocol,
+)
+from pydantic import BaseModel
+from PyQt5.QtWidgets import QCheckBox, QComboBox
+
 from foraging_gui.schema_widgets.schema_widget_base import (
     SchemaWidgetBase,
     add_border,
     create_widget,
 )
-from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
-    Optogenetics,
-    IntervalConditions,
-    LocationOne,
-    LocationTwo,
-    SineProtocol,
-    PulseProtocol,
-    ConstantProtocol,
-    LaserColorOne,
-    LaserColorTwo,
-    LaserColorThree,
-    LaserColorFour,
-    LaserColorFive,
-    LaserColorSix,
-    SessionControl,
-)
-from pydantic import BaseModel
-import logging
-from PyQt5.QtWidgets import QCheckBox, QComboBox
 
 
 class OptoParametersWidget(SchemaWidgetBase):
@@ -279,7 +280,7 @@ class OptoParametersWidget(SchemaWidgetBase):
         name_lst = name.split(".")
         value = self.path_get(self.schema, name_lst)
         if hasattr(self, name + "_check_box"):  # optional type
-            getattr(self, name + "_check_box").setChecked(not value is None)
+            getattr(self, name + "_check_box").setChecked(value is not None)
 
         if value is not None:
             if "protocol" == name_lst[-1]:
@@ -436,9 +437,10 @@ class OptoParametersWidget(SchemaWidgetBase):
 
 
 if __name__ == "__main__":
-    from PyQt5.QtWidgets import QApplication
     import sys
     import traceback
+
+    from PyQt5.QtWidgets import QApplication
 
     def error_handler(etype, value, tb):
         error_msg = "".join(traceback.format_exception(etype, value, tb))

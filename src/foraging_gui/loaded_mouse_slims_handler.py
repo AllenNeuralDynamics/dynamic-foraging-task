@@ -1,28 +1,29 @@
-from aind_behavior_dynamic_foraging.CurriculumManager.trainer import (
-    DynamicForagingTrainerState,
-    DynamicForagingTrainerServer,
-    DynamicForagingMetrics,
-)
-from aind_behavior_curriculum import Trainer, Curriculum
+import logging
+import math
+import os
+from datetime import timezone
+from typing import TypedDict, get_args
+
+from aind_behavior_curriculum import Curriculum, Trainer
 from aind_behavior_dynamic_foraging import AindDynamicForagingTaskLogic
-from aind_behavior_services.session import AindBehaviorSessionModel
-from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
-    Optogenetics,
+from aind_behavior_dynamic_foraging.CurriculumManager.trainer import (
+    DynamicForagingMetrics,
+    DynamicForagingTrainerServer,
+    DynamicForagingTrainerState,
 )
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
-    FiberPhotometry,
     STAGE_STARTS,
+    FiberPhotometry,
 )
 from aind_behavior_dynamic_foraging.DataSchemas.operation_control import (
     OperationalControl,
 )
-from aind_slims_api import SlimsClient, models, exceptions
+from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
+    Optogenetics,
+)
+from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_data_schema.core.session import Session
-import logging
-import os
-import math
-from datetime import timezone
-from typing import get_args, TypedDict
+from aind_slims_api import SlimsClient, models
 
 
 class StageCoords(TypedDict):
@@ -204,12 +205,12 @@ class LoadedMouseSlimsHandler:
                 "%Y-%m-%d %H:%M:%S"
             ):
                 self.log.info(
-                    f"Waterlog information already exists for this session. Updating waterlog in Slims."
+                    "Waterlog information already exists for this session. Updating waterlog in Slims."
                 )
                 model.pk = waterlog[0].pk
                 self.slims_client.update_model(model=model)
             else:
-                self.log.info(f"Adding waterlog to Slims.")
+                self.log.info("Adding waterlog to Slims.")
                 self.slims_client.add_model(model)
         else:
             self.log.warning("No client connected.")
@@ -300,7 +301,7 @@ class LoadedMouseSlimsHandler:
 
             # update fip_model
             if FiberPhotometry.__name__ in attachment_names:
-                self.log.info(f"Applying fip model")
+                self.log.info("Applying fip model")
                 fip_attachment = attachments[
                     attachment_names.index(FiberPhotometry.__name__)
                 ]

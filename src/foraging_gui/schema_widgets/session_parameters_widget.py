@@ -1,12 +1,13 @@
+from datetime import datetime
+
+from aind_behavior_services.session import AindBehaviorSessionModel
+from PyQt5.QtGui import QIntValidator
+from PyQt5.QtWidgets import QLabel, QTextEdit
+
 from foraging_gui.schema_widgets.schema_widget_base import (
     SchemaWidgetBase,
-    add_border,
     create_widget,
 )
-from aind_behavior_services.session import AindBehaviorSessionModel
-from datetime import datetime
-from PyQt5.QtWidgets import QTextEdit, QLabel
-from PyQt5.QtGui import QIntValidator
 
 
 class SessionParametersWidget(SchemaWidgetBase):
@@ -77,11 +78,13 @@ class SessionParametersWidget(SchemaWidgetBase):
 
 
 if __name__ == "__main__":
-    from PyQt5.QtWidgets import QApplication
+    import subprocess
     import sys
     import traceback
+
+    from PyQt5.QtWidgets import QApplication
+
     import foraging_gui
-    import subprocess
 
     def error_handler(etype, value, tb):
         error_msg = "".join(traceback.format_exception(etype, value, tb))

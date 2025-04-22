@@ -6,17 +6,16 @@ import subprocess
 from datetime import datetime
 
 import numpy as np
-from aind_behavior_services.session import AindBehaviorSessionModel
-from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
-    AindDynamicForagingTaskLogic,
+from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
+    FiberPhotometry,
 )
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
     Optogenetics,
 )
-from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
-    FiberPhotometry,
+from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
+    AindDynamicForagingTaskLogic,
 )
-
+from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_data_schema.components.coordinates import (
     Axis,
     AxisName,
@@ -52,7 +51,7 @@ from aind_data_schema_models.units import (
     PowerUnit,
     SizeUnit,
     SoundIntensityUnit,
-    TimeUnit
+    TimeUnit,
 )
 
 import foraging_gui

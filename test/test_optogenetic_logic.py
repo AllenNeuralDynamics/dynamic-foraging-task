@@ -1,36 +1,32 @@
 import unittest
+from datetime import datetime
+from unittest.mock import MagicMock
+
+import numpy as np
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
-    Optogenetics,
+    ConstantProtocol,
     IntervalConditions,
     LaserColorOne,
-    LaserColorTwo,
-    LaserColorThree,
-    LaserColorFour,
-    LaserColorFive,
-    LaserColorSix,
-    SessionControl,
     LocationOne,
     LocationTwo,
-    SineProtocol,
+    Optogenetics,
     PulseProtocol,
-    ConstantProtocol,
+    SessionControl,
+    SineProtocol,
 )
-from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
     AindDynamicForagingTaskLogic,
     AindDynamicForagingTaskParameters,
-    AutoWater,
     AutoBlock,
+    AutoWater,
     Warmup,
 )
-from test.resources.old_generate_trials import GenerateTrials as OldGenerateTrials
-from datetime import datetime
-import matplotlib.pyplot as plt
-import numpy as np
-from src.foraging_gui.MyFunctions import GenerateTrials
+from aind_behavior_services.session import AindBehaviorSessionModel
 
-from unittest.mock import patch, MagicMock
-import os
+from src.foraging_gui.MyFunctions import GenerateTrials
+from test.resources.old_generate_trials import (
+    GenerateTrials as OldGenerateTrials,
+)
 
 
 class TestOptogeneticLogic(unittest.TestCase):
@@ -124,7 +120,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_1"
         old_generate_trials.TP_Laser1_power_1 = f"[{laser.location[0].power}]"
-        old_generate_trials.TP_Laser2_power_1 = f"[0]"
+        old_generate_trials.TP_Laser2_power_1 = "[0]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
         old_generate_trials.TP_Frequency_1 = laser.protocol.frequency
@@ -152,7 +148,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -181,7 +177,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -210,7 +206,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -291,7 +287,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_1"
         old_generate_trials.TP_Laser1_power_1 = f"[{laser.location[0].power}]"
-        old_generate_trials.TP_Laser2_power_1 = f"[0]"
+        old_generate_trials.TP_Laser2_power_1 = "[0]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
         old_generate_trials.TP_Frequency_1 = laser.protocol.frequency
@@ -319,7 +315,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -348,7 +344,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -378,7 +374,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -457,7 +453,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_1"
         old_generate_trials.TP_Laser1_power_1 = f"[{laser.location[0].power}]"
-        old_generate_trials.TP_Laser2_power_1 = f"[0]"
+        old_generate_trials.TP_Laser2_power_1 = "[0]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
         old_generate_trials.TP_Frequency_1 = 0
@@ -485,7 +481,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -514,7 +510,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -544,7 +540,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name

@@ -15,7 +15,6 @@ from PyQt5.QtWidgets import (
 )
 
 
-
 class WarningWidget(QWidget):
     """Widget that uses a logging QueueHandler to display log errors and warning"""
 

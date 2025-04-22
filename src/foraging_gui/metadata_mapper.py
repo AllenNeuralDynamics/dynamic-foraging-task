@@ -1,46 +1,45 @@
 import ast
 from datetime import datetime
-from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
-    AindDynamicForagingTaskParameters,
-    AindDynamicForagingTaskLogic,
-    BlockParameters,
-    RewardProbability,
-    DelayPeriod,
-    AutoWater,
-    InterTrialInterval,
-    ResponseTime,
-    AutoBlock,
-    RewardSize,
-    Warmup,
-    RewardN,
-)
-from aind_behavior_services.session import AindBehaviorSessionModel
-
-from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
-    Optogenetics,
-    LaserColorOne,
-    LaserColorTwo,
-    LaserColorThree,
-    LaserColorFour,
-    LaserColorFive,
-    LaserColorSix,
-    LocationOne,
-    LocationTwo,
-    IntervalConditions,
-    SineProtocol,
-    PulseProtocol,
-    ConstantProtocol,
-    SessionControl,
-)
 
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
     FiberPhotometry,
 )
 from aind_behavior_dynamic_foraging.DataSchemas.operation_control import (
-    OperationalControl,
     AutoStop,
+    OperationalControl,
     StageSpecs,
 )
+from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
+    ConstantProtocol,
+    IntervalConditions,
+    LaserColorFive,
+    LaserColorFour,
+    LaserColorOne,
+    LaserColorSix,
+    LaserColorThree,
+    LaserColorTwo,
+    LocationOne,
+    LocationTwo,
+    Optogenetics,
+    PulseProtocol,
+    SessionControl,
+    SineProtocol,
+)
+from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
+    AindDynamicForagingTaskLogic,
+    AindDynamicForagingTaskParameters,
+    AutoBlock,
+    AutoWater,
+    BlockParameters,
+    DelayPeriod,
+    InterTrialInterval,
+    ResponseTime,
+    RewardN,
+    RewardProbability,
+    RewardSize,
+    Warmup,
+)
+from aind_behavior_services.session import AindBehaviorSessionModel
 
 
 def task_parameters_to_tp_conversion(

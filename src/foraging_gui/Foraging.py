@@ -1,17 +1,10 @@
 import csv
 import json
 import logging
-import requests
-from hashlib import md5
-from typing import Literal, get_args, Union
-from pydantic import BaseModel
-import re
-from importlib import import_module
-
-import logging_loki
 import math
 import os
 import platform
+import re
 import shutil
 import socket
 import subprocess
@@ -20,41 +13,63 @@ import threading
 import time
 import traceback
 import webbrowser
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta
 from hashlib import md5
-import yaml
-import shutil
+from importlib import import_module
 from pathlib import Path
+from typing import Literal, Union, get_args
 
 import harp
 import logging_loki
-from datetime import date, datetime, timezone, timedelta
-import serial
 import numpy as np
 import pandas as pd
 import requests
 import serial
 import yaml
-from aind_auto_train.schema.task import TrainingStage
+from aind_behavior_dynamic_foraging.CurriculumManager.curriculum_schedule_mapper import (
+    CURRICULUM_SCHEDULE_NAME_MAPPER,
+)
+from aind_behavior_dynamic_foraging.CurriculumManager.trainer import (
+    DynamicForagingMetrics,
+    DynamicForagingTrainerState,
+    TrainerState,
+)
+from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
+    STAGE_STARTS,
+    FiberPhotometry,
+)
+from aind_behavior_dynamic_foraging.DataSchemas.operation_control import (
+    OperationalControl,
+    StageSpecs,
+)
+from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
+    IntervalConditions,
+    LaserColorFive,
+    LaserColorFour,
+    LaserColorOne,
+    LaserColorSix,
+    LaserColorThree,
+    LaserColorTwo,
+    Optogenetics,
+    SessionControl,
+)
+from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
+    AindDynamicForagingTaskLogic,
+    AindDynamicForagingTaskParameters,
+    AutoBlock,
+    AutoWater,
+    Warmup,
+)
 from aind_behavior_services.session import AindBehaviorSessionModel
-from aind_data_schema.core.session import Session
-from aind_slims_api import SlimsClient, models
+from aind_slims_api.models.behavior_session import SlimsBehaviorSession
 from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar,
 )
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 from pykeepass import PyKeePass
-from matplotlib.backends.backend_qt5agg import (
-    NavigationToolbar2QT as NavigationToolbar,
-)
-from scipy.io import savemat, loadmat
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QSizePolicy
-from PyQt5.QtWidgets import QFileDialog, QVBoxLayout, QGridLayout, QLabel
-from PyQt5 import QtWidgets, QtGui, QtCore, uic
-from PyQt5.QtCore import QThreadPool, Qt, QThread, QTimer
 from pyOSC3.OSC3 import OSCStreamingClient
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from PyQt5.QtCore import Qt, QThread, QThreadPool
+from PyQt5.QtCore import Qt, QThread, QThreadPool, QTimer
 from PyQt5.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -68,46 +83,27 @@ from PyQt5.QtWidgets import (
 from scipy.io import loadmat, savemat
 from StageWidget.main import get_stage_widget
 
-
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
-from foraging_gui.Visualization import (
-    PlotV,
-    PlotLickDistribution,
-    PlotTimeDistribution,
-)
-from foraging_gui.Dialogs import (
-    OptogeneticsDialog,
-    WaterCalibrationDialog,
-    CameraDialog,
-    MetadataDialog,
-)
-from foraging_gui.Dialogs import LaserCalibrationDialog
-from foraging_gui.Dialogs import LickStaDialog, TimeDistributionDialog
-from foraging_gui.Dialogs import MouseSelectorDialog
-from foraging_gui.MyFunctions import (
-    GenerateTrials,
-    Worker,
-    TimerWorker,
-    NewScaleSerialY,
-    EphysRecording,
-)
-from foraging_gui.stage import Stage
 from foraging_gui.bias_indicator import BiasIndicator
-from foraging_gui.warning_widget import WarningWidget
-from foraging_gui.schema_widgets.behavior_parameters_widget import (
-    BehaviorParametersWidget,
-)
-from foraging_gui.schema_widgets.fib_parameters_widget import (
-    FIBParametersWidget,
-)
-from foraging_gui.schema_widgets.session_parameters_widget import (
-    SessionParametersWidget,
-)
-from foraging_gui.schema_widgets.operation_control_widget import (
-    OperationControlWidget,
+from foraging_gui.Dialogs import (
+    CameraDialog,
+    LaserCalibrationDialog,
+    LickStaDialog,
+    MetadataDialog,
+    MouseSelectorDialog,
+    OptogeneticsDialog,
+    TimeDistributionDialog,
+    WaterCalibrationDialog,
 )
 from foraging_gui.GenerateMetadata import generate_metadata
+from foraging_gui.metadata_mapper import (
+    behavior_json_to_fip_model,
+    behavior_json_to_operational_control_model,
+    behavior_json_to_opto_model,
+    behavior_json_to_session_model,
+    behavior_json_to_task_logic_model,
+)
 from foraging_gui.MyFunctions import (
     EphysRecording,
     GenerateTrials,
@@ -116,56 +112,17 @@ from foraging_gui.MyFunctions import (
     Worker,
 )
 from foraging_gui.RigJsonBuilder import build_rig_json
-from foraging_gui.settings_model import DFTSettingsModel, BonsaiSettingsModel
-from foraging_gui.loaded_mouse_slims_handler import LoadedMouseSlimsHandler
-from aind_behavior_services.session import AindBehaviorSessionModel
-from aind_slims_api.models.behavior_session import SlimsBehaviorSession
-from aind_behavior_dynamic_foraging.CurriculumManager.curriculum_schedule_mapper import (
-    CURRICULUM_SCHEDULE_NAME_MAPPER,
+from foraging_gui.schema_widgets.behavior_parameters_widget import (
+    BehaviorParametersWidget,
 )
-
-from foraging_gui.metadata_mapper import (
-    behavior_json_to_task_logic_model,
-    behavior_json_to_session_model,
-    behavior_json_to_fip_model,
-    behavior_json_to_opto_model,
-    behavior_json_to_operational_control_model,
+from foraging_gui.schema_widgets.fib_parameters_widget import (
+    FIBParametersWidget,
 )
-
-from aind_behavior_dynamic_foraging.CurriculumManager.trainer import (
-    DynamicForagingTrainerState,
-    TrainerState,
-    DynamicForagingMetrics,
+from foraging_gui.schema_widgets.operation_control_widget import (
+    OperationControlWidget,
 )
-
-from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
-    AindDynamicForagingTaskLogic,
-    AindDynamicForagingTaskParameters,
-    AutoWater,
-    AutoBlock,
-    Warmup,
-)
-
-from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
-    Optogenetics,
-    IntervalConditions,
-    LaserColorOne,
-    LaserColorTwo,
-    LaserColorThree,
-    LaserColorFour,
-    LaserColorFive,
-    LaserColorSix,
-    SessionControl,
-)
-
-from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
-    FiberPhotometry,
-    STAGE_STARTS,
-)
-
-from aind_behavior_dynamic_foraging.DataSchemas.operation_control import (
-    OperationalControl,
-    StageSpecs,
+from foraging_gui.schema_widgets.session_parameters_widget import (
+    SessionParametersWidget,
 )
 from foraging_gui.settings_model import BonsaiSettingsModel, DFTSettingsModel
 from foraging_gui.sound_button import SoundButton
@@ -1848,7 +1805,7 @@ class Window(QMainWindow):
             elif axis == "z":
                 relative_postition = (0, 0, step)
             self._UpdatePosition(current_position, relative_postition)
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
 
     def _MoveXP(self):
@@ -3067,7 +3024,7 @@ class Window(QMainWindow):
             else:
                 self.ShowRewardPairs.setText(reward_str)
 
-        except Exception as e:
+        except Exception:
             # Catch the exception and log error information
             logging.warning(traceback.format_exc())
 
@@ -5264,7 +5221,7 @@ class Window(QMainWindow):
         if self.actionDrawing_after_stopping.isChecked() == True:
             try:
                 self.PlotM._Update(GeneratedTrials=GeneratedTrials,Channel=self.Channel2)
-            except Exception as e:
+            except Exception:
                 logging.error(traceback.format_exc())
 
     def session_end_tasks(self):

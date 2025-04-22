@@ -10,36 +10,32 @@ from sys import platform as PLATFORM
 
 import numpy as np
 import requests
-from PyQt5 import QtCore, QtWidgets
-from serial import Serial
-from serial.tools.list_ports import comports as list_comports
-
-from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
-from aind_behavior_dynamic_foraging.CurriculumManager.trainer import (
-    DynamicForagingTrainerState,
-)
 from aind_behavior_dynamic_foraging import AindDynamicForagingTaskLogic
-from aind_behavior_services.session import AindBehaviorSessionModel
-from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
-    Optogenetics,
-)
 from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
     FiberPhotometry,
 )
 from aind_behavior_dynamic_foraging.DataSchemas.operation_control import (
     OperationalControl,
 )
+from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
+    Optogenetics,
+)
+from aind_behavior_services.session import AindBehaviorSessionModel
+from PyQt5 import QtCore, QtWidgets
+from serial import Serial
+from serial.tools.list_ports import comports as list_comports
 
 from foraging_gui.metadata_mapper import (
-    task_parameters_to_tp_conversion,
-    session_to_tp_conversion,
     fip_to_tp_conversion,
-    opto_to_tp_conversion,
     operational_control_to_tp_conversion,
+    opto_to_tp_conversion,
+    session_to_tp_conversion,
+    task_parameters_to_tp_conversion,
 )
+from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
 
 if PLATFORM == "win32":
-    from newscale.usbxpress import USBXpressLib, USBXpressDevice
+    from newscale.usbxpress import USBXpressDevice, USBXpressLib
 VID_NEWSCALE = 0x10C4
 PID_NEWSCALE = 0xEA61
 

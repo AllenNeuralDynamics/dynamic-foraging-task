@@ -1,23 +1,18 @@
-import random
-import traceback
-import math
-import time
-import sys
-from sys import platform as PLATFORM
-from datetime import datetime
 import logging
-import requests
+import math
+import random
+import time
+from datetime import datetime
+from itertools import accumulate
+from sys import platform as PLATFORM
 
 import numpy as np
-from itertools import accumulate
-from serial.tools.list_ports import comports as list_comports
-from PyQt5 import QtWidgets
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 
 from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
 
 if PLATFORM == "win32":
-    from newscale.usbxpress import USBXpressLib, USBXpressDevice
+    pass
 VID_NEWSCALE = 0x10C4
 PID_NEWSCALE = 0xEA61
 

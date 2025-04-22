@@ -1,27 +1,28 @@
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import (
-    QFrame,
-    QWidget,
-    QLabel,
-    QComboBox,
-    QHBoxLayout,
-    QVBoxLayout,
-    QMainWindow,
-    QLineEdit,
-    QSpinBox,
-    QDoubleSpinBox,
-    QSlider,
-    QCheckBox,
-)
-from inspect import currentframe
-from importlib import import_module
 import enum
+import logging
 import re
+import typing
+from importlib import import_module
+from inspect import currentframe
+from typing import Literal
+
 import inflection
 from pydantic import BaseModel
-from typing import Literal
-import logging
-import typing
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QDoubleSpinBox,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QSlider,
+    QSpinBox,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class SchemaWidgetBase(QMainWindow):
@@ -452,7 +453,7 @@ def add_border(
         frame = QFrame()
         layout = QVBoxLayout(frame)
         layout.addWidget(field_widget)
-        frame.setStyleSheet(f".QFrame {{ border:1px solid grey }} ")
+        frame.setStyleSheet(".QFrame { border:1px solid grey } ")
         widgets.append(frame)
     if len(widgets) % 2 != 0 and orientation in [
         "VH",
@@ -465,16 +466,17 @@ def add_border(
 
 
 if __name__ == "__main__":
-    from PyQt5.QtWidgets import QApplication
     import sys
     import traceback
+
     from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
         AindDynamicForagingTaskLogic,
         AindDynamicForagingTaskParameters,
-        AutoWater,
         AutoBlock,
+        AutoWater,
         Warmup,
     )
+    from PyQt5.QtWidgets import QApplication
 
     def error_handler(etype, value, tb):
         error_msg = "".join(traceback.format_exception(etype, value, tb))

@@ -4,46 +4,42 @@ import math
 import os
 import subprocess
 import time
-import webbrowser
 from datetime import datetime
 from typing import Literal
 
 import numpy as np
-import pandas as pd
+from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
+    Optogenetics,
+)
 from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar,
+)
+from PyQt5 import QtGui, QtWidgets, uic
+from PyQt5.QtCore import (
+    QAbstractTableModel,
+    Qt,
+    QThreadPool,
+    QTimer,
+    pyqtSignal,
 )
 from PyQt5.QtWidgets import (
     QApplication,
     QDialog,
-    QVBoxLayout,
-    QMessageBox,
-    QGridLayout,
-)
-from PyQt5.QtWidgets import (
-    QLabel,
     QDialogButtonBox,
     QFileDialog,
+    QGridLayout,
     QInputDialog,
+    QLabel,
     QLineEdit,
-)
-from PyQt5 import QtWidgets, uic, QtGui
-from PyQt5.QtCore import (
-    QThreadPool,
-    Qt,
-    QAbstractTableModel,
-    QTimer,
-    pyqtSignal,
+    QMessageBox,
+    QVBoxLayout,
 )
 
 from foraging_gui.MyFunctions import Worker
-from foraging_gui.Visualization import PlotWaterCalibration
 from foraging_gui.schema_widgets.opto_parameters_widget import (
     OptoParametersWidget,
 )
-from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
-    Optogenetics,
-)
+from foraging_gui.Visualization import PlotWaterCalibration
 
 logger = logging.getLogger(__name__)
 

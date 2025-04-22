@@ -1,18 +1,19 @@
+from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
+    AindDynamicForagingTaskLogic,
+    AindDynamicForagingTaskParameters,
+    AutoBlock,
+    AutoWater,
+    RewardN,
+    Warmup,
+)
+from pydantic import BaseModel
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QCheckBox
+
 from foraging_gui.schema_widgets.schema_widget_base import (
     SchemaWidgetBase,
     add_border,
 )
-from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
-    AindDynamicForagingTaskLogic,
-    AindDynamicForagingTaskParameters,
-    AutoWater,
-    AutoBlock,
-    Warmup,
-    RewardN,
-)
-from PyQt5.QtWidgets import QCheckBox
-from PyQt5.QtCore import pyqtSignal
-from pydantic import BaseModel
 
 
 class BehaviorParametersWidget(SchemaWidgetBase):
@@ -186,7 +187,7 @@ class BehaviorParametersWidget(SchemaWidgetBase):
 
         value = self.path_get(self.schema, name.split("."))
         if hasattr(self, name + "_check_box"):  # optional type
-            getattr(self, name + "_check_box").setChecked(not value is None)
+            getattr(self, name + "_check_box").setChecked(value is not None)
         if (
             dict not in type(value).__mro__
             and list not in type(value).__mro__
@@ -210,9 +211,10 @@ class BehaviorParametersWidget(SchemaWidgetBase):
 
 
 if __name__ == "__main__":
-    from PyQt5.QtWidgets import QApplication
     import sys
     import traceback
+
+    from PyQt5.QtWidgets import QApplication
 
     def error_handler(etype, value, tb):
         error_msg = "".join(traceback.format_exception(etype, value, tb))
