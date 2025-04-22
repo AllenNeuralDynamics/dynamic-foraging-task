@@ -2794,7 +2794,7 @@
      <string> min</string>
       </property>
      <property name="prefix">
-     <string> Habituation: </string>
+     <string> Baseline: </string>
     </property>
    </widget>
    <widget class="QPushButton" name="NewSession">
