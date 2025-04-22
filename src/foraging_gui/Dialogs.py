@@ -1,12 +1,11 @@
-import time
-import math
 import json
-import os
-import shutil
-import subprocess
-from datetime import datetime
 import logging
+import math
+import os
+import subprocess
+import time
 import webbrowser
+from datetime import datetime
 from typing import Literal
 
 import numpy as np
@@ -300,6 +299,9 @@ class WaterCalibrationDialog(QDialog):
         self.EmergencyStop.clicked.connect(self._EmergencyStop)
         self.showrecent.textChanged.connect(self._Showrecent)
         self.showspecificcali.activated.connect(self._ShowSpecifcDay)
+        # toggle multi value calibration on and off
+        self.groupBox_2.setEnabled(False)
+        self.multi_value_enable.toggled.connect(self.groupBox_2.setEnabled)
 
     def _Showrecent(self):
         """update the calibration figure"""
@@ -317,7 +319,7 @@ class WaterCalibrationDialog(QDialog):
             reply = QMessageBox.question(
                 self,
                 "Box {}, Finished".format(self.MainWindow.box_letter),
-                f"Calibration incomplete, are you sure you want to finish?\n",
+                "Calibration incomplete, are you sure you want to finish?\n",
                 QMessageBox.Yes | QMessageBox.No,
                 QMessageBox.No,
             )
@@ -327,7 +329,7 @@ class WaterCalibrationDialog(QDialog):
             reply = QMessageBox.question(
                 self,
                 "Box {}, Finished".format(self.MainWindow.box_letter),
-                f"Calibration incomplete, are you sure you want to finish?\n",
+                "Calibration incomplete, are you sure you want to finish?\n",
                 QMessageBox.Yes | QMessageBox.No,
                 QMessageBox.No,
             )
@@ -1186,12 +1188,12 @@ class WaterCalibrationDialog(QDialog):
         if np.abs(error) > TOLERANCE:
             reply = QMessageBox.critical(
                 self,
-                f"Spot check {valve}",
+                f"Spot check {valve}".format(np.round(result, 2)),
                 "Measurement is outside expected tolerance.<br><br>"
                 "If this is a typo, please press cancel."
                 '<br><br><span style="color:purple;font-weight:bold">IMPORTANT</span>: '
                 "If the measurement was correctly entered, please press okay and repeat"
-                "spot check once.".format(np.round(result, 2)),
+                "spot check once.",
                 QMessageBox.Ok | QMessageBox.Cancel,
             )
             if reply == QMessageBox.Cancel:
@@ -1200,7 +1202,7 @@ class WaterCalibrationDialog(QDialog):
                     extra={"tags": self.MainWindow.warning_log_tag},
                 )
             else:
-                logging.error(
+                logging.warning(
                     "Water calibration spot check, {}, exceeds tolerance: {}".format(
                         valve, error
                     )
@@ -1403,7 +1405,7 @@ class CameraDialog(QDialog):
                 or self.MainWindow.logging_type == -1
             ):
                 self.MainWindow.Ot_log_folder = (
-                    self.MainWindow._restartlogging()
+                    self.MainWindow._restartlogging(start_from_camera=True)
                 )
             # set to check drop frame as true
             self.MainWindow.to_check_drop_frames = 1
@@ -1450,7 +1452,7 @@ def is_file_in_use(file_path):
         try:
             os.rename(file_path, file_path)
             return False
-        except OSError as e:
+        except OSError:
             return True
 
 
@@ -1645,7 +1647,7 @@ class LaserCalibrationDialog(QDialog):
                     1:-1
                 ]
             )
-        FinishOfWaveForm = self.MainWindow.Channel4.receive()
+        self.MainWindow.Channel4.receive()
 
     def _ProduceWaveForm(self, Amplitude):
         """generate the waveform based on Duration and Protocol, Laser Power, Frequency, RampingDown, PulseDur and the sample frequency"""
@@ -2211,7 +2213,7 @@ class LaserCalibrationDialog(QDialog):
         self.MainWindow.LaserCalibrationResults = LaserCalibrationResults
         self.MainWindow._GetLaserCalibration()
         for i in self.condition_idx:
-            getattr(self.MainWindow.Opto_dialog, f"_LaserColor")(i)
+            getattr(self.MainWindow.Opto_dialog, "_LaserColor")(i)
         time.sleep(0.01)
         self.Save.setStyleSheet("background-color : none")
         self.Save.setChecked(False)
@@ -2434,7 +2436,6 @@ class MetadataDialog(QDialog):
         self.Stick_ArcAngle.textChanged.connect(self._save_configuration)
         self.Stick_ModuleAngle.textChanged.connect(self._save_configuration)
         self.Stick_RotationAngle.textChanged.connect(self._save_configuration)
-        self.ProjectName.currentIndexChanged.connect(self._show_project_info)
         self.LickSpoutDistance.textChanged.connect(
             self._save_lick_spout_distance
         )
@@ -2449,25 +2450,6 @@ class MetadataDialog(QDialog):
             line_edit = getattr(self, f"LickSpoutReference{axis.upper()}")
             line_edit.setText(str(pos))
 
-    def _show_project_info(self):
-        """show the project information based on current project name"""
-        current_project_index = self.ProjectName.currentIndex()
-        self.current_project_name = self.ProjectName.currentText()
-        self.funding_institution = self.project_info["Funding Institution"][
-            current_project_index
-        ]
-        self.grant_number = self.project_info["Grant Number"][
-            current_project_index
-        ]
-        self.investigators = self.project_info["Investigators"][
-            current_project_index
-        ]
-        self.fundee = self.project_info["Fundee"][current_project_index]
-        self.FundingSource.setText(str(self.funding_institution))
-        self.Investigators.setText(str(self.investigators))
-        self.GrantNumber.setText(str(self.grant_number))
-        self.Fundee.setText(str(self.fundee))
-
     def _save_lick_spout_distance(self):
         """save the lick spout distance"""
         self.MainWindow.Other_lick_spout_distance = (
@@ -2475,23 +2457,11 @@ class MetadataDialog(QDialog):
         )
 
     def _show_project_names(self):
-        """show the project names from the project spreadsheet"""
-        # load the project spreadsheet
-        project_info_file = self.MainWindow.project_info_file
-        if not os.path.exists(project_info_file):
-            return
-        self.project_info = pd.read_excel(project_info_file)
-        project_names = self.project_info["Project Name"].tolist()
-        # show the project information
+        """show the project names"""
+        project_names = self.MainWindow._GetApprovedAINDProjectNames()
+
         # adding project names to the project combobox
-        self._manage_signals(
-            enable=False, keys=["ProjectName"], action=self._show_project_info
-        )
         self.ProjectName.addItems(project_names)
-        self._manage_signals(
-            enable=True, keys=["ProjectName"], action=self._show_project_info
-        )
-        self._show_project_info()
 
     def _get_basics(self):
         """get the basic information"""
@@ -2886,7 +2856,11 @@ def get_curriculum_string(curriculum):
     if curriculum is None:
         return "unknown curriculum"
     else:
-        return f"{curriculum.curriculum_name} (v{curriculum.curriculum_version}@{curriculum.curriculum_schema_version})"
+        return (
+            f"{curriculum.curriculum_name} "
+            f"(v{curriculum.curriculum_version}"
+            f"@{curriculum.curriculum_schema_version})"
+        )
 
 
 # --- Helpers ---

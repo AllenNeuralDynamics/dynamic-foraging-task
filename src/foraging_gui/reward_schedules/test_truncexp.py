@@ -9,9 +9,9 @@ Related to https://github.com/AllenNeuralDynamics/aind-behavior-blog/discussions
 
 """
 
-import scipy.stats as stats
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.stats as stats
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 
@@ -67,6 +67,7 @@ def draw_dist_and_harzard(
 
 
 def test_truncexp(lower=20, upper=60, beta=20, n=100000):
+
     # TruncExp with Re-draw
     X = stats.truncexpon(b=(upper - lower) / beta, loc=lower, scale=beta)
     truncexp_redraw = X.rvs(n)
@@ -101,7 +102,8 @@ def test_truncexp(lower=20, upper=60, beta=20, n=100000):
     )
     draw_dist_and_harzard(
         samples=truncexp_trunc_at_max,
-        title=f"TruncExp (trunc_at_max: {truncated_ratio:.2%})\nmin={lower}, max={upper}, beta={beta}",
+        title=f"TruncExp (trunc_at_max: {truncated_ratio:.2%})\n"
+        f"min={lower}, max={upper}, beta={beta}",
         ax_dist=ax[0, 1],
         ax_hazard=ax[1, 1],
         ax_dist_all=ax[0, 3],

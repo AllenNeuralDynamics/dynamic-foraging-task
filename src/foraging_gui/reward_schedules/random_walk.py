@@ -1,6 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib
+import numpy as np
 
 # matplotlib.use('Qt5Agg')
 
@@ -21,15 +20,16 @@ class RandomWalkReward:
         sigma=[0.15, 0.15],  # L and R
         mean=[0, 0],  # L and R
     ) -> None:
+
         self.__dict__.update(locals())
 
-        if not type(sigma) == list:
+        if not isinstance(sigma, list):
             sigma = [sigma, sigma]  # Backward compatibility
 
-        if not type(p_min) == list:
+        if not isinstance(p_min, list):
             p_min = [p_min, p_min]  # Backward compatibility
 
-        if not type(p_max) == list:
+        if not isinstance(p_max, list):
             p_max = [p_max, p_max]  # Backward compatibility
 
         self.p_min, self.p_max, self.sigma, self.mean = (

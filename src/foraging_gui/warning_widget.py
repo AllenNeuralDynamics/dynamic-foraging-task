@@ -1,17 +1,19 @@
 import logging
-from queue import Queue
+import sys
 from logging.handlers import QueueHandler
+from queue import Queue
 from random import randint
+from time import sleep
+
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import (
     QApplication,
-    QWidget,
-    QVBoxLayout,
     QLabel,
     QScrollArea,
+    QVBoxLayout,
+    QWidget,
 )
-import sys
-from time import sleep
+
 
 
 class WarningWidget(QWidget):

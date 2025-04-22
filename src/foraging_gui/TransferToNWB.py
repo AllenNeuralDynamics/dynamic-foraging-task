@@ -2,15 +2,15 @@
 Transfer current Json/mat format from Bonsai behavior control to NWB format
 """
 
-from uuid import uuid4
-import numpy as np
-import json
-import os
 import datetime
+import json
 import logging
+import os
+from uuid import uuid4
+
+import numpy as np
 import pandas as pd
 from dateutil.tz import tzlocal
-
 from pynwb import NWBHDF5IO, NWBFile, TimeSeries
 from pynwb.file import Subject
 from scipy.io import loadmat
@@ -58,7 +58,13 @@ def _get_field(
                 has_field = 1
         if has_field == 0:
             continue
-        if value in reject_list:
+        reject = (
+            not isinstance(value, np.generic)
+            and value in reject_list
+            or isinstance(value, np.generic)
+            and value.size == 0
+        )
+        if reject:
             continue
         if index is None:
             return value
@@ -236,249 +242,249 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     ## behavior events (including trial start/end time; left/right lick time; give left/right reward time) ##
     nwbfile.add_trial_column(
         name="animal_response",
-        description=f"The response of the animal. 0, left choice; 1, right choice; 2, no response",
+        description="The response of the animal. 0, left choice; 1, right choice; 2, no response",
     )
     nwbfile.add_trial_column(
         name="rewarded_historyL",
-        description=f"The reward history of left lick port",
+        description="The reward history of left lick port",
     )
     nwbfile.add_trial_column(
         name="rewarded_historyR",
-        description=f"The reward history of right lick port",
+        description="The reward history of right lick port",
     )
     nwbfile.add_trial_column(
-        name="delay_start_time", description=f"The delay start time"
+        name="delay_start_time", description="The delay start time"
     )
     nwbfile.add_trial_column(
-        name="goCue_start_time", description=f"The go cue start time"
+        name="goCue_start_time", description="The go cue start time"
     )
     nwbfile.add_trial_column(
         name="reward_outcome_time",
-        description=f"The reward outcome time (reward/no reward/no response) Note: This is in fact time when choice is registered.",
+        description="The reward outcome time (reward/no reward/no response) Note: This is in fact time when choice is registered.",
     )
     ## training paramters ##
     # behavior structure
     nwbfile.add_trial_column(
         name="bait_left",
-        description=f"Whether the current left lickport has a bait or not",
+        description="Whether the current left lickport has a bait or not",
     )
     nwbfile.add_trial_column(
         name="bait_right",
-        description=f"Whether the current right lickport has a bait or not",
+        description="Whether the current right lickport has a bait or not",
     )
     nwbfile.add_trial_column(
         name="base_reward_probability_sum",
-        description=f"The summation of left and right reward probability",
+        description="The summation of left and right reward probability",
     )
     nwbfile.add_trial_column(
         name="reward_probabilityL",
-        description=f"The reward probability of left lick port",
+        description="The reward probability of left lick port",
     )
     nwbfile.add_trial_column(
         name="reward_probabilityR",
-        description=f"The reward probability of right lick port",
+        description="The reward probability of right lick port",
     )
     nwbfile.add_trial_column(
         name="reward_random_number_left",
-        description=f"The random number used to determine the reward of left lick port",
+        description="The random number used to determine the reward of left lick port",
     )
     nwbfile.add_trial_column(
         name="reward_random_number_right",
-        description=f"The random number used to determine the reward of right lick port",
+        description="The random number used to determine the reward of right lick port",
     )
     nwbfile.add_trial_column(
-        name="left_valve_open_time", description=f"The left valve open time"
+        name="left_valve_open_time", description="The left valve open time"
     )
     nwbfile.add_trial_column(
-        name="right_valve_open_time", description=f"The right valve open time"
+        name="right_valve_open_time", description="The right valve open time"
     )
     # block
     nwbfile.add_trial_column(
         name="block_beta",
-        description=f"The beta of exponential distribution to generate the block length",
+        description="The beta of exponential distribution to generate the block length",
     )
     nwbfile.add_trial_column(
         name="block_min",
-        description=f"The minimum length allowed for each block",
+        description="The minimum length allowed for each block",
     )
     nwbfile.add_trial_column(
         name="block_max",
-        description=f"The maxmum length allowed for each block",
+        description="The maxmum length allowed for each block",
     )
     nwbfile.add_trial_column(
         name="min_reward_each_block",
-        description=f"The minimum reward allowed for each block",
+        description="The minimum reward allowed for each block",
     )
     # delay duration
     nwbfile.add_trial_column(
         name="delay_beta",
-        description=f"The beta of exponential distribution to generate the delay duration(s)",
+        description="The beta of exponential distribution to generate the delay duration(s)",
     )
     nwbfile.add_trial_column(
         name="delay_min",
-        description=f"The minimum duration(s) allowed for each delay",
+        description="The minimum duration(s) allowed for each delay",
     )
     nwbfile.add_trial_column(
         name="delay_max",
-        description=f"The maxmum duration(s) allowed for each delay",
+        description="The maxmum duration(s) allowed for each delay",
     )
     nwbfile.add_trial_column(
         name="delay_duration",
-        description=f"The expected time duration between delay start and go cue start",
+        description="The expected time duration between delay start and go cue start",
     )
     # ITI duration
     nwbfile.add_trial_column(
         name="ITI_beta",
-        description=f"The beta of exponential distribution to generate the ITI duration(s)",
+        description="The beta of exponential distribution to generate the ITI duration(s)",
     )
     nwbfile.add_trial_column(
         name="ITI_min",
-        description=f"The minimum duration(s) allowed for each ITI",
+        description="The minimum duration(s) allowed for each ITI",
     )
     nwbfile.add_trial_column(
         name="ITI_max",
-        description=f"The maxmum duration(s) allowed for each ITI",
+        description="The maxmum duration(s) allowed for each ITI",
     )
     nwbfile.add_trial_column(
         name="ITI_duration",
-        description=f"The expected time duration between trial start and ITI start",
+        description="The expected time duration between trial start and ITI start",
     )
     # response duration
     nwbfile.add_trial_column(
         name="response_duration",
-        description=f"The maximum time that the animal must make a choce in order to get a reward",
+        description="The maximum time that the animal must make a choce in order to get a reward",
     )
     # reward consumption duration
     nwbfile.add_trial_column(
         name="reward_consumption_duration",
-        description=f"The duration for the animal to consume the reward",
+        description="The duration for the animal to consume the reward",
     )
     # reward delay
     nwbfile.add_trial_column(
         name="reward_delay",
-        description=f"The delay between choice and reward delivery",
+        description="The delay between choice and reward delivery",
     )
     # auto water
     nwbfile.add_trial_column(
-        name="auto_waterL", description=f"Autowater given at Left"
+        name="auto_waterL", description="Autowater given at Left"
     )
     nwbfile.add_trial_column(
-        name="auto_waterR", description=f"Autowater given at Right"
+        name="auto_waterR", description="Autowater given at Right"
     )
     # optogenetics
     nwbfile.add_trial_column(
-        name="laser_on_trial", description=f"Trials with laser stimulation"
+        name="laser_on_trial", description="Trials with laser stimulation"
     )
     nwbfile.add_trial_column(
-        name="laser_wavelength", description=f"The wavelength of laser or LED"
+        name="laser_wavelength", description="The wavelength of laser or LED"
     )
     nwbfile.add_trial_column(
-        name="laser_location", description=f"The target brain areas"
+        name="laser_location", description="The target brain areas"
     )
     nwbfile.add_trial_column(
-        name="laser_1_power", description=f"The laser power of the laser 1(mw)"
+        name="laser_1_power", description="The laser power of the laser 1(mw)"
     )
     nwbfile.add_trial_column(
-        name="laser_2_power", description=f"The laser power of the laser 2(mw)"
+        name="laser_2_power", description="The laser power of the laser 2(mw)"
     )
     nwbfile.add_trial_column(
-        name="laser_on_probability", description=f"The laser on probability"
+        name="laser_on_probability", description="The laser on probability"
     )
     nwbfile.add_trial_column(
-        name="laser_duration", description=f"The laser duration"
+        name="laser_duration", description="The laser duration"
     )
     nwbfile.add_trial_column(
         name="laser_condition",
-        description=f"The laser on is conditioned on LaserCondition",
+        description="The laser on is conditioned on LaserCondition",
     )
     nwbfile.add_trial_column(
         name="laser_condition_probability",
-        description=f"The laser on is conditioned on LaserCondition with a probability LaserConditionPro",
+        description="The laser on is conditioned on LaserCondition with a probability LaserConditionPro",
     )
     nwbfile.add_trial_column(
-        name="laser_start", description=f"Laser start is aligned to an event"
+        name="laser_start", description="Laser start is aligned to an event"
     )
     nwbfile.add_trial_column(
         name="laser_start_offset",
-        description=f"Laser start is aligned to an event with an offset",
+        description="Laser start is aligned to an event with an offset",
     )
     nwbfile.add_trial_column(
-        name="laser_end", description=f"Laser end is aligned to an event"
+        name="laser_end", description="Laser end is aligned to an event"
     )
     nwbfile.add_trial_column(
         name="laser_end_offset",
-        description=f"Laser end is aligned to an event with an offset",
+        description="Laser end is aligned to an event with an offset",
     )
     nwbfile.add_trial_column(
-        name="laser_protocol", description=f"The laser waveform"
+        name="laser_protocol", description="The laser waveform"
     )
     nwbfile.add_trial_column(
-        name="laser_frequency", description=f"The laser waveform frequency"
+        name="laser_frequency", description="The laser waveform frequency"
     )
     nwbfile.add_trial_column(
         name="laser_rampingdown",
-        description=f"The ramping down time of the laser",
+        description="The ramping down time of the laser",
     )
     nwbfile.add_trial_column(
         name="laser_pulse_duration",
-        description=f"The pulse duration for Pulse protocol",
+        description="The pulse duration for Pulse protocol",
     )
     nwbfile.add_trial_column(
         name="session_wide_control",
-        description=f"Control the optogenetics session wide (e.g. only turn on opto in half of the session)",
+        description="Control the optogenetics session wide (e.g. only turn on opto in half of the session)",
     )
     nwbfile.add_trial_column(
         name="fraction_of_session",
-        description=f"Turn on/off opto in a fraction of the session (related to session_wide_control)",
+        description="Turn on/off opto in a fraction of the session (related to session_wide_control)",
     )
     nwbfile.add_trial_column(
         name="session_start_with",
-        description=f"The session start with opto on or off (related to session_wide_control)",
+        description="The session start with opto on or off (related to session_wide_control)",
     )
     nwbfile.add_trial_column(
         name="session_alternation",
-        description=f"Turn on/off opto in every other session (related to session_wide_control)",
+        description="Turn on/off opto in every other session (related to session_wide_control)",
     )
     nwbfile.add_trial_column(
         name="minimum_opto_interval",
-        description=f"Minimum interval between two optogenetics trials (number of trials)",
+        description="Minimum interval between two optogenetics trials (number of trials)",
     )
 
     # auto training parameters
     nwbfile.add_trial_column(
         name="auto_train_engaged",
-        description=f"Whether the auto training is engaged",
+        description="Whether the auto training is engaged",
     )
     nwbfile.add_trial_column(
         name="auto_train_curriculum_name",
-        description=f"The name of the auto training curriculum",
+        description="The name of the auto training curriculum",
     )
     nwbfile.add_trial_column(
         name="auto_train_curriculum_version",
-        description=f"The version of the auto training curriculum",
+        description="The version of the auto training curriculum",
     )
     nwbfile.add_trial_column(
         name="auto_train_curriculum_schema_version",
-        description=f"The schema version of the auto training curriculum",
+        description="The schema version of the auto training curriculum",
     )
     nwbfile.add_trial_column(
         name="auto_train_stage",
-        description=f"The current stage of auto training",
+        description="The current stage of auto training",
     )
     nwbfile.add_trial_column(
         name="auto_train_stage_overridden",
-        description=f"Whether the auto training stage is overridden",
+        description="Whether the auto training stage is overridden",
     )
 
     # determine lickspout keys based on stage position keys
     stage_positions = getattr(obj, "B_StagePositions", [{}])
     nwbfile.add_trial_column(
         name="lickspout_position_x",
-        description=f"x position (um) of the lickspout position (left-right)",
+        description="x position (um) of the lickspout position (left-right)",
     )
     nwbfile.add_trial_column(
         name="lickspout_position_z",
-        description=f"z position (um) of the lickspout position (up-down)",
+        description="z position (um) of the lickspout position (up-down)",
     )
     if len(stage_positions) > 0 and list(stage_positions[0].keys()) == [
         "x",
@@ -488,23 +494,23 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     ]:  # aind stage
         nwbfile.add_trial_column(
             name="lickspout_position_y1",
-            description=f"y position (um) of the left lickspout position (forward-backward)",
+            description="y position (um) of the left lickspout position (forward-backward)",
         )
         nwbfile.add_trial_column(
             name="lickspout_position_y2",
-            description=f"y position (um) of the right lickspout position (forward-backward)",
+            description="y position (um) of the right lickspout position (forward-backward)",
         )
     else:
         nwbfile.add_trial_column(
             name="lickspout_position_y",
-            description=f"y position (um) of the lickspout position (forward-backward)",
+            description="y position (um) of the lickspout position (forward-backward)",
         )
     # add reward size
     nwbfile.add_trial_column(
-        name="reward_size_left", description=f"Left reward size (uL)"
+        name="reward_size_left", description="Left reward size (uL)"
     )
     nwbfile.add_trial_column(
-        name="reward_size_right", description=f"Right reward size (uL)"
+        name="reward_size_right", description="Right reward size (uL)"
     )
 
     ## start adding trials ##
@@ -590,16 +596,14 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
             LaserPulseDurC = float(getattr(obj, f"TP_PulseDur_{Sc}")[i])
 
         if Harp == "":
-            goCue_start_time_t = getattr(obj, f"B_GoCueTime")[
-                i
-            ]  # Use CPU time
+            goCue_start_time_t = getattr(obj, "B_GoCueTime")[i]  # Use CPU time
         else:
-            if hasattr(obj, f"B_GoCueTimeHarp"):
-                goCue_start_time_t = getattr(obj, f"B_GoCueTimeHarp")[
+            if hasattr(obj, "B_GoCueTimeHarp"):
+                goCue_start_time_t = getattr(obj, "B_GoCueTimeHarp")[
                     i
                 ]  # Use Harp time, old format
             else:
-                goCue_start_time_t = getattr(obj, f"B_GoCueTimeSoundCard")[
+                goCue_start_time_t = getattr(obj, "B_GoCueTimeSoundCard")[
                     i
                 ]  # Use Harp time, new format
 
@@ -838,10 +842,10 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
     nwbfile.add_acquisition(PhotometryRisingTimeHarp)
 
     # Add optogenetics time stamps
-    """ 
-    There are two sources of optogenetics time stamps depending on which event it is aligned to. 
-    The first source is the optogenetics time stamps aligned to the trial start time (from the 
-    DO0 stored in B_TrialStartTimeHarp), and the second source is the optogenetics time stamps aligned to other events 
+    """
+    There are two sources of optogenetics time stamps depending on which event it is aligned to.
+    The first source is the optogenetics time stamps aligned to the trial start time (from the
+    DO0 stored in B_TrialStartTimeHarp), and the second source is the optogenetics time stamps aligned to other events
     (e.g go cue and reward outcome; from the DO3 stored in B_OptogeneticsTimeHarp).
     """
     start_time = np.array(

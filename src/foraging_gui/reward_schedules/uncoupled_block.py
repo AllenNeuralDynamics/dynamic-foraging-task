@@ -1,6 +1,6 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
 
 matplotlib.use("Qt5Agg")
 
@@ -28,6 +28,7 @@ class UncoupledBlocks:
         perseverative_limit=4,
         max_block_tally=4,  # Max number of consecutive blocks in which one side has higher rwd prob than the other
     ) -> None:
+
         self.__dict__.update(locals())
         self.block_stagger = int(
             (round(block_max - block_min - 0.5) / 2 + block_min) / 2
