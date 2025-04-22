@@ -4,14 +4,13 @@ from datetime import datetime
 from PyQt5.QtWidgets import QTextEdit, QLabel
 from PyQt5.QtGui import QIntValidator
 
-class SessionParametersWidget(SchemaWidgetBase):
 
+class SessionParametersWidget(SchemaWidgetBase):
     """
     Widget to expose fields from session models
     """
 
     def __init__(self, schema: AindBehaviorSessionModel):
-
         super().__init__(schema)
 
         # hide unnecessary widgets
@@ -33,13 +32,11 @@ class SessionParametersWidget(SchemaWidgetBase):
         self.centralWidget().layout().insertWidget(-1, self.schema_fields_widgets["notes"])
 
         # change experiment to combo box
-        self.create_attribute_widget("experiment", "combo", [
-            "Coupled Baiting",
-            "Coupled Without Baiting",
-            "Uncoupled Baiting",
-            "Uncoupled Without Baiting",
-            "RewardN"
-        ])
+        self.create_attribute_widget(
+            "experiment",
+            "combo",
+            ["Coupled Baiting", "Coupled Without Baiting", "Uncoupled Baiting", "Uncoupled Without Baiting", "RewardN"],
+        )
         self.schema_fields_widgets["experiment"].deleteLater()
         self.schema_fields_widgets["experiment"] = create_widget("H", QLabel("Experiment"), self.experiment_widget)
         self.centralWidget().layout().insertWidget(0, self.schema_fields_widgets["experiment"])
@@ -58,6 +55,7 @@ class SessionParametersWidget(SchemaWidgetBase):
         self.path_set(self.schema, name_lst, value)
         self.ValueChangedInside.emit(name)
 
+
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication
     import sys
@@ -66,26 +64,25 @@ if __name__ == "__main__":
     import subprocess
 
     def error_handler(etype, value, tb):
-        error_msg = ''.join(traceback.format_exception(etype, value, tb))
+        error_msg = "".join(traceback.format_exception(etype, value, tb))
         print(error_msg)
-
 
     sys.excepthook = error_handler  # redirect std error
     app = QApplication(sys.argv)
-    task_model = schema=AindBehaviorSessionModel(
-            experiment="Coupled Baiting",
-            experimenter=["Chris P. Bacon"],
-            date=datetime.now(),   # update when folders are created
-            root_path="",         # update when created
-            session_name="",   # update when date and subject are filled in
-            subject="",
-            experiment_version=foraging_gui.__version__,
-            notes="",
-            commit_hash=subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip(),
-            allow_dirty_repo=
-            subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip() != '',
-            skip_hardware_validation=True
-        )
+    task_model = schema = AindBehaviorSessionModel(
+        experiment="Coupled Baiting",
+        experimenter=["Chris P. Bacon"],
+        date=datetime.now(),  # update when folders are created
+        root_path="",  # update when created
+        session_name="",  # update when date and subject are filled in
+        subject="",
+        experiment_version=foraging_gui.__version__,
+        notes="",
+        commit_hash=subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip(),
+        allow_dirty_repo=subprocess.check_output(["git", "diff-index", "--name-only", "HEAD"]).decode("ascii").strip()
+        != "",
+        skip_hardware_validation=True,
+    )
     task_widget = SessionParametersWidget(task_model)
     task_widget.ValueChangedInside.connect(lambda name: print(task_model))
     task_widget.show()
