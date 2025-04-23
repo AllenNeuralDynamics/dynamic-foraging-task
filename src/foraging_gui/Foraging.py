@@ -667,8 +667,6 @@ class Window(QMainWindow):
             # check slims for curriculum
             trainer_state, slims_session, task, sess, opto, fip, oc = self.slims_handler.load_mouse_curriculum(mouse_id)
 
-            print(slims_session)
-
             if trainer_state is None:  # no curriculum in slims for this mouse
                 logging.info(f"Attempting to create curriculum for mouse {mouse_id} from schedule.")
                 trainer_state, slims_session, task, sess, opto, fip, oc = self.create_curriculum(mouse_id)
@@ -676,9 +674,21 @@ class Window(QMainWindow):
             # update models
             self.task_logic = task
             self.opto_model = opto if opto else self.opto_model
-            self.fip_model = fip if fip else self.fip_model
 
-            print(self.fip_model, fip)
+
+            # check schedule if fip should be on at this stage
+            self.fip_model = fip if fip else self.fip_model
+            mode = self._GetInfoFromSchedule(mouse_id, "FIP Mode")
+            if not (isinstance(mode, float) and math.isnan(mode)):  # schedule has input for fip
+                stage_list = get_args(STAGE_STARTS)
+                stage_mapping = ["1.1", "1.2", "2", "3", "4", "FINAL", "GRADUATED"]
+                first = stage_list[stage_mapping.index(self._GetInfoFromSchedule(mouse_id, "First FP Stage"))]
+                # check if current stage is past stage_start and enable if so
+                self.fip_model = FiberPhotometry(mode=mode,
+                                                 stage_start="stage_1_warmup" if type(first) != str else first.lower(),
+                                                 enabled=stage_list.index(trainer_state.stage.name) >=
+                                                         stage_list.index(self.fip_model.stage_start)
+                                                 )
 
             # update session model only partially
             self.session_model.experiment = sess.experiment

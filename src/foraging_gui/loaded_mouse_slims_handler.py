@@ -221,11 +221,6 @@ class LoadedMouseSlimsHandler:
                 self.log.info(f"Applying fip model")
                 fip_attachment = attachments[attachment_names.index(FiberPhotometry.__name__)]
                 fip_model = FiberPhotometry(**self.slims_client.fetch_attachment_content(fip_attachment).json())
-
-                # check if current stage is past stage_start and enable if so
-                stage_list = get_args(STAGE_STARTS)
-                fip_model.enabled = stage_list.index(self.trainer_state.stage.name) >= \
-                                    stage_list.index(fip_model.stage_start)
             else:
                 fip_model = None
 
@@ -338,22 +333,18 @@ class LoadedMouseSlimsHandler:
             )
 
             # add opto model
-            if opto_model.laser_colors != []:
-                self.slims_client.add_attachment_content(
-                    record=slims_model,
-                    name=opto_model.name,
-                    content=opto_model.model_dump_json()
-                )
+            self.slims_client.add_attachment_content(
+                record=slims_model,
+                name=opto_model.name,
+                content=opto_model.model_dump_json()
+            )
 
             # Add fip model
-            stage_list = get_args(STAGE_STARTS)
-            if fip_model.enabled or stage_list.index(self.trainer_state.stage.name) < \
-                    stage_list.index(fip_model.stage_start):
-                self.slims_client.add_attachment_content(
-                    record=slims_model,
-                    name=fip_model.name,
-                    content=fip_model.model_dump_json()
-                )
+            self.slims_client.add_attachment_content(
+                record=slims_model,
+                name=fip_model.name,
+                content=fip_model.model_dump_json()
+            )
 
             self.log.info(f"Writing next session to Slims successful. "
                           f"Mouse {self._loaded_mouse_id} will run on {next_trainer_state.stage.name} next session.",
