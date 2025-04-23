@@ -675,17 +675,16 @@ class Window(QMainWindow):
             self.task_logic = task
             self.opto_model = opto if opto else self.opto_model
 
-
-            # check schedule if fip should be on at this stage
             self.fip_model = fip if fip else self.fip_model
             mode = self._GetInfoFromSchedule(mouse_id, "FIP Mode")
             if not (isinstance(mode, float) and math.isnan(mode)):  # schedule has input for fip
                 stage_list = get_args(STAGE_STARTS)
                 stage_mapping = ["1.1", "1.2", "2", "3", "4", "FINAL", "GRADUATED"]
-                first = stage_list[stage_mapping.index(self._GetInfoFromSchedule(mouse_id, "First FP Stage"))]
+                start = self._GetInfoFromSchedule(mouse_id, "First FP Stage")
+                first = "stage_1_warmup" if math.isnan(start) else stage_list[stage_mapping.index(start)]
                 # check if current stage is past stage_start and enable if so
                 self.fip_model = FiberPhotometry(mode=mode,
-                                                 stage_start="stage_1_warmup" if type(first) != str else first.lower(),
+                                                 stage_start=first,
                                                  enabled=stage_list.index(trainer_state.stage.name) >=
                                                          stage_list.index(self.fip_model.stage_start)
                                                  )
@@ -798,12 +797,14 @@ class Window(QMainWindow):
         if not (isinstance(mode, float) and math.isnan(mode)):  # schedule has input for fip
             stage_list = get_args(STAGE_STARTS)
             stage_mapping = ["1.1", "1.2", "2", "3", "4", "FINAL", "GRADUATED"]
-            first = stage_list[stage_mapping.index(self._GetInfoFromSchedule(mouse_id, "First FP Stage"))]
-            self.fip_model = FiberPhotometry(mode=mode,
-                                             stage_start="stage_1_warmup" if type(first) != str else first.lower()
-            )
+            start = self._GetInfoFromSchedule(mouse_id, "First FP Stage")
+            first = "stage_1_warmup" if math.isnan(start) else stage_list[stage_mapping.index(start)]
             # check if current stage is past stage_start and enable if so
-            self.fip_model.enabled = stage_list.index(ts.stage.name) >= stage_list.index(self.fip_model.stage_start)
+            self.fip_model = FiberPhotometry(mode=mode,
+                                             stage_start=first,
+                                             enabled=stage_list.index(ts.stage.name) >=
+                                                     stage_list.index(self.fip_model.stage_start)
+                                             )
 
         else:   # set fip model to clear
             self.fip_model.enabled = False
@@ -820,6 +821,7 @@ class Window(QMainWindow):
         )
 
         return ts, sbs, ts.stage.task, self.session_model, self.opto_model, self.fip_model, self.operation_control_model
+
 
     def load_local_session(self, continuation: bool=False) -> None:
 
