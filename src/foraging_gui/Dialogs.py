@@ -776,7 +776,7 @@ class WaterCalibrationDialog(QDialog):
 
             # reset the default valve open time
             time.sleep(0.01)
-            set_valve_time(float(getattr(self.MainWindow, f'{valve}Value').text()) * 1000)
+            #set_valve_time(float(getattr(self.MainWindow, f'{valve}Value').text()) * 1000)
 
     def reopen_valve(self, valve: Literal['Left', 'Right']):
         """Function to reopen the right or left water line open. Valve must be open prior to calling this function.
