@@ -667,6 +667,8 @@ class Window(QMainWindow):
             # check slims for curriculum
             trainer_state, slims_session, task, sess, opto, fip, oc = self.slims_handler.load_mouse_curriculum(mouse_id)
 
+            print(slims_session)
+
             if trainer_state is None:  # no curriculum in slims for this mouse
                 logging.info(f"Attempting to create curriculum for mouse {mouse_id} from schedule.")
                 trainer_state, slims_session, task, sess, opto, fip, oc = self.create_curriculum(mouse_id)
@@ -676,14 +678,16 @@ class Window(QMainWindow):
             self.opto_model = opto if opto else self.opto_model
             self.fip_model = fip if fip else self.fip_model
 
+            print(self.fip_model, fip)
+
             # update session model only partially
             self.session_model.experiment = sess.experiment
             self.session_model.experimenter = sess.experimenter
             self.session_model.subject = sess.subject
             self.session_model.notes = sess.notes
 
-            self.label_curriculum_stage.setText(trainer_state.stage.name)
-            self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
+            # self.label_curriculum_stage.setText(trainer_state.stage.name)
+            # self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
 
             # enable or disable widget based on if session is on curriculum
             self.task_widget.setEnabled(not slims_session.is_curriculum_suggestion)
@@ -697,7 +701,8 @@ class Window(QMainWindow):
             # update operational control model with latest stage coords
             self.update_operational_control_stage_positions()
 
-            logging.info(f"Successfully loaded mouse {mouse_id}", extra={'tags': [self.warning_log_tag]})
+            logging.info(f"Successfully loaded mouse {mouse_id} on {trainer_state.stage.name} ",
+                                                        extra={'tags': [self.warning_log_tag]})
 
         except Exception as e:
             logging.error(str(e), extra={'tags': [self.warning_log_tag]})
@@ -2675,7 +2680,7 @@ class Window(QMainWindow):
             Obj['generate_session_metadata_success'] = False
             Obj['generate_rig_metadata_success'] = False
 
-        # don't save the data if the load tag is 1
+         # don't save the data if the load tag is 1
         if self.load_tag == 0:
             # save Json or mat
             if self.SaveFile.endswith('.mat'):
@@ -3998,10 +4003,10 @@ class Window(QMainWindow):
     def _perform_backup(self, BackupSave):
         # Backup save logic
         with self.data_lock:
-            try:
+            #try:
                 self._Save(BackupSave=BackupSave)
-            except Exception as e:
-                logging.error('backup save failed: {}'.format(e))
+            # except Exception as e:
+            #     logging.error('backup save failed: {}'.format(e))
 
     def bias_calculated(self, bias: float, trial_number: int) -> None:
         """

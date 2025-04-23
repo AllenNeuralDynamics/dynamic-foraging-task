@@ -18,9 +18,9 @@ class FIBParametersWidget(SchemaWidgetBase):
         super().__init__(schema)
         self.schema_fields_widgets["name"].hide()
         self.enabled_widget.toggled.connect(self.toggle_enabled)
-        self.toggle_enabled(self.schema.enabled)
+        self.toggle_enabled()
 
-    def toggle_enabled(self, enabled=True):
+    def toggle_enabled(self):
         """
             Disable widgets if enabled is False
         """

@@ -45,7 +45,7 @@ def task_parameters_to_tp_conversion(task_parameters: AindDynamicForagingTaskPar
 
     return {
         'AddOneTrialForNoresponse': task_parameters.no_response_trial_addition,
-        'AdvancedBlockAuto': task_parameters.auto_block if task_parameters.auto_block is not None else "off",
+        'AdvancedBlockAuto': "on" if task_parameters.auto_block is not None else "off",
         'AutoReward': True if task_parameters.auto_water is not None else False,
         'AutoWaterType': None if task_parameters.auto_water is None else task_parameters.auto_water.auto_water_type,
         'BaseRewardSum': task_parameters.reward_probability.base_reward_sum,
@@ -75,7 +75,7 @@ def task_parameters_to_tp_conversion(task_parameters: AindDynamicForagingTaskPar
         'RightValue_volume': task_parameters.reward_size.right_value_volume,
         'SwitchThr': None if task_parameters.auto_block is None else task_parameters.auto_block.switch_thr,
         'TP_AddOneTrialForNoresponse': task_parameters.no_response_trial_addition,
-        'TP_AdvancedBlockAuto': task_parameters.auto_block if task_parameters.auto_block is not None else "off",
+        'TP_AdvancedBlockAuto': "on" if task_parameters.auto_block is not None else "off",
         'TP_AutoReward': True if task_parameters.auto_water is not None else False,
         'TP_AutoWaterType': None if task_parameters.auto_water is None else task_parameters.auto_water.auto_water_type,
         'TP_BaseRewardSum': task_parameters.reward_probability.base_reward_sum,
