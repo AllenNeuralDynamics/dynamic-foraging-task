@@ -6174,12 +6174,6 @@ class Window(QMainWindow):
                 self.workertimer.moveToThread(self.workertimer_thread)
                 self.workertimer_thread.start()
 
-            self.Time.emit(int(np.floor(float(self.baselinetime.text()) * 60)))
-            logging.info(
-                "Running photometry baseline",
-                extra={"tags": [self.warning_log_tag]},
-            )
-
         self._StartTrialLoop(GeneratedTrials, worker1, worker_save)
 
         if self.actionDrawing_after_stopping.isChecked() == True:
@@ -6304,18 +6298,24 @@ class Window(QMainWindow):
 
 
     def _StartTrialLoop(self, GeneratedTrials, worker1, worker_save):
+
         if not self.Start.isChecked():
             logging.info("ending trial loop")
             self.behavior_baseline_period.clear()
             return
 
-        else:
-            logging.info("starting trial loop")
-            self.behavior_baseline_period.set()
+        logging.info("starting trial loop")
+        self.behavior_baseline_period.set()
 
         # pause for specified habituation time
         if self.baseline_min_elapsed <= self.hab_time_box.value():
             self.wait_for_baseline()
+
+        self.Time.emit(int(np.floor(float(self.baselinetime.text()) * 60)))
+        logging.info(
+            "Running photometry baseline",
+            extra={"tags": [self.warning_log_tag]},
+            )
 
         # Track elapsed time in case Bonsai Stalls
         last_trial_start = time.time()
