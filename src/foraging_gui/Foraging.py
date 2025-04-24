@@ -5913,42 +5913,6 @@ class Window(QMainWindow):
                 )
                 return
 
-            # Check if photometry excitation is running or not
-            if self.PhotometryB.currentText() == "on" and (
-                not self.StartExcitation.isChecked()
-            ):
-                logging.warning(
-                    'photometry is set to "on", but excitation is not running'
-                )
-
-                reply = QMessageBox.question(
-                    self,
-                    "Box {}, Start".format(self.box_letter),
-                    'Photometry is set to "on", but excitation is not running. Start excitation now?',
-                    QMessageBox.Yes | QMessageBox.No,
-                    QMessageBox.Yes,
-                )
-                if reply == QMessageBox.Yes:
-                    self.StartExcitation.setChecked(True)
-                    logging.info("User selected to start excitation")
-                    started = self._StartExcitation()
-                    if started == 0:
-                        reply = QMessageBox.critical(
-                            self,
-                            "Box {}, Start".format(self.box_letter),
-                            "Could not start excitation, therefore cannot start the session",
-                            QMessageBox.Ok,
-                        )
-                        logging.info(
-                            "could not start session, due to failure to start excitation"
-                        )
-                        self.Start.setChecked(False)
-                        return
-                else:
-                    logging.info("User selected not to start excitation")
-                    self.Start.setChecked(False)
-                    return
-
             # disable sound button
             self.sound_button.setEnabled(False)
 
@@ -5964,6 +5928,9 @@ class Window(QMainWindow):
             self._set_metadata_enabled(False)
             self.session_run = True  # session has been started
             self.keyPressEvent(allow_reset=True)
+
+            # set flag to perform habituation period
+            self.behavior_baseline_period.set()
 
         else:
             # Prompt user to confirm stopping trials
@@ -5996,6 +5963,7 @@ class Window(QMainWindow):
 
             self.session_end_tasks()
             self.sound_button.setEnabled(True)
+            self.behavior_baseline_period.clear()   # set flag to break out of habituation period
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -6142,37 +6110,51 @@ class Window(QMainWindow):
             workerStartTrialLoop1 = self.workerStartTrialLoop1
             worker_save = self.worker_save
 
-        # collecting the base signal for photometry. Only run once
-        if (
-            self.Start.isChecked()
-            and self.PhotometryB.currentText() == "on"
-            and self.PhotometryRun == 0
-        ):
-            logging.info("Starting photometry baseline timer")
-            self.finish_Timer = 0
-            self.PhotometryRun = 1
-            self.ignore_timer = False
+        # pause for specified habituation time
+        if self.baseline_min_elapsed <= self.hab_time_box.value():
+            self.wait_for_baseline()
 
-            # create label to display time remaining on photometry label and add to warning widget
-            self.photometry_timer_label = QLabel()
-            self.photometry_timer_label.setStyleSheet(
-                f"color: {self.default_warning_color};"
-            )
-            self.warning_widget.layout().insertWidget(
-                0, self.photometry_timer_label
-            )
+            # collecting the base signal for photometry. Only run once
+            if (
+                    self.Start.isChecked()
+                    and self.PhotometryB.currentText() == "on"
+                    and self.PhotometryRun == 0
+            ):
+                logging.info("Starting photometry baseline timer")
+                self.finish_Timer = 0
+                self.PhotometryRun = 1
+                self.ignore_timer = False
 
-            # If we already created a workertimer and thread we can reuse them
-            if not hasattr(self, "workertimer"):
-                self.workertimer = TimerWorker()
-                self.workertimer_thread = QThread()
-                self.workertimer.progress.connect(
-                    self._update_photometery_timer
+                # create label to display time remaining on photometry label and add to warning widget
+                self.photometry_timer_label = QLabel()
+                self.photometry_timer_label.setStyleSheet(
+                    f"color: {self.default_warning_color};"
                 )
-                self.workertimer.finished.connect(self._thread_complete_timer)
-                self.Time.connect(self.workertimer._Timer)
-                self.workertimer.moveToThread(self.workertimer_thread)
-                self.workertimer_thread.start()
+                self.warning_widget.layout().insertWidget(
+                    0, self.photometry_timer_label
+                )
+
+                # If we already created a workertimer and thread we can reuse them
+                if not hasattr(self, "workertimer"):
+                    self.workertimer = TimerWorker()
+                    self.workertimer_thread = QThread()
+                    self.workertimer.progress.connect(
+                        self._update_photometery_timer
+                    )
+                    self.workertimer.finished.connect(self._thread_complete_timer)
+                    self.Time.connect(self.workertimer._Timer)
+                    self.workertimer.moveToThread(self.workertimer_thread)
+                    self.workertimer_thread.start()
+
+                # check if workflow is running and start photometry timer
+                if not self.photometry_workflow_running():
+                    self.Start.setChecked(False)
+                    return
+                self.Time.emit(int(np.floor(float(self.baselinetime.text()) * 60)))
+                logging.info(
+                    "Running photometry baseline",
+                    extra={"tags": [self.warning_log_tag]},
+                )
 
         self._StartTrialLoop(GeneratedTrials, worker1, worker_save)
 
@@ -6183,6 +6165,47 @@ class Window(QMainWindow):
                 )
             except Exception:
                 logging.error(traceback.format_exc())
+
+    def photometry_workflow_running(self) -> bool or None:
+        """
+        If fiber photometery is configured for session, check if work flow is running
+
+        :returns: boolean indicating if workflow is running or not. If None, fip is not configured
+        """
+
+        # Check if photometry excitation is running or not
+        if self.PhotometryB.currentText() == "on" and not self.StartExcitation.isChecked():
+            logging.warning('photometry is set to "on", but excitation is not running')
+
+            reply = QMessageBox.question(
+                self,
+                "Box {}, Start".format(self.box_letter),
+                'Photometry is set to "on", but excitation is not running. Start excitation now?',
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes,
+            )
+            if reply == QMessageBox.Yes:
+                self.StartExcitation.setChecked(True)
+                logging.info("User selected to start excitation")
+                started = self._StartExcitation()
+                if started == 0:
+                    reply = QMessageBox.critical(
+                        self,
+                        "Box {}, Start".format(self.box_letter),
+                        "Could not start excitation, therefore cannot start the session",
+                        QMessageBox.Ok,
+                    )
+                    logging.info(
+                        "could not start session, due to failure to start excitation"
+                    )
+                    self.Start.setChecked(False)
+                    return False
+            else:
+                logging.info("User selected not to start excitation")
+                self.Start.setChecked(False)
+                return False
+
+            return True
 
     def session_end_tasks(self):
         """
@@ -6301,22 +6324,9 @@ class Window(QMainWindow):
 
         if not self.Start.isChecked():
             logging.info("ending trial loop")
-            self.behavior_baseline_period.clear()
             return
 
         logging.info("starting trial loop")
-        self.behavior_baseline_period.set()
-
-        # pause for specified habituation time
-        if self.baseline_min_elapsed <= self.hab_time_box.value():
-            self.wait_for_baseline()
-
-        # start photometry timer
-        self.Time.emit(int(np.floor(float(self.baselinetime.text()) * 60)))
-        logging.info(
-            "Running photometry baseline",
-            extra={"tags": [self.warning_log_tag]},
-            )
 
         # Track elapsed time in case Bonsai Stalls
         last_trial_start = time.time()
