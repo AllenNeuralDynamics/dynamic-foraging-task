@@ -6311,6 +6311,7 @@ class Window(QMainWindow):
         if self.baseline_min_elapsed <= self.hab_time_box.value():
             self.wait_for_baseline()
 
+        # start photometry timer
         self.Time.emit(int(np.floor(float(self.baselinetime.text()) * 60)))
         logging.info(
             "Running photometry baseline",
