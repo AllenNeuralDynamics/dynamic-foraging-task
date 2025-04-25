@@ -6334,8 +6334,7 @@ class Window(QMainWindow):
         stall_iteration = 1
         stall_duration = 5 * 60
 
-        if self.Start.isChecked():
-            logging.info(f"Starting session.")
+        logging.info(f"Starting session.")
 
         while self.Start.isChecked():
             QApplication.processEvents()
