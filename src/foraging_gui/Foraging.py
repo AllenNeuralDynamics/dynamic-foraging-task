@@ -6158,6 +6158,21 @@ class Window(QMainWindow):
         :returns: boolean indicating if workflow is running or not. If None, fip is not configured
         """
 
+        if self.PhotometryB.currentText() == "on" and (
+                not self.FIP_started
+        ):
+            reply = QMessageBox.critical(
+                self,
+                "Box {}, Start".format(self.box_letter),
+                'Photometry is set to "on", but the FIP workflow has not been started',
+                QMessageBox.Ok,
+            )
+
+            logging.info(
+                "Cannot start session without starting FIP workflow"
+            )
+            return False
+
         # Check if photometry excitation is running or not
         if self.PhotometryB.currentText() == "on" and not self.StartExcitation.isChecked():
             logging.warning('photometry is set to "on", but excitation is not running')
