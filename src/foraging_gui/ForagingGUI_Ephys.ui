@@ -69,7 +69,7 @@
    <widget class="QComboBox" name="Task">
     <property name="geometry">
      <rect>
-      <x>620</x>
+      <x>650</x>
       <y>20</y>
       <width>152</width>
       <height>20</height>
@@ -2763,6 +2763,40 @@
      <bool>false</bool>
     </property>
    </widget>
+   <widget class="QSpinBox" name="hab_time_box">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>20</y>
+      <width>110</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="minimum">
+      <number>0</number>
+     </property>
+     <property name="maximum">
+      <number>90</number>
+     </property>
+     <property name="suffix">
+     <string> min</string>
+      </property>
+     <property name="prefix">
+     <string> Baseline: </string>
+    </property>
+   </widget>
    <widget class="QPushButton" name="NewSession">
     <property name="enabled">
      <bool>true</bool>
@@ -3263,7 +3297,7 @@
    <widget class="QLineEdit" name="ID">
     <property name="geometry">
      <rect>
-      <x>324</x>
+      <x>380</x>
       <y>20</y>
       <width>71</width>
       <height>20</height>
@@ -3282,7 +3316,7 @@
    <widget class="QLabel" name="label_72">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>350</x>
       <y>20</y>
       <width>21</width>
       <height>20</height>
@@ -3658,7 +3692,7 @@
    <widget class="QLabel" name="label_74">
     <property name="geometry">
      <rect>
-      <x>400</x>
+      <x>450</x>
       <y>20</y>
       <width>71</width>
       <height>20</height>
@@ -3683,7 +3717,7 @@
    <widget class="QLineEdit" name="Experimenter">
     <property name="geometry">
      <rect>
-      <x>474</x>
+      <x>524</x>
       <y>20</y>
       <width>121</width>
       <height>20</height>
