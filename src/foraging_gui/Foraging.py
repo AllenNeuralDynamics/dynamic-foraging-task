@@ -119,6 +119,7 @@ class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int)  # Photometry timer signal
     sessionEnded = QtCore.pyqtSignal()
     modelsChanged = QtCore.pyqtSignal()
+    updateStageLabel = QtCore.pyqtSignal(str)   # update label of curriculm stage when mouse is loaded
 
     def __init__(self, parent=None, box_number=1, start_bonsai_ide=True):
         logging.info('Creating Window')
@@ -562,6 +563,11 @@ class Window(QMainWindow):
         # update model widgets if models have changed
         self.modelsChanged.connect(self.update_model_widgets)
 
+        # update label when mouse is loaded in
+        self.updateStageLabel.connect(lambda stage: self.label_curriculum_stage.setText(stage))
+        self.updateStageLabel.connect(lambda v: self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);"))
+
+
     def update_loaded_mouse_offset(self):
         """
             Update the stage offset associated with mouse model from slims with aind stage coordinates
@@ -693,10 +699,10 @@ class Window(QMainWindow):
             self.session_model.experiment = sess.experiment
             self.session_model.experimenter = sess.experimenter
             self.session_model.subject = sess.subject
-            self.session_model.notes = sess.notes
+            self.session_model.notes = sess.notes + self.session_model.notes    # append notes
 
-            # self.label_curriculum_stage.setText(trainer_state.stage.name)
-            # self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
+            # update curriculum label
+            self.updateStageLabel.emit(trainer_state.stage.name)
 
             # enable or disable widget based on if session is on curriculum
             self.task_widget.setEnabled(not slims_session.is_curriculum_suggestion)
