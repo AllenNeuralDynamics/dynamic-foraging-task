@@ -6099,47 +6099,48 @@ class Window(QMainWindow):
         if self.baseline_min_elapsed <= self.hab_time_box.value():
             self.wait_for_baseline()
 
-            # collecting the base signal for photometry. Only run once
-            if (
-                    self.Start.isChecked()
-                    and self.PhotometryB.currentText() == "on"
-                    and self.PhotometryRun == 0
-            ):
-                logging.info("Starting photometry baseline timer")
-                self.finish_Timer = 0
-                self.PhotometryRun = 1
-                self.ignore_timer = False
+        # check if workflow is running and start photometry timer
+        if not self.photometry_workflow_running():
+            self.Start.setChecked(False)
+            return
 
-                # create label to display time remaining on photometry label and add to warning widget
-                self.photometry_timer_label = QLabel()
-                self.photometry_timer_label.setStyleSheet(
-                    f"color: {self.default_warning_color};"
-                )
-                self.warning_widget.layout().insertWidget(
-                    0, self.photometry_timer_label
-                )
+        # collecting the base signal for photometry. Only run once
+        if (
+                self.Start.isChecked()
+                and self.PhotometryB.currentText() == "on"
+                and self.PhotometryRun == 0
+        ):
+            logging.info("Starting photometry baseline timer")
+            self.finish_Timer = 0
+            self.PhotometryRun = 1
+            self.ignore_timer = False
 
-                # If we already created a workertimer and thread we can reuse them
-                if not hasattr(self, "workertimer"):
-                    self.workertimer = TimerWorker()
-                    self.workertimer_thread = QThread()
-                    self.workertimer.progress.connect(
-                        self._update_photometery_timer
-                    )
-                    self.workertimer.finished.connect(self._thread_complete_timer)
-                    self.Time.connect(self.workertimer._Timer)
-                    self.workertimer.moveToThread(self.workertimer_thread)
-                    self.workertimer_thread.start()
+            # create label to display time remaining on photometry label and add to warning widget
+            self.photometry_timer_label = QLabel()
+            self.photometry_timer_label.setStyleSheet(
+                f"color: {self.default_warning_color};"
+            )
+            self.warning_widget.layout().insertWidget(
+                0, self.photometry_timer_label
+            )
 
-                # check if workflow is running and start photometry timer
-                if not self.photometry_workflow_running():
-                    self.Start.setChecked(False)
-                    return
-                self.Time.emit(int(np.floor(float(self.baselinetime.text()) * 60)))
-                logging.info(
-                    "Running photometry baseline",
-                    extra={"tags": [self.warning_log_tag]},
+            # If we already created a workertimer and thread we can reuse them
+            if not hasattr(self, "workertimer"):
+                self.workertimer = TimerWorker()
+                self.workertimer_thread = QThread()
+                self.workertimer.progress.connect(
+                    self._update_photometery_timer
                 )
+                self.workertimer.finished.connect(self._thread_complete_timer)
+                self.Time.connect(self.workertimer._Timer)
+                self.workertimer.moveToThread(self.workertimer_thread)
+                self.workertimer_thread.start()
+
+            self.Time.emit(int(np.floor(float(self.baselinetime.text()) * 60)))
+            logging.info(
+                "Running photometry baseline",
+                extra={"tags": [self.warning_log_tag]},
+            )
 
         self._StartTrialLoop(GeneratedTrials, worker1, worker_save)
 
