@@ -6099,17 +6099,17 @@ class Window(QMainWindow):
         if self.baseline_min_elapsed <= self.hab_time_box.value():
             self.wait_for_baseline()
 
-        # check if workflow is running and start photometry timer
-        if not self.photometry_workflow_running():
-            self.Start.setChecked(False)
-            return
-
         # collecting the base signal for photometry. Only run once
         if (
                 self.Start.isChecked()
                 and self.PhotometryB.currentText() == "on"
                 and self.PhotometryRun == 0
         ):
+            # check if workflow is running and start photometry timer
+            if not self.photometry_workflow_running():
+                self.Start.setChecked(False)
+                return
+
             logging.info("Starting photometry baseline timer")
             self.finish_Timer = 0
             self.PhotometryRun = 1
@@ -6326,7 +6326,7 @@ class Window(QMainWindow):
         if not self.Start.isChecked():
             logging.info("ending trial loop")
             return
-
+        
         logging.info("starting trial loop")
 
         # Track elapsed time in case Bonsai Stalls
