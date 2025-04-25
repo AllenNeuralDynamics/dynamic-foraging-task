@@ -4011,11 +4011,11 @@ class Window(QMainWindow):
                 ):
                     self._AddWaterLogResult(session)
                 elif self.BaseWeight.text() == "" or self.WeightAfter.text() == "":
-                    logging.error(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims "
-                                  f"due do unrecorded weight information.")
+                    logging.warning(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims"
+                                   f" due do unrecorded weight information.")
                 elif session is None:
-                    logging.error(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims "
-                                 f"due do metadata generation failure.")
+                    logging.warning(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims"
+                                  f" due do metadata generation failure.")
         except Exception as e:
             logging.warning(
                 "Meta data is not saved!",
