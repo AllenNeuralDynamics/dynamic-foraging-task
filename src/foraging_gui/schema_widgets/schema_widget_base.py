@@ -11,7 +11,8 @@ from PyQt5.QtWidgets import (
     QSpinBox,
     QDoubleSpinBox,
     QSlider,
-    QCheckBox
+    QCheckBox,
+    QTextEdit
 )
 from inspect import currentframe
 from importlib import import_module
@@ -215,7 +216,7 @@ class SchemaWidgetBase(QMainWindow):
         if hasattr(self, f"{name}_widget"):
             widget = getattr(self, f"{name}_widget")
             widget.blockSignals(True)  # block signal indicating change since changing internally
-            if type(widget) in [QLineEdit]:
+            if type(widget) in [QLineEdit, QTextEdit]:
                 widget.setText(str(value))
             elif type(widget) in [QSpinBox, QDoubleSpinBox, QSlider]:
                 widget.setValue(value)

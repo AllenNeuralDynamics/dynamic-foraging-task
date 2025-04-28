@@ -9,7 +9,7 @@ import math
 import logging
 import requests
 from hashlib import md5
-from typing import Literal, get_args, Union
+from typing import Literal, get_args, Union, Optional
 from pydantic import BaseModel
 import re
 from importlib import import_module
@@ -17,7 +17,7 @@ from importlib import import_module
 import logging_loki
 import socket
 import harp
-import threading
+from threading import Thread, Event, Lock
 import yaml
 import shutil
 from pathlib import Path
@@ -114,12 +114,10 @@ class NumpyEncoder(json.JSONEncoder):
             return 'NaN'  # Represent NaN as a string
         return super(NumpyEncoder, self).default(obj)
 
-
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int)  # Photometry timer signal
     sessionEnded = QtCore.pyqtSignal()
-    modelsChanged = QtCore.pyqtSignal()
-    updateStageLabel = QtCore.pyqtSignal(str)   # update label of curriculm stage when mouse is loaded
+    mouseLoaded = QtCore.pyqtSignal(DynamicForagingTrainerState)
 
     def __init__(self, parent=None, box_number=1, start_bonsai_ide=True):
         logging.info('Creating Window')
@@ -266,6 +264,9 @@ class Window(QMainWindow):
         self.threadpool5 = QThreadPool()  # for starting the trial loop
         self.threadpool6 = QThreadPool()  # for saving data
         self.threadpool_workertimer = QThreadPool()  # for timing
+        self.load_mouse_worker = None   # initialized when mouse loaded
+        self.update_curriculum_attachments_worker = Worker(fn=self.update_curriculum_attachments)   # update attachments
+        self.load_mouse_thread = QThreadPool()  # threadpool for loading in mouse
 
         # create bias indicator
         self.bias_n_size = 200
@@ -273,7 +274,7 @@ class Window(QMainWindow):
             x_range=self.bias_n_size)  # TODO: Where to store bias_threshold parameter? self.Settings?
         self.bias_indicator.biasValue.connect(self.bias_calculated)  # update dashboard value
         self.bias_indicator.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        self.bias_thread = threading.Thread()  # dummy thread
+        self.bias_thread = Thread()  # dummy thread
 
         # Set up more parameters
         self.FIP_started = False
@@ -524,12 +525,11 @@ class Window(QMainWindow):
         self.pushButton_streamlit.clicked.connect(self._open_mouse_on_streamlit)
         self.on_curriculum.clicked.connect(self.off_curriculum)
 
-        # hook up signals
+        # hook up mouse selector signals
         self.mouse_selector_dialog.acceptedMouseID.connect(lambda: self.geometry().center())
         self.mouse_selector_dialog.acceptedMouseID.connect(lambda: self.Load.setEnabled(False))
         self.mouse_selector_dialog.acceptedMouseID.connect(self.load_slims_progress.show)
-        self.mouse_selector_dialog.acceptedMouseID.connect(lambda: threading.Thread(target=self.load_curriculum,
-                                                                                    kwargs={"mouse_id": self.mouse_selector_dialog.combo.currentText()}).start())
+        self.mouse_selector_dialog.acceptedMouseID.connect(self.create_load_mouse_worker)
 
         # add validator for weight and water fields
         double_validator = QtGui.QDoubleValidator()
@@ -549,24 +549,37 @@ class Window(QMainWindow):
             self.MoveZN.clicked.connect(self.update_operational_control_stage_positions)
 
         elif self.stage_widget is not None:
+            view = self.stage_widget.movement_page_view
+
             # connect aind stage widgets to update loaded mouse offset if text has been changed by user or button press
-            self.stage_widget.movement_page_view.lineEdit_z.textChanged.connect(lambda v: threading.Thread(target=self.update_loaded_mouse_offset).start())
-            self.stage_widget.movement_page_view.lineEdit_x.textChanged.connect(lambda v: threading.Thread(target=self.update_loaded_mouse_offset).start())
-            self.stage_widget.movement_page_view.lineEdit_y1.textChanged.connect(lambda v: threading.Thread(target=self.update_loaded_mouse_offset).start())
-            self.stage_widget.movement_page_view.lineEdit_y2.textChanged.connect(lambda v: threading.Thread(target=self.update_loaded_mouse_offset).start())
+            view.lineEdit_z.textChanged.connect(lambda v: Thread(target=self.update_loaded_mouse_offset).start())
+            view.lineEdit_x.textChanged.connect(lambda v: Thread(target=self.update_loaded_mouse_offset).start())
+            view.lineEdit_y1.textChanged.connect(lambda v: Thread(target=self.update_loaded_mouse_offset).start())
+            view.lineEdit_y2.textChanged.connect(lambda v: Thread(target=self.update_loaded_mouse_offset).start())
+
             # Connect aind stage widgets to update operational control model
-            self.stage_widget.movement_page_view.lineEdit_z.textChanged.connect(self.update_operational_control_stage_positions)
-            self.stage_widget.movement_page_view.lineEdit_x.textChanged.connect(self.update_operational_control_stage_positions)
-            self.stage_widget.movement_page_view.lineEdit_y1.textChanged.connect(self.update_operational_control_stage_positions)
-            self.stage_widget.movement_page_view.lineEdit_y2.textChanged.connect(self.update_operational_control_stage_positions)
+            view.lineEdit_z.textChanged.connect(self.update_operational_control_stage_positions)
+            view.lineEdit_x.textChanged.connect(self.update_operational_control_stage_positions)
+            view.lineEdit_y1.textChanged.connect(self.update_operational_control_stage_positions)
+            view.lineEdit_y2.textChanged.connect(self.update_operational_control_stage_positions)
+            view.lineEdit_step_size.textEdited.connect(lambda v: setattr(self.operational_control_model, "step_size",
+                                                                         float(v)))
 
-        # update model widgets if models have changed
-        self.modelsChanged.connect(self.update_model_widgets)
+    def create_load_mouse_worker(self) -> None:
+        """
+            Creates worker for slims handler to load in mouse. Since loading in mouse requires updating widgets,
+            put loading from slims in thread and then update ui once finished.
+        """
 
-        # update label when mouse is loaded in
-        self.updateStageLabel.connect(lambda stage: self.label_curriculum_stage.setText(stage))
-        self.updateStageLabel.connect(lambda v: self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);"))
+        continue_load = self._NewSession()
 
+        if not continue_load:
+            return
+
+        self.load_mouse_worker = Worker(fn=self.slims_handler.load_mouse_curriculum,
+                                        mouse_id=self.mouse_selector_dialog.combo.currentText())
+        self.load_mouse_worker.signals.result.connect(lambda args: self.load_curriculum(*args))
+        self.load_mouse_thread.start(self.load_mouse_worker)
 
     def update_loaded_mouse_offset(self):
         """
@@ -588,7 +601,7 @@ class Window(QMainWindow):
                                                        None if y == '' else float(y),
                                                        None if z == '' else float(z))
 
-    def update_operational_control_stage_positions(self, *args):
+    def update_operational_control_stage_positions(self, *args) -> None:
         """
             Update operational control model with the latest stage coordinates
 
@@ -642,7 +655,8 @@ class Window(QMainWindow):
                 3: positions['z'] if last_positions['z'] is None else float(last_positions["z"]),
             }
             self.stage_widget.stage_model.update_position(positions)
-            self.stage_widget.movement_page_view.lineEdit_step_size.returnPressed.emit()
+            if oc.stage_specs.step_size:    # update step size
+                self.stage_widget.stage_model.update_step_size(oc.stage_specs.step_size)
 
         # check newscale stage
         elif hasattr(self, "current_stage") and last_positions != none_pos:  # newscale stage
@@ -651,6 +665,7 @@ class Window(QMainWindow):
                 logging.info("Using coordinates in loaded operational control model.")
                 last_positions = {k: v if v is not None else positions[k] for k, v in last_positions.items()}
                 last_positions_lst = list(last_positions.values())
+
                 self.current_stage.move_absolute_3d(*last_positions_lst)
                 self._UpdatePosition(last_positions_lst, (0, 0, 0))
             else:
@@ -658,21 +673,28 @@ class Window(QMainWindow):
                 logging.info(f"Cannot move stage since last session was run using {oc.stage_specs.stage_name} and"
                              f" on {oc.stage_specs.rig_name}", extra={'tags': [self.warning_log_tag]})
 
-    def load_curriculum(self, mouse_id: str) -> None:
+    def load_curriculum(self, trainer_state: Optional[DynamicForagingTrainerState],
+                        slims_session: Optional[SlimsBehaviorSession],
+                        task: Optional[AindDynamicForagingTaskLogic],
+                        sess: Optional[AindBehaviorSessionModel],
+                        opto: Optional[Optogenetics],
+                        fip: Optional[FiberPhotometry],
+                        oc: Optional[OperationalControl],
+                        mouse_id: str) -> None:
         """
-            Load and apply curriculum from slims
-            :param mouse_id: mouse id to load
+            Load curriculum based on models
+
+            :param trainer_state: trainer state loaded from slims. None if nothing on slims found.
+            :param slims_session: slims model of session loaded from slims. None if nothing on slims found.
+            :param task: task model found as an attachment from slims. None if nothing on slims found.
+            :param sess: session model found as an attachment from slims. None if nothing on slims found.
+            :param opto: optogenetic model found as an attachment from slims. None if nothing on slims found.
+            :param fip: fiber photometery model found as an attachment from slims. None if nothing on slims found.
+            :param oc: operational control model found as an attachment from slims. None if nothing on slims found.
+            :param mouse_id: mouse id to loaded
         """
-
-        continue_load = self._NewSession()
-
-        if not continue_load:
-            return
 
         try:
-            # check slims for curriculum
-            trainer_state, slims_session, task, sess, opto, fip, oc = self.slims_handler.load_mouse_curriculum(mouse_id)
-
             if trainer_state is None:  # no curriculum in slims for this mouse
                 logging.info(f"Attempting to create curriculum for mouse {mouse_id} from schedule.")
                 trainer_state, slims_session, task, sess, opto, fip, oc = self.create_curriculum(mouse_id)
@@ -683,11 +705,12 @@ class Window(QMainWindow):
 
             self.fip_model = fip if fip else self.fip_model
             mode = self._GetInfoFromSchedule(mouse_id, "FIP Mode")
-            if not (isinstance(mode, float) and math.isnan(mode)):  # schedule has input for fip
+            if not (isinstance(mode, float) and math.isnan(mode)) and mode is not None:  # schedule has input for fip
                 stage_list = get_args(STAGE_STARTS)
                 stage_mapping = ["1.1", "1.2", "2", "3", "4", "FINAL", "GRADUATED"]
                 start = self._GetInfoFromSchedule(mouse_id, "First FP Stage")
-                first = "stage_1_warmup" if math.isnan(start) else stage_list[stage_mapping.index(start)]
+                first = "stage_1_warmup" if (isinstance(start, float) and math.isnan(start)) \
+                    else stage_list[stage_mapping.index(start)]
                 # check if current stage is past stage_start and enable if so
                 self.fip_model = FiberPhotometry(mode=mode,
                                                  stage_start=first,
@@ -699,10 +722,7 @@ class Window(QMainWindow):
             self.session_model.experiment = sess.experiment
             self.session_model.experimenter = sess.experimenter
             self.session_model.subject = sess.subject
-            self.session_model.notes = sess.notes + self.session_model.notes    # append notes
-
-            # update curriculum label
-            self.updateStageLabel.emit(trainer_state.stage.name)
+            self.session_model.notes = self.session_model.notes
 
             # enable or disable widget based on if session is on curriculum
             self.task_widget.setEnabled(not slims_session.is_curriculum_suggestion)
@@ -719,13 +739,19 @@ class Window(QMainWindow):
             logging.info(f"Successfully loaded mouse {mouse_id} on {trainer_state.stage.name} ",
                                                         extra={'tags': [self.warning_log_tag]})
 
+            self.update_model_widgets()
+            self.on_curriculum.setVisible(True)
+            self.label_curriculum_stage.setText(trainer_state.stage.name)
+            self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
+            self.BaseWeight.setText(str(self.slims_handler.loaded_slims_mouse.baseline_weight_g))
+            self.mouseLoaded.emit(trainer_state)
+
         except Exception as e:
             logging.error(str(e), extra={'tags': [self.warning_log_tag]})
             self.Load.setEnabled(True)
 
         finally:
             self.load_slims_progress.hide()
-            self.modelsChanged.emit()
 
     def create_curriculum(self, mouse_id) -> tuple[DynamicForagingTrainerState or None,
                                                    SlimsBehaviorSession or None,
@@ -827,7 +853,6 @@ class Window(QMainWindow):
         )
 
         return ts, sbs, ts.stage.task, self.session_model, self.opto_model, self.fip_model, self.operation_control_model
-
 
     def load_local_session(self, continuation: bool=False) -> None:
 
@@ -942,7 +967,7 @@ class Window(QMainWindow):
         # Set stage position to last position
         self.update_stage_positions_from_operational_control()
 
-        self.modelsChanged.emit()
+        self.update_model_widgets()
 
         logging.info(f"Successfully opened mouse {self.session_model.subject}.",
                      extra={'tags': [self.warning_log_tag]})
@@ -953,7 +978,7 @@ class Window(QMainWindow):
             Write curriculum to slims for next session
         """
         # add session to slims if there are trials and mouse loaded
-        if hasattr(self, "GeneratedTrials") and self.slims_handler.curriculum is not None:
+        if hasattr(self, "GeneratedTrials") and self.slims_handler.loaded_slims_mouse is not None:
             try:
                 trainer_state = self.slims_handler.write_loaded_mouse(self.GeneratedTrials.B_for_eff_optimal,
                                                                       self.GeneratedTrials.B_CurrentTrialN,
@@ -975,6 +1000,31 @@ class Window(QMainWindow):
 
             except Exception as e:
                 logging.error(str(e), extra={'tags': [self.warning_log_tag]})
+
+        else:
+            logging.info("No mouse loaded.")
+
+    def update_curriculum_attachments(self) -> None:
+        """
+            Update attachments with model attributes
+        """
+
+        try:
+            self.slims_handler.update_loaded_session_attachments(AindBehaviorSessionModel.__name__,
+                                                                 self.session_model.model_dump_json())
+            self.slims_handler.update_loaded_session_attachments(self.operation_control_model.name,
+                                                                 self.operation_control_model.model_dump_json())
+            self.slims_handler.update_loaded_session_attachments(self.fip_model.name,
+                                                                 self.fip_model.model_dump_json())
+            self.slims_handler.update_loaded_session_attachments(self.opto_model.name,
+                                                                 self.opto_model.model_dump_json())
+            # Update with curriculum that actually ran
+            if not self.slims_handler.loaded_slims_session.is_curriculum_suggestion:
+                ts, *args = self.slims_handler.load_mouse_curriculum(self.session_model.subject)
+                ts.stage.task = self.task_logic
+                self.slims_handler.update_loaded_session_attachments("TrainerState", ts.model_dump_json())
+        except KeyError as e:
+            logging.error(f"Error updating mouse {self.session_model.subject} session in slims: {e}")
 
     def _set_reference(self):
         '''
@@ -1927,7 +1977,7 @@ class Window(QMainWindow):
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
         # Log stdout and stderr from bonsai in a separate thread
-        threading.Thread(target=log_subprocess_output, args=(process, 'BONSAI',)).start()
+        Thread(target=log_subprocess_output, args=(process, 'BONSAI',)).start()
 
     def _OpenVideoFolder(self):
         '''Open the video folder'''
@@ -2837,9 +2887,6 @@ class Window(QMainWindow):
         self.fip_widget.apply_schema(self.fip_model)
         self.operation_control_widget.apply_schema(self.operation_control_model)
 
-        # Set on_curriculum to be visible if loaded mouse
-        self.on_curriculum.setVisible(self.slims_handler.loaded_mouse_id is not None)
-
     def save_task_models(self):
         """
         Save session and task model as well as opto and fip if applicable
@@ -3010,7 +3057,7 @@ class Window(QMainWindow):
                 self.bonsai_path + ' ' + self.FIP_workflow_path + folder_path + camera + ' --start', cwd=CWD,
                 shell=True,
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-            threading.Thread(target=log_subprocess_output, args=(process, 'FIP',)).start()
+            Thread(target=log_subprocess_output, args=(process, 'FIP',)).start()
             self.FIP_started = True
         except Exception as e:
             logging.error(e)
@@ -3560,22 +3607,7 @@ class Window(QMainWindow):
 
             # if mouse is loaded, update attachments with what actually ran
             if self.slims_handler.loaded_slims_session:
-                try:
-                    self.slims_handler.update_loaded_session_attachments(AindBehaviorSessionModel.__name__,
-                                                                         self.session_model.model_dump_json())
-                    self.slims_handler.update_loaded_session_attachments(self.operation_control_model.name,
-                                                                         self.operation_control_model.model_dump_json())
-                    self.slims_handler.update_loaded_session_attachments(self.fip_model.name,
-                                                                         self.fip_model.model_dump_json())
-                    self.slims_handler.update_loaded_session_attachments(self.opto_model.name,
-                                                                         self.opto_model.model_dump_json())
-                    # Update with curriculum that actually ran
-                    if not self.slims_handler.loaded_slims_session.is_curriculum_suggestion:
-                        ts, *args = self.slims_handler.load_mouse_curriculum(self.session_model.subject)
-                        ts.stage.task = self.task_logic
-                        self.slims_handler.update_loaded_session_attachments("TrainerState", ts.model_dump_json())
-                except KeyError as e:
-                    logging.error(f"Error updating mouse {self.session_model.subject} session in slims: {e}")
+                self.load_mouse_thread.start(self.update_curriculum_attachments_worker)
 
             # set the load tag to zero
             self.load_tag = 0
@@ -3773,7 +3805,7 @@ class Window(QMainWindow):
             self.workerStartTrialLoop = workerStartTrialLoop
             self.workerStartTrialLoop1 = workerStartTrialLoop1
             self.worker_save = worker_save
-            self.data_lock = threading.Lock()
+            self.data_lock = Lock()
         else:
             PlotM = self.PlotM
             worker1 = self.worker1
@@ -3943,7 +3975,7 @@ class Window(QMainWindow):
                     # add data to bias_indicator
                     if not self.bias_thread.is_alive():
                         logger.debug('Starting bias thread.')
-                        self.bias_thread = threading.Thread(target=self.bias_indicator.calculate_bias,
+                        self.bias_thread = Thread(target=self.bias_indicator.calculate_bias,
                                                             kwargs={'trial_num': len(formatted_history),
                                                                     'choice_history': choice_history,
                                                                     'reward_history': np.array(any_reward).astype(int),

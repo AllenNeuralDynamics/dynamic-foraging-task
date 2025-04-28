@@ -1556,7 +1556,7 @@
          <string>Move back</string>
         </property>
        </widget>
-       <widget class="QLineEdit" name="Step">
+       <widget class="QLabel" name="Step">
         <property name="geometry">
          <rect>
           <x>240</x>

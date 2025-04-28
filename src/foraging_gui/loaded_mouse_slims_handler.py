@@ -59,6 +59,7 @@ class LoadedMouseSlimsHandler:
         self.metrics = None
         self._loaded_mouse_id = None
         self._loaded_slims_session = None
+        self._slims_mouse = None
 
     @property
     def loaded_mouse_id(self) -> str or None:
@@ -67,6 +68,14 @@ class LoadedMouseSlimsHandler:
         """
 
         return self._loaded_mouse_id
+
+    @property
+    def loaded_slims_mouse(self) -> models.SlimsMouseContent or None:
+        """
+            Return loaded slims mouse object. Read only. Use load_mouse_curriculum to update.
+        """
+
+        return self._slims_mouse
 
     @property
     def loaded_slims_session(self) -> models.SlimsBehaviorSession or None:
@@ -177,7 +186,8 @@ class LoadedMouseSlimsHandler:
                                                             AindBehaviorSessionModel or None,
                                                             Optogenetics or None,
                                                             FiberPhotometry or None,
-                                                            OperationalControl or None]:
+                                                            OperationalControl or None,
+                                                            str]:
         """
             Load in specified mouse from slims
             :params mouse_id: mouse id string to load from slims
@@ -186,7 +196,7 @@ class LoadedMouseSlimsHandler:
 
         try:
             self.log.info(f"Fetching {mouse_id} from Slims.")
-            self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
+            self._slims_mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
             self.log.info(f"Successfully fetched {mouse_id} from Slims.")
 
             self.log.info(f"Fetching curriculum, trainer_state, and metrics for {mouse_id} from Slims.")
@@ -227,7 +237,7 @@ class LoadedMouseSlimsHandler:
             self._loaded_mouse_id = mouse_id
             self.log.info(f"Mouse {mouse_id} curriculum loaded from Slims.")
 
-            return self.trainer_state, self._loaded_slims_session, task_logic, session_model, opto_model, fip_model, oc
+            return self.trainer_state, self._loaded_slims_session, task_logic, session_model, opto_model, fip_model, oc, mouse_id
 
         except Exception as e:
             if 'No record found' in str(e):  # mouse doesn't exist
@@ -251,13 +261,13 @@ class LoadedMouseSlimsHandler:
         if self.slims_client is not None:
             self.log.info(f"Setting loaded mouse to {mouse_id}")
             self._loaded_mouse_id = mouse_id
+            self._slims_mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=mouse_id)
             self.metrics = metrics
             self.trainer_state = trainer_state
             self.curriculum = curriculum
             self._loaded_slims_session = models.SlimsBehaviorSession()  # create empty model to update on_curriculum
         else:
             self.log.warning("No client connected.")
-
 
     def clear_loaded_mouse(self):
         """
@@ -365,8 +375,7 @@ class LoadedMouseSlimsHandler:
             :param serialized_json: string json content
         """
         if self.slims_client is not None:
-            mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=self._loaded_mouse_id)
-            fetched = self.slims_client.fetch_models(models.SlimsBehaviorSession, mouse_pk=mouse.pk)[-1]
+            fetched = self.slims_client.fetch_models(models.SlimsBehaviorSession, mouse_pk=self._slims_mouse.pk)[-1]
             attachments = self.slims_client.db.slims_api.get_entities(f"attachment/{fetched._slims_table}/{fetched.pk}")
             attachment_names = [attach.attm_name.value for attach in attachments]
 
@@ -414,12 +423,10 @@ class LoadedMouseSlimsHandler:
         """
 
         if self._loaded_mouse_id is not None and self.slims_client is not None:
-            # grab mouse
-            mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=self._loaded_mouse_id)
 
-            return {"x": mouse.x_offset,
-                    "y": mouse.y_offset,
-                    "z": mouse.z_offset
+            return {"x": self._slims_mouse.x_offset,
+                    "y": self._slims_mouse.y_offset,
+                    "z": self._slims_mouse.z_offset
                     }
         else:
             self.log.info("No mouse loaded so can't return offset.")
@@ -437,7 +444,7 @@ class LoadedMouseSlimsHandler:
         """
 
         if self._loaded_mouse_id is not None and self.slims_client is not None:
-            mouse = self.slims_client.fetch_model(models.SlimsMouseContent, barcode=self._loaded_mouse_id)  # grab mouse
+            mouse = self._slims_mouse
             if [mouse.x_offset, mouse.y_offset, mouse.z_offset] == [x, y, z]:   # skip update if offset is the same
                 return
             mouse.x_offset = x

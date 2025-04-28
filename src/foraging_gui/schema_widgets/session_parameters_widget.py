@@ -31,6 +31,7 @@ class SessionParametersWidget(SchemaWidgetBase):
         self.schema_fields_widgets["notes"].deleteLater()
         self.schema_fields_widgets["notes"] = create_widget("V", QLabel("Notes:"), self.notes_widget)
         self.centralWidget().layout().insertWidget(-1, self.schema_fields_widgets["notes"])
+        self.notes_widget.setText(schema.notes)
 
         # change experiment to combo box
         self.create_attribute_widget("experiment", "combo", [
@@ -80,7 +81,7 @@ if __name__ == "__main__":
             session_name="",   # update when date and subject are filled in
             subject="",
             experiment_version=foraging_gui.__version__,
-            notes="",
+            notes="gfkgkgkhjgjhkji",
             commit_hash=subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip(),
             allow_dirty_repo=
             subprocess.check_output(['git','diff-index','--name-only', 'HEAD']).decode('ascii').strip() != '',
@@ -89,5 +90,10 @@ if __name__ == "__main__":
     task_widget = SessionParametersWidget(task_model)
     task_widget.ValueChangedInside.connect(lambda name: print(task_model))
     task_widget.show()
+
+    task_model.notes = "updating"
+    task_widget.apply_schema(task_model)
+
+
 
     sys.exit(app.exec_())
