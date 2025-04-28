@@ -562,8 +562,8 @@ class Window(QMainWindow):
             view.lineEdit_x.textChanged.connect(self.update_operational_control_stage_positions)
             view.lineEdit_y1.textChanged.connect(self.update_operational_control_stage_positions)
             view.lineEdit_y2.textChanged.connect(self.update_operational_control_stage_positions)
-            view.lineEdit_step_size.textEdited.connect(lambda v: setattr(self.operation_control_model, "step_size",
-                                                                         float(v)))
+            view.lineEdit_step_size.textEdited.connect(lambda v: setattr(self.operation_control_model.stage_specs,
+                                                                         "step_size", float(v)))
 
     def create_load_mouse_worker(self) -> None:
         """
