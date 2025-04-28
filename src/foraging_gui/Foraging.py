@@ -657,6 +657,7 @@ class Window(QMainWindow):
             self.stage_widget.stage_model.update_position(positions)
             if oc.stage_specs.step_size:    # update step size
                 self.stage_widget.stage_model.update_step_size(oc.stage_specs.step_size)
+                self.stage_widget.stage_model.lineEdit_step_size.setText(str(oc.stage_specs.step_size))
 
         # check newscale stage
         elif hasattr(self, "current_stage") and last_positions != none_pos:  # newscale stage
@@ -3607,7 +3608,10 @@ class Window(QMainWindow):
 
             # if mouse is loaded, update attachments with what actually ran
             if self.slims_handler.loaded_slims_session:
-                self.load_mouse_thread.start(self.update_curriculum_attachments_worker)
+                self.load_slims_progress.show()
+                self.update_curriculum_attachments()
+                self.load_slims_progress.hide()
+                #self.load_mouse_thread.start(self.update_curriculum_attachments_worker)
 
             # set the load tag to zero
             self.load_tag = 0
