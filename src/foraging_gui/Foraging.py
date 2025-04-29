@@ -3606,10 +3606,10 @@ class Window(QMainWindow):
 
             # if mouse is loaded, update attachments with what actually ran
             if self.slims_handler.loaded_slims_session:
-                self.load_slims_progress.show()
-                self.update_curriculum_attachments()
-                self.load_slims_progress.hide()
-                #self.load_mouse_thread.start(self.update_curriculum_attachments_worker)
+                # self.load_slims_progress.show()
+                # self.update_curriculum_attachments()
+                # self.load_slims_progress.hide()
+                self.load_mouse_thread.start(self.update_curriculum_attachments_worker)
 
             # set the load tag to zero
             self.load_tag = 0
