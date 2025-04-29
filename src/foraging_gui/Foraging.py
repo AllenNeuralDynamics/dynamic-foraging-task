@@ -658,7 +658,7 @@ class Window(QMainWindow):
             self.stage_widget.stage_model.update_position(positions)
             if oc.stage_specs.step_size:    # update step size
                 self.stage_widget.stage_model.update_step_size(oc.stage_specs.step_size)
-                self.stage_widget.stage_model.lineEdit_step_size.setText(str(oc.stage_specs.step_size))
+                self.stage_widget.movement_page_view.lineEdit_step_size.setText(str(oc.stage_specs.step_size))
 
         # check newscale stage
         elif hasattr(self, "current_stage") and last_positions != none_pos:  # newscale stage
