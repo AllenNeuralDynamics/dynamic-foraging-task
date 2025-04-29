@@ -264,9 +264,7 @@ class Window(QMainWindow):
         self.threadpool6 = QThreadPool()  # for saving data
         self.threadpool_workertimer = QThreadPool()  # for timing
         self.load_mouse_worker = None   # initialized when mouse loaded
-        self.update_curriculum_attachments_worker = Worker(fn=self.update_curriculum_attachments)   # update attachments
         self.load_mouse_thread = QThreadPool()  # threadpool for loading in mouse
-        self.load_mouse_thread.setMaxThreadCount(1)
 
         # create bias indicator
         self.bias_n_size = 200
@@ -3607,11 +3605,7 @@ class Window(QMainWindow):
 
             # if mouse is loaded, update attachments with what actually ran
             if self.slims_handler.loaded_slims_session:
-                self.load_slims_progress.show()
-                # self.update_curriculum_attachments()
-                # self.load_slims_progress.hide()
-                self.update_curriculum_attachments_worker.signals.finished.connect(self.load_slims_progress.hide)
-                self.load_mouse_thread.start(self.update_curriculum_attachments_worker)
+                Thread(target=self.update_curriculum_attachments).start()
 
             # set the load tag to zero
             self.load_tag = 0
