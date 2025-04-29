@@ -117,7 +117,6 @@ class NumpyEncoder(json.JSONEncoder):
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int)  # Photometry timer signal
     sessionEnded = QtCore.pyqtSignal()
-    mouseLoaded = QtCore.pyqtSignal(DynamicForagingTrainerState)
 
     def __init__(self, parent=None, box_number=1, start_bonsai_ide=True):
         logging.info('Creating Window')
@@ -579,7 +578,9 @@ class Window(QMainWindow):
         self.load_mouse_worker = Worker(fn=self.slims_handler.load_mouse_curriculum,
                                         mouse_id=self.mouse_selector_dialog.combo.currentText())
         self.load_mouse_worker.signals.result.connect(lambda args: self.load_curriculum(*args))
+        self.load_mouse_worker.signals.finished.connect(self.load_slims_progress.hide)
         self.load_mouse_thread.start(self.load_mouse_worker)
+
 
     def update_loaded_mouse_offset(self):
         """
@@ -745,14 +746,11 @@ class Window(QMainWindow):
             self.label_curriculum_stage.setText(trainer_state.stage.name)
             self.label_curriculum_stage.setStyleSheet("color: rgb(0, 214, 103);")
             self.BaseWeight.setText(str(self.slims_handler.loaded_slims_mouse.baseline_weight_g))
-            self.mouseLoaded.emit(trainer_state)
 
         except Exception as e:
             logging.error(str(e), extra={'tags': [self.warning_log_tag]})
             self.Load.setEnabled(True)
 
-        finally:
-            self.load_slims_progress.hide()
 
     def create_curriculum(self, mouse_id) -> tuple[DynamicForagingTrainerState or None,
                                                    SlimsBehaviorSession or None,
