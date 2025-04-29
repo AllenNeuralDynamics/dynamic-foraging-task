@@ -1021,6 +1021,7 @@ class Window(QMainWindow):
                 ts, *args = self.slims_handler.load_mouse_curriculum(self.session_model.subject)
                 ts.stage.task = self.task_logic
                 self.slims_handler.update_loaded_session_attachments("TrainerState", ts.model_dump_json())
+        print("Finished!")
         except KeyError as e:
             logging.error(f"Error updating mouse {self.session_model.subject} session in slims: {e}")
 
