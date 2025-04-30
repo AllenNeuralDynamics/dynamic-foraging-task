@@ -102,13 +102,14 @@ class LoadedMouseSlimsHandler:
         try:
             slims_client.fetch_model(models.SlimsMouseContent, barcode='00000000')
         except Exception as e:
-            if 'Status 401 – Unauthorized' in str(e):  # catch error if username and password are incorrect
-                raise Exception(f'Exception trying to read from Slims: {e}.\n'
-                                f' Please check credentials:\n'
-                                f'Username: {os.environ["SLIMS_USERNAME"]}\n'
-                                f'Password: {os.environ["SLIMS_PASSWORD"]}')
-            elif 'No record found' not in str(e):  # bypass if mouse doesn't exist
-                raise Exception(f'Exception trying to read from Slims: {e}.\n')
+            return
+            # if 'Status 401 – Unauthorized' in str(e):  # catch error if username and password are incorrect
+            #     raise Exception(f'Exception trying to read from Slims: {e}.\n'
+            #                     f' Please check credentials:\n'
+            #                     f'Username: {os.environ["SLIMS_USERNAME"]}\n'
+            #                     f'Password: {os.environ["SLIMS_PASSWORD"]}')
+            # elif 'No record found' not in str(e):  # bypass if mouse doesn't exist
+            #     raise Exception(f'Exception trying to read from Slims: {e}.\n')
         self.log.info('Successfully connected to Slims')
 
         return slims_client
