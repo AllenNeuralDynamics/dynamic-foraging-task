@@ -4758,7 +4758,8 @@ class Window(QMainWindow):
                         elif isinstance(widget, QtWidgets.QDoubleSpinBox):
                             widget.setValue(float(final_value))
                         elif isinstance(widget, QtWidgets.QSpinBox):
-                            widget.setValue(int(final_value))
+                            if final_value.isnumeric(): # check in case QSpinBox has suffix or prefix
+                                widget.setValue(int(final_value))
                         elif isinstance(widget, QtWidgets.QTextEdit):
                             widget.setText(final_value)
                         elif isinstance(widget, QtWidgets.QPushButton):
