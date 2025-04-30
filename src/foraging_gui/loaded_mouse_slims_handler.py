@@ -49,6 +49,7 @@ class LoadedMouseSlimsHandler:
         try:
             self.slims_client = self.connect_to_slims(username, password)
         except Exception as e:
+            print("in exception")
             self.slims_client = None
             self.log.error(str(e))
 
