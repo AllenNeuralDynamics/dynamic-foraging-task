@@ -207,7 +207,7 @@ class LoadedMouseSlimsHandler:
 
             if self.curriculum is None:  # no curriculum in slims for this mouse
                 self.log.info(f"No curriculum in slims for mouse {mouse_id}")
-                return None, None, None, None, None, None, None
+                return None, None, None, None, None, None, None, None
 
             task_logic = AindDynamicForagingTaskLogic(**self.trainer_state.stage.task.model_dump())
 
