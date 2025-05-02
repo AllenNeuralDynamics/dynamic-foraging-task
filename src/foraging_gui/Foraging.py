@@ -1561,7 +1561,7 @@ class Window(QMainWindow):
                 for x in schedule["Mouse ID"].unique()
                 if isinstance(x, str) and (len(x) > 3) and ("/" not in x)
             ]
-            self.schedule = schedule.dropna(subset=["Mouse ID", "Box"]).copy()
+            self.schedule = schedule.dropna(subset=["Mouse ID"]).copy()
             logging.info("Loaded behavior schedule")
         else:
             self.schedule_mice = None
