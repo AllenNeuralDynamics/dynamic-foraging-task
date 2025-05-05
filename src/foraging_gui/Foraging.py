@@ -740,6 +740,7 @@ class Window(QMainWindow):
             logging.info(f"Successfully loaded mouse {mouse_id} on {trainer_state.stage.name} ",
                                                         extra={'tags': [self.warning_log_tag]})
 
+            # update gui
             self.update_model_widgets()
             self.on_curriculum.setVisible(True)
             self.label_curriculum_stage.setText(trainer_state.stage.name)
@@ -749,7 +750,6 @@ class Window(QMainWindow):
         except Exception as e:
             logging.error(str(e), extra={'tags': [self.warning_log_tag]})
             self.Load.setEnabled(True)
-
 
     def create_curriculum(self, mouse_id) -> tuple[DynamicForagingTrainerState or None,
                                                    SlimsBehaviorSession or None,
@@ -1021,6 +1021,8 @@ class Window(QMainWindow):
                 ts, *args = self.slims_handler.load_mouse_curriculum(self.session_model.subject)
                 ts.stage.task = self.task_logic
                 self.slims_handler.update_loaded_session_attachments("TrainerState", ts.model_dump_json())
+
+            logging.info("Successfully updated attachments")
 
         except KeyError as e:
             logging.error(f"Error updating mouse {self.session_model.subject} session in slims: {e}")
@@ -3604,9 +3606,9 @@ class Window(QMainWindow):
                     self.Start.setChecked(False)
                     return
 
-            # if mouse is loaded, update attachments with what actually ran
-            # if self.slims_handler.loaded_slims_session:
-            #     Thread(target=self.update_curriculum_attachments).start()
+            #   if mouse is loaded, update attachments with what actually ran
+            if self.slims_handler.loaded_slims_session:
+                Thread(target=self.update_curriculum_attachments).start()
 
             # set the load tag to zero
             self.load_tag = 0
