@@ -1559,7 +1559,7 @@ class Window(QMainWindow):
         
             # Find the correct week on the schedule
             dividers = schedule[[isinstance(x,str)and('/' in x) for x in schedule['Mouse ID'].values]]
-            today = datetime.now().strftime('%-m/%-d/%Y')
+            today = datetime.now().strftime('%m/%d/%Y')
    
             # Multiple weeks on the schedule 
             if len(dividers) > 1:
