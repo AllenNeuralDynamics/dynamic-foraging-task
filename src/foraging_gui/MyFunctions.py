@@ -153,7 +153,25 @@ class GenerateTrials():
             "TP_laser_2_target": []
             }
         self.selected_condition = None
+
+        # define settings that will be used if warmup is on
         self.warmup_on = self.task_logic.task_parameters.warmup is not None
+        self.warmup_settings = {
+            # reward_probability
+            "base_reward_sum": 1,
+            "reward_family": 3,
+            "pairs_n": 1,
+            # block_parameters
+            "block_beta": 1,
+            "block_min": 1,
+            "block_max": 1,
+            # auto_water
+            "auto_water_type": "Natural",
+            "multiplier": 0.8,
+            "unrewarded": 0,
+            "ignored": 0,
+        }
+
         # get all of the training parameters of the current trial
         self._GetTrainingParameters(self.win)
 
@@ -403,11 +421,21 @@ class GenerateTrials():
 
     def _generate_next_coupled_block(self):
         '''Generate the next block reward probability and block length (coupled task only)'''
+
+        # if warmup is on, warmup_settings will be used instead
         tp = self.task_logic.task_parameters
+        warm_set = self.warmup_settings
+        base_reward_sum = warm_set["base_reward_sum"] if self.warmup_on else tp.reward_probability.base_reward_sum
+        family = warm_set["reward_family"] if self.warmup_on else tp.reward_probability.family
+        pairs_n = warm_set["pairs_n"] if self.warmup_on else tp.reward_probability.pairs_n
+        block_min = warm_set["block_min"] if self.warmup_on else tp.block_parameters.min
+        block_max = warm_set["block_max"] if self.warmup_on else tp.block_parameters.max
+        block_beta = warm_set["block_beta"] if self.warmup_on else tp.block_parameters.beta
+
         # determine the reward probability of the next trial based on tasks
-        self.RewardPairs = self.B_RewardFamilies[tp.reward_probability.family - 1][:tp.reward_probability.pairs_n]
+        self.RewardPairs = self.B_RewardFamilies[family - 1][:pairs_n]
         self.RewardProb = np.array(self.RewardPairs) / np.expand_dims(np.sum(self.RewardPairs, axis=1),
-                                                                      axis=1) * tp.reward_probability.base_reward_sum
+                                                                      axis=1) * base_reward_sum
         # get the reward probabilities pool
         RewardProbPool = np.append(self.RewardProb, np.fliplr(self.RewardProb), axis=0)
         if self.B_RewardProHistory.size != 0:
@@ -422,12 +450,12 @@ class GenerateTrials():
         # get the reward probabilities of the current block
         self.B_CurrentRewardProb = RewardProbPool[random.choice(range(np.shape(RewardProbPool)[0]))]
         # randomly draw a block length between Min and Max
-        if tp.randomness == 'Exponential':
-            self.BlockLen = np.array(int(np.random.exponential(tp.block_parameters.beta, 1) + tp.block_parameters.min))
-        elif tp.randomness == 'Even':
-            self.BlockLen = np.array(np.random.randint(tp.block_parameters.min, tp.block_parameters.max + 1))
-        if self.BlockLen > tp.block_parameters.max:
-            self.BlockLen = tp.block_parameters.max
+        if self.task_logic.task_parameters.randomness == 'Exponential':
+            self.BlockLen = np.array(int(np.random.exponential(block_beta, 1) + block_min))
+        elif self.task_logic.task_parameters.randomness == 'Even':
+            self.BlockLen = np.array(np.random.randint(block_min, block_beta + 1))
+        if self.BlockLen > block_max:
+            self.BlockLen = block_max
         for i in range(len(self.B_ANewBlock)):
             self.BlockLenHistory[i].append(self.BlockLen)
         self.B_ANewBlock = np.array([0, 0])
@@ -520,7 +548,7 @@ class GenerateTrials():
 
     def _check_advanced_block_switch(self):
         '''Check if we can switch to a different block'''
-        if self.task_logic.task_parameters.auto_block is None:
+        if self.task_logic.task_parameters.auto_block is None or self.warmup_on:    # skip if warmup
             self.AdvancedBlockSwitchPermitted = 1
             return
         kernel_size = 2
@@ -1400,9 +1428,13 @@ class GenerateTrials():
 
     def _CheckAutoWater(self):
         '''Check if it should be an auto water trial'''
-        if self.task_logic.task_parameters.auto_water is not None:
-            UnrewardedN = self.task_logic.task_parameters.auto_water.unrewarded
-            IgnoredN = self.task_logic.task_parameters.auto_water.ignored
+
+
+        if self.task_logic.task_parameters.auto_water is not None or self.warmup_on:
+            UnrewardedN = self.warmup_settings["unrewarded"] if self.warmup_on else \
+                self.task_logic.task_parameters.auto_water.unrewarded
+            IgnoredN = self.warmup_settings["ignored"] if self.warmup_on else \
+                self.task_logic.task_parameters.auto_water.ignored
             if UnrewardedN <= 0:
                 self.CurrentAutoReward = 1
                 logging.warning(f'Auto water because unrewarded trials exceed: {UnrewardedN}',
@@ -1613,7 +1645,7 @@ class GenerateTrials():
         # determine auto water
         if self.CurrentAutoReward == 1:
             self.CurrentAutoRewardTrial = [0, 0]
-            if self.task_logic.task_parameters.auto_water.auto_water_type == 'Natural':
+            if self.task_logic.task_parameters.auto_water.auto_water_type == 'Natural' or self.warmup_on:
                 for i in range(len(self.CurrentBait)):
                     if self.CurrentBait[i] == True:
                         self.CurrentAutoRewardTrial[i] = 1
@@ -1797,8 +1829,10 @@ class GenerateTrials():
             self._SimulateResponse()
             return
         # set the valve time of auto water
-        multiplier = 1 if self.task_logic.task_parameters.auto_water is None else \
-            self.task_logic.task_parameters.auto_water.multiplier
+        tp = self.task_logic.task_parameters
+        multiplier = self.warmup_settings["multiplier"] if self.task_logic.task_parameters.auto_water is None or \
+                                                           self.warmup_on else tp.auto_water.multiplier
+
         if self.CurrentAutoRewardTrial[0] == 1:
             self._set_valve_time_left(Channel3, float(self.win.left_valve_open_time), multiplier)
         if self.CurrentAutoRewardTrial[1] == 1:
@@ -1947,16 +1981,24 @@ class GenerateTrials():
 
     def _GiveLeft(self, channel3):
         '''manually give left water'''
+
+        tp = self.task_logic.task_parameters
+        multiplier = self.warmup_settings["multiplier"] if self.task_logic.task_parameters.auto_water is None or \
+                                                            self.warmup_on else tp.auto_water.multiplier
         channel3.LeftValue1(
-            float(self.win.left_valve_open_time * 1000 * self.task_logic.task_parameters.auto_water.multiplier))
+            float(self.win.left_valve_open_time * 1000 * multiplier))
         time.sleep(0.01)
         channel3.ManualWater_Left(int(1))
         channel3.LeftValue1(float(self.win.left_valve_open_time * 1000))
 
     def _GiveRight(self, channel3):
         '''manually give right water'''
+
+        tp = self.task_logic.task_parameters
+        multiplier = self.warmup_settings["multiplier"] if self.task_logic.task_parameters.auto_water is None or \
+                                                            self.warmup_on else tp.auto_water.multiplier
         channel3.RightValue1(
-            float(self.win.right_valve_open_time * 1000 * self.task_logic.task_parameters.auto_water.multiplier))
+            float(self.win.right_valve_open_time * 1000 * multiplier))
         time.sleep(0.01)
         channel3.ManualWater_Right(int(1))
         channel3.RightValue1(float(self.win.right_valve_open_time * 1000))
@@ -2061,8 +2103,11 @@ class GenerateTrials():
         self.Obj["RightValue"].append(self.win.right_valve_open_time)
         self.Obj["TP_LeftValue"].append(self.win.left_valve_open_time)
         self.Obj["TP_RightValue"].append(self.win.right_valve_open_time)
-        self.Obj["multipliers"].append(.8 if self.task_logic.task_parameters.auto_water is None
-                                       else self.task_logic.task_parameters.auto_water.multiplier)
+
+        tp = self.task_logic.task_parameters
+        multiplier = self.warmup_settings["multiplier"] if self.task_logic.task_parameters.auto_water is None or \
+                                                           self.warmup_on else tp.auto_water.multiplier
+        self.Obj["multipliers"].append(multiplier)
 
         # add opto parameters
         self.Obj["TP_Laser_calibration"].append(self.win.Opto_dialog.Laser_calibration.currentText())
