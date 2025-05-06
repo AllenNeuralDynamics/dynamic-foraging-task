@@ -6185,6 +6185,62 @@ class Window(QMainWindow):
             except Exception:
                 logging.error(traceback.format_exc())
 
+    def photometry_workflow_running(self) -> bool or None:
+        """
+        If fiber photometery is configured for session, check if work flow is running
+
+        :returns: boolean indicating if workflow is running or not. If None, fip is not configured
+        """
+
+        if self.PhotometryB.currentText() == "on" and (
+                not self.FIP_started
+        ):
+            reply = QMessageBox.critical(
+                self,
+                "Box {}, Start".format(self.box_letter),
+                'Photometry is set to "on", but the FIP workflow has not been started',
+                QMessageBox.Ok,
+            )
+
+            logging.info(
+                "Cannot start session without starting FIP workflow"
+            )
+            return False
+
+        # Check if photometry excitation is running or not
+        if self.PhotometryB.currentText() == "on" and not self.StartExcitation.isChecked():
+            logging.warning('photometry is set to "on", but excitation is not running')
+
+            reply = QMessageBox.question(
+                self,
+                "Box {}, Start".format(self.box_letter),
+                'Photometry is set to "on", but excitation is not running. Start excitation now?',
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes,
+            )
+            if reply == QMessageBox.Yes:
+                self.StartExcitation.setChecked(True)
+                logging.info("User selected to start excitation")
+                started = self._StartExcitation()
+                if started == 0:
+                    reply = QMessageBox.critical(
+                        self,
+                        "Box {}, Start".format(self.box_letter),
+                        "Could not start excitation, therefore cannot start the session",
+                        QMessageBox.Ok,
+                    )
+                    logging.info(
+                        "could not start session, due to failure to start excitation"
+                    )
+                    self.Start.setChecked(False)
+                    return False
+            else:
+                logging.info("User selected not to start excitation")
+                self.Start.setChecked(False)
+                return False
+
+        return True
+
     def session_end_tasks(self):
         """
         Data cleanup and saving that needs to be done at end of session.
@@ -6995,7 +7051,7 @@ class Window(QMainWindow):
                 "capsule_id": capsule_id,
                 "mount": mount,
                 "destination": "//allen/aind/scratch/dynamic_foraging_rig_transfer",
-                "s3_bucket": "private",
+                "s3_bucket": "public",
                 "processor_full_name": "AIND Behavior Team",
                 "modalities": modalities,
                 "schemas": [
