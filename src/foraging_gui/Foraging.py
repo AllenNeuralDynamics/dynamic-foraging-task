@@ -6207,7 +6207,7 @@ class Window(QMainWindow):
                 self.Start.setChecked(False)
                 return False
 
-            return True
+        return True
 
     def session_end_tasks(self):
         """
