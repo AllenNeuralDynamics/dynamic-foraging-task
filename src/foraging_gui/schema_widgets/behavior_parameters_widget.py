@@ -1,12 +1,19 @@
 from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
-    AindDynamicForagingTaskLogic, AindDynamicForagingTaskParameters, AutoBlock,
-    AutoWater, RewardN, Warmup)
+    AindDynamicForagingTaskLogic,
+    AindDynamicForagingTaskParameters,
+    AutoBlock,
+    AutoWater,
+    RewardN,
+    Warmup,
+)
 from pydantic import BaseModel
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QCheckBox
 
-from foraging_gui.schema_widgets.schema_widget_base import (SchemaWidgetBase,
-                                                            add_border)
+from foraging_gui.schema_widgets.schema_widget_base import (
+    SchemaWidgetBase,
+    add_border,
+)
 
 
 class BehaviorParametersWidget(SchemaWidgetBase):
@@ -39,17 +46,17 @@ class BehaviorParametersWidget(SchemaWidgetBase):
         getattr(self, "reward_probability.family_widget").valueChanged.connect(
             self.update_reward_family
         )
-        getattr(self, "reward_probability.pairs_n_widget").valueChanged.connect(
-            self.update_reward_family
-        )
+        getattr(
+            self, "reward_probability.pairs_n_widget"
+        ).valueChanged.connect(self.update_reward_family)
 
         # emit signal if reward volume changes
-        getattr(self, "reward_size.right_value_volume_widget").valueChanged.connect(
-            lambda: self.volumeChanged.emit("Right")
-        )
-        getattr(self, "reward_size.left_value_volume_widget").valueChanged.connect(
-            lambda: self.volumeChanged.emit("Left")
-        )
+        getattr(
+            self, "reward_size.right_value_volume_widget"
+        ).valueChanged.connect(lambda: self.volumeChanged.emit("Right"))
+        getattr(
+            self, "reward_size.left_value_volume_widget"
+        ).valueChanged.connect(lambda: self.volumeChanged.emit("Left"))
 
         # hide or show auto_water
         widget = self.auto_water_widget
@@ -73,7 +80,9 @@ class BehaviorParametersWidget(SchemaWidgetBase):
         widget = self.uncoupled_reward_widget
         self.uncoupled_reward_check_box = QCheckBox()
         self.uncoupled_reward_check_box.toggled.connect(
-            lambda s: self.toggle_optional_field("uncoupled_reward", s, [0.1, 0.3, 0.7])
+            lambda s: self.toggle_optional_field(
+                "uncoupled_reward", s, [0.1, 0.3, 0.7]
+            )
         )
         self.uncoupled_reward_check_box.setChecked(False)
         self.uncoupled_reward_check_box.toggled.emit(False)
@@ -93,7 +102,9 @@ class BehaviorParametersWidget(SchemaWidgetBase):
         widget = self.reward_n_widget
         self.reward_n_check_box = QCheckBox()
         self.reward_n_check_box.toggled.connect(
-            lambda state: self.toggle_optional_field("reward_n", state, RewardN())
+            lambda state: self.toggle_optional_field(
+                "reward_n", state, RewardN()
+            )
         )
         widget.parent().layout().insertWidget(0, self.reward_n_check_box)
         self.reward_n_check_box.setChecked(False)
@@ -185,7 +196,11 @@ class BehaviorParametersWidget(SchemaWidgetBase):
         ):  # not a dictionary or list like value
             self._set_widget_text(name, value)
         elif dict in type(value).__mro__ or BaseModel in type(value).__mro__:
-            value = value.model_dump() if BaseModel in type(value).__mro__ else value
+            value = (
+                value.model_dump()
+                if BaseModel in type(value).__mro__
+                else value
+            )
             for k, v in value.items():  # multiple widgets to set values for
                 self.update_field_widget(f"{name}.{k}")
         else:  # update list
@@ -220,7 +235,9 @@ if __name__ == "__main__":
         [[6, 1], [3, 1], [1, 1]],
     ]
 
-    task_widget = BehaviorParametersWidget(task_model.task_parameters, reward_families)
+    task_widget = BehaviorParametersWidget(
+        task_model.task_parameters, reward_families
+    )
     # task_widget.ValueChangedInside.connect(lambda name: print(task_model))
     # task_widget.taskUpdated.connect(print)
     task_widget.show()

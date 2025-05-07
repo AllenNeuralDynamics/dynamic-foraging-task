@@ -4,8 +4,10 @@ from aind_behavior_services.session import AindBehaviorSessionModel
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QLabel, QTextEdit
 
-from foraging_gui.schema_widgets.schema_widget_base import (SchemaWidgetBase,
-                                                            create_widget)
+from foraging_gui.schema_widgets.schema_widget_base import (
+    SchemaWidgetBase,
+    create_widget,
+)
 
 
 class SessionParametersWidget(SchemaWidgetBase):
@@ -30,7 +32,9 @@ class SessionParametersWidget(SchemaWidgetBase):
 
         # change notes to QTextEdit
         self.notes_widget = QTextEdit()
-        self.notes_widget.textChanged.connect(lambda: self.text_edit_changed("notes"))
+        self.notes_widget.textChanged.connect(
+            lambda: self.text_edit_changed("notes")
+        )
         self.schema_fields_widgets["notes"].deleteLater()
         self.schema_fields_widgets["notes"] = create_widget(
             "V", QLabel("Notes:"), self.notes_widget

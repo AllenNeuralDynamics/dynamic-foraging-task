@@ -6,8 +6,13 @@ from random import randint
 from time import sleep
 
 from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import (QApplication, QLabel, QScrollArea, QVBoxLayout,
-                             QWidget)
+from PyQt5.QtWidgets import (
+    QApplication,
+    QLabel,
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class WarningWidget(QWidget):
@@ -33,7 +38,9 @@ class WarningWidget(QWidget):
 
         super().__init__(*args, **kwargs)
 
-        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+        self.logger = logging.getLogger(
+            f"{__name__}.{self.__class__.__name__}"
+        )
 
         # set color for labels
         self._warning_color = warning_color
@@ -49,12 +56,16 @@ class WarningWidget(QWidget):
         queue_handler.setLevel(log_level)
         queue_handler.addFilter(WarningFilter(log_tag))  # add filter
         queue_handler.setFormatter(
-            logging.Formatter(fmt="%(asctime)s: %(message)s", datefmt="%I:%M:%S %p")
+            logging.Formatter(
+                fmt="%(asctime)s: %(message)s", datefmt="%I:%M:%S %p"
+            )
         )
         self.logger.root.addHandler(queue_handler)
 
         # create QTimer to periodically check queue
-        self.check_timer = QTimer(timeout=self.check_warning_queue, interval=1000)
+        self.check_timer = QTimer(
+            timeout=self.check_warning_queue, interval=1000
+        )
         self.check_timer.start()
 
     def check_warning_queue(self) -> None:
@@ -153,7 +164,9 @@ if __name__ == "__main__":
     stream_handler.setLevel("INFO")
     log_format = "%(asctime)s:%(levelname)s:%(module)s:%(filename)s:%(funcName)s:line %(lineno)d:%(message)s"
     log_datefmt = "%I:%M:%S %p"
-    stream_handler.setFormatter(logging.Formatter(fmt=log_format, datefmt=log_datefmt))
+    stream_handler.setFormatter(
+        logging.Formatter(fmt=log_format, datefmt=log_datefmt)
+    )
     logger.root.addHandler(stream_handler)
 
     scroll = QScrollArea()

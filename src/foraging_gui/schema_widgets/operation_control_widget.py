@@ -1,5 +1,6 @@
-from aind_behavior_dynamic_foraging.DataSchemas.operation_control import \
-    OperationalControl
+from aind_behavior_dynamic_foraging.DataSchemas.operation_control import (
+    OperationalControl,
+)
 
 from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase
 

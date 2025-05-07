@@ -1,16 +1,29 @@
 import unittest
 from datetime import datetime
-from test.resources.old_generate_trials import \
-    GenerateTrials as OldGenerateTrials
+from test.resources.old_generate_trials import (
+    GenerateTrials as OldGenerateTrials,
+)
 from unittest.mock import MagicMock
 
 import numpy as np
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
-    ConstantProtocol, IntervalConditions, LaserColorOne, LocationOne,
-    LocationTwo, Optogenetics, PulseProtocol, SessionControl, SineProtocol)
+    ConstantProtocol,
+    IntervalConditions,
+    LaserColorOne,
+    LocationOne,
+    LocationTwo,
+    Optogenetics,
+    PulseProtocol,
+    SessionControl,
+    SineProtocol,
+)
 from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
-    AindDynamicForagingTaskLogic, AindDynamicForagingTaskParameters, AutoBlock,
-    AutoWater, Warmup)
+    AindDynamicForagingTaskLogic,
+    AindDynamicForagingTaskParameters,
+    AutoBlock,
+    AutoWater,
+    Warmup,
+)
 from aind_behavior_services.session import AindBehaviorSessionModel
 
 from src.foraging_gui.MyFunctions import GenerateTrials
@@ -56,7 +69,9 @@ class TestOptogeneticLogic(unittest.TestCase):
             duration=5.0,
             condition_probability=1,
             pulse_condition="Right choice",
-            start=IntervalConditions(interval_condition="Trial start", offset=0),
+            start=IntervalConditions(
+                interval_condition="Trial start", offset=0
+            ),
             end=None,
             protocol=SineProtocol(frequency=40, ramp_down=1),
         )
@@ -283,7 +298,9 @@ class TestOptogeneticLogic(unittest.TestCase):
             duration=5.0,
             condition_probability=1,
             pulse_condition="Right choice",
-            start=IntervalConditions(interval_condition="Trial start", offset=0),
+            start=IntervalConditions(
+                interval_condition="Trial start", offset=0
+            ),
             end=None,
             protocol=PulseProtocol(frequency=40, duration=0.002),
         )
@@ -509,7 +526,9 @@ class TestOptogeneticLogic(unittest.TestCase):
             duration=5.0,
             condition_probability=1,
             pulse_condition="Right choice",
-            start=IntervalConditions(interval_condition="Trial start", offset=0),
+            start=IntervalConditions(
+                interval_condition="Trial start", offset=0
+            ),
             end=None,
             protocol=ConstantProtocol(ramp_down=1),
         )

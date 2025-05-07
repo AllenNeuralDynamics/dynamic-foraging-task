@@ -7,14 +7,19 @@ from typing import TypedDict
 from aind_behavior_curriculum import Curriculum, Trainer
 from aind_behavior_dynamic_foraging import AindDynamicForagingTaskLogic
 from aind_behavior_dynamic_foraging.CurriculumManager.trainer import (
-    DynamicForagingMetrics, DynamicForagingTrainerServer,
-    DynamicForagingTrainerState)
-from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import \
-    FiberPhotometry
-from aind_behavior_dynamic_foraging.DataSchemas.operation_control import \
-    OperationalControl
-from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import \
-    Optogenetics
+    DynamicForagingMetrics,
+    DynamicForagingTrainerServer,
+    DynamicForagingTrainerState,
+)
+from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
+    FiberPhotometry,
+)
+from aind_behavior_dynamic_foraging.DataSchemas.operation_control import (
+    OperationalControl,
+)
+from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
+    Optogenetics,
+)
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_data_schema.core.session import Session
 from aind_slims_api import SlimsClient, models
@@ -46,7 +51,9 @@ class LoadedMouseSlimsHandler:
         # connect to Slims
         try:
             self.slims_client = self.connect_to_slims(username, password)
-            self.trainer = DynamicForagingTrainerServer(slims_client=self.slims_client)
+            self.trainer = DynamicForagingTrainerServer(
+                slims_client=self.slims_client
+            )
         except Exception as e:
             self.slims_client = None
             self.trainer = None
@@ -93,8 +100,12 @@ class LoadedMouseSlimsHandler:
         try:
             self.log.info("Attempting to connect to Slims")
             slims_client = SlimsClient(
-                username=username if username else os.environ["SLIMS_USERNAME"],
-                password=password if password else os.environ["SLIMS_PASSWORD"],
+                username=(
+                    username if username else os.environ["SLIMS_USERNAME"]
+                ),
+                password=(
+                    password if password else os.environ["SLIMS_PASSWORD"]
+                ),
             )
         except KeyError as e:
             raise KeyError(
@@ -103,7 +114,9 @@ class LoadedMouseSlimsHandler:
             )
 
         try:
-            slims_client.fetch_model(models.SlimsMouseContent, barcode="00000000")
+            slims_client.fetch_model(
+                models.SlimsMouseContent, barcode="00000000"
+            )
         except Exception:
             return
             # if 'Status 401 – Unauthorized' in str(e):  # catch error if username and password are incorrect
@@ -146,19 +159,27 @@ class LoadedMouseSlimsHandler:
                     raise e
 
             # extract water information
-            self.log.info("Extracting water information from first stimulus epoch")
-            water_json = session.stimulus_epochs[0].output_parameters.water.items()
+            self.log.info(
+                "Extracting water information from first stimulus epoch"
+            )
+            water_json = session.stimulus_epochs[
+                0
+            ].output_parameters.water.items()
             water = {
                 k: v if not (isinstance(v, float) and math.isnan(v)) else None
                 for k, v in water_json
             }
 
             # extract software information
-            self.log.info("Extracting software information from first data stream")
+            self.log.info(
+                "Extracting software information from first data stream"
+            )
             software = session.stimulus_epochs[0].software[0]
 
             # create model
-            self.log.info("Creating SlimsWaterlogResult based on session information.")
+            self.log.info(
+                "Creating SlimsWaterlogResult based on session information."
+            )
             model = models.SlimsWaterlogResult(
                 mouse_pk=mouse.pk,
                 date=session.session_start_time,
@@ -172,11 +193,15 @@ class LoadedMouseSlimsHandler:
                 workstation=session.rig_id,
                 sw_source=software.url,
                 sw_version=software.version,
-                test_pk=self.slims_client.fetch_pk("Test", test_name="test_waterlog"),
+                test_pk=self.slims_client.fetch_pk(
+                    "Test", test_name="test_waterlog"
+                ),
             )
 
             # check if mouse already has waterlog for at session time and if, so update model
-            self.log.info(f"Fetching previous waterlog for mouse {session.subject_id}")
+            self.log.info(
+                f"Fetching previous waterlog for mouse {session.subject_id}"
+            )
             waterlog = self.slims_client.fetch_models(
                 models.SlimsWaterlogResult, mouse_pk=mouse.pk, start=0, end=1
             )
@@ -240,7 +265,9 @@ class LoadedMouseSlimsHandler:
                 self._loaded_slims_session,
             ) = self.trainer.load_data(mouse_id)
 
-            if self.curriculum is None:  # no curriculum in slims for this mouse
+            if (
+                self.curriculum is None
+            ):  # no curriculum in slims for this mouse
                 self.log.info(f"No curriculum in slims for mouse {mouse_id}")
                 return None, None, None, None, None, None, None, None
 
@@ -259,7 +286,9 @@ class LoadedMouseSlimsHandler:
             )
 
             # update operation_control model
-            oc_att = attachments[attachment_names.index(OperationalControl.__name__)]
+            oc_att = attachments[
+                attachment_names.index(OperationalControl.__name__)
+            ]
             oc = OperationalControl(
                 **self.slims_client.fetch_attachment_content(oc_att).json()
             )
@@ -270,7 +299,9 @@ class LoadedMouseSlimsHandler:
                     attachment_names.index(Optogenetics.__name__)
                 ]
                 opto_model = Optogenetics(
-                    **self.slims_client.fetch_attachment_content(opto_attachment).json()
+                    **self.slims_client.fetch_attachment_content(
+                        opto_attachment
+                    ).json()
                 )
             else:
                 opto_model = None
@@ -282,7 +313,9 @@ class LoadedMouseSlimsHandler:
                     attachment_names.index(FiberPhotometry.__name__)
                 ]
                 fip_model = FiberPhotometry(
-                    **self.slims_client.fetch_attachment_content(fip_attachment).json()
+                    **self.slims_client.fetch_attachment_content(
+                        fip_attachment
+                    ).json()
                 )
             else:
                 fip_model = None
@@ -377,15 +410,19 @@ class LoadedMouseSlimsHandler:
         :returns trainer state of next session
         """
 
-        if self.metrics is not None and self.slims_client is not None:  # loaded mouse
+        if (
+            self.metrics is not None and self.slims_client is not None
+        ):  # loaded mouse
             # add current session to metrics
             self.log.info("Constructing new metrics.")
             new_metrics = DynamicForagingMetrics(
                 foraging_efficiency=self.metrics.foraging_efficiency
                 + [foraging_efficiency],
-                finished_trials=self.metrics.finished_trials + [finished_trials],
+                finished_trials=self.metrics.finished_trials
+                + [finished_trials],
                 session_total=self.metrics.session_total + 1,
-                session_at_current_stage=self.metrics.session_at_current_stage + 1,
+                session_at_current_stage=self.metrics.session_at_current_stage
+                + 1,
             )
 
             if self._loaded_slims_session.is_curriculum_suggestion:
@@ -462,14 +499,18 @@ class LoadedMouseSlimsHandler:
             attachments = self.slims_client.db.slims_api.get_entities(
                 f"attachment/{fetched._slims_table}/{fetched.pk}"
             )
-            attachment_names = [attach.attm_name.value for attach in attachments]
+            attachment_names = [
+                attach.attm_name.value for attach in attachments
+            ]
 
             if attachment_name in attachment_names:
                 # delete attachment since we can't delete
                 attachments[attachment_names.index(attachment_name)].remove()
 
             # re-add with new content
-            action = "Updating" if attachment_name in attachment_names else "Adding"
+            action = (
+                "Updating" if attachment_name in attachment_names else "Adding"
+            )
             self.log.info(f"{action} attachment {attachment_name} to session.")
             self.slims_client.add_attachment_content(
                 record=fetched, name=attachment_name, content=serialized_json
@@ -485,7 +526,9 @@ class LoadedMouseSlimsHandler:
 
         if self.loaded_slims_session and self.slims_client is not None:
             self._loaded_slims_session.is_curriculum_suggestion = False
-            self.log.info(f"Session for mouse {self.loaded_mouse_id} is off curriculum")
+            self.log.info(
+                f"Session for mouse {self.loaded_mouse_id} is off curriculum"
+            )
         else:
             self.log.info("No session loaded.")
 

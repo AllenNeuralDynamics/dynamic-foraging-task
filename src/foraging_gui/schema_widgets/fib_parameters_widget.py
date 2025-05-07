@@ -1,5 +1,6 @@
-from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import \
-    FiberPhotometry
+from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
+    FiberPhotometry,
+)
 
 from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase
 

@@ -2,8 +2,9 @@ import logging
 
 import numpy as np
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import LaserColors
-from matplotlib.backends.backend_qt5agg import \
-    FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import (
+    FigureCanvasQTAgg as FigureCanvas,
+)
 from matplotlib.figure import Figure
 from matplotlib.gridspec import GridSpec
 from scipy import stats
@@ -11,11 +12,24 @@ from scipy import stats
 
 class PlotV(FigureCanvas):
     def __init__(
-        self, win, GeneratedTrials=None, parent=None, dpi=100, width=5, height=4
+        self,
+        win,
+        GeneratedTrials=None,
+        parent=None,
+        dpi=100,
+        width=5,
+        height=4,
     ):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         gs = GridSpec(
-            10, 30, wspace=3, hspace=0.1, bottom=0.1, top=0.95, left=0.04, right=0.98
+            10,
+            30,
+            wspace=3,
+            hspace=0.1,
+            bottom=0.1,
+            top=0.95,
+            left=0.04,
+            right=0.98,
         )
 
         self.ax1 = self.fig.add_subplot(gs[0:6, 0:26])
@@ -74,30 +88,42 @@ class PlotV(FigureCanvas):
         self.B_EarnedRightWaterStartTime = (
             GeneratedTrials.B_EarnedRightWaterStartTime.copy()
         )
-        self.B_AutoLeftWaterStartTime = GeneratedTrials.B_AutoLeftWaterStartTime.copy()
+        self.B_AutoLeftWaterStartTime = (
+            GeneratedTrials.B_AutoLeftWaterStartTime.copy()
+        )
         self.B_AutoRightWaterStartTime = (
             GeneratedTrials.B_AutoRightWaterStartTime.copy()
         )
-        self.B_SelectedCondition = np.array(GeneratedTrials.B_SelectedCondition)
+        self.B_SelectedCondition = np.array(
+            GeneratedTrials.B_SelectedCondition
+        )
         if self.B_CurrentTrialN > 0:
-            self.B_Time = self.B_RewardOutcomeTime - GeneratedTrials.B_TrialStartTime[0]
+            self.B_Time = (
+                self.B_RewardOutcomeTime - GeneratedTrials.B_TrialStartTime[0]
+            )
             self.B_ManualLeftWaterStartTime = (
-                self.B_ManualLeftWaterStartTime - GeneratedTrials.B_TrialStartTime[0]
+                self.B_ManualLeftWaterStartTime
+                - GeneratedTrials.B_TrialStartTime[0]
             )
             self.B_ManualRightWaterStartTime = (
-                self.B_ManualRightWaterStartTime - GeneratedTrials.B_TrialStartTime[0]
+                self.B_ManualRightWaterStartTime
+                - GeneratedTrials.B_TrialStartTime[0]
             )
             self.B_EarnedLeftWaterStartTime = (
-                self.B_EarnedLeftWaterStartTime - GeneratedTrials.B_TrialStartTime[0]
+                self.B_EarnedLeftWaterStartTime
+                - GeneratedTrials.B_TrialStartTime[0]
             )
             self.B_EarnedRightWaterStartTime = (
-                self.B_EarnedRightWaterStartTime - GeneratedTrials.B_TrialStartTime[0]
+                self.B_EarnedRightWaterStartTime
+                - GeneratedTrials.B_TrialStartTime[0]
             )
             self.B_AutoLeftWaterStartTime = (
-                self.B_AutoLeftWaterStartTime - GeneratedTrials.B_TrialStartTime[0]
+                self.B_AutoLeftWaterStartTime
+                - GeneratedTrials.B_TrialStartTime[0]
             )
             self.B_AutoRightWaterStartTime = (
-                self.B_AutoRightWaterStartTime - GeneratedTrials.B_TrialStartTime[0]
+                self.B_AutoRightWaterStartTime
+                - GeneratedTrials.B_TrialStartTime[0]
             )
         else:
             self.B_Time = self.B_RewardOutcomeTime
@@ -146,7 +172,9 @@ class PlotV(FigureCanvas):
             label="p_R",
             alpha=1,
         )
-        Fraction = self.B_RewardProHistory[1] / self.B_RewardProHistory.sum(axis=0)
+        Fraction = self.B_RewardProHistory[1] / self.B_RewardProHistory.sum(
+            axis=0
+        )
         self.ax2.plot(
             self.B_Time,
             Fraction[0:Len],
@@ -162,15 +190,30 @@ class PlotV(FigureCanvas):
 
         # Colors for different optogenetics conditions
         color_mapping = {
-            "ConditionLaserColorOne": (0, 191 / 255, 255 / 255, 1),  # Deep Sky Blue
-            "ConditionLaserColorTwo": (255 / 255, 127 / 255, 80 / 255, 1),  # Coral Red
+            "ConditionLaserColorOne": (
+                0,
+                191 / 255,
+                255 / 255,
+                1,
+            ),  # Deep Sky Blue
+            "ConditionLaserColorTwo": (
+                255 / 255,
+                127 / 255,
+                80 / 255,
+                1,
+            ),  # Coral Red
             "ConditionLaserColorThree": (
                 34 / 255,
                 139 / 255,
                 34 / 255,
                 1,
             ),  # Forest Green
-            "ConditionLaserColorFour": (218 / 255, 165 / 255, 32 / 255, 1),  # Goldenrod
+            "ConditionLaserColorFour": (
+                218 / 255,
+                165 / 255,
+                32 / 255,
+                1,
+            ),  # Goldenrod
             "ConditionLaserColorFive": (255 / 255, 0 / 255, 0 / 255, 1),  # Red
             "ConditionLaserColorSix": (0 / 255, 0 / 255, 255 / 255, 1),  # Blue
         }
@@ -178,22 +221,26 @@ class PlotV(FigureCanvas):
         # Define trial types
         LeftChoice_Rewarded = np.where(
             np.logical_and(
-                self.B_AnimalResponseHistory == 0, self.B_RewardedHistory[0] == True
+                self.B_AnimalResponseHistory == 0,
+                self.B_RewardedHistory[0] == True,
             )
         )
         LeftChoice_UnRewarded = np.where(
             np.logical_and(
-                self.B_AnimalResponseHistory == 0, self.B_RewardedHistory[0] == False
+                self.B_AnimalResponseHistory == 0,
+                self.B_RewardedHistory[0] == False,
             )
         )
         RightChoice_Rewarded = np.where(
             np.logical_and(
-                self.B_AnimalResponseHistory == 1, self.B_RewardedHistory[1] == True
+                self.B_AnimalResponseHistory == 1,
+                self.B_RewardedHistory[1] == True,
             )
         )
         RightChoice_UnRewarded = np.where(
             np.logical_and(
-                self.B_AnimalResponseHistory == 1, self.B_RewardedHistory[1] == False
+                self.B_AnimalResponseHistory == 1,
+                self.B_RewardedHistory[1] == False,
             )
         )
 
@@ -219,14 +266,20 @@ class PlotV(FigureCanvas):
         RewardedHistoryT[NoReward] = np.nan
         RewardedHistoryF = RewardedHistoryT.copy()
         SuccessHistoryT = self.B_AnimalResponseHistory.copy()
-        SuccessHistoryT[np.logical_or(SuccessHistoryT == 1, SuccessHistoryT == 0)] = 1
+        SuccessHistoryT[
+            np.logical_or(SuccessHistoryT == 1, SuccessHistoryT == 0)
+        ] = 1
         SuccessHistoryT[SuccessHistoryT == 2] = 0
         SuccessHistoryF = SuccessHistoryT.copy()
 
         # running average of response fraction
         for i in range(len(self.B_AnimalResponseHistory)):
             if i >= self.kernel_size - 1:
-                if all(np.isnan(ResponseHistoryT[i + 1 - self.kernel_size : i + 1])):
+                if all(
+                    np.isnan(
+                        ResponseHistoryT[i + 1 - self.kernel_size : i + 1]
+                    )
+                ):
                     ResponseHistoryF[i + 1 - self.kernel_size] = np.nan
                     RewardedHistoryF[i + 1 - self.kernel_size] = np.nan
                     SuccessHistoryF[i + 1 - self.kernel_size] = np.nan
@@ -251,7 +304,9 @@ class PlotV(FigureCanvas):
             # plot the upcoming trial start time
             if self.B_CurrentTrialN > 0:
                 NewTrialStart = np.array(self.B_BTime[-1])
-                NewTrialStart2 = np.array(self.B_BTime[-1] + self.B_BTime[-1] / 40)
+                NewTrialStart2 = np.array(
+                    self.B_BTime[-1] + self.B_BTime[-1] / 40
+                )
             else:
                 NewTrialStart = np.array(self.B_BTime[-1] + 0.1)
                 NewTrialStart2 = np.array(self.B_BTime[-1])
@@ -283,7 +338,11 @@ class PlotV(FigureCanvas):
                 )
             if self.B_BaitHistory[1][-1] == True:
                 self.ax1.plot(
-                    NewTrialStart2, 1.2, "kD", markersize=self.MarkerSize, alpha=0.4
+                    NewTrialStart2,
+                    1.2,
+                    "kD",
+                    markersize=self.MarkerSize,
+                    alpha=0.4,
                 )
             if self.B_LaserOnTrial[-1] == 1:
                 current_color = color_mapping[
@@ -357,7 +416,10 @@ class PlotV(FigureCanvas):
         # backwards compatible for opening old behavior jsons
         non_none_conditions = (
             [x for x in self.B_SelectedCondition if x != 0]
-            if all(not isinstance(x, LaserColors) for x in self.B_SelectedCondition)
+            if all(
+                not isinstance(x, LaserColors)
+                for x in self.B_SelectedCondition
+            )
             else [
                 condition.name
                 for condition in self.B_SelectedCondition
@@ -368,7 +430,8 @@ class PlotV(FigureCanvas):
         for condition in condition_list:
             Optogenetics_On = np.where(
                 np.logical_and(
-                    self.B_LaserOnTrial[:-1] == 1, non_none_conditions == condition
+                    self.B_LaserOnTrial[:-1] == 1,
+                    non_none_conditions == condition,
                 )
             )
             if len(Optogenetics_On[0]) == 0:
@@ -475,7 +538,9 @@ class PlotV(FigureCanvas):
 
         if self.B_CurrentTrialN < 1:
             return
-        NumberOfDots = int((np.ptp(self.B_Time) - self.WindowSize) / self.StepSize)
+        NumberOfDots = int(
+            (np.ptp(self.B_Time) - self.WindowSize) / self.StepSize
+        )
         if NumberOfDots < 1:
             return
         choice_R_frac = np.empty(NumberOfDots)
@@ -486,7 +551,8 @@ class PlotV(FigureCanvas):
         WinStartN = np.min(self.B_Time)
         for idx in range(NumberOfDots):
             CuI = np.logical_and(
-                self.B_Time >= WinStartN, self.B_Time < WinStartN + self.WindowSize
+                self.B_Time >= WinStartN,
+                self.B_Time < WinStartN + self.WindowSize,
             )
             LeftChoiceN = sum(self.B_AnimalResponseHistory[CuI] == 0)
             RightChoiceN = sum(self.B_AnimalResponseHistory[CuI] == 1)
@@ -542,7 +608,14 @@ class PlotWaterCalibration(FigureCanvas):
     def __init__(self, water_win, dpi=100, width=5, height=4):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         gs = GridSpec(
-            10, 30, wspace=3, hspace=0.1, bottom=0.1, top=0.9, left=0.08, right=0.98
+            10,
+            30,
+            wspace=3,
+            hspace=0.1,
+            bottom=0.1,
+            top=0.9,
+            left=0.08,
+            right=0.98,
         )
         self.ax1 = self.fig.add_subplot(gs[0:9, 1:30])
         self.ax1.spines["right"].set_visible(False)
@@ -557,7 +630,9 @@ class PlotWaterCalibration(FigureCanvas):
         self.WaterCalibrationResults = self.water_win.WaterCalibrationResults
         current_item = self.water_win.showspecificcali.currentText()
         self.water_win.showspecificcali.clear()
-        sorted_dates = sorted(self.WaterCalibrationResults.keys(), reverse=True)
+        sorted_dates = sorted(
+            self.WaterCalibrationResults.keys(), reverse=True
+        )
         sorted_dates.insert(0, "NA")
         self.water_win.showspecificcali.addItems(sorted_dates)
         # remain the item unchanged
@@ -591,9 +666,11 @@ class PlotWaterCalibration(FigureCanvas):
                 break
             iterator += 1
             if (
-                "Left" in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()
+                "Left"
+                in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()
             ) or (
-                "Right" in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()
+                "Right"
+                in self.WaterCalibrationResults[sorted_dates[-iterator]].keys()
             ):
                 counter += 1
         all_dates = sorted_dates[-iterator:]
@@ -608,7 +685,9 @@ class PlotWaterCalibration(FigureCanvas):
             for current_valve in all_valves:
                 if current_valve in ["Left", "Right"]:
                     sorted_X, sorted_Y = self._GetWaterCalibration(
-                        self.WaterCalibrationResults, current_date, current_valve
+                        self.WaterCalibrationResults,
+                        current_date,
+                        current_valve,
                     )
                     if current_date in all_dates:
                         if current_valve == "Left":
@@ -647,7 +726,9 @@ class PlotWaterCalibration(FigureCanvas):
                     current_date in all_dates
                 ):
                     X, Y = self._GetWaterSpotCheck(
-                        self.WaterCalibrationResults, current_date, current_valve
+                        self.WaterCalibrationResults,
+                        current_date,
+                        current_valve,
                     )
                     for index, y in enumerate(Y):
                         x = X[index]
@@ -655,20 +736,32 @@ class PlotWaterCalibration(FigureCanvas):
                         if current_valve == "SpotLeft":
                             if FAILED:
                                 line = self.ax1.plot(
-                                    x, y, "x", label=current_date + "_spot left (FAIL)"
+                                    x,
+                                    y,
+                                    "x",
+                                    label=current_date + "_spot left (FAIL)",
                                 )
                             else:
                                 line = self.ax1.plot(
-                                    x, y, "o", label=current_date + "_spot left"
+                                    x,
+                                    y,
+                                    "o",
+                                    label=current_date + "_spot left",
                                 )
                         elif current_valve == "SpotRight":
                             if FAILED:
                                 line = self.ax1.plot(
-                                    x, y, "x", label=current_date + "_spot right (FAIL)"
+                                    x,
+                                    y,
+                                    "x",
+                                    label=current_date + "_spot right (FAIL)",
                                 )
                             else:
                                 line = self.ax1.plot(
-                                    x, y, "o", label=current_date + "_spot right"
+                                    x,
+                                    y,
+                                    "o",
+                                    label=current_date + "_spot right",
                                 )
         self.ax1.set_xlabel("valve open time(s)")
         self.ax1.set_ylabel("water(mg)")
@@ -684,12 +777,20 @@ class PlotWaterCalibration(FigureCanvas):
             self.ax1.plot(fit_x, fit_y, color=color, linestyle="--")
         return slope, intercept
 
-    def _GetWaterCalibration(self, WaterCalibrationResult, current_date, current_valve):
-        x, y = GetWaterCalibration(WaterCalibrationResult, current_date, current_valve)
+    def _GetWaterCalibration(
+        self, WaterCalibrationResult, current_date, current_valve
+    ):
+        x, y = GetWaterCalibration(
+            WaterCalibrationResult, current_date, current_valve
+        )
         return x, y
 
-    def _GetWaterSpotCheck(self, WaterCalibrationResult, current_date, current_valve):
-        x, y = GetWaterSpotCheck(WaterCalibrationResult, current_date, current_valve)
+    def _GetWaterSpotCheck(
+        self, WaterCalibrationResult, current_date, current_valve
+    ):
+        x, y = GetWaterSpotCheck(
+            WaterCalibrationResult, current_date, current_valve
+        )
         return x, y
 
 
@@ -698,10 +799,12 @@ def GetWaterSpotCheck(WaterCalibrationResult, date, valve):
     y = []
     for time in WaterCalibrationResult[date][valve].keys():
         for interval in WaterCalibrationResult[date][valve][time].keys():
-            for cycles in WaterCalibrationResult[date][valve][time][interval].keys():
-                for measurement in WaterCalibrationResult[date][valve][time][interval][
-                    cycles
-                ]:
+            for cycles in WaterCalibrationResult[date][valve][time][
+                interval
+            ].keys():
+                for measurement in WaterCalibrationResult[date][valve][time][
+                    interval
+                ][cycles]:
                     x.append(float(time))
                     y.append(float(measurement) / float(cycles))
     return x, y
@@ -711,13 +814,15 @@ def GetWaterCalibration(WaterCalibrationResults, current_date, current_valve):
     """Get the water calibration results from a specific date and valve"""
     X = []
     Y = []
-    all_valve_opentime = WaterCalibrationResults[current_date][current_valve].keys()
+    all_valve_opentime = WaterCalibrationResults[current_date][
+        current_valve
+    ].keys()
     for current_valve_opentime in all_valve_opentime:
         average_water = []
         X.append(current_valve_opentime)
-        all_valve_openinterval = WaterCalibrationResults[current_date][current_valve][
-            current_valve_opentime
-        ].keys()
+        all_valve_openinterval = WaterCalibrationResults[current_date][
+            current_valve
+        ][current_valve_opentime].keys()
         for current_valve_openinterval in all_valve_openinterval:
             all_cycle = WaterCalibrationResults[current_date][current_valve][
                 current_valve_opentime
@@ -741,7 +846,14 @@ class PlotLickDistribution(FigureCanvas):
     def __init__(self, GeneratedTrials=None, dpi=100, width=5, height=4):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         gs = GridSpec(
-            10, 51, wspace=3, hspace=0.1, bottom=0.1, top=0.95, left=0.04, right=0.98
+            10,
+            51,
+            wspace=3,
+            hspace=0.1,
+            bottom=0.1,
+            top=0.95,
+            left=0.04,
+            right=0.98,
         )
 
         self.ax1 = self.fig.add_subplot(gs[1:9, 2:11])
@@ -845,7 +957,14 @@ class PlotTimeDistribution(FigureCanvas):
     def __init__(self, GeneratedTrials=None, dpi=100, width=5, height=4):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         gs = GridSpec(
-            10, 31, wspace=3, hspace=0.1, bottom=0.1, top=0.95, left=0.04, right=0.98
+            10,
+            31,
+            wspace=3,
+            hspace=0.1,
+            bottom=0.1,
+            top=0.95,
+            left=0.04,
+            right=0.98,
         )
         self.ax1 = self.fig.add_subplot(gs[1:9, 2:11])
         self.ax2 = self.fig.add_subplot(gs[1:9, 12:21])
@@ -861,7 +980,11 @@ class PlotTimeDistribution(FigureCanvas):
         Beta = win.task_logic.task_parameters.block_parameters.beta
         DataType = "int"
         SampledBlockLen = self._Sample(
-            Min=Min, Max=Max, SampleMethods=SampleMethods, Beta=Beta, DataType=DataType
+            Min=Min,
+            Max=Max,
+            SampleMethods=SampleMethods,
+            Beta=Beta,
+            DataType=DataType,
         )
         # ITI
         Min = win.task_logic.task_parameters.inter_trial_interval.min
@@ -869,7 +992,11 @@ class PlotTimeDistribution(FigureCanvas):
         Beta = win.task_logic.task_parameters.inter_trial_interval.beta
         DataType = "float"
         SampledITI = self._Sample(
-            Min=Min, Max=Max, SampleMethods=SampleMethods, Beta=Beta, DataType=DataType
+            Min=Min,
+            Max=Max,
+            SampleMethods=SampleMethods,
+            Beta=Beta,
+            DataType=DataType,
         )
         # Delay
         Min = win.task_logic.task_parameters.delay_period.min
@@ -877,7 +1004,11 @@ class PlotTimeDistribution(FigureCanvas):
         Beta = win.task_logic.task_parameters.delay_period.beta
         DataType = "float"
         SampledDelay = self._Sample(
-            Min=Min, Max=Max, SampleMethods=SampleMethods, Beta=Beta, DataType=DataType
+            Min=Min,
+            Max=Max,
+            SampleMethods=SampleMethods,
+            Beta=Beta,
+            DataType=DataType,
         )
         self.ax1.cla()
         self.ax2.cla()
@@ -894,11 +1025,15 @@ class PlotTimeDistribution(FigureCanvas):
             fontsize=10,
         )
         self.ax2.set_title(
-            "ITI time \n(average=" + str(np.round(np.nanmean(SampledITI), 2)) + ")",
+            "ITI time \n(average="
+            + str(np.round(np.nanmean(SampledITI), 2))
+            + ")",
             fontsize=10,
         )
         self.ax3.set_title(
-            "Delay time \n(average=" + str(np.round(np.nanmean(SampledDelay), 2)) + ")",
+            "Delay time \n(average="
+            + str(np.round(np.nanmean(SampledDelay), 2))
+            + ")",
             fontsize=10,
         )
         self.ax1.plot(
@@ -907,10 +1042,12 @@ class PlotTimeDistribution(FigureCanvas):
             label="Average",
         )
         self.ax2.plot(
-            [np.nanmean(SampledITI), np.nanmean(SampledITI)], [0, np.max(Re2[0])]
+            [np.nanmean(SampledITI), np.nanmean(SampledITI)],
+            [0, np.max(Re2[0])],
         )
         self.ax3.plot(
-            [np.nanmean(SampledDelay), np.nanmean(SampledDelay)], [0, np.max(Re3[0])]
+            [np.nanmean(SampledDelay), np.nanmean(SampledDelay)],
+            [0, np.max(Re3[0])],
         )
         self.ax1.legend(loc="upper right", fontsize=8)
         self.ax2.set_xlabel("time (s)")
@@ -918,7 +1055,13 @@ class PlotTimeDistribution(FigureCanvas):
         self.draw()
 
     def _Sample(
-        self, Min, Max, SampleMethods, SampleTime=100000, Beta=None, DataType="float"
+        self,
+        Min,
+        Max,
+        SampleMethods,
+        SampleTime=100000,
+        Beta=None,
+        DataType="float",
     ):
         if SampleMethods == "Exponential":
             Sampled = np.random.exponential(Beta, SampleTime) + Min

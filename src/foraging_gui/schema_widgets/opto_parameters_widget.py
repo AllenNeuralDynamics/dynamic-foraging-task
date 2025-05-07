@@ -1,13 +1,27 @@
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
-    ConstantProtocol, IntervalConditions, LaserColorFive, LaserColorFour,
-    LaserColorOne, LaserColorSix, LaserColorThree, LaserColorTwo, LocationOne,
-    LocationTwo, Optogenetics, PulseProtocol, SessionControl, SineProtocol)
+    ConstantProtocol,
+    IntervalConditions,
+    LaserColorFive,
+    LaserColorFour,
+    LaserColorOne,
+    LaserColorSix,
+    LaserColorThree,
+    LaserColorTwo,
+    LocationOne,
+    LocationTwo,
+    Optogenetics,
+    PulseProtocol,
+    SessionControl,
+    SineProtocol,
+)
 from pydantic import BaseModel
 from PyQt5.QtWidgets import QCheckBox, QComboBox
 
-from foraging_gui.schema_widgets.schema_widget_base import (SchemaWidgetBase,
-                                                            add_border,
-                                                            create_widget)
+from foraging_gui.schema_widgets.schema_widget_base import (
+    SchemaWidgetBase,
+    add_border,
+    create_widget,
+)
 
 
 class OptoParametersWidget(SchemaWidgetBase):
@@ -68,7 +82,9 @@ class OptoParametersWidget(SchemaWidgetBase):
                 check_box.setChecked(True)
                 check_box.toggled.connect(
                     lambda s, laser_i=laser, name=interval: self.toggle_optional_field(
-                        f"laser_colors.{laser_i}.{name}", s, IntervalConditions()
+                        f"laser_colors.{laser_i}.{name}",
+                        s,
+                        IntervalConditions(),
                     )
                 )
                 layout = (
@@ -78,12 +94,20 @@ class OptoParametersWidget(SchemaWidgetBase):
                 )
                 label = layout.itemAt(0).widget()
                 layout.replaceWidget(label, check_box)
-                setattr(self, f"laser_colors.{laser}.{interval}_check_box", check_box)
+                setattr(
+                    self,
+                    f"laser_colors.{laser}.{interval}_check_box",
+                    check_box,
+                )
             # set 0 minimum for start
-            getattr(self, f"laser_colors.{laser}.start.offset_widget").setMinimum(0)
+            getattr(
+                self, f"laser_colors.{laser}.start.offset_widget"
+            ).setMinimum(0)
 
             # set range on probability widget
-            getattr(self, f"laser_colors.{laser}.probability_widget").setRange(0, 1)
+            getattr(self, f"laser_colors.{laser}.probability_widget").setRange(
+                0, 1
+            )
 
             # change protocol
             protocol_widget = QComboBox()
@@ -97,17 +121,23 @@ class OptoParametersWidget(SchemaWidgetBase):
                 self, f"laser_colors.{laser}.protocol_widget"
             ).layout().insertWidget(0, protocol_widget)
             setattr(
-                self, f"laser_colors.{laser}.protocol_combo_box_widget", protocol_widget
+                self,
+                f"laser_colors.{laser}.protocol_combo_box_widget",
+                protocol_widget,
             )
             # hide protocol name widget
-            getattr(self, f"laser_colors.{laser}.protocol_widgets")["name"].hide()
+            getattr(self, f"laser_colors.{laser}.protocol_widgets")[
+                "name"
+            ].hide()
 
         # add/remove session control
         widget = self.session_control_widget
         self.session_control_check_box = QCheckBox("Enable Session Control")
         self.session_control_check_box.setChecked(True)
         self.session_control_check_box.toggled.connect(
-            lambda s: self.toggle_optional_field("session_control", s, SessionControl())
+            lambda s: self.toggle_optional_field(
+                "session_control", s, SessionControl()
+            )
         )
         widget.layout().insertWidget(0, self.session_control_check_box)
 
@@ -138,7 +168,10 @@ class OptoParametersWidget(SchemaWidgetBase):
         """
 
         widget_dict = getattr(self, name + "_widgets")
-        [widget.show() if enabled else widget.hide() for widget in widget_dict.values()]
+        [
+            widget.show() if enabled else widget.hide()
+            for widget in widget_dict.values()
+        ]
         name_lst = name.split(".")
 
         possible_lasers = [
@@ -152,8 +185,12 @@ class OptoParametersWidget(SchemaWidgetBase):
         laser_color = possible_lasers[int(name_lst[-1])](
             color="Blue",
             pulse_condition="Right choice",
-            start=IntervalConditions(interval_condition="Trial start", offset=0),
-            end=IntervalConditions(interval_condition="Right reward", offset=0),
+            start=IntervalConditions(
+                interval_condition="Trial start", offset=0
+            ),
+            end=IntervalConditions(
+                interval_condition="Right reward", offset=0
+            ),
         )
         active_lasers = self.path_get(self.schema, name_lst[:-1])
         if enabled and laser_color.name not in [
@@ -180,7 +217,10 @@ class OptoParametersWidget(SchemaWidgetBase):
         :param enabled: whether to add or remove field
         """
         widget_dict = getattr(self, name + "_widgets")
-        [widget.show() if enabled else widget.hide() for widget in widget_dict.values()]
+        [
+            widget.show() if enabled else widget.hide()
+            for widget in widget_dict.values()
+        ]
 
         name_lst = name.split(".")
         index = int(name_lst[-1])
@@ -220,7 +260,9 @@ class OptoParametersWidget(SchemaWidgetBase):
             widget.deleteLater()
         fields = {
             f"{name}.{key}": value
-            for key, value in self.path_get(self.schema, name_lst).model_dump().items()
+            for key, value in self.path_get(self.schema, name_lst)
+            .model_dump()
+            .items()
         }
         new_widget = create_widget(
             **self.create_field_widgets(fields, name), struct="V"
@@ -242,7 +284,9 @@ class OptoParametersWidget(SchemaWidgetBase):
         if value is not None:
             if "protocol" == name_lst[-1]:
                 getattr(self, f"{name}_combo_box_widget").blockSignals(True)
-                getattr(self, f"{name}_combo_box_widget").setCurrentText(value.name)
+                getattr(self, f"{name}_combo_box_widget").setCurrentText(
+                    value.name
+                )
                 getattr(self, f"{name}_combo_box_widget").blockSignals(False)
                 self._set_widget_text(name, value)
                 for widget in getattr(self, name + "_widgets").values():
@@ -256,7 +300,9 @@ class OptoParametersWidget(SchemaWidgetBase):
                 new_widget = create_widget(
                     **self.create_field_widgets(fields, name), struct="V"
                 )
-                getattr(self, f"{name}_widget").layout().insertWidget(1, new_widget)
+                getattr(self, f"{name}_widget").layout().insertWidget(
+                    1, new_widget
+                )
                 getattr(self, f"{name}_widgets")["name"].hide()
             elif (
                 dict not in type(value).__mro__
@@ -264,11 +310,18 @@ class OptoParametersWidget(SchemaWidgetBase):
                 and BaseModel not in type(value).__mro__
             ):  # not a dictionary or list like value
                 self._set_widget_text(name, value)
-            elif dict in type(value).__mro__ or BaseModel in type(value).__mro__:
+            elif (
+                dict in type(value).__mro__ or BaseModel in type(value).__mro__
+            ):
                 value = (
-                    value.model_dump() if BaseModel in type(value).__mro__ else value
+                    value.model_dump()
+                    if BaseModel in type(value).__mro__
+                    else value
                 )
-                for k, v in value.items():  # multiple widgets to set values for
+                for (
+                    k,
+                    v,
+                ) in value.items():  # multiple widgets to set values for
                     self.update_field_widget(f"{name}.{k}")
             else:  # update list
                 for i, item in enumerate(value):
@@ -321,7 +374,9 @@ class OptoParametersWidget(SchemaWidgetBase):
                 sort_map = ["LocationOne", "LocationTwo"]
                 location_dict = {k: None for k in sort_map}
                 # fill gaps
-                location_dict.update({loc.name: loc for loc in iterable.location})
+                location_dict.update(
+                    {loc.name: loc for loc in iterable.location}
+                )
                 iterable = [location_dict[mapping] for mapping in sort_map]
 
             else:
@@ -366,12 +421,16 @@ class OptoParametersWidget(SchemaWidgetBase):
                 sort_map = ["LocationOne", "LocationTwo"]
                 location_dict = {k: None for k in sort_map}
                 # fill gaps
-                location_dict.update({loc.name: loc for loc in iterable.location})
+                location_dict.update(
+                    {loc.name: loc for loc in iterable.location}
+                )
                 iterable = [location_dict[mapping] for mapping in sort_map]
             else:
                 k = int(k) if type(iterable) == list else k
                 iterable = (
-                    iterable[int(k)] if type(iterable) == list else getattr(iterable, k)
+                    iterable[int(k)]
+                    if type(iterable) == list
+                    else getattr(iterable, k)
                 )
         return iterable
 
@@ -394,38 +453,62 @@ if __name__ == "__main__":
             LaserColorOne(
                 color="Blue",
                 pulse_condition="Right choice",
-                start=IntervalConditions(interval_condition="Trial start", offset=0),
-                end=IntervalConditions(interval_condition="Right reward", offset=0),
+                start=IntervalConditions(
+                    interval_condition="Trial start", offset=0
+                ),
+                end=IntervalConditions(
+                    interval_condition="Right reward", offset=0
+                ),
             ),
             LaserColorTwo(
                 color="Red",
                 pulse_condition="Right choice",
-                start=IntervalConditions(interval_condition="Trial start", offset=0),
-                end=IntervalConditions(interval_condition="Right reward", offset=0),
+                start=IntervalConditions(
+                    interval_condition="Trial start", offset=0
+                ),
+                end=IntervalConditions(
+                    interval_condition="Right reward", offset=0
+                ),
             ),
             LaserColorThree(
                 color="Green",
                 pulse_condition="Right choice",
-                start=IntervalConditions(interval_condition="Trial start", offset=0),
-                end=IntervalConditions(interval_condition="Right reward", offset=0),
+                start=IntervalConditions(
+                    interval_condition="Trial start", offset=0
+                ),
+                end=IntervalConditions(
+                    interval_condition="Right reward", offset=0
+                ),
             ),
             LaserColorFour(
                 color="Orange",
                 pulse_condition="Right choice",
-                start=IntervalConditions(interval_condition="Trial start", offset=0),
-                end=IntervalConditions(interval_condition="Right reward", offset=0),
+                start=IntervalConditions(
+                    interval_condition="Trial start", offset=0
+                ),
+                end=IntervalConditions(
+                    interval_condition="Right reward", offset=0
+                ),
             ),
             LaserColorFive(
                 color="Orange",
                 pulse_condition="Right choice",
-                start=IntervalConditions(interval_condition="Trial start", offset=0),
-                end=IntervalConditions(interval_condition="Right reward", offset=0),
+                start=IntervalConditions(
+                    interval_condition="Trial start", offset=0
+                ),
+                end=IntervalConditions(
+                    interval_condition="Right reward", offset=0
+                ),
             ),
             LaserColorSix(
                 color="Orange",
                 pulse_condition="Right choice",
-                start=IntervalConditions(interval_condition="Trial start", offset=0),
-                end=IntervalConditions(interval_condition="Right reward", offset=0),
+                start=IntervalConditions(
+                    interval_condition="Trial start", offset=0
+                ),
+                end=IntervalConditions(
+                    interval_condition="Right reward", offset=0
+                ),
             ),
         ],
         session_control=SessionControl(),
@@ -440,8 +523,12 @@ if __name__ == "__main__":
         LaserColorFive(
             color="Blue",
             pulse_condition="Right choice",
-            start=IntervalConditions(interval_condition="Trial start", offset=0),
-            end=IntervalConditions(interval_condition="Right reward", offset=0),
+            start=IntervalConditions(
+                interval_condition="Trial start", offset=0
+            ),
+            end=IntervalConditions(
+                interval_condition="Right reward", offset=0
+            ),
         )
     )
     task_model.laser_colors[0].location = [LocationOne()]
@@ -455,26 +542,42 @@ if __name__ == "__main__":
             LaserColorOne(
                 color="Blue",
                 pulse_condition="Right choice",
-                start=IntervalConditions(interval_condition="Trial start", offset=0),
-                end=IntervalConditions(interval_condition="Right reward", offset=0),
+                start=IntervalConditions(
+                    interval_condition="Trial start", offset=0
+                ),
+                end=IntervalConditions(
+                    interval_condition="Right reward", offset=0
+                ),
             ),
             LaserColorThree(
                 color="Blue",
                 pulse_condition="Right choice",
-                start=IntervalConditions(interval_condition="Trial start", offset=0),
-                end=IntervalConditions(interval_condition="Right reward", offset=0),
+                start=IntervalConditions(
+                    interval_condition="Trial start", offset=0
+                ),
+                end=IntervalConditions(
+                    interval_condition="Right reward", offset=0
+                ),
             ),
             LaserColorFour(
                 color="Blue",
                 pulse_condition="Right choice",
-                start=IntervalConditions(interval_condition="Trial start", offset=0),
-                end=IntervalConditions(interval_condition="Right reward", offset=0),
+                start=IntervalConditions(
+                    interval_condition="Trial start", offset=0
+                ),
+                end=IntervalConditions(
+                    interval_condition="Right reward", offset=0
+                ),
             ),
             LaserColorFive(
                 color="Blue",
                 pulse_condition="Right choice",
-                start=IntervalConditions(interval_condition="Trial start", offset=0),
-                end=IntervalConditions(interval_condition="Right reward", offset=0),
+                start=IntervalConditions(
+                    interval_condition="Trial start", offset=0
+                ),
+                end=IntervalConditions(
+                    interval_condition="Right reward", offset=0
+                ),
             ),
         ],
         session_control=SessionControl(),

@@ -2,13 +2,21 @@ import logging
 from typing import List, Union
 
 import numpy as np
-from aind_dynamic_foraging_models.logistic_regression import \
-    fit_logistic_regression
+from aind_dynamic_foraging_models.logistic_regression import (
+    fit_logistic_regression,
+)
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QColor, QPen
 from PyQt5.QtWidgets import QMainWindow
-from pyqtgraph import (FillBetweenItem, GraphItem, PlotDataItem, PlotWidget,
-                       TextItem, colormap, setConfigOption)
+from pyqtgraph import (
+    FillBetweenItem,
+    GraphItem,
+    PlotDataItem,
+    PlotWidget,
+    TextItem,
+    colormap,
+    setConfigOption,
+)
 
 setConfigOption("background", "w")
 setConfigOption("foreground", "k")
@@ -19,9 +27,13 @@ class BiasIndicator(QMainWindow):
 
     biasOver = pyqtSignal(float, int)  # emit bias and trial number it occurred
     biasError = pyqtSignal(str, int)  # emit error and trial number it occurred
-    biasValue = pyqtSignal(float, int)  # emit bias and trial number it occurred
+    biasValue = pyqtSignal(
+        float, int
+    )  # emit bias and trial number it occurred
 
-    def __init__(self, bias_threshold: float = 0.7, x_range: int = 15, *args, **kwargs):
+    def __init__(
+        self, bias_threshold: float = 0.7, x_range: int = 15, *args, **kwargs
+    ):
         """
         :param bias_limit: decimal to alert user if bias is above between 0 and 1
         :param x_range: total number of values displayed on the x axis as graph is scrolling
@@ -44,7 +56,9 @@ class BiasIndicator(QMainWindow):
             xRange=[1, self.x_range],
             yRange=[-self.bias_threshold - 0.3, 0.3 + self.bias_threshold],
         )
-        self.bias_plot.setLabels(left="Bias", bottom="Trial #")  # make label bigger
+        self.bias_plot.setLabels(
+            left="Bias", bottom="Trial #"
+        )  # make label bigger
         self.bias_plot.getAxis("left").setTicks(
             [[(-bias_threshold, "L"), (bias_threshold, "R")]]
         )
@@ -85,7 +99,10 @@ class BiasIndicator(QMainWindow):
 
         # create leading point
         self._current_bias_point = GraphItem(
-            pos=[[0, 0]], pen=QPen(QColor("green")), brush=QColor("green"), size=9
+            pos=[[0, 0]],
+            pen=QPen(QColor("green")),
+            brush=QColor("green"),
+            size=9,
         )
         self.bias_plot.addItem(self._current_bias_point)
 
@@ -191,8 +208,12 @@ class BiasIndicator(QMainWindow):
                 self.biasValue.emit(bias, trial_num)
 
                 # add confidence intervals
-                upper = lr["df_beta"].loc["bias"]["bootstrap_CI_upper"].values[0]
-                lower = lr["df_beta"].loc["bias"]["bootstrap_CI_lower"].values[0]
+                upper = (
+                    lr["df_beta"].loc["bias"]["bootstrap_CI_upper"].values[0]
+                )
+                lower = (
+                    lr["df_beta"].loc["bias"]["bootstrap_CI_lower"].values[0]
+                )
             elif len(unique) == 0:
                 # no choices, report bias confidence as (-inf, +inf)
                 bias = 0
@@ -235,7 +256,11 @@ class BiasIndicator(QMainWindow):
                 if trial_num >= self.bias_plot.getAxis("bottom").range[1] - 50:
                     self.bias_plot.setRange(
                         xRange=[
-                            trial_num - self.x_range if self.x_range < trial_num else 2,
+                            (
+                                trial_num - self.x_range
+                                if self.x_range < trial_num
+                                else 2
+                            ),
                             trial_num + 50,
                         ]
                     )
@@ -299,7 +324,10 @@ class BiasIndicator(QMainWindow):
         self.bias_plot.addItem(self._biases_scatter_item)
         # reset leading point
         self._current_bias_point = GraphItem(
-            pos=[[0, 0]], pen=QPen(QColor("green")), brush=QColor("green"), size=9
+            pos=[[0, 0]],
+            pen=QPen(QColor("green")),
+            brush=QColor("green"),
+            size=9,
         )
         self.bias_plot.addItem(self._current_bias_point)
         # reset bias label

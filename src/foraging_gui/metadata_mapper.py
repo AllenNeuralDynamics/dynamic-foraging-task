@@ -1,18 +1,44 @@
 import ast
 from datetime import datetime
 
-from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import \
-    FiberPhotometry
+from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
+    FiberPhotometry,
+)
 from aind_behavior_dynamic_foraging.DataSchemas.operation_control import (
-    AutoStop, OperationalControl, StageSpecs)
+    AutoStop,
+    OperationalControl,
+    StageSpecs,
+)
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
-    ConstantProtocol, IntervalConditions, LaserColorFive, LaserColorFour,
-    LaserColorOne, LaserColorSix, LaserColorThree, LaserColorTwo, LocationOne,
-    LocationTwo, Optogenetics, PulseProtocol, SessionControl, SineProtocol)
+    ConstantProtocol,
+    IntervalConditions,
+    LaserColorFive,
+    LaserColorFour,
+    LaserColorOne,
+    LaserColorSix,
+    LaserColorThree,
+    LaserColorTwo,
+    LocationOne,
+    LocationTwo,
+    Optogenetics,
+    PulseProtocol,
+    SessionControl,
+    SineProtocol,
+)
 from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
-    AindDynamicForagingTaskLogic, AindDynamicForagingTaskParameters, AutoBlock,
-    AutoWater, BlockParameters, DelayPeriod, InterTrialInterval, ResponseTime,
-    RewardN, RewardProbability, RewardSize, Warmup)
+    AindDynamicForagingTaskLogic,
+    AindDynamicForagingTaskParameters,
+    AutoBlock,
+    AutoWater,
+    BlockParameters,
+    DelayPeriod,
+    InterTrialInterval,
+    ResponseTime,
+    RewardN,
+    RewardProbability,
+    RewardSize,
+    Warmup,
+)
 from aind_behavior_services.session import AindBehaviorSessionModel
 
 
@@ -26,8 +52,12 @@ def task_parameters_to_tp_conversion(
 
     return {
         "AddOneTrialForNoresponse": task_parameters.no_response_trial_addition,
-        "AdvancedBlockAuto": "on" if task_parameters.auto_block is not None else "off",
-        "AutoReward": True if task_parameters.auto_water is not None else False,
+        "AdvancedBlockAuto": (
+            "on" if task_parameters.auto_block is not None else "off"
+        ),
+        "AutoReward": (
+            True if task_parameters.auto_water is not None else False
+        ),
         "AutoWaterType": (
             None
             if task_parameters.auto_water is None
@@ -87,7 +117,9 @@ def task_parameters_to_tp_conversion(
         "TP_AdvancedBlockAuto": (
             "on" if task_parameters.auto_block is not None else "off"
         ),
-        "TP_AutoReward": True if task_parameters.auto_water is not None else False,
+        "TP_AutoReward": (
+            True if task_parameters.auto_water is not None else False
+        ),
         "TP_AutoWaterType": (
             None
             if task_parameters.auto_water is None
@@ -160,7 +192,9 @@ def task_parameters_to_tp_conversion(
             else task_parameters.warmup.min_finish_ratio
         ),
         "TP_warm_min_trial": (
-            None if task_parameters.warmup is None else task_parameters.warmup.min_trial
+            None
+            if task_parameters.warmup is None
+            else task_parameters.warmup.min_trial
         ),
         "TP_warm_windowsize": (
             None
@@ -180,10 +214,14 @@ def task_parameters_to_tp_conversion(
             else task_parameters.warmup.max_choice_ratio_bias
         ),
         "warm_min_finish_ratio": (
-            None if task_parameters.warmup is None else task_parameters.warmup.min_trial
+            None
+            if task_parameters.warmup is None
+            else task_parameters.warmup.min_trial
         ),
         "warm_min_trial": (
-            None if task_parameters.warmup is None else task_parameters.warmup.min_trial
+            None
+            if task_parameters.warmup is None
+            else task_parameters.warmup.min_trial
         ),
         "warm_windowsize": (
             None
@@ -205,7 +243,9 @@ def behavior_json_to_task_logic_model(
 
     # parse through json and grab last value
     behavior = {
-        k: v[-1] for k, v in behavior_json.items() if type(v) == list and len(v) != 0
+        k: v[-1]
+        for k, v in behavior_json.items()
+        if type(v) == list and len(v) != 0
     }
 
     return AindDynamicForagingTaskLogic(
@@ -221,7 +261,11 @@ def behavior_json_to_task_logic_model(
                     if behavior["TP_BlockMinReward"]
                     else float(behavior["TP_BlockMinReward"])
                 ),
-                beta=0 if behavior["TP_BlockBeta"] else float(behavior["TP_BlockBeta"]),
+                beta=(
+                    0
+                    if behavior["TP_BlockBeta"]
+                    else float(behavior["TP_BlockBeta"])
+                ),
             ),
             reward_probability=RewardProbability(
                 base_reward_sum=(
@@ -247,9 +291,21 @@ def behavior_json_to_task_logic_model(
             ),
             randomness=behavior["TP_Randomness"],
             delay_period=DelayPeriod(
-                min=0 if behavior["TP_DelayMin"] else float(behavior["TP_DelayMin"]),
-                max=0 if behavior["TP_DelayMax"] else float(behavior["TP_DelayMax"]),
-                beta=0 if behavior["TP_DelayBeta"] else float(behavior["TP_DelayBeta"]),
+                min=(
+                    0
+                    if behavior["TP_DelayMin"]
+                    else float(behavior["TP_DelayMin"])
+                ),
+                max=(
+                    0
+                    if behavior["TP_DelayMax"]
+                    else float(behavior["TP_DelayMax"])
+                ),
+                beta=(
+                    0
+                    if behavior["TP_DelayBeta"]
+                    else float(behavior["TP_DelayBeta"])
+                ),
             ),
             reward_delay=(
                 0
@@ -284,10 +340,20 @@ def behavior_json_to_task_logic_model(
                 )
             ),
             inter_trial_interval=InterTrialInterval(
-                min=0 if behavior["TP_ITIMin"] == "" else float(behavior["TP_ITIMin"]),
-                max=0 if behavior["TP_ITIMax"] == "" else float(behavior["TP_ITIMax"]),
+                min=(
+                    0
+                    if behavior["TP_ITIMin"] == ""
+                    else float(behavior["TP_ITIMin"])
+                ),
+                max=(
+                    0
+                    if behavior["TP_ITIMax"] == ""
+                    else float(behavior["TP_ITIMax"])
+                ),
                 beta=(
-                    0 if behavior["TP_ITIBeta"] == "" else float(behavior["TP_ITIBeta"])
+                    0
+                    if behavior["TP_ITIBeta"] == ""
+                    else float(behavior["TP_ITIBeta"])
                 ),
                 increase=(
                     0
@@ -363,7 +429,9 @@ def behavior_json_to_task_logic_model(
                 ),
             ),
             no_response_trial_addition=(
-                True if behavior["TP_AddOneTrialForNoresponse"] == "Yes" else False
+                True
+                if behavior["TP_AddOneTrialForNoresponse"] == "Yes"
+                else False
             ),
             reward_n=(
                 None
@@ -397,7 +465,9 @@ def session_to_tp_conversion(session_model: AindBehaviorSessionModel) -> dict:
     }
 
 
-def behavior_json_to_session_model(behavior_json: dict) -> AindBehaviorSessionModel:
+def behavior_json_to_session_model(
+    behavior_json: dict,
+) -> AindBehaviorSessionModel:
     """
     Map behavior.json to session model.
 
@@ -406,7 +476,9 @@ def behavior_json_to_session_model(behavior_json: dict) -> AindBehaviorSessionMo
 
     # parse through json and grab last value
     behavior = {
-        k: v[-1] for k, v in behavior_json.items() if type(v) == list and len(v) != 0
+        k: v[-1]
+        for k, v in behavior_json.items()
+        if type(v) == list and len(v) != 0
     }
 
     return AindBehaviorSessionModel(
@@ -452,7 +524,9 @@ def behavior_json_to_fip_model(behavior_json: dict) -> FiberPhotometry:
 
     # parse through json and grab last value
     behavior = {
-        k: v[-1] for k, v in behavior_json.items() if type(v) == list and len(v) != 0
+        k: v[-1]
+        for k, v in behavior_json.items()
+        if type(v) == list and len(v) != 0
     }
 
     return FiberPhotometry(
@@ -480,7 +554,9 @@ def opto_to_tp_conversion(opto_model: Optogenetics) -> dict:
         "TP_SessionStartWith": getattr(
             opto_model.session_control, "optogenetic_start", None
         ),
-        "TP_SessionWideControl": False if opto_model.session_control is None else True,
+        "TP_SessionWideControl": (
+            False if opto_model.session_control is None else True
+        ),
     }
 
     sort_map = [
@@ -510,10 +586,12 @@ def opto_to_tp_conversion(opto_model: Optogenetics) -> dict:
             )
             dictionary[f"TP_LaserColor_{i + 1}"] = lasers[laser_name].color
             dictionary[f"TP_LaserEnd_{i + 1}"] = (
-                getattr(lasers[laser_name].end, "interval_condition", None) is None
+                getattr(lasers[laser_name].end, "interval_condition", None)
+                is None
             )
             dictionary[f"TP_LaserStart_{i + 1}"] = (
-                getattr(lasers[laser_name].start, "interval_condition", None) is None
+                getattr(lasers[laser_name].start, "interval_condition", None)
+                is None
             )
             dictionary[f"TP_OffsetEnd_{i + 1}"] = (
                 getattr(lasers[laser_name].end, "offset", None) is None
@@ -521,8 +599,12 @@ def opto_to_tp_conversion(opto_model: Optogenetics) -> dict:
             dictionary[f"TP_OffsetStart_{i + 1}"] = (
                 getattr(lasers[laser_name].start, "offset", None) is None
             )
-            dictionary[f"TP_Probability_{i + 1}"] = lasers[laser_name].probability
-            dictionary[f"TP_Protocol_{i + 1}"] = lasers[laser_name].protocol.name
+            dictionary[f"TP_Probability_{i + 1}"] = lasers[
+                laser_name
+            ].probability
+            dictionary[f"TP_Protocol_{i + 1}"] = lasers[
+                laser_name
+            ].protocol.name
             dictionary[f"TP_PulseDur_{i + 1}"] = getattr(
                 lasers[laser_name].protocol, "duration", None
             )
@@ -535,10 +617,14 @@ def opto_to_tp_conversion(opto_model: Optogenetics) -> dict:
             locs = {k: None for k in loc_map}
             locs.update({loc.name: loc for loc in lasers[laser_name].location})
             dictionary[f"TP_Laser1_power_{i + 1}"] = (
-                None if locs["LocationOne"] is None else locs["LocationOne"].power
+                None
+                if locs["LocationOne"] is None
+                else locs["LocationOne"].power
             )
             dictionary[f"TP_Laser2_power_{i + 1}"] = (
-                None if locs["LocationTwo"] is None else locs["LocationTwo"].power
+                None
+                if locs["LocationTwo"] is None
+                else locs["LocationTwo"].power
             )
             if locs["LocationOne"] is None:
                 dictionary[f"TP_Location_{i + 1}"] = "laser2"
@@ -576,7 +662,9 @@ def behavior_json_to_opto_model(behavior_json: dict) -> Optogenetics:
 
     # parse through json and grab last value
     behavior = {
-        k: v[-1] for k, v in behavior_json.items() if type(v) == list and len(v) != 0
+        k: v[-1]
+        for k, v in behavior_json.items()
+        if type(v) == list and len(v) != 0
     }
 
     sort_map = [
@@ -610,7 +698,9 @@ def behavior_json_to_opto_model(behavior_json: dict) -> Optogenetics:
                     duration=behavior[f"TP_PulseDur_{i + 1}"],
                 )
             else:
-                protocol = ConstantProtocol(ramp_down=behavior[f"TP_RD_{i + 1}"])
+                protocol = ConstantProtocol(
+                    ramp_down=behavior[f"TP_RD_{i + 1}"]
+                )
 
             lasers.append(
                 sort_map[i](
@@ -680,13 +770,17 @@ def behavior_json_to_operational_control_model(
 
     # parse through json and grab last value
     behavior = {
-        k: v[-1] for k, v in behavior_json.items() if type(v) == list and len(v) != 0
+        k: v[-1]
+        for k, v in behavior_json.items()
+        if type(v) == list and len(v) != 0
     }
 
     return OperationalControl(
         auto_stop=AutoStop(
             ignore_win=behavior["TP_auto_stop_ignore_win"],
-            ignore_ratio_threshold=behavior["TP_auto_stop_ignore_ratio_threshold"],
+            ignore_ratio_threshold=behavior[
+                "TP_auto_stop_ignore_ratio_threshold"
+            ],
             max_trial=behavior["TP_MaxTrial"],
             max_time=behavior["TP_MaxTime"],
             min_time=behavior["TP_min_time"],
@@ -697,7 +791,8 @@ def behavior_json_to_operational_control_model(
             else StageSpecs(
                 stage_name=(
                     "newscale"
-                    if list(behavior["B_StagePositions"].keys()) == ["x", "y", "z"]
+                    if list(behavior["B_StagePositions"].keys())
+                    == ["x", "y", "z"]
                     else "AIND"
                 ),
                 rig_name=behavior_json["Other_current_box"],

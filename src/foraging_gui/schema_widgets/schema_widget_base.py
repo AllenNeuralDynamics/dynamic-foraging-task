@@ -9,10 +9,21 @@ from typing import Literal
 import inflection
 from pydantic import BaseModel
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import (QCheckBox, QComboBox, QDoubleSpinBox, QFrame,
-                             QHBoxLayout, QLabel, QLineEdit, QMainWindow,
-                             QSlider, QSpinBox, QTextEdit, QVBoxLayout,
-                             QWidget)
+from PyQt5.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QDoubleSpinBox,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QSlider,
+    QSpinBox,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class SchemaWidgetBase(QMainWindow):
@@ -26,7 +37,9 @@ class SchemaWidgetBase(QMainWindow):
         super().__init__()
         self.schema = schema
         self.schema_module = import_module(self.schema.__module__)
-        widget = self.create_field_widgets(self.schema.model_dump(), "schema_fields")
+        widget = self.create_field_widgets(
+            self.schema.model_dump(), "schema_fields"
+        )
         self.setCentralWidget(create_widget("V", **widget))
         self.ValueChangedOutside[str].connect(
             self.update_field_widget
@@ -66,8 +79,12 @@ class SchemaWidgetBase(QMainWindow):
                     )
                 # If no found options, create an editable text box or checkbox
                 else:
-                    box_type = "text" if bool not in type(value).__mro__ else "check"
-                    boxes[name] = self.create_attribute_widget(name, box_type, value)
+                    box_type = (
+                        "text" if bool not in type(value).__mro__ else "check"
+                    )
+                    boxes[name] = self.create_attribute_widget(
+                        name, box_type, value
+                    )
 
             elif dict in type(value).__mro__:  # deal with dict like variables
                 boxes[name] = create_widget(
@@ -110,7 +127,9 @@ class SchemaWidgetBase(QMainWindow):
             if x is not None:
                 if type(driver_vars[variable]) in [dict, list]:
                     return driver_vars[variable]
-                elif type(driver_vars[variable]) == typing._LiteralGenericAlias:
+                elif (
+                    type(driver_vars[variable]) == typing._LiteralGenericAlias
+                ):
                     return list(typing.get_args(driver_vars[variable]))
                 elif type(driver_vars[variable]) == enum.EnumMeta:  # if enum
                     enum_class = driver_vars[variable]
@@ -132,7 +151,9 @@ class SchemaWidgetBase(QMainWindow):
 
         return box
 
-    def create_text_box(self, name, value) -> QLineEdit or QDoubleSpinBox or QSpinBox:
+    def create_text_box(
+        self, name, value
+    ) -> QLineEdit or QDoubleSpinBox or QSpinBox:
         """Convenience function to build editable text boxes and add initial value and validator
         :param name: name to emit when text is edited is changed
         :param value: initial value to add to box"""
@@ -158,7 +179,11 @@ class SchemaWidgetBase(QMainWindow):
         """
 
         name_lst = name.split(".")
-        value = value if value is not None else getattr(self, name + "_widget").text()
+        value = (
+            value
+            if value is not None
+            else getattr(self, name + "_widget").text()
+        )
         self.path_set(self.schema, name_lst, value)
         self.ValueChangedInside.emit(name)
 
@@ -170,7 +195,9 @@ class SchemaWidgetBase(QMainWindow):
 
         checkbox = QCheckBox()
         checkbox.setChecked(value)
-        checkbox.toggled.connect(lambda state: self.check_box_toggled(name, state))
+        checkbox.toggled.connect(
+            lambda state: self.check_box_toggled(name, state)
+        )
         return checkbox
 
     def check_box_toggled(self, name: str, state: bool):
@@ -229,7 +256,11 @@ class SchemaWidgetBase(QMainWindow):
         ):  # not a dictionary or list like value
             self._set_widget_text(name, value)
         elif dict in type(value).__mro__ or BaseModel in type(value).__mro__:
-            value = value.model_dump() if BaseModel in type(value).__mro__ else value
+            value = (
+                value.model_dump()
+                if BaseModel in type(value).__mro__
+                else value
+            )
             for k, v in value.items():  # multiple widgets to set values for
                 self.update_field_widget(f"{name}.{k}")
         else:  # update list
@@ -301,7 +332,9 @@ class SchemaWidgetBase(QMainWindow):
         for i, k in enumerate(path):
             if i != len(path) - 1:
                 iterable = (
-                    iterable[int(k)] if type(iterable) == list else getattr(iterable, k)
+                    iterable[int(k)]
+                    if type(iterable) == list
+                    else getattr(iterable, k)
                 )
             else:
                 if type(iterable) == list:
@@ -321,7 +354,9 @@ class SchemaWidgetBase(QMainWindow):
         for i, k in enumerate(path):
             k = int(k) if type(iterable) == list else k
             iterable = (
-                iterable[int(k)] if type(iterable) == list else getattr(iterable, k)
+                iterable[int(k)]
+                if type(iterable) == list
+                else getattr(iterable, k)
             )
         return iterable
 
@@ -413,7 +448,9 @@ def add_border(
     """
 
     widgets = []
-    widget_group = widget_group if widget_group else widget.schema_fields_widgets
+    widget_group = (
+        widget_group if widget_group else widget.schema_fields_widgets
+    )
     for name, field_widget in widget_group.items():
         frame = QFrame()
         layout = QVBoxLayout(frame)
@@ -435,8 +472,12 @@ if __name__ == "__main__":
     import traceback
 
     from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
-        AindDynamicForagingTaskLogic, AindDynamicForagingTaskParameters,
-        AutoBlock, AutoWater, Warmup)
+        AindDynamicForagingTaskLogic,
+        AindDynamicForagingTaskParameters,
+        AutoBlock,
+        AutoWater,
+        Warmup,
+    )
     from PyQt5.QtWidgets import QApplication
 
     def error_handler(etype, value, tb):
