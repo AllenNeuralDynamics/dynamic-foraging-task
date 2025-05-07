@@ -1,10 +1,10 @@
-from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase, add_border, create_widget
-from aind_behavior_dynamic_foraging.DataSchemas.operation_control import OperationalControl
-from PyQt5.QtWidgets import QVBoxLayout
+from aind_behavior_dynamic_foraging.DataSchemas.operation_control import \
+    OperationalControl
+
+from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase
 
 
 class OperationControlWidget(SchemaWidgetBase):
-
     """
     Widget to expose fields from operation_control models
     """
@@ -26,15 +26,14 @@ class OperationControlWidget(SchemaWidgetBase):
 
 
 if __name__ == "__main__":
-    from PyQt5.QtWidgets import QApplication
     import sys
     import traceback
 
+    from PyQt5.QtWidgets import QApplication
 
     def error_handler(etype, value, tb):
-        error_msg = ''.join(traceback.format_exception(etype, value, tb))
+        error_msg = "".join(traceback.format_exception(etype, value, tb))
         print(error_msg)
-
 
     sys.excepthook = error_handler  # redirect std error
     app = QApplication(sys.argv)

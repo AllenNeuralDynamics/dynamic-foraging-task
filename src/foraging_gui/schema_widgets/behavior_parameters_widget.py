@@ -1,15 +1,13 @@
-from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase, add_border
 from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
-    AindDynamicForagingTaskLogic,
-    AindDynamicForagingTaskParameters,
-    AutoWater,
-    AutoBlock,
-    Warmup,
-    RewardN
-)
-from PyQt5.QtWidgets import QCheckBox
-from PyQt5.QtCore import pyqtSignal
+    AindDynamicForagingTaskLogic, AindDynamicForagingTaskParameters, AutoBlock,
+    AutoWater, RewardN, Warmup)
 from pydantic import BaseModel
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QCheckBox
+
+from foraging_gui.schema_widgets.schema_widget_base import (SchemaWidgetBase,
+                                                            add_border)
+
 
 class BehaviorParametersWidget(SchemaWidgetBase):
     """
@@ -19,8 +17,9 @@ class BehaviorParametersWidget(SchemaWidgetBase):
     taskUpdated = pyqtSignal(str)
     volumeChanged = pyqtSignal(str)
 
-    def __init__(self, schema: AindDynamicForagingTaskParameters,
-                 reward_families: list):
+    def __init__(
+        self, schema: AindDynamicForagingTaskParameters, reward_families: list
+    ):
 
         super().__init__(schema)
 
@@ -31,39 +30,51 @@ class BehaviorParametersWidget(SchemaWidgetBase):
         getattr(self, "auto_block.switch_thr_widget").setRange(0, 1)
         getattr(self, "warmup.max_choice_ratio_bias_widget").setRange(0, 1)
         getattr(self, "warmup.min_finish_ratio_widget").setRange(0, 1)
-        getattr(self, "reward_probability.family_widget").setRange(1, len(self.reward_families[:]))
+        getattr(self, "reward_probability.family_widget").setRange(
+            1, len(self.reward_families[:])
+        )
         getattr(self, "reward_probability.pairs_n_widget").setMinimum(1)
 
         # connect reward family signal to update pair_n if needed
-        getattr(self, "reward_probability.family_widget").valueChanged.connect(self.update_reward_family)
-        getattr(self, "reward_probability.pairs_n_widget").valueChanged.connect(self.update_reward_family)
+        getattr(self, "reward_probability.family_widget").valueChanged.connect(
+            self.update_reward_family
+        )
+        getattr(self, "reward_probability.pairs_n_widget").valueChanged.connect(
+            self.update_reward_family
+        )
 
         # emit signal if reward volume changes
         getattr(self, "reward_size.right_value_volume_widget").valueChanged.connect(
-            lambda: self.volumeChanged.emit('Right'))
+            lambda: self.volumeChanged.emit("Right")
+        )
         getattr(self, "reward_size.left_value_volume_widget").valueChanged.connect(
-            lambda: self.volumeChanged.emit('Left'))
+            lambda: self.volumeChanged.emit("Left")
+        )
 
         # hide or show auto_water
         widget = self.auto_water_widget
         self.auto_water_check_box = QCheckBox()
         self.auto_water_check_box.setChecked(True)
-        self.auto_water_check_box.toggled.connect(lambda s: self.toggle_optional_field("auto_water", s, AutoWater()))
+        self.auto_water_check_box.toggled.connect(
+            lambda s: self.toggle_optional_field("auto_water", s, AutoWater())
+        )
         widget.layout().insertWidget(0, self.auto_water_check_box)
 
         # hide or show auto_block
         widget = self.auto_block_widget
         self.auto_block_check_box = QCheckBox()
         self.auto_block_check_box.setChecked(True)
-        self.auto_block_check_box.toggled.connect(lambda s: self.toggle_optional_field("auto_block", s, AutoBlock()))
+        self.auto_block_check_box.toggled.connect(
+            lambda s: self.toggle_optional_field("auto_block", s, AutoBlock())
+        )
         widget.layout().insertWidget(0, self.auto_block_check_box)
 
         # hide or show uncoupled_reward
         widget = self.uncoupled_reward_widget
         self.uncoupled_reward_check_box = QCheckBox()
-        self.uncoupled_reward_check_box.toggled.connect(lambda s: self.toggle_optional_field("uncoupled_reward",
-                                                                                             s,
-                                                                                             [0.1, 0.3, 0.7]))
+        self.uncoupled_reward_check_box.toggled.connect(
+            lambda s: self.toggle_optional_field("uncoupled_reward", s, [0.1, 0.3, 0.7])
+        )
         self.uncoupled_reward_check_box.setChecked(False)
         self.uncoupled_reward_check_box.toggled.emit(False)
 
@@ -73,13 +84,17 @@ class BehaviorParametersWidget(SchemaWidgetBase):
         widget = self.warmup_widget
         self.warmup_check_box = QCheckBox()
         self.warmup_check_box.setChecked(True)
-        self.warmup_check_box.toggled.connect(lambda state: self.toggle_optional_field("warmup", state, Warmup()))
+        self.warmup_check_box.toggled.connect(
+            lambda state: self.toggle_optional_field("warmup", state, Warmup())
+        )
         widget.layout().insertWidget(0, self.warmup_check_box)
 
         # hide or show reward n
         widget = self.reward_n_widget
         self.reward_n_check_box = QCheckBox()
-        self.reward_n_check_box.toggled.connect(lambda state: self.toggle_optional_field("reward_n", state, RewardN()))
+        self.reward_n_check_box.toggled.connect(
+            lambda state: self.toggle_optional_field("reward_n", state, RewardN())
+        )
         widget.parent().layout().insertWidget(0, self.reward_n_check_box)
         self.reward_n_check_box.setChecked(False)
         self.reward_n_check_box.toggled.emit(False)
@@ -126,8 +141,10 @@ class BehaviorParametersWidget(SchemaWidgetBase):
 
         family = self.schema.reward_probability.family
         pairs_n = self.schema.reward_probability.pairs_n
-        if pairs_n > len(self.reward_families[family-1]):
-            self.schema.reward_probability.pairs_n = len(self.reward_families[family-1])
+        if pairs_n > len(self.reward_families[family - 1]):
+            self.schema.reward_probability.pairs_n = len(
+                self.reward_families[family - 1]
+            )
             self.apply_schema(self.schema)
 
     def toggle_optional_field(self, name: str, enabled: bool, value) -> None:
@@ -138,8 +155,11 @@ class BehaviorParametersWidget(SchemaWidgetBase):
         :param value: value to set field to
         """
 
-        widgets = getattr(self, name+"_widgets") if hasattr(self, name+"_widgets") \
-            else {"k": getattr(self, name+"_widget")}  # disable all sub widgets
+        widgets = (
+            getattr(self, name + "_widgets")
+            if hasattr(self, name + "_widgets")
+            else {"k": getattr(self, name + "_widget")}
+        )  # disable all sub widgets
         for widget in widgets.values():
             widget.setEnabled(enabled)
         name_lst = name.split(".")
@@ -157,8 +177,12 @@ class BehaviorParametersWidget(SchemaWidgetBase):
 
         value = self.path_get(self.schema, name.split("."))
         if hasattr(self, name + "_check_box"):  # optional type
-            getattr(self, name + "_check_box").setChecked(not value is None)
-        if dict not in type(value).__mro__ and list not in type(value).__mro__ and BaseModel not in type(value).__mro__:  # not a dictionary or list like value
+            getattr(self, name + "_check_box").setChecked(value is not None)
+        if (
+            dict not in type(value).__mro__
+            and list not in type(value).__mro__
+            and BaseModel not in type(value).__mro__
+        ):  # not a dictionary or list like value
             self._set_widget_text(name, value)
         elif dict in type(value).__mro__ or BaseModel in type(value).__mro__:
             value = value.model_dump() if BaseModel in type(value).__mro__ else value
@@ -166,43 +190,45 @@ class BehaviorParametersWidget(SchemaWidgetBase):
                 self.update_field_widget(f"{name}.{k}")
         else:  # update list
             for i, item in enumerate(value):
-                if hasattr(self, f"{name}.{i}_widget"):  # can't handle added indexes yet
+                if hasattr(
+                    self, f"{name}.{i}_widget"
+                ):  # can't handle added indexes yet
                     self.update_field_widget(f"{name}.{i}")
 
+
 if __name__ == "__main__":
-    from PyQt5.QtWidgets import QApplication
     import sys
     import traceback
 
+    from PyQt5.QtWidgets import QApplication
 
     def error_handler(etype, value, tb):
-        error_msg = ''.join(traceback.format_exception(etype, value, tb))
+        error_msg = "".join(traceback.format_exception(etype, value, tb))
         print(error_msg)
-
 
     sys.excepthook = error_handler  # redirect std error
     app = QApplication(sys.argv)
     task_model = AindDynamicForagingTaskLogic(
         task_parameters=AindDynamicForagingTaskParameters(
-            auto_water=AutoWater(),
-            auto_block=AutoBlock(),
-            warmup=Warmup()
+            auto_water=AutoWater(), auto_block=AutoBlock(), warmup=Warmup()
         ),
     )
-    reward_families = [[[8, 1], [6, 1], [3, 1], [1, 1]], [[8, 1], [1, 1]],
-                           [[1, 0], [.9, .1], [.8, .2], [.7, .3], [.6, .4], [.5, .5]], [[6, 1], [3, 1], [1, 1]]]
+    reward_families = [
+        [[8, 1], [6, 1], [3, 1], [1, 1]],
+        [[8, 1], [1, 1]],
+        [[1, 0], [0.9, 0.1], [0.8, 0.2], [0.7, 0.3], [0.6, 0.4], [0.5, 0.5]],
+        [[6, 1], [3, 1], [1, 1]],
+    ]
 
     task_widget = BehaviorParametersWidget(task_model.task_parameters, reward_families)
-    #task_widget.ValueChangedInside.connect(lambda name: print(task_model))
-    #task_widget.taskUpdated.connect(print)
+    # task_widget.ValueChangedInside.connect(lambda name: print(task_model))
+    # task_widget.taskUpdated.connect(print)
     task_widget.show()
 
     task_model.task_parameters.block_parameters.min = 10
     task_model.task_parameters.auto_water = None
     task_model.task_parameters.warmup = None
-    task_model.task_parameters.uncoupled_reward = [.4, .7, .8]
+    task_model.task_parameters.uncoupled_reward = [0.4, 0.7, 0.8]
     task_widget.apply_schema(task_model.task_parameters)
-
-
 
     sys.exit(app.exec_())

@@ -1,40 +1,23 @@
 import unittest
-from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
-    Optogenetics,
-    IntervalConditions,
-    LaserColorOne,
-    LaserColorTwo,
-    LaserColorThree,
-    LaserColorFour,
-    LaserColorFive,
-    LaserColorSix,
-    SessionControl,
-    LocationOne,
-    LocationTwo,
-    SineProtocol,
-    PulseProtocol,
-    ConstantProtocol
-)
-from aind_behavior_services.session import AindBehaviorSessionModel
-from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
-    AindDynamicForagingTaskLogic,
-    AindDynamicForagingTaskParameters,
-    AutoWater,
-    AutoBlock,
-    Warmup
-)
-from test.resources.old_generate_trials import GenerateTrials as OldGenerateTrials
 from datetime import datetime
-import matplotlib.pyplot as plt
-import numpy as np
-from src.foraging_gui.MyFunctions import GenerateTrials
+from test.resources.old_generate_trials import \
+    GenerateTrials as OldGenerateTrials
+from unittest.mock import MagicMock
 
-from unittest.mock import patch, MagicMock
-import os
+import numpy as np
+from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
+    ConstantProtocol, IntervalConditions, LaserColorOne, LocationOne,
+    LocationTwo, Optogenetics, PulseProtocol, SessionControl, SineProtocol)
+from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
+    AindDynamicForagingTaskLogic, AindDynamicForagingTaskParameters, AutoBlock,
+    AutoWater, Warmup)
+from aind_behavior_services.session import AindBehaviorSessionModel
+
+from src.foraging_gui.MyFunctions import GenerateTrials
 
 
 class TestOptogeneticLogic(unittest.TestCase):
-    """ Testing TrainerServer model"""
+    """Testing TrainerServer model"""
 
     session_model: AindBehaviorSessionModel
     task_model: AindDynamicForagingTaskLogic
@@ -45,7 +28,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         Setup models
         """
 
-        self.session_model = session_model = AindBehaviorSessionModel(
+        self.session_model = AindBehaviorSessionModel(
             experiment="Coupled Baiting",
             experimenter=["the ghost in the shell"],
             date=datetime.now(),  # update when folders are created
@@ -58,9 +41,7 @@ class TestOptogeneticLogic(unittest.TestCase):
 
         self.task_model = self.task_logic = AindDynamicForagingTaskLogic(
             task_parameters=AindDynamicForagingTaskParameters(
-                auto_water=AutoWater(),
-                auto_block=AutoBlock(),
-                warmup=Warmup()
+                auto_water=AutoWater(), auto_block=AutoBlock(), warmup=Warmup()
             )
         )
 
@@ -71,19 +52,13 @@ class TestOptogeneticLogic(unittest.TestCase):
         laser = LaserColorOne(
             color="Blue",
             location=[LocationOne(power=1), LocationTwo(power=1)],
-            probability=.25,
+            probability=0.25,
             duration=5.0,
             condition_probability=1,
             pulse_condition="Right choice",
-            start=IntervalConditions(
-                interval_condition="Trial start",
-                offset=0
-            ),
+            start=IntervalConditions(interval_condition="Trial start", offset=0),
             end=None,
-            protocol=SineProtocol(
-                frequency=40,
-                ramp_down=1
-            )
+            protocol=SineProtocol(frequency=40, ramp_down=1),
         )
 
         # initialize opto model
@@ -93,7 +68,9 @@ class TestOptogeneticLogic(unittest.TestCase):
             session_control=SessionControl(),
         )
 
-        generate_trials = GenerateTrials(MagicMock(), self.task_model, self.session_model, opto_model)
+        generate_trials = GenerateTrials(
+            MagicMock(), self.task_model, self.session_model, opto_model
+        )
         generate_trials.selected_condition = laser
         generate_trials._GetLaserWaveForm()
 
@@ -116,16 +93,25 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_SampleFrequency = opto_model.sample_frequency
         old_generate_trials._GetLaserWaveForm()
 
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_1,
-                                       generate_trials.WaveFormLocation_1))
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_2,
-                                       generate_trials.WaveFormLocation_2))
-
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_1,
+                generate_trials.WaveFormLocation_1,
+            )
+        )
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_2,
+                generate_trials.WaveFormLocation_2,
+            )
+        )
 
         # test only laser 1
         laser.location = [LocationOne(power=1)]
 
-        generate_trials = GenerateTrials(MagicMock(), self.task_model, self.session_model, opto_model)
+        generate_trials = GenerateTrials(
+            MagicMock(), self.task_model, self.session_model, opto_model
+        )
         generate_trials.selected_condition = laser
         generate_trials._GetLaserWaveForm()
 
@@ -135,7 +121,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_1"
         old_generate_trials.TP_Laser1_power_1 = f"[{laser.location[0].power}]"
-        old_generate_trials.TP_Laser2_power_1 = f"[0]"
+        old_generate_trials.TP_Laser2_power_1 = "[0]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
         old_generate_trials.TP_Frequency_1 = laser.protocol.frequency
@@ -148,15 +134,25 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_SampleFrequency = opto_model.sample_frequency
         old_generate_trials._GetLaserWaveForm()
 
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_1,
-                                       generate_trials.WaveFormLocation_1))
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_2,
-                                       generate_trials.WaveFormLocation_2))
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_1,
+                generate_trials.WaveFormLocation_1,
+            )
+        )
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_2,
+                generate_trials.WaveFormLocation_2,
+            )
+        )
 
         # test only laser 2
         laser.location = [LocationTwo(power=1)]
 
-        generate_trials = GenerateTrials(MagicMock(), self.task_model, self.session_model, opto_model)
+        generate_trials = GenerateTrials(
+            MagicMock(), self.task_model, self.session_model, opto_model
+        )
         generate_trials.selected_condition = laser
         generate_trials._GetLaserWaveForm()
 
@@ -165,7 +161,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -179,15 +175,25 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_SampleFrequency = opto_model.sample_frequency
         old_generate_trials._GetLaserWaveForm()
 
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_1,
-                                       generate_trials.WaveFormLocation_1))
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_2,
-                                       generate_trials.WaveFormLocation_2))
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_1,
+                generate_trials.WaveFormLocation_1,
+            )
+        )
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_2,
+                generate_trials.WaveFormLocation_2,
+            )
+        )
 
         # test offset
         laser.start.offset = 50
 
-        generate_trials = GenerateTrials(MagicMock(), self.task_model, self.session_model, opto_model)
+        generate_trials = GenerateTrials(
+            MagicMock(), self.task_model, self.session_model, opto_model
+        )
         generate_trials.selected_condition = laser
         generate_trials._GetLaserWaveForm()
 
@@ -196,7 +202,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -210,15 +216,25 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_SampleFrequency = opto_model.sample_frequency
         old_generate_trials._GetLaserWaveForm()
 
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_1,
-                                       generate_trials.WaveFormLocation_1))
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_2,
-                                       generate_trials.WaveFormLocation_2))
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_1,
+                generate_trials.WaveFormLocation_1,
+            )
+        )
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_2,
+                generate_trials.WaveFormLocation_2,
+            )
+        )
 
         # test offset
         laser.duration = 10
 
-        generate_trials = GenerateTrials(MagicMock(), self.task_model, self.session_model, opto_model)
+        generate_trials = GenerateTrials(
+            MagicMock(), self.task_model, self.session_model, opto_model
+        )
         generate_trials.selected_condition = laser
         generate_trials._GetLaserWaveForm()
 
@@ -227,7 +243,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -241,12 +257,18 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_SampleFrequency = opto_model.sample_frequency
         old_generate_trials._GetLaserWaveForm()
 
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_1,
-                                       generate_trials.WaveFormLocation_1))
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_2,
-                                       generate_trials.WaveFormLocation_2))
-
-
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_1,
+                generate_trials.WaveFormLocation_1,
+            )
+        )
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_2,
+                generate_trials.WaveFormLocation_2,
+            )
+        )
 
     def test_pulse_waveforms(self):
         """
@@ -257,19 +279,13 @@ class TestOptogeneticLogic(unittest.TestCase):
         laser = LaserColorOne(
             color="Blue",
             location=[LocationOne(power=1), LocationTwo(power=1)],
-            probability=.25,
+            probability=0.25,
             duration=5.0,
             condition_probability=1,
             pulse_condition="Right choice",
-            start=IntervalConditions(
-                interval_condition="Trial start",
-                offset=0
-            ),
+            start=IntervalConditions(interval_condition="Trial start", offset=0),
             end=None,
-            protocol=PulseProtocol(
-                frequency=40,
-                duration=.002
-            )
+            protocol=PulseProtocol(frequency=40, duration=0.002),
         )
 
         # initialize opto model
@@ -279,7 +295,9 @@ class TestOptogeneticLogic(unittest.TestCase):
             session_control=SessionControl(),
         )
 
-        generate_trials = GenerateTrials(MagicMock(), self.task_model, self.session_model, opto_model)
+        generate_trials = GenerateTrials(
+            MagicMock(), self.task_model, self.session_model, opto_model
+        )
         generate_trials.selected_condition = laser
         generate_trials._GetLaserWaveForm()
 
@@ -302,16 +320,25 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_SampleFrequency = opto_model.sample_frequency
         old_generate_trials._GetLaserWaveForm()
 
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_1,
-                                       generate_trials.WaveFormLocation_1))
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_2,
-                                       generate_trials.WaveFormLocation_2))
-
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_1,
+                generate_trials.WaveFormLocation_1,
+            )
+        )
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_2,
+                generate_trials.WaveFormLocation_2,
+            )
+        )
 
         # test only laser 1
         laser.location = [LocationOne(power=1)]
 
-        generate_trials = GenerateTrials(MagicMock(), self.task_model, self.session_model, opto_model)
+        generate_trials = GenerateTrials(
+            MagicMock(), self.task_model, self.session_model, opto_model
+        )
         generate_trials.selected_condition = laser
         generate_trials._GetLaserWaveForm()
 
@@ -321,7 +348,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_1"
         old_generate_trials.TP_Laser1_power_1 = f"[{laser.location[0].power}]"
-        old_generate_trials.TP_Laser2_power_1 = f"[0]"
+        old_generate_trials.TP_Laser2_power_1 = "[0]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
         old_generate_trials.TP_Frequency_1 = laser.protocol.frequency
@@ -334,16 +361,25 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_SampleFrequency = opto_model.sample_frequency
         old_generate_trials._GetLaserWaveForm()
 
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_1,
-                                       generate_trials.WaveFormLocation_1))
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_2,
-                                       generate_trials.WaveFormLocation_2))
-
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_1,
+                generate_trials.WaveFormLocation_1,
+            )
+        )
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_2,
+                generate_trials.WaveFormLocation_2,
+            )
+        )
 
         # test only laser 2
         laser.location = [LocationTwo(power=1)]
 
-        generate_trials = GenerateTrials(MagicMock(), self.task_model, self.session_model, opto_model)
+        generate_trials = GenerateTrials(
+            MagicMock(), self.task_model, self.session_model, opto_model
+        )
         generate_trials.selected_condition = laser
         generate_trials._GetLaserWaveForm()
 
@@ -352,7 +388,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -366,15 +402,25 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_SampleFrequency = opto_model.sample_frequency
         old_generate_trials._GetLaserWaveForm()
 
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_1,
-                                       generate_trials.WaveFormLocation_1))
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_2,
-                                       generate_trials.WaveFormLocation_2))
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_1,
+                generate_trials.WaveFormLocation_1,
+            )
+        )
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_2,
+                generate_trials.WaveFormLocation_2,
+            )
+        )
 
         # test offset
         laser.start.offset = 50
 
-        generate_trials = GenerateTrials(MagicMock(), self.task_model, self.session_model, opto_model)
+        generate_trials = GenerateTrials(
+            MagicMock(), self.task_model, self.session_model, opto_model
+        )
         generate_trials.selected_condition = laser
         generate_trials._GetLaserWaveForm()
 
@@ -383,7 +429,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -397,16 +443,26 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_SampleFrequency = opto_model.sample_frequency
         old_generate_trials._GetLaserWaveForm()
 
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_1,
-                                       generate_trials.WaveFormLocation_1))
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_2,
-                                       generate_trials.WaveFormLocation_2))
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_1,
+                generate_trials.WaveFormLocation_1,
+            )
+        )
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_2,
+                generate_trials.WaveFormLocation_2,
+            )
+        )
 
         ## test frequency
         laser.start.offset = 0
         laser.protocol.frequency = 10
 
-        generate_trials = GenerateTrials(MagicMock(), self.task_model, self.session_model, opto_model)
+        generate_trials = GenerateTrials(
+            MagicMock(), self.task_model, self.session_model, opto_model
+        )
         generate_trials.selected_condition = laser
         generate_trials._GetLaserWaveForm()
 
@@ -415,7 +471,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -429,10 +485,18 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_SampleFrequency = opto_model.sample_frequency
         old_generate_trials._GetLaserWaveForm()
 
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_1,
-                                       generate_trials.WaveFormLocation_1))
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_2,
-                                       generate_trials.WaveFormLocation_2))
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_1,
+                generate_trials.WaveFormLocation_1,
+            )
+        )
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_2,
+                generate_trials.WaveFormLocation_2,
+            )
+        )
 
     def test_constant_waveforms(self):
         """Test constant protocol waveforms"""
@@ -441,18 +505,13 @@ class TestOptogeneticLogic(unittest.TestCase):
         laser = LaserColorOne(
             color="Blue",
             location=[LocationOne(power=1), LocationTwo(power=1)],
-            probability=.25,
+            probability=0.25,
             duration=5.0,
             condition_probability=1,
             pulse_condition="Right choice",
-            start=IntervalConditions(
-                interval_condition="Trial start",
-                offset=0
-            ),
+            start=IntervalConditions(interval_condition="Trial start", offset=0),
             end=None,
-            protocol=ConstantProtocol(
-                ramp_down=1
-            )
+            protocol=ConstantProtocol(ramp_down=1),
         )
 
         # initialize opto model
@@ -462,7 +521,9 @@ class TestOptogeneticLogic(unittest.TestCase):
             session_control=SessionControl(),
         )
 
-        generate_trials = GenerateTrials(MagicMock(), self.task_model, self.session_model, opto_model)
+        generate_trials = GenerateTrials(
+            MagicMock(), self.task_model, self.session_model, opto_model
+        )
         generate_trials.selected_condition = laser
         generate_trials._GetLaserWaveForm()
 
@@ -485,15 +546,25 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_SampleFrequency = opto_model.sample_frequency
         old_generate_trials._GetLaserWaveForm()
 
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_1,
-                                       generate_trials.WaveFormLocation_1))
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_2,
-                                       generate_trials.WaveFormLocation_2))
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_1,
+                generate_trials.WaveFormLocation_1,
+            )
+        )
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_2,
+                generate_trials.WaveFormLocation_2,
+            )
+        )
 
         # test only laser 1
         laser.location = [LocationOne(power=1)]
 
-        generate_trials = GenerateTrials(MagicMock(), self.task_model, self.session_model, opto_model)
+        generate_trials = GenerateTrials(
+            MagicMock(), self.task_model, self.session_model, opto_model
+        )
         generate_trials.selected_condition = laser
         generate_trials._GetLaserWaveForm()
 
@@ -503,7 +574,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_1"
         old_generate_trials.TP_Laser1_power_1 = f"[{laser.location[0].power}]"
-        old_generate_trials.TP_Laser2_power_1 = f"[0]"
+        old_generate_trials.TP_Laser2_power_1 = "[0]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
         old_generate_trials.TP_Frequency_1 = 0
@@ -516,15 +587,25 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_SampleFrequency = opto_model.sample_frequency
         old_generate_trials._GetLaserWaveForm()
 
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_1,
-                                       generate_trials.WaveFormLocation_1))
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_2,
-                                       generate_trials.WaveFormLocation_2))
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_1,
+                generate_trials.WaveFormLocation_1,
+            )
+        )
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_2,
+                generate_trials.WaveFormLocation_2,
+            )
+        )
 
         # test only laser 2
         laser.location = [LocationTwo(power=1)]
 
-        generate_trials = GenerateTrials(MagicMock(), self.task_model, self.session_model, opto_model)
+        generate_trials = GenerateTrials(
+            MagicMock(), self.task_model, self.session_model, opto_model
+        )
         generate_trials.selected_condition = laser
         generate_trials._GetLaserWaveForm()
 
@@ -533,7 +614,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -547,15 +628,25 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_SampleFrequency = opto_model.sample_frequency
         old_generate_trials._GetLaserWaveForm()
 
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_1,
-                                       generate_trials.WaveFormLocation_1))
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_2,
-                                       generate_trials.WaveFormLocation_2))
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_1,
+                generate_trials.WaveFormLocation_1,
+            )
+        )
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_2,
+                generate_trials.WaveFormLocation_2,
+            )
+        )
 
         # test offset
         laser.start.offset = 50
 
-        generate_trials = GenerateTrials(MagicMock(), self.task_model, self.session_model, opto_model)
+        generate_trials = GenerateTrials(
+            MagicMock(), self.task_model, self.session_model, opto_model
+        )
         generate_trials.selected_condition = laser
         generate_trials._GetLaserWaveForm()
 
@@ -564,7 +655,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -578,16 +669,26 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_SampleFrequency = opto_model.sample_frequency
         old_generate_trials._GetLaserWaveForm()
 
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_1,
-                                       generate_trials.WaveFormLocation_1))
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_2,
-                                       generate_trials.WaveFormLocation_2))
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_1,
+                generate_trials.WaveFormLocation_1,
+            )
+        )
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_2,
+                generate_trials.WaveFormLocation_2,
+            )
+        )
 
         # test ramp down
         laser.start.offset = 0
         laser.protocol.ramp_down = 2
 
-        generate_trials = GenerateTrials(MagicMock(), self.task_model, self.session_model, opto_model)
+        generate_trials = GenerateTrials(
+            MagicMock(), self.task_model, self.session_model, opto_model
+        )
         generate_trials.selected_condition = laser
         generate_trials._GetLaserWaveForm()
 
@@ -596,7 +697,7 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.SelctedCondition = 1
         old_generate_trials.TP_LaserColor_1 = laser.color
         old_generate_trials.TP_Location_1 = "Laser_2"
-        old_generate_trials.TP_Laser1_power_1 = f"[0]"
+        old_generate_trials.TP_Laser1_power_1 = "[0]"
         old_generate_trials.TP_Laser2_power_1 = f"[{laser.location[0].power}]"
         old_generate_trials.TP_Duration_1 = laser.duration
         old_generate_trials.TP_Protocol_1 = laser.protocol.name
@@ -610,10 +711,18 @@ class TestOptogeneticLogic(unittest.TestCase):
         old_generate_trials.TP_SampleFrequency = opto_model.sample_frequency
         old_generate_trials._GetLaserWaveForm()
 
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_1,
-                                       generate_trials.WaveFormLocation_1))
-        self.assertTrue(np.array_equal(old_generate_trials.WaveFormLocation_2,
-                                       generate_trials.WaveFormLocation_2))
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_1,
+                generate_trials.WaveFormLocation_1,
+            )
+        )
+        self.assertTrue(
+            np.array_equal(
+                old_generate_trials.WaveFormLocation_2,
+                generate_trials.WaveFormLocation_2,
+            )
+        )
 
         # x = np.linspace(0, laser.duration, len(old_generate_trials.WaveFormLocation_1))
         #
