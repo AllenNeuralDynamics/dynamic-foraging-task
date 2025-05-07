@@ -243,6 +243,10 @@ class Window(QMainWindow):
         # initialize thread lock
         self.data_lock = threading.Lock()
 
+        # intialize behavior baseline time flag
+        self.behavior_baseline_period = threading.Event()
+        self.baseline_min_elapsed = 0
+
         # create bias indicator
         self.bias_n_size = 200
         self.bias_indicator = BiasIndicator(
@@ -2761,6 +2765,7 @@ class Window(QMainWindow):
                         "laser_2_calibration_power",
                         "laser_1_calibration_voltage",
                         "laser_2_calibration_voltage",
+                        "hab_time_box"
                     }:
                         continue
                     if child.objectName() == "UncoupledReward":
@@ -4006,11 +4011,11 @@ class Window(QMainWindow):
                 ):
                     self._AddWaterLogResult(session)
                 elif self.BaseWeight.text() == "" or self.WeightAfter.text() == "":
-                    logging.error(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims "
-                                  f"due do unrecorded weight information.")
+                    logging.warning(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims"
+                                   f" due do unrecorded weight information.")
                 elif session is None:
-                    logging.error(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims "
-                                 f"due do metadata generation failure.")
+                    logging.warning(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims"
+                                  f" due do metadata generation failure.")
         except Exception as e:
             logging.warning(
                 "Meta data is not saved!",
@@ -5457,6 +5462,7 @@ class Window(QMainWindow):
 
         self.unsaved_data = False
         self.ManualWaterVolume = [0, 0]
+        self.baseline_min_elapsed = 0   # variable to track baseline time elapsed before session for start/stop
 
         # Clear Plots
         if hasattr(self, "PlotM") and self.clear_figure_after_save:
@@ -5893,57 +5899,6 @@ class Window(QMainWindow):
             elif self.behavior_session_model.allow_dirty_repo is None:
                 logging.error("Could not check for untracked local changes")
 
-            if self.PhotometryB.currentText() == "on" and (
-                not self.FIP_started
-            ):
-                reply = QMessageBox.critical(
-                    self,
-                    "Box {}, Start".format(self.box_letter),
-                    'Photometry is set to "on", but the FIP workflow has not been started',
-                    QMessageBox.Ok,
-                )
-                self.Start.setChecked(False)
-                logging.info(
-                    "Cannot start session without starting FIP workflow"
-                )
-                return
-
-            # Check if photometry excitation is running or not
-            if self.PhotometryB.currentText() == "on" and (
-                not self.StartExcitation.isChecked()
-            ):
-                logging.warning(
-                    'photometry is set to "on", but excitation is not running'
-                )
-
-                reply = QMessageBox.question(
-                    self,
-                    "Box {}, Start".format(self.box_letter),
-                    'Photometry is set to "on", but excitation is not running. Start excitation now?',
-                    QMessageBox.Yes | QMessageBox.No,
-                    QMessageBox.Yes,
-                )
-                if reply == QMessageBox.Yes:
-                    self.StartExcitation.setChecked(True)
-                    logging.info("User selected to start excitation")
-                    started = self._StartExcitation()
-                    if started == 0:
-                        reply = QMessageBox.critical(
-                            self,
-                            "Box {}, Start".format(self.box_letter),
-                            "Could not start excitation, therefore cannot start the session",
-                            QMessageBox.Ok,
-                        )
-                        logging.info(
-                            "could not start session, due to failure to start excitation"
-                        )
-                        self.Start.setChecked(False)
-                        return
-                else:
-                    logging.info("User selected not to start excitation")
-                    self.Start.setChecked(False)
-                    return
-
             # disable sound button
             self.sound_button.setEnabled(False)
 
@@ -5959,6 +5914,9 @@ class Window(QMainWindow):
             self._set_metadata_enabled(False)
             self.session_run = True  # session has been started
             self.keyPressEvent(allow_reset=True)
+
+            # set flag to perform habituation period
+            self.behavior_baseline_period.set()
 
         else:
             # Prompt user to confirm stopping trials
@@ -5991,6 +5949,7 @@ class Window(QMainWindow):
 
             self.session_end_tasks()
             self.sound_button.setEnabled(True)
+            self.behavior_baseline_period.clear()   # set flag to break out of habituation period
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -6137,12 +6096,21 @@ class Window(QMainWindow):
             workerStartTrialLoop1 = self.workerStartTrialLoop1
             worker_save = self.worker_save
 
+        # pause for specified habituation time
+        if self.baseline_min_elapsed <= self.hab_time_box.value():
+            self.wait_for_baseline()
+
         # collecting the base signal for photometry. Only run once
         if (
-            self.Start.isChecked()
-            and self.PhotometryB.currentText() == "on"
-            and self.PhotometryRun == 0
+                self.Start.isChecked()
+                and self.PhotometryB.currentText() == "on"
+                and self.PhotometryRun == 0
         ):
+            # check if workflow is running and start photometry timer
+            if not self.photometry_workflow_running():
+                self.Start.setChecked(False)
+                return
+
             logging.info("Starting photometry baseline timer")
             self.finish_Timer = 0
             self.PhotometryRun = 1
@@ -6322,16 +6290,52 @@ class Window(QMainWindow):
         else:
             logging.info("No active session logger")
 
+    def wait_for_baseline(self) -> None:
+        """
+            Function to wait for a baseline time before behavior
+        """
+
+        # pause for specified habituation time
+        start_time = time.time()
+
+        # create habituation timer label and update every minute
+        hab_lab = QLabel()
+        hab_lab.setStyleSheet(f"color: {self.default_warning_color};")
+        self.warning_widget.layout().insertWidget(0, hab_lab)
+        update_hab_timer = QtCore.QTimer(
+            timeout=lambda: hab_lab.setText(f"Time elapsed: "
+                                            f"{round((self.baseline_min_elapsed * 60) // 60)} minutes"
+                                            f" {round((self.baseline_min_elapsed * 60) % 60)} seconds"),
+            interval=1000)
+        update_hab_timer.start()
+
+        logging.info(f"Waiting {round(self.hab_time_box.value() - self.baseline_min_elapsed)} min before starting "
+                     f"session.")
+
+        elapsed = self.baseline_min_elapsed
+        while self.baseline_min_elapsed < self.hab_time_box.value() and self.behavior_baseline_period.is_set():
+            QApplication.processEvents()
+            # update baseline time elapsed before session for start/stop logic
+            self.baseline_min_elapsed = ((time.time() - start_time) / 60) + elapsed
+
+        update_hab_timer.stop()
+        self.behavior_baseline_period.clear()
+
+
     def _StartTrialLoop(self, GeneratedTrials, worker1, worker_save):
-        if self.Start.isChecked():
-            logging.info("starting trial loop")
-        else:
+
+        if not self.Start.isChecked():
             logging.info("ending trial loop")
+            return
+        
+        logging.info("starting trial loop")
 
         # Track elapsed time in case Bonsai Stalls
         last_trial_start = time.time()
         stall_iteration = 1
         stall_duration = 5 * 60
+
+        logging.info(f"Starting session.")
 
         while self.Start.isChecked():
             QApplication.processEvents()
