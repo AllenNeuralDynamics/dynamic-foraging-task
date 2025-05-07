@@ -46,14 +46,13 @@ from aind_data_schema.core.session import (
     TriggerType,
 )
 from aind_data_schema_models.modalities import Modality
-from aind_data_schema_models.organizations import Organization
-from aind_data_schema_models.pid_names import PIDName
 from aind_data_schema_models.platforms import Platform
 from aind_data_schema_models.units import (
     FrequencyUnit,
     PowerUnit,
     SizeUnit,
     SoundIntensityUnit,
+    TimeUnit
 )
 
 import foraging_gui
@@ -297,29 +296,6 @@ class generate_metadata:
         else:
             self.box_type = "Behavior"
 
-    def _get_funding_source(self):
-        """
-        Get the funding source
-        """
-        self.funding_source = [
-            Funding(
-                funder=getattr(
-                    Organization,
-                    self.name_mapper["institute"][
-                        self.Obj["meta_data_dialog"]["session_metadata"][
-                            "FundingSource"
-                        ]
-                    ],
-                ),
-                grant_number=self.Obj["meta_data_dialog"]["session_metadata"][
-                    "GrantNumber"
-                ],
-                fundee=self.Obj["meta_data_dialog"]["session_metadata"][
-                    "Fundee"
-                ],
-            )
-        ]
-
     def _get_platform(self):
         """
         Get the platform name. This should be improved in the future.
@@ -360,20 +336,6 @@ class generate_metadata:
         else:
             self.session_start_time = ""
             self.session_end_time = ""
-
-    def _get_investigators(self):
-        """
-        Get investigators
-        """
-        self.investigators = []
-        investigators = self.Obj["meta_data_dialog"]["session_metadata"][
-            "Investigators"
-        ].split(",")
-        for investigator in investigators:
-            if investigator != "":
-                self.investigators.append(
-                    PIDName(name=investigator, registry=self.orcid)
-                )
 
     def _save_rig_metadata(self):
         """
@@ -597,7 +559,7 @@ class generate_metadata:
                 r"[^\.\d]", "", self.Obj["WeightAfter"]
             )
 
-            # Typo
+        # Typo
         if "PtotocolID" in self.Obj["meta_data_dialog"]["session_metadata"]:
             self.Obj["meta_data_dialog"]["session_metadata"]["ProtocolID"] = (
                 self.Obj["meta_data_dialog"]["session_metadata"]["PtotocolID"]
@@ -640,6 +602,7 @@ class generate_metadata:
         self._get_water_calibration()
         self._get_opto_calibration()
         self.calibration = self.water_calibration + self.opto_calibration
+        self._get_behavior_software()
         self._get_behavior_stream()
         self._get_ephys_stream()
         self._get_ophys_stream()
@@ -857,6 +820,8 @@ class generate_metadata:
         if self.Obj["fiber_photometry_start_time"] == "":
             logging.info("No photometry data stream detected!")
             return
+        if self.Obj["fiber_photometry_end_time"] == "":
+            self.Obj["fiber_photometry_end_time"] = str(datetime.now())
         self._get_photometry_light_sources_config()
         self._get_photometry_detectors()
         self._get_fiber_connections()
@@ -953,7 +918,8 @@ class generate_metadata:
                     DetectorConfig(
                         name=current_detector["name"],
                         exposure_time=exposure_time,
-                        trigger_type=TriggerType.INTERNAL,
+                        exposure_time_unit=TimeUnit.US,
+                        trigger_type=TriggerType.EXTERNAL,
                     )
                 )
 
@@ -970,7 +936,7 @@ class generate_metadata:
                 "LightEmittingDiode",
                 "Light emitting diode",
             ]:
-                if current_light_source["notes"] != None:
+                if current_light_source["notes"] is not None:
                     if "camera" in current_light_source["notes"]:
                         continue
                 self.fib_light_sources_config.append(
@@ -1417,7 +1383,6 @@ class generate_metadata:
             daq_names = self.name_mapper["rig_daq_names_janelia_lick_detector"]
 
         self.behavior_streams = []
-        self._get_behavior_software()
         self.behavior_streams.append(
             Stream(
                 stream_modalities=[Modality.BEHAVIOR],
@@ -1438,16 +1403,8 @@ class generate_metadata:
         """
         self.behavior_software = []
         try:
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            os.chdir(
-                script_dir
-            )  # Change to the directory of the current script
             # Get information about task repository
-            commit_ID = (
-                subprocess.check_output(["git", "rev-parse", "HEAD"])
-                .decode("ascii")
-                .strip()
-            )
+            commit_ID = self.session_model.commit_hash
             current_branch = (
                 subprocess.check_output(["git", "branch", "--show-current"])
                 .decode("ascii")
@@ -1466,7 +1423,7 @@ class generate_metadata:
         self.behavior_software.append(
             Software(
                 name="dynamic-foraging-task",
-                version=f'behavior branch:{self.Obj["current_branch"]}   commit ID:{self.Obj["commit_ID"]}    version:{self.Obj["version"]}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}',
+                version=f"behavior branch:{self.Obj['current_branch']}   commit ID:{self.Obj['commit_ID']}    version:{self.Obj['version']}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}",
                 url=self.Obj["repo_url"],
             )
         )
@@ -1482,7 +1439,7 @@ class generate_metadata:
         self._parse_opto_calibration()
         self.opto_calibration = []
         for current_calibration in self.parsed_optocalibration:
-            description = f'Optogenetic calibration for {current_calibration["laser name"]} {current_calibration["Color"]} Laser_{current_calibration["Laser tag"]}. Protocol: {current_calibration["Protocol"]}. Frequency: {current_calibration["Frequency"]}.'
+            description = f"Optogenetic calibration for {current_calibration['laser name']} {current_calibration['Color']} Laser_{current_calibration['Laser tag']}. Protocol: {current_calibration['Protocol']}. Frequency: {current_calibration['Frequency']}."
             self.opto_calibration.append(
                 Calibration(
                     calibration_date=datetime.strptime(
@@ -1519,7 +1476,6 @@ class generate_metadata:
                 RecentLaserCalibration = self.Obj["LaserCalibrationResults"][
                     latest_calibration_date
                 ]
-            no_calibration = False
             if not RecentLaserCalibration == {}:
                 if color in RecentLaserCalibration.keys():
                     for Protocol in RecentLaserCalibration[color]:
@@ -1634,12 +1590,6 @@ class generate_metadata:
                                     "Power": power,
                                 }
                             )
-                    else:
-                        no_calibration = True
-                else:
-                    no_calibration = True
-            else:
-                no_calibration = True
 
     def _get_laser_names_from_rig_metadata(self, Obj=None):
         """

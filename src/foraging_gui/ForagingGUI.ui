@@ -227,6 +227,28 @@
           </property>
          </widget>
         </item>
+        <item row="2" column="3">
+         <widget class="QSpinBox" name="hab_time_box">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>90</number>
+           </property>
+           <property name="suffix">
+           <string> min</string>
+          </property>
+          <property name="prefix">
+           <string> Baseline: </string>
+          </property>
+         </widget>
+        </item>
         <item row="2" column="4">
          <widget class="QPushButton" name="pushButton_streamlit">
            <property name="geometry">

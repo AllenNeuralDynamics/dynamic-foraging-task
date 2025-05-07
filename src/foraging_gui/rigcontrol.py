@@ -82,6 +82,15 @@ class RigClient:
     def receive2(self):
         return self.msgs.get(block=False)
 
+    def TriggerGoCue(self, value):
+        self.send("/TriggerGoCue", value)
+
+    def set_attenuation_left(self, value: int):
+        self.send("/AttenuationLeft", value)
+
+    def set_attenuation_right(self, value: int):
+        self.send("/AttenuationRight", value)
+
     def Left_Bait(self, value):
         self.send("/Left_Bait", value)
 

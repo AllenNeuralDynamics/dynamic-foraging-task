@@ -1,4 +1,5 @@
 import logging
+from threading import Lock
 from typing import List, Union
 
 import numpy as np
@@ -28,20 +29,27 @@ class BiasIndicator(QMainWindow):
     biasOver = pyqtSignal(float, int)  # emit bias and trial number it occurred
     biasError = pyqtSignal(str, int)  # emit error and trial number it occurred
     biasValue = pyqtSignal(
-        float, int
-    )  # emit bias and trial number it occurred
+        float, list, int
+    )  # emit bias, confidence intervals, and trial number it occurred
 
     def __init__(
-        self, bias_threshold: float = 0.7, x_range: int = 15, *args, **kwargs
+        self,
+        bias_threshold: float = 0.7,
+        x_range: int = 15,
+        data_lock: Lock = Lock(),
+        *args,
+        **kwargs,
     ):
         """
         :param bias_limit: decimal to alert user if bias is above between 0 and 1
         :param x_range: total number of values displayed on the x axis as graph is scrolling
+        :param data_lock: optional data lock to use when manipulating data
         """
 
         super().__init__(*args, **kwargs)
         self.log = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self.bias_threshold = bias_threshold
+        self.lock = data_lock
 
         # initialize biases as empy list and x_range
         self._biases = []
@@ -109,10 +117,10 @@ class BiasIndicator(QMainWindow):
         # create bias label
         self.bias_label = TextItem(color="black", anchor=(-0.02, 0))
         self.biasValue.connect(
-            lambda bias, trial: self.bias_label.setText(str(round(bias, 3)))
+            lambda bias, c, trial: self.bias_label.setText(str(round(bias, 3)))
         )
         self.biasValue.connect(
-            lambda bias, trial: self.bias_label.setPos(
+            lambda bias, c, trial: self.bias_label.setPos(
                 self._current_bias_point.pos[0][0], bias
             )
         )
@@ -194,18 +202,18 @@ class BiasIndicator(QMainWindow):
             # Determine if we have valid data to fit model
             unique = np.unique(choice_history[~np.isnan(choice_history)])
             if len(unique) == 2:
-                lr = fit_logistic_regression(
-                    choice_history=choice_history,
-                    reward_history=reward_history,
-                    n_trial_back=n_trial_back,
-                    selected_trial_idx=selected_trial_idx,
-                    cv=cv,
-                    fit_exponential=False,
-                )
+                with self.lock:
+                    lr = fit_logistic_regression(
+                        choice_history=choice_history,
+                        reward_history=reward_history,
+                        n_trial_back=n_trial_back,
+                        selected_trial_idx=selected_trial_idx,
+                        cv=cv,
+                        fit_exponential=False,
+                    )
                 bias = lr["df_beta"].loc["bias"]["cross_validation"].values[0]
                 self.log.info(f"Bias: {bias} Trial Number: {trial_num}")
                 self._biases.append(bias)
-                self.biasValue.emit(bias, trial_num)
 
                 # add confidence intervals
                 upper = (
@@ -233,6 +241,8 @@ class BiasIndicator(QMainWindow):
 
             else:  # skip bias calculation if no conditions are met
                 return
+
+            self.biasValue.emit(bias, [lower, upper], trial_num)
 
             # update
             self._upper_scatter_item.setData(

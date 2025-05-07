@@ -44,7 +44,6 @@ class PlotV(FigureCanvas):
         self.setMinimumWidth(650)
 
     def _Update(self, GeneratedTrials=None, Channel=None):
-
         if GeneratedTrials is None:
             # If we have no trials, clear the plots
             self.ax1.cla()
@@ -190,32 +189,12 @@ class PlotV(FigureCanvas):
 
         # Colors for different optogenetics conditions
         color_mapping = {
-            "ConditionLaserColorOne": (
-                0,
-                191 / 255,
-                255 / 255,
-                1,
-            ),  # Deep Sky Blue
-            "ConditionLaserColorTwo": (
-                255 / 255,
-                127 / 255,
-                80 / 255,
-                1,
-            ),  # Coral Red
-            "ConditionLaserColorThree": (
-                34 / 255,
-                139 / 255,
-                34 / 255,
-                1,
-            ),  # Forest Green
-            "ConditionLaserColorFour": (
-                218 / 255,
-                165 / 255,
-                32 / 255,
-                1,
-            ),  # Goldenrod
-            "ConditionLaserColorFive": (255 / 255, 0 / 255, 0 / 255, 1),  # Red
-            "ConditionLaserColorSix": (0 / 255, 0 / 255, 255 / 255, 1),  # Blue
+            "Condition1": (0, 191 / 255, 255 / 255, 1),  # Deep Sky Blue
+            "Condition2": (255 / 255, 127 / 255, 80 / 255, 1),  # Coral Red
+            "Condition3": (34 / 255, 139 / 255, 34 / 255, 1),  # Forest Green
+            "Condition4": (218 / 255, 165 / 255, 32 / 255, 1),  # Goldenrod
+            "Condition5": (255 / 255, 0 / 255, 0 / 255, 1),  # Red
+            "Condition6": (0 / 255, 0 / 255, 255 / 255, 1),  # Blue
         }
 
         # Define trial types
@@ -225,7 +204,7 @@ class PlotV(FigureCanvas):
                 self.B_RewardedHistory[0] == True,
             )
         )
-        LeftChoice_UnRewarded = np.where(
+        np.where(
             np.logical_and(
                 self.B_AnimalResponseHistory == 0,
                 self.B_RewardedHistory[0] == False,
@@ -237,7 +216,7 @@ class PlotV(FigureCanvas):
                 self.B_RewardedHistory[1] == True,
             )
         )
-        RightChoice_UnRewarded = np.where(
+        np.where(
             np.logical_and(
                 self.B_AnimalResponseHistory == 1,
                 self.B_RewardedHistory[1] == False,
@@ -299,8 +278,8 @@ class PlotV(FigureCanvas):
         NoResponse = np.where(self.B_AnimalResponseHistory == 2)
 
         if self.B_BaitHistory.shape[1] > self.B_AnimalResponseHistory.shape[0]:
-            LeftBait = np.where(self.B_BaitHistory[0][:-1] == True)
-            RightBait = np.where(self.B_BaitHistory[1][:-1] == True)
+            LeftBait = np.where(self.B_BaitHistory[0][:-1]==True)
+            RightBait = np.where(self.B_BaitHistory[1][:-1]==True)
             # plot the upcoming trial start time
             if self.B_CurrentTrialN > 0:
                 NewTrialStart = np.array(self.B_BTime[-1])

@@ -59,7 +59,6 @@ def build_rig_json(
 
 
 def build_rig_json_core(settings, water_calibration, laser_calibration):
-
     # Set up
     ###########################################################################
     logging.info("building rig json")
@@ -673,13 +672,15 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
 def parse_water_calibration(water_calibration):
     calibrations = []
     dates = sorted(water_calibration.keys())
-    for date in dates[::-1]:
-        if "Left" in water_calibration[date]:
+    for this_date in dates[::-1]:
+        if "Left" in water_calibration[this_date]:
             left_times, left_volumes = GetWaterCalibration(
-                water_calibration, date, "Left"
+                water_calibration, this_date, "Left"
             )
             left = d.Calibration(
-                calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
+                calibration_date=datetime.strptime(
+                    this_date, "%Y-%m-%d"
+                ).date(),
                 device_name="Lick spout Left",
                 description="Water calibration for Lick spout Left. The input is the valve open time in seconds and the output is the volume of water delivered in microliters.",
                 input={"valve open time (s):": left_times},
@@ -687,12 +688,14 @@ def parse_water_calibration(water_calibration):
             )
             calibrations.append(left)
             break
-        elif "SpotLeft" in water_calibration[date]:
+        elif "SpotLeft" in water_calibration[this_date]:
             times, volumes = GetWaterCalibration(
-                water_calibration, date, "SpotLeft"
+                water_calibration, this_date, "SpotLeft"
             )
             left = d.Calibration(
-                calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
+                calibration_date=datetime.strptime(
+                    this_date, "%Y-%m-%d"
+                ).date(),
                 device_name="Lick spout Left",
                 description="Spot check of water calibration for Lick spout Left. "
                 + "The input is the valve open time in seconds and the output is the "
@@ -704,13 +707,15 @@ def parse_water_calibration(water_calibration):
             )
             calibrations.append(left)
 
-    for date in dates[::-1]:
-        if "Right" in water_calibration[date]:
+    for this_date in dates[::-1]:
+        if "Right" in water_calibration[this_date]:
             right_times, right_volumes = GetWaterCalibration(
-                water_calibration, date, "Right"
+                water_calibration, this_date, "Right"
             )
             right = d.Calibration(
-                calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
+                calibration_date=datetime.strptime(
+                    this_date, "%Y-%m-%d"
+                ).date(),
                 device_name="Lick spout Right",
                 description="Water calibration for Lick spout Right. The input is the valve open time in seconds and the output is the volume of water delivered in microliters.",
                 input={"valve open time (s):": right_times},
@@ -718,12 +723,14 @@ def parse_water_calibration(water_calibration):
             )
             calibrations.append(right)
             break
-        elif "SpotRight" in water_calibration[date]:
+        elif "SpotRight" in water_calibration[this_date]:
             times, volumes = GetWaterCalibration(
-                water_calibration, date, "SpotRight"
+                water_calibration, this_date, "SpotRight"
             )
             right = d.Calibration(
-                calibration_date=datetime.strptime(date, "%Y-%m-%d").date(),
+                calibration_date=datetime.strptime(
+                    this_date, "%Y-%m-%d"
+                ).date(),
                 device_name="Lick spout Right",
                 description="Spot check of water calibration for Lick spout Right. "
                 + "The input is the valve open time in seconds and the output is the "
@@ -823,17 +830,17 @@ def parse_laser_calibration(laser_calibration):
 
 def get_laser_names(laser_calibration):
     names = []
-    for date in laser_calibration:
-        names.extend(list(laser_calibration[date].keys()))
+    for this_date in laser_calibration:
+        names.extend(list(laser_calibration[this_date].keys()))
     return np.unique(names)
 
 
 def FindLatestCalibrationDate(laser, laser_calibration):
     """find the latest calibration date for the selected laser"""
     dates = []
-    for date in laser_calibration:
-        if laser in laser_calibration[date].keys():
-            dates.append(date)
+    for this_date in laser_calibration:
+        if laser in laser_calibration[this_date].keys():
+            dates.append(this_date)
     sorted_dates = sorted(dates)
     if sorted_dates == []:
         return "NA"

@@ -23,13 +23,13 @@ class RandomWalkReward:
 
         self.__dict__.update(locals())
 
-        if not type(sigma) == list:
+        if not isinstance(sigma, list):
             sigma = [sigma, sigma]  # Backward compatibility
 
-        if not type(p_min) == list:
+        if not isinstance(p_min, list):
             p_min = [p_min, p_min]  # Backward compatibility
 
-        if not type(p_max) == list:
+        if not isinstance(p_max, list):
             p_max = [p_max, p_max]  # Backward compatibility
 
         self.p_min, self.p_max, self.sigma, self.mean = (

@@ -38,7 +38,6 @@ if PLATFORM == "win32":
 VID_NEWSCALE = 0x10C4
 PID_NEWSCALE = 0xEA61
 
-
 class GenerateTrials:
 
     def __init__(
@@ -317,33 +316,33 @@ class GenerateTrials:
 
         control_trial = 0
         self.opto_error_tag = 0
-        # try:
-        if self.opto_model.laser_colors != []:  # optogenetics is turned on
-            # select the current optogenetics condition
-            self._SelectOptogeneticsCondition()
-            # session control is regarded as off when the optogenetics is turned off
-            self.B_session_control_state.append(self.session_control_state)
-            if self.selected_condition is not None:
-                self.LaserOn = 1
-                self.B_LaserOnTrial.append(self.LaserOn)
-                # generate the optogenetics waveform of the next trial
-                self._GetLaserWaveForm()
-                self.B_SelectedCondition.append(self.selected_condition)
+        try:
+            if self.opto_model.laser_colors != []:  # optogenetics is turned on
+                # select the current optogenetics condition
+                self._SelectOptogeneticsCondition()
+                # session control is regarded as off when the optogenetics is turned off
+                self.B_session_control_state.append(self.session_control_state)
+                if self.selected_condition is not None:
+                    self.LaserOn = 1
+                    self.B_LaserOnTrial.append(self.LaserOn)
+                    # generate the optogenetics waveform of the next trial
+                    self._GetLaserWaveForm()
+                    self.B_SelectedCondition.append(self.selected_condition)
+                else:
+                    # this is the control trial
+                    control_trial = 1
             else:
-                # this is the control trial
+                # optogenetics is turned off
                 control_trial = 1
-        else:
-            # optogenetics is turned off
+                self.B_session_control_state.append(0)
+            self.B_opto_error.append(self.opto_error_tag)
+        except Exception as e:
+            #optogenetics is turned off
             control_trial = 1
+            self.B_opto_error.append(1)
             self.B_session_control_state.append(0)
-        self.B_opto_error.append(self.opto_error_tag)
-        # except Exception as e:
-        # optogenetics is turned off
-        # control_trial = 1
-        # self.B_opto_error.append(1)
-        # self.B_session_control_state.append(0)
-        # Catch the exception and print error information
-        # logging.error(str(e))
+            #Catch the exception and print error information
+            logging.error(str(e))
         if control_trial == 1:
             self.LaserOn = 0
             self.B_LaserOnTrial.append(self.LaserOn)
@@ -1199,7 +1198,7 @@ class GenerateTrials:
 
     def _LickSta(self, Trials=None):
         """Perform lick stats for the input trials"""
-        if Trials == None:  # could receive multiple trials
+        if Trials is None:  # could receive multiple trials
             Trials = self.B_CurrentTrialN - 1
         # combine all of the left and right licks
         self.AllLicksInd = np.concatenate(
@@ -2203,6 +2202,8 @@ class GenerateTrials:
             self.win.sessionEnded.emit()
             self.win.write_session_to_slims(self.session_model.subject)
 
+            self.win.session_end_tasks()
+
     def _CheckAutoWater(self):
         """Check if it should be an auto water trial"""
 
@@ -2424,7 +2425,7 @@ class GenerateTrials:
         """
         # test
         import matplotlib.pyplot as plt
-        plt.plot(np.arange(0, length, length / resolution), self.my_wave)   
+        plt.plot(np.arange(0, length, length / resolution), self.my_wave)
         plt.show()
         """
 
@@ -2545,7 +2546,7 @@ class GenerateTrials:
         ]:
             self.CurrentBait = self.CurrentBait | self.B_Baited
         # For task rewardN, if this is the "initial N trials" of the active side, no bait will be be given.
-        if self.BaitPermitted is False:
+        if self.BaitPermitted == False:
             # no reward in the active side
             max_index = np.argmax(self.B_CurrentRewardProb)
             self.CurrentBait[max_index] = False
@@ -2691,7 +2692,7 @@ class GenerateTrials:
         """Simulate animal's response"""
 
         # win stay, lose switch forager
-        if self.win.actionWin_stay_lose_switch.isChecked() == True:
+        if self.win.actionWin_stay_lose_switch.isChecked():
             if self.B_CurrentTrialN >= 2:
                 if np.random.random(1) < 0.1:  # no response
                     self.B_AnimalCurrentResponse = 2
@@ -2716,7 +2717,7 @@ class GenerateTrials:
             else:
                 self.B_AnimalCurrentResponse = random.choice(range(2))
         # random forager
-        elif self.win.actionRandom_choice.isChecked() == True:
+        elif self.win.actionRandom_choice.isChecked():
             if np.random.random(1) < 0.1:  # no response
                 self.B_AnimalCurrentResponse = 2
             else:
@@ -2726,7 +2727,7 @@ class GenerateTrials:
             self.B_CurrentRewarded[0] = False
             self.B_CurrentRewarded[1] = False
             self._add_one_trial()
-        elif self.B_AnimalCurrentResponse == 0 and self.CurrentBait[0] == True:
+        elif self.B_AnimalCurrentResponse == 0 and self.CurrentBait[0]:
             self.B_Baited[0] = False
             self.B_CurrentRewarded[1] = False
             self.B_CurrentRewarded[0] = True
@@ -2736,7 +2737,7 @@ class GenerateTrials:
             self.B_Baited[0] = False
             self.B_CurrentRewarded[0] = False
             self.B_CurrentRewarded[1] = False
-        elif self.B_AnimalCurrentResponse == 1 and self.CurrentBait[1] == True:
+        elif self.B_AnimalCurrentResponse == 1 and self.CurrentBait[1]:
             self.B_Baited[1] = False
             self.B_CurrentRewarded[0] = False
             self.B_CurrentRewarded[1] = True
@@ -2829,11 +2830,10 @@ class GenerateTrials:
                         self.BlockLenHistory[i][-1] + 1
                     )
 
-    def _GetAnimalResponse(self, Channel1, Channel3):
+    def _GetAnimalResponse(self, Channel1, Channel3, data_lock):
         """Get the animal's response"""
-
         self._CheckSimulationSession()
-        if self.CurrentSimulation == True:
+        if self.CurrentSimulation:
             self._SimulateResponse()
             return
         # set the valve time of auto water
@@ -2887,30 +2887,35 @@ class GenerateTrials:
             elif Rec[0].address == "/RewardOutcome":
                 TrialOutcome = Rec[1][1][0]
                 if TrialOutcome == "NoResponse":
-                    self.B_AnimalCurrentResponse = 2
-                    self.B_CurrentRewarded[0] = False
-                    self.B_CurrentRewarded[1] = False
-                    self._add_one_trial()
+                    with data_lock:
+                        self.B_AnimalCurrentResponse = 2
+                        self.B_CurrentRewarded[0] = False
+                        self.B_CurrentRewarded[1] = False
+                        self._add_one_trial()
                 elif TrialOutcome == "RewardLeft":
-                    self.B_AnimalCurrentResponse = 0
-                    self.B_Baited[0] = False
-                    self.B_CurrentRewarded[1] = False
-                    self.B_CurrentRewarded[0] = True
+                    with data_lock:
+                        self.B_AnimalCurrentResponse = 0
+                        self.B_Baited[0] = False
+                        self.B_CurrentRewarded[1] = False
+                        self.B_CurrentRewarded[0] = True
                 elif TrialOutcome == "ErrorLeft":
-                    self.B_AnimalCurrentResponse = 0
-                    self.B_Baited[0] = False
-                    self.B_CurrentRewarded[0] = False
-                    self.B_CurrentRewarded[1] = False
+                    with data_lock:
+                        self.B_AnimalCurrentResponse = 0
+                        self.B_Baited[0] = False
+                        self.B_CurrentRewarded[0] = False
+                        self.B_CurrentRewarded[1] = False
                 elif TrialOutcome == "RewardRight":
-                    self.B_AnimalCurrentResponse = 1
-                    self.B_Baited[1] = False
-                    self.B_CurrentRewarded[0] = False
-                    self.B_CurrentRewarded[1] = True
+                    with data_lock:
+                        self.B_AnimalCurrentResponse = 1
+                        self.B_Baited[1] = False
+                        self.B_CurrentRewarded[0] = False
+                        self.B_CurrentRewarded[1] = True
                 elif TrialOutcome == "ErrorRight":
-                    self.B_AnimalCurrentResponse = 1
-                    self.B_Baited[1] = False
-                    self.B_CurrentRewarded[0] = False
-                    self.B_CurrentRewarded[1] = False
+                    with data_lock:
+                        self.B_AnimalCurrentResponse = 1
+                        self.B_Baited[1] = False
+                        self.B_CurrentRewarded[0] = False
+                        self.B_CurrentRewarded[1] = False
                 B_CurrentRewarded = self.B_CurrentRewarded
                 B_AnimalCurrentResponse = self.B_AnimalCurrentResponse
             elif Rec[0].address == "/TrialEndTime":
@@ -2954,12 +2959,12 @@ class GenerateTrials:
                 Rec[0].address == "/DOPort2Output"
             ):  # this port is used to trigger optogenetics aligned to Go cue
                 B_DOPort2Output = Rec[1][1][0]
-                self.B_DOPort2Output = np.append(
-                    self.B_DOPort2Output, B_DOPort2Output
-                )
+                with data_lock:
+                    self.B_DOPort2Output = np.append(
+                        self.B_DOPort2Output, B_DOPort2Output
+                    )
             elif Rec[0].address == "/ITIStartTimeHarp":
                 TrialStartTimeHarp = Rec[1][1][0]
-
             elif Rec[0].address == "/BehaviorEvent":
                 if in_delay == 1:
                     DelayStartTimeHarp.append(Rec[1][1][0])
@@ -2975,44 +2980,44 @@ class GenerateTrials:
                     current_receiveN += 1
             if current_receiveN == ReceiveN:
                 break
-
-        self.B_RewardedHistory = np.append(
-            self.B_RewardedHistory, B_CurrentRewarded, axis=1
-        )
-        self.B_AnimalResponseHistory = np.append(
-            self.B_AnimalResponseHistory, B_AnimalCurrentResponse
-        )
-        # get the event harp time
-        self.B_TrialStartTimeHarp = np.append(
-            self.B_TrialStartTimeHarp, TrialStartTimeHarp
-        )
-        self.B_DelayStartTimeHarp = np.append(
-            self.B_DelayStartTimeHarp, DelayStartTimeHarp[0]
-        )
-        self.B_DelayStartTimeHarpComplete.append(DelayStartTimeHarp)
-        self.B_TrialEndTimeHarp = np.append(
-            self.B_TrialEndTimeHarp, TrialEndTimeHarp
-        )
-        self.B_GoCueTimeBehaviorBoard = np.append(
-            self.B_GoCueTimeBehaviorBoard, GoCueTimeBehaviorBoard
-        )
-        self.B_GoCueTimeSoundCard = np.append(
-            self.B_GoCueTimeSoundCard, GoCueTimeSoundCard
-        )
-        # get the event time
-        self.B_TrialStartTime = np.append(
-            self.B_TrialStartTime, TrialStartTime
-        )
-        self.B_DelayStartTime = np.append(
-            self.B_DelayStartTime, DelayStartTime[0]
-        )
-        self.B_DelayStartTimeComplete.append(DelayStartTime)
-        self.B_TrialEndTime = np.append(self.B_TrialEndTime, TrialEndTime)
-        self.B_GoCueTime = np.append(self.B_GoCueTime, GoCueTime)
-        self.B_RewardOutcomeTime = np.append(
-            self.B_RewardOutcomeTime, RewardOutcomeTime
-        )
-        self.GetResponseFinish = 1
+        with data_lock:
+            self.B_RewardedHistory = np.append(
+                self.B_RewardedHistory, B_CurrentRewarded, axis=1
+            )
+            self.B_AnimalResponseHistory = np.append(
+                self.B_AnimalResponseHistory, B_AnimalCurrentResponse
+            )
+            # get the event harp time
+            self.B_TrialStartTimeHarp = np.append(
+                self.B_TrialStartTimeHarp, TrialStartTimeHarp
+            )
+            self.B_DelayStartTimeHarp = np.append(
+                self.B_DelayStartTimeHarp, DelayStartTimeHarp[0]
+            )
+            self.B_DelayStartTimeHarpComplete.append(DelayStartTimeHarp)
+            self.B_TrialEndTimeHarp = np.append(
+                self.B_TrialEndTimeHarp, TrialEndTimeHarp
+            )
+            self.B_GoCueTimeBehaviorBoard = np.append(
+                self.B_GoCueTimeBehaviorBoard, GoCueTimeBehaviorBoard
+            )
+            self.B_GoCueTimeSoundCard = np.append(
+                self.B_GoCueTimeSoundCard, GoCueTimeSoundCard
+            )
+            # get the event time
+            self.B_TrialStartTime = np.append(
+                self.B_TrialStartTime, TrialStartTime
+            )
+            self.B_DelayStartTime = np.append(
+                self.B_DelayStartTime, DelayStartTime[0]
+            )
+            self.B_DelayStartTimeComplete.append(DelayStartTime)
+            self.B_TrialEndTime = np.append(self.B_TrialEndTime, TrialEndTime)
+            self.B_GoCueTime = np.append(self.B_GoCueTime, GoCueTime)
+            self.B_RewardOutcomeTime = np.append(
+                self.B_RewardOutcomeTime, RewardOutcomeTime
+            )
+            self.GetResponseFinish = 1
 
     def _set_valve_time_left(self, channel3, LeftValue=0.01, Multiplier=1):
         """set the left valve time"""
@@ -3124,7 +3129,7 @@ class GenerateTrials:
     def _DeletePreviousLicks(self, Channel2):
         """Delete licks from the previous session"""
         while not Channel2.msgs.empty():
-            Rec = Channel2.receive()
+            Channel2.receive()
 
     # get training parameters
     def _GetTrainingParameters(self, win):
@@ -3456,7 +3461,6 @@ class TimerWorker(QtCore.QObject):
 
 
 class EphysRecording:
-
     def __init__(self, open_ephys_machine_ip_address, mouse_id):
         """
         Runs an experiment with Open Ephys GUI,
