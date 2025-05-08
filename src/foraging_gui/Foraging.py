@@ -7051,7 +7051,7 @@ class Window(QMainWindow):
                 "capsule_id": capsule_id,
                 "mount": mount,
                 "destination": "//allen/aind/scratch/dynamic_foraging_rig_transfer",
-                "s3_bucket": "public",
+                "s3_bucket": "open",
                 "processor_full_name": "AIND Behavior Team",
                 "modalities": modalities,
                 "schemas": [
