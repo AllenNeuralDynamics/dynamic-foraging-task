@@ -68,6 +68,9 @@ class GenerateTrials:
             None  # percentage of cross side lick intervals under 100ms
         )
         self.B_Bias = np.array([0], dtype=np.float64)  # lick bias
+        self.B_Bias_CI = np.array(
+            [[0, 0]], dtype=np.float64
+        )  # lick bias confidence intervals
         self.B_RewardFamilies = self.win.RewardFamilies
         self.B_CurrentTrialN = (
             -1

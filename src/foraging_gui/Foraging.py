@@ -5380,18 +5380,6 @@ class Window(QMainWindow):
             # stop lick interval calculation
             self.GeneratedTrials.lick_interval_time.stop()
 
-        # validate behavior session model and document validation errors if any
-        try:
-            AindBehaviorSessionModel(
-                **self.behavior_session_model.model_dump()
-            )
-        except ValidationError as e:
-            logging.error(str(e), extra={"tags": [self.warning_log_tag]})
-
-        # save behavior session model
-        with open(self.behavior_session_modelJson, "w") as outfile:
-            outfile.write(self.behavior_session_model.model_dump_json())
-
     def log_session(self) -> None:
         """
         Setup a log handler to write logs during session to TrainingFolder
@@ -6150,7 +6138,7 @@ class Window(QMainWindow):
                     ),
                 ],
                 "schedule_time": schedule_time,
-                "project_name": self.project_name,
+                "project_name": self.Metadata_dialog.ProjectName.currentText(),
                 "script": {},
             }
 
