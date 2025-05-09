@@ -280,7 +280,7 @@
            <string> min</string>
           </property>
           <property name="prefix">
-           <string> Baseline: </string>
+           <string> Habituation: </string>
           </property>
          </widget>
         </item>
