@@ -1893,7 +1893,6 @@
      <string>File</string>
     </property>
     <addaction name="action_New"/>
-    <addaction name="action_continue_session"/>
     <addaction name="action_create_from_local_session"/>
     <addaction name="action_Save"/>
     <addaction name="action_Exit"/>
@@ -2028,7 +2027,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="action_New"/>
-   <addaction name="action_continue_session"/>
    <addaction name="action_Save"/>
    <addaction name="separator"/>
   </widget>
@@ -2105,18 +2103,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
-   </property>
-  </action>
-  <action name="action_continue_session">
-   <property name="icon">
-    <iconset>
-     <normaloff>resources/file-open.png</normaloff>resources/file-open.png</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Load and continue local session</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="action_create_from_local_session">

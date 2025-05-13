@@ -667,9 +667,6 @@ class Window(QMainWindow):
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
         self.action_Calibration.triggered.connect(self._WaterCalibration)
         self.actionLaser_Calibration.triggered.connect(self._LaserCalibration)
-        self.action_continue_session.triggered.connect(
-            lambda: self.load_local_session(continuation=True)
-        )
         self.action_create_from_local_session.triggered.connect(
             self.load_local_session
         )
@@ -1291,12 +1288,10 @@ class Window(QMainWindow):
             self.operation_control_model,
         )
 
-    def load_local_session(self, continuation: bool = False) -> None:
+    def load_local_session(self) -> None:
         """
         Load session from local drive.
 
-        :param continuation: boolean indicating if session should be continued or a new session should be created
-        based on loaded session.
         """
 
         # stop current session first
@@ -1440,13 +1435,13 @@ class Window(QMainWindow):
         self.opto_model = loaded["optogenetics"]
         self.fip_model = loaded["fiber_photometry"]
 
-        if continuation:
-            self.Obj = Obj
-            self._LoadVisualization()
-            # check dropping frames
-            self.to_check_drop_frames = 1
-            self._check_drop_frames(save_tag=0)
-            self.StartExcitation.setChecked(False)
+
+        self.Obj = Obj
+        self._LoadVisualization()
+        # check dropping frames
+        self.to_check_drop_frames = 1
+        self._check_drop_frames(save_tag=0)
+        self.StartExcitation.setChecked(False)
 
         # Set stage position to last position
         self.update_stage_positions_from_operational_control()
@@ -6126,7 +6121,7 @@ class Window(QMainWindow):
                 "capsule_id": capsule_id,
                 "mount": mount,
                 "destination": "//allen/aind/scratch/dynamic_foraging_rig_transfer",
-                "s3_bucket": "public",
+                "s3_bucket": "open",
                 "processor_full_name": "AIND Behavior Team",
                 "modalities": modalities,
                 "schemas": [
