@@ -173,8 +173,6 @@ class GenerateTrials:
             **operational_control_to_tp_conversion(
                 self.operation_control_model
             ),
-            "LeftValue": [],  # left valve open times
-            "RightValue": [],  # right valve open times
             "TP_LeftValue": [],  # left valve open times
             "TP_RightValue": [],
             "multipliers": [],
@@ -966,9 +964,9 @@ class GenerateTrials:
             BS_AutoWater_N_left,
             BS_EarnedReward_N_left,
         ) = self._process_values(
-            self.Obj["LeftValue"],
+            self.Obj["TP_LeftValue_volume"],
             self.B_AutoWaterTrial[0],
-            self.Obj["multipliers"],
+            self.Obj["TP_Multiplier"],
             B_RewardedHistory[0],
         )
         (
@@ -977,9 +975,9 @@ class GenerateTrials:
             BS_AutoWater_N_right,
             BS_EarnedReward_N_right,
         ) = self._process_values(
-            self.Obj["RightValue"],
+            self.Obj["TP_RightValue_volume"],
             self.B_AutoWaterTrial[1],
-            self.Obj["multipliers"],
+            self.Obj["TP_Multiplier"],
             B_RewardedHistory[1],
         )
         self.BS_auto_water = [BS_auto_water_left, BS_auto_water_right]
@@ -3223,19 +3221,8 @@ class GenerateTrials:
             self.B_StagePositions.append(self.win._GetPositions())
 
         # map miscellaneous values
-        self.Obj["LeftValue"].append(self.win.left_valve_open_time)
-        self.Obj["RightValue"].append(self.win.right_valve_open_time)
         self.Obj["TP_LeftValue"].append(self.win.left_valve_open_time)
         self.Obj["TP_RightValue"].append(self.win.right_valve_open_time)
-
-        tp = self.task_logic.task_parameters
-        multiplier = (
-            self.warmup_settings["multiplier"]
-            if self.task_logic.task_parameters.auto_water is None
-            or self.warmup_on
-            else tp.auto_water.multiplier
-        )
-        self.Obj["multipliers"].append(multiplier)
 
         # add opto parameters
         self.Obj["TP_Laser_calibration"].append(
