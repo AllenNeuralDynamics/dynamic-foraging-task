@@ -460,9 +460,7 @@ class Window(QMainWindow):
             )
 
         # initialize mouse selector
-        slims_mice = self.slims_handler.get_added_mice()[
-            -100:
-        ]  # grab 100 latest mice from slims
+        slims_mice = self.slims_handler.get_added_mice()
         self.mouse_selector_dialog = MouseSelectorDialog(
             [mouse.barcode for mouse in slims_mice], self.box_letter
         )
@@ -982,6 +980,7 @@ class Window(QMainWindow):
                     else float(last_positions["z"])
                 ),
             }
+            self.stage_widget.blockSignals(True)
             self.stage_widget.stage_model.update_position(positions)
             if oc.stage_specs.step_size:  # update step size
                 self.stage_widget.stage_model.update_step_size(
@@ -990,6 +989,7 @@ class Window(QMainWindow):
                 self.stage_widget.movement_page_view.lineEdit_step_size.setText(
                     str(oc.stage_specs.step_size)
                 )
+            self.stage_widget.blockSignals(False)
 
         # check newscale stage
         elif (
@@ -1018,6 +1018,11 @@ class Window(QMainWindow):
                     f" on {oc.stage_specs.rig_name}",
                     extra={"tags": [self.warning_log_tag]},
                 )
+        else:
+            logging.info(
+                f"Cannot move stage with last position {last_positions}.",
+                extra={"tags": [self.warning_log_tag]},
+            )
 
     def load_curriculum(
         self,
@@ -1104,7 +1109,6 @@ class Window(QMainWindow):
             self.on_curriculum.setEnabled(
                 slims_session.is_curriculum_suggestion
             )
-
             self.update_stage_positions_from_operational_control(oc)
 
             # update operational control model with latest stage coords
