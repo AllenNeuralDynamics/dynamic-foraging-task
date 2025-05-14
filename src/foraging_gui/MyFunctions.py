@@ -2162,10 +2162,10 @@ class GenerateTrials:
         elif self.BS_CurrentRunningTime > max_time:
             stop = True
             msg = "Stopping the session because the session running time has reached {} minutes".format(
-                max_trial
+                max_time/60
             )
             warning_label_text = (
-                f"Stop because running time exceeds or equals: {max_time} m"
+                f"Stop because running time exceeds or equals: {max_time/60} m"
             )
         else:
             stop = False
@@ -2200,8 +2200,7 @@ class GenerateTrials:
                 )
                 self.fip_stop_timer.setSingleShot(True)
                 self.fip_stop_timer.start()
-            self.win.sessionEnded.emit()
-            self.win.write_session_to_slims(self.session_model.subject)
+            self.win.save_task_models()
 
             self.win.session_end_tasks()
 

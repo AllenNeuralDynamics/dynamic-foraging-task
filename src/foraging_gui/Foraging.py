@@ -160,7 +160,6 @@ class NumpyEncoder(json.JSONEncoder):
 
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int)  # Photometry timer signal
-    sessionEnded = QtCore.pyqtSignal()
 
     def __init__(self, parent=None, box_number=1, start_bonsai_ide=True):
         logging.info("Creating Window")
@@ -319,9 +318,6 @@ class Window(QMainWindow):
         ):
             self.fip_layout.insertWidget(i, widget)
             self.fip_layout.insertWidget(i, widget)
-
-        # when session is ended, save relevant models
-        self.sessionEnded.connect(self.save_task_models)
 
         # add warning_widget to layout and set color
         self.warning_widget = WarningWidget(
