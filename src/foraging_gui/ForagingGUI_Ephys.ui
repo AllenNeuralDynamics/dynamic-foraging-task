@@ -204,6 +204,40 @@
      <bool>false</bool>
     </property>
    </widget>
+   <widget class="QSpinBox" name="hab_time_box">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>20</y>
+      <width>110</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="minimum">
+      <number>0</number>
+     </property>
+     <property name="maximum">
+      <number>90</number>
+     </property>
+     <property name="suffix">
+     <string> min</string>
+      </property>
+     <property name="prefix">
+     <string> Baseline: </string>
+    </property>
+   </widget>
    <widget class="QPushButton" name="NewSession">
     <property name="enabled">
      <bool>true</bool>
@@ -1556,7 +1590,7 @@
          <string>Move back</string>
         </property>
        </widget>
-       <widget class="QLineEdit" name="Step">
+       <widget class="QLabel" name="Step">
         <property name="geometry">
          <rect>
           <x>240</x>
@@ -1859,7 +1893,6 @@
      <string>File</string>
     </property>
     <addaction name="action_New"/>
-    <addaction name="action_continue_session"/>
     <addaction name="action_create_from_local_session"/>
     <addaction name="action_Save"/>
     <addaction name="action_Exit"/>
@@ -1994,7 +2027,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="action_New"/>
-   <addaction name="action_continue_session"/>
    <addaction name="action_Save"/>
    <addaction name="separator"/>
   </widget>
@@ -2071,18 +2103,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
-   </property>
-  </action>
-  <action name="action_continue_session">
-   <property name="icon">
-    <iconset>
-     <normaloff>resources/file-open.png</normaloff>resources/file-open.png</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Load and continue local session</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="action_create_from_local_session">

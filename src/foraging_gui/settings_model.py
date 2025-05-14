@@ -1,6 +1,6 @@
-from pydantic import BaseModel
-from pydantic import Field
 from typing import Literal, Optional
+
+from pydantic import BaseModel, Field
 
 
 class BonsaiSettingsModel(BaseModel):
@@ -41,10 +41,10 @@ class BonsaiSettingsModel(BaseModel):
         description="Box name in ROOM-TOWER-BOX format, or ROOM-EphysNUM",
     )
     RunningWheel: Literal["0", "1"] = Field(
-        default=0, description="Using AIND running wheel"
+        default="0", description="Using AIND running wheel"
     )
     AINDLickDetector: Literal["0", "1"] = Field(
-        default=0, description="Using AIND Lick Detector"
+        default="0", description="Using AIND Lick Detector"
     )
     LeftLickDetector: Optional[str] = Field(
         default="COM0",
@@ -60,35 +60,80 @@ class BonsaiSettingsModel(BaseModel):
         default=0, description="Using High Speed cameras"
     )
     HasSideCameraLeft: Literal["0", "1"] = Field(
-        default=0, description="Using high speed camera on the left side of the mouse"
+        default=0,
+        description="Using high speed camera on the left side of the mouse",
     )
     HasSideCameraRight: Literal["0", "1"] = Field(
-        default=0, description="Using high speed camera on the right side of the mouse"
+        default=0,
+        description="Using high speed camera on the right side of the mouse",
     )
     HasBottomCamera: Literal["0", "1"] = Field(
-        default=0, description="Using high speed camera on the bottom the mouse"
+        default=0,
+        description="Using high speed camera on the bottom the mouse",
     )
     HasBodyCamera: Literal["0", "1"] = Field(
-        default=0, description="Using high speed camera on the body of the mouse"
+        default=0,
+        description="Using high speed camera on the body of the mouse",
     )
-    # TODO, need to add a validator that these camera serial numbers are required if Has<camera> is 1
     SideCameraLeft: int = Field(
-        default=0, description="serial number for side camera left"
+        default=0, description="Serial number for side camera left"
     )
     SideCameraRight: int = Field(
-        default=0, description="serial number for side camera right"
+        default=0, description="Serial number for side camera right"
     )
-    BottomCamera: int = Field(default=0, description="serial number for bottom camera")
-    BodyCamera: int = Field(default=0, description="serial number for body camera")
+    BottomCamera: int = Field(
+        default=0, description="Serial number for bottom camera"
+    )
+    BodyCamera: int = Field(
+        default=0, description="Serial number for body camera"
+    )
     codec: Optional[str] = Field(default="", description="Video codec")
-    HasOpto: Literal["0", "1"] = Field(default=0, description="Using Optogenetics")
-    # Need to add Optogenetic parameters
-    # TODO OptoLaser<x>Manufacturer
-    # TODO OptoLaser<x>Wavelength
-    # TODO OptoLaser<x>Model
-    # TODO OptoLaser<x>SerialNumber
+    HasOpto: Literal["0", "1"] = Field(
+        default=0, description="Using Optogenetics"
+    )
+
+    # TODO: Add optogenetic parameters as needed
+    # OptoLaser<x>Manufacturer
+    # OptoLaser<x>Wavelength
+    # OptoLaser<x>Model
+    # OptoLaser<x>SerialNumber
+
     FipObjectiveCMOSSerialNumber: Optional[str] = Field(
         default=0, description="Serial number for FIP CMOS Objective"
+    )
+
+    # NEW FIELDS FOR CAMERA EXPOSURE & GAIN
+    BottomCamera_ExposureTime: float = Field(
+        default=1000,
+        description="Exposure time for the bottom camera"
+    )
+    SideCameraLeft_ExposureTime: float = Field(
+        default=1000,
+        description="Exposure time for the left side camera"
+    )
+    SideCameraRight_ExposureTime: float = Field(
+        default=1000,
+        description="Exposure time for the right side camera"
+    )
+    BodyCamera_ExposureTime: float = Field(
+        default=1000,
+        description="Exposure time for the body camera"
+    )
+    BottomCamera_Gain: float = Field(
+        default=8,
+        description="Gain for the bottom camera"
+    )
+    SideCameraLeft_Gain: float = Field(
+        default=8,
+        description="Gain for the left side camera"
+    )
+    SideCameraRight_Gain: float = Field(
+        default=8,
+        description="Gain for the right side camera"
+    )
+    BodyCamera_Gain: float = Field(
+        default=8,
+        description="Gain for the body camera"
     )
 
 
@@ -119,7 +164,6 @@ class DFTSettingsModel(BaseModel):
     open_ephys_machine_ip_address: str
     metadata_dialog_folder: str
     rig_metadata_folder: str
-    project_info_file: str
     schedule_path: str
     go_cue_decibel_box1: float
     go_cue_decibel_box2: float
@@ -137,3 +181,4 @@ class DFTSettingsModel(BaseModel):
     auto_engage: bool
     clear_figure_after_save: bool
     add_default_project_name: bool
+    check_schedule: bool
