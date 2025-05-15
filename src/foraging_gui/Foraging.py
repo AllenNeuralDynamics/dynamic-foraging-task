@@ -343,6 +343,8 @@ class Window(QMainWindow):
 
         # Stage Widget
         self.stage_widget = None
+        self.left_retract_timer = QTimer.singleShot()
+        self.right_retract_timer = QTimer.singleShot()
         try:
             self._load_stage()
         except IOError as e:
