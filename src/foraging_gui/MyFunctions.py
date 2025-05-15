@@ -344,8 +344,7 @@ class GenerateTrials:
                         "LaserColorFive",
                         "LaserColorSix",
                     ]
-                    condition_num = 0 if self.selected_condition.name not in possible_lasers else \
-                        possible_lasers.index(self.selected_condition.name) + 1
+                    condition_num = possible_lasers.index(self.selected_condition.name) + 1
                     self.B_SelectedCondition.append(condition_num)
                 else:
                     # this is the control trial
@@ -2299,6 +2298,7 @@ class GenerateTrials:
         """
 
         laser = self.selected_condition
+
         # align to trial start
         if laser.end is not None and laser.start is not None:
             if (
@@ -2544,7 +2544,7 @@ class GenerateTrials:
                 len(self.B_SelectedCondition) - (non_none_indices[-1] + 1)
                 < self.opto_model.minimum_trial_interval
             ):
-                self.selected_condition = 0
+                self.selected_condition = None
 
     def _InitiateATrial(self, Channel1, Channel4):
 

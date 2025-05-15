@@ -400,7 +400,6 @@ class PlotV(FigureCanvas):
                     self.B_SelectedCondition[:-1] == condition,
                 )
             )
-
             if len(Optogenetics_On[0]) == 0:
                 continue
             current_color = color_mapping["Condition" + str(condition)]
