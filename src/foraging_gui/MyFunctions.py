@@ -19,6 +19,12 @@ from aind_behavior_dynamic_foraging.DataSchemas.operation_control import (
 )
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
     Optogenetics,
+    LaserColorOne,
+    LaserColorTwo,
+    LaserColorThree,
+    LaserColorFour,
+    LaserColorFive,
+    LaserColorSix
 )
 from aind_behavior_services.session import AindBehaviorSessionModel
 from PyQt5 import QtCore, QtWidgets
@@ -328,7 +334,19 @@ class GenerateTrials:
                     self.B_LaserOnTrial.append(self.LaserOn)
                     # generate the optogenetics waveform of the next trial
                     self._GetLaserWaveForm()
-                    self.B_SelectedCondition.append(self.selected_condition)
+
+                    # map selected_condition to number to adhere to post-processing convention
+                    possible_lasers = [
+                        "LaserColorOne",
+                        "LaserColorTwo",
+                        "LaserColorThree",
+                        "LaserColorFour",
+                        "LaserColorFive",
+                        "LaserColorSix",
+                    ]
+                    condition_num = 0 if self.selected_condition.name not in possible_lasers else \
+                        possible_lasers.index(self.selected_condition.name) + 1
+                    self.B_SelectedCondition.append(condition_num)
                 else:
                     # this is the control trial
                     control_trial = 1
@@ -349,7 +367,7 @@ class GenerateTrials:
             self.B_LaserOnTrial.append(self.LaserOn)
             self.B_LaserAmplitude.append([0, 0])
             self.B_LaserDuration.append(0)
-            self.B_SelectedCondition.append(None)
+            self.B_SelectedCondition.append(0)
             self.CurrentLaserAmplitude = [0, 0]
 
     def _CheckSessionControl(self):
@@ -2519,14 +2537,14 @@ class GenerateTrials:
         non_none_indices = [
             i
             for i, condition in enumerate(self.B_SelectedCondition)
-            if condition is not None
+            if condition != 0
         ]
         if len(non_none_indices) > 0:
             if (
                 len(self.B_SelectedCondition) - (non_none_indices[-1] + 1)
                 < self.opto_model.minimum_trial_interval
             ):
-                self.selected_condition = None
+                self.selected_condition = 0
 
     def _InitiateATrial(self, Channel1, Channel4):
 
