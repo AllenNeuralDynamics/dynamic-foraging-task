@@ -38,7 +38,9 @@ if PLATFORM == "win32":
 VID_NEWSCALE = 0x10C4
 PID_NEWSCALE = 0xEA61
 
-class GenerateTrials:
+class GenerateTrials(QtCore.QObject):
+
+    mouseLicked = QtCore.pyqtSignal(str)
 
     def __init__(
         self,
@@ -49,6 +51,8 @@ class GenerateTrials:
         fip_model: FiberPhotometry,
         operation_control_model: OperationalControl,
     ):
+
+        super().__init__()
 
         self.win = win
         # set model attributes
@@ -2899,6 +2903,7 @@ class GenerateTrials:
                         self.B_Baited[0] = False
                         self.B_CurrentRewarded[1] = False
                         self.B_CurrentRewarded[0] = True
+                    self.mouseLicked.emit("Left")
                 elif TrialOutcome == "ErrorLeft":
                     with data_lock:
                         self.B_AnimalCurrentResponse = 0
@@ -2911,6 +2916,7 @@ class GenerateTrials:
                         self.B_Baited[1] = False
                         self.B_CurrentRewarded[0] = False
                         self.B_CurrentRewarded[1] = True
+                    self.mouseLicked.emit("Right")
                 elif TrialOutcome == "ErrorRight":
                     with data_lock:
                         self.B_AnimalCurrentResponse = 1
