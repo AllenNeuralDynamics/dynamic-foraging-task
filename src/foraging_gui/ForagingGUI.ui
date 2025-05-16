@@ -1440,18 +1440,18 @@
                     </property>
                     <item>
                      <widget class="QGroupBox" name="groupBox_4">
-                      <property name="minimumSize">
-                       <size>
-                        <width>0</width>
-                        <height>130</height>
-                       </size>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>260</width>
-                        <height>900</height>
-                       </size>
-                      </property>
+<!--                      <property name="minimumSize">-->
+<!--                       <size>-->
+<!--                        <width>0</width>-->
+<!--                        <height>130</height>-->
+<!--                       </size>-->
+<!--                      </property>-->
+<!--                      <property name="maximumSize">-->
+<!--                       <size>-->
+<!--                        <width>260</width>-->
+<!--                        <height>900</height>-->
+<!--                       </size>-->
+<!--                      </property>-->
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
@@ -1492,157 +1492,6 @@
                          </property>
                         </widget>
                        </item>
-                       <item row="2" column="0">
-                        <widget class="QDoubleSpinBox" name="GiveWaterL">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>70</width>
-                           <height>20</height>
-                          </size>
-                         </property>
-                         <property name="decimals">
-                          <number>3</number>
-                         </property>
-                         <property name="singleStep">
-                          <double>0.005000000000000</double>
-                         </property>
-                         <property name="value">
-                          <double>0.030000000000000</double>
-                         </property>
-                         <property name="disabled">
-                          <bool>true</bool>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="2" column="2">
-                        <widget class="QDoubleSpinBox" name="GiveWaterR">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                           <horstretch>7</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>70</width>
-                           <height>20</height>
-                          </size>
-                         </property>
-                         <property name="decimals">
-                          <number>3</number>
-                         </property>
-                         <property name="singleStep">
-                          <double>0.005000000000000</double>
-                         </property>
-                         <property name="value">
-                          <double>0.030000000000000</double>
-                         </property>
-                         <property name="disabled">
-                         <bool>true</bool>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="3" column="1">
-                        <widget class="QLabel" name="label_31">
-                         <property name="maximumSize">
-                          <size>
-                           <width>20</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string>uL</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="2" column="1">
-                        <widget class="QLabel" name="label_16">
-                         <property name="maximumSize">
-                          <size>
-                           <width>20</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string>sec</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="3" column="0">
-                        <widget class="QDoubleSpinBox" name="GiveWaterL_volume">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>70</width>
-                           <height>20</height>
-                          </size>
-                         </property>
-                         <property name="decimals">
-                          <number>2</number>
-                         </property>
-                         <property name="singleStep">
-                          <double>1.000000000000000</double>
-                         </property>
-                         <property name="value">
-                          <double>3.000000000000000</double>
-                         </property>
-                          <property name="disabled">
-                          <bool>true</bool>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="3" column="2">
-                        <widget class="QDoubleSpinBox" name="GiveWaterR_volume">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-                           <horstretch>7</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>70</width>
-                           <height>20</height>
-                          </size>
-                         </property>
-                         <property name="decimals">
-                          <number>2</number>
-                         </property>
-                         <property name="singleStep">
-                          <double>1.000000000000000</double>
-                         </property>
-                         <property name="value">
-                          <double>3.000000000000000</double>
-                         </property>
-                         <property name="disabled">
-                         <bool>true</bool>
-                        </property>
-                        </widget>
-                       </item>
-                       <item row="2" column="3">
-                        <widget class="QLabel" name="label_32">
-                         <property name="maximumSize">
-                          <size>
-                           <width>20</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string>sec</string>
-                         </property>
-                        </widget>
-                       </item>
                        <item row="0" column="0" rowspan="2" colspan="2">
                         <widget class="QPushButton" name="GiveLeft">
                          <property name="sizePolicy">
@@ -1671,35 +1520,10 @@
                          </property>
                         </widget>
                        </item>
-                       <item row="3" column="3">
-                        <widget class="QLabel" name="label_33">
-                         <property name="maximumSize">
-                          <size>
-                           <width>20</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string>uL</string>
-                         </property>
-                        </widget>
-                       </item>
                        <item row="5" column="2">
                         <widget class="QComboBox" name="AlignToGoCue">
                          <property name="enabled">
                           <bool>true</bool>
-                         </property>
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>100</width>
-                           <height>150</height>
-                          </size>
                          </property>
                          <property name="currentIndex">
                           <number>1</number>
