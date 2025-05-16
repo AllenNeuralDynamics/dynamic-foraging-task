@@ -345,8 +345,10 @@ class Window(QMainWindow):
         self.stage_widget = None
         # initialize empty timers
         wait = self.operation_control_model.lick_spout_retraction_specs.wait_time
-        self.left_retract_timer = QTimer.singleShot(wait*1000, lambda: None)
-        self.right_retract_timer = QTimer.singleShot(wait*1000, lambda: None)
+        self.left_retract_timer = QTimer()
+        self.left_retract_timer.setSingleShot(True)
+        self.right_retract_timer = QTimer()
+        self.right_retract_timer.setSingleShot(True)
         try:
             self._load_stage()
         except IOError as e:
