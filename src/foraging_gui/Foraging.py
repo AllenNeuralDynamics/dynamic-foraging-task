@@ -633,9 +633,12 @@ class Window(QMainWindow):
         timer = getattr(self, f"{lick_spout_retract}_retract_timer")
         tp = self.task_logic.task_parameters
 
+        logger.info("In retract_lick_spout", tp.lick_spout_retraction, self.stage_widget, timer.isActive())
+
         if tp.lick_spout_retraction and self.stage_widget is not None and not timer.isActive():
             motor = 1 if lick_spout_licked == "Left" else 0                             # TODO: is this the correct mapping
             curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor)    # TODO: Do I need to set rel_to_monument to True?
+            logger.info("fast retracting")
             self.stage_widget.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=True)
 
             # configure timer to un-retract lick spout
@@ -661,6 +664,7 @@ class Window(QMainWindow):
 
         """
         if self.stage_widget is not None:
+            logger.info("unretracting ")
             speed = self.operation_control_model.lick_spout_retraction_specs.un_retract_speed.value
             motor = 1 if lick_spout_licked == "Left" else 0
             self.stage_widget.update_speed(value=speed)
@@ -930,7 +934,7 @@ class Window(QMainWindow):
             return
 
         elif list(current_positions.keys()) == ["x", "y", "z"]:
-            logging.info(
+            logging.debug(
                 "Can't update loaded mouse offset with non AIND stage coordinates."
             )
         else:
