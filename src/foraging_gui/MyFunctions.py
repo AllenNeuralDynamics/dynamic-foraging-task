@@ -2903,7 +2903,6 @@ class GenerateTrials(QtCore.QObject):
                         self.B_Baited[0] = False
                         self.B_CurrentRewarded[1] = False
                         self.B_CurrentRewarded[0] = True
-                    self.mouseLicked.emit("Left")
                 elif TrialOutcome == "ErrorLeft":
                     with data_lock:
                         self.B_AnimalCurrentResponse = 0
@@ -2916,7 +2915,6 @@ class GenerateTrials(QtCore.QObject):
                         self.B_Baited[1] = False
                         self.B_CurrentRewarded[0] = False
                         self.B_CurrentRewarded[1] = True
-                    self.mouseLicked.emit("Right")
                 elif TrialOutcome == "ErrorRight":
                     with data_lock:
                         self.B_AnimalCurrentResponse = 1
