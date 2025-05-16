@@ -4268,7 +4268,7 @@ class Window(QMainWindow):
             self.operation_control_model,
         )
         self.GeneratedTrials.mouseLicked.connect(self.retract_lick_spout)
-        self.GeneratedTrials.mouseLicked.connect(print)
+        self.GeneratedTrials.mouseLicked.connect(lambda value: print(f"I LICKED {value}"))
         # Iterate over all attributes of the GeneratedTrials object
         for attr_name in dir(self.GeneratedTrials):
             if attr_name in Obj.keys():
@@ -5206,7 +5206,7 @@ class Window(QMainWindow):
             )
             self.GeneratedTrials = GeneratedTrials
             self.GeneratedTrials.mouseLicked.connect(self.retract_lick_spout)
-            self.GeneratedTrials.mouseLicked.connect(print)
+            self.GeneratedTrials.mouseLicked.connect(lambda value: print(f"I LICKED {value}"))
             self.StartANewSession = 0
             PlotM = PlotV(
                 win=self, GeneratedTrials=GeneratedTrials, width=5, height=4
