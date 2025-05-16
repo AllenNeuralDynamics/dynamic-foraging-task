@@ -3011,6 +3011,10 @@ class Window(QMainWindow):
                         volume - self.latest_fitting[valve][1]
                     ) / self.latest_fitting[valve][0]
                     setattr(self, f"{valve.lower()}_open_time", valve_time)
+                    getattr(self, f"GiveWater{valve[0]}").setValue(valve_time)
+                    getattr(self, f"GiveWater{valve[0]}_volume").setValue(
+                        volume
+                    )
 
     def set_water_calibration_latest_fitting(self, fitting_results: dict):
         """
