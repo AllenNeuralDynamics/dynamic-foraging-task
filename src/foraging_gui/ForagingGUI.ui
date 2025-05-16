@@ -1440,18 +1440,6 @@
                     </property>
                     <item>
                      <widget class="QGroupBox" name="groupBox_4">
-<!--                      <property name="minimumSize">-->
-<!--                       <size>-->
-<!--                        <width>0</width>-->
-<!--                        <height>130</height>-->
-<!--                       </size>-->
-<!--                      </property>-->
-<!--                      <property name="maximumSize">-->
-<!--                       <size>-->
-<!--                        <width>260</width>-->
-<!--                        <height>900</height>-->
-<!--                       </size>-->
-<!--                      </property>-->
                       <property name="font">
                        <font>
                         <pointsize>8</pointsize>
