@@ -2923,10 +2923,8 @@ class GenerateTrials(QtCore.QObject):
                         self.B_CurrentRewarded[1] = False
 
                 if self.B_AnimalCurrentResponse == 0:
-                    print("EMIT")
                     self.mouseLicked.emit("Left")
                 elif self.B_AnimalCurrentResponse == 1:
-                    print("EMIT")
                     self.mouseLicked.emit("Right")
                 B_CurrentRewarded = self.B_CurrentRewarded
                 B_AnimalCurrentResponse = self.B_AnimalCurrentResponse

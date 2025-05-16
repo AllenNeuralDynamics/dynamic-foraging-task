@@ -641,7 +641,7 @@ class Window(QMainWindow):
             motor = 1 if lick_spout_licked == "Left" else 0                             # TODO: is this the correct mapping
             curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor)    # TODO: Do I need to set rel_to_monument to True?
             logger.info("fast retracting")
-            self.stage_widget.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=True)
+            self.stage_widget.stage_model.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=True)
 
             # configure timer to un-retract lick spout
             timer.timeout.disconnect()
@@ -4268,7 +4268,6 @@ class Window(QMainWindow):
             self.operation_control_model,
         )
         self.GeneratedTrials.mouseLicked.connect(self.retract_lick_spout)
-        self.GeneratedTrials.mouseLicked.connect(lambda value: print(f"I LICKED {value}"))
         # Iterate over all attributes of the GeneratedTrials object
         for attr_name in dir(self.GeneratedTrials):
             if attr_name in Obj.keys():
@@ -5206,7 +5205,6 @@ class Window(QMainWindow):
             )
             self.GeneratedTrials = GeneratedTrials
             self.GeneratedTrials.mouseLicked.connect(self.retract_lick_spout)
-            self.GeneratedTrials.mouseLicked.connect(lambda value: print(f"I LICKED {value}"))
             self.StartANewSession = 0
             PlotM = PlotV(
                 win=self, GeneratedTrials=GeneratedTrials, width=5, height=4
