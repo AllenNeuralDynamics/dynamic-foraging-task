@@ -639,8 +639,8 @@ class Window(QMainWindow):
 
         if tp.lick_spout_retraction and self.stage_widget is not None and not timer.isActive():
             motor = 1 if lick_spout_licked == "Left" else 0                             # TODO: is this the correct mapping
-            curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor)[0]    # TODO: Do I need to set rel_to_monument to True?
-            print(self.stage_widget.stage_model.get_current_positions_mm(motor))
+            curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor)    # TODO: Do I need to set rel_to_monument to True?
+            print(pos, curr_pos)
             logger.info("fast retracting")
             self.stage_widget.stage_model.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=True)
 
