@@ -619,7 +619,6 @@ class Window(QMainWindow):
                 layout.itemAt(i).widget().setVisible(False)
             # Insert new stage_widget
             self.stage_widget = get_stage_widget()
-            self.set_stage_speed_to_normal()
             layout.addWidget(self.stage_widget)
 
     def retract_lick_spout(self, lick_spout_licked: Literal["Left", "Right"], pos: float = 0) -> None:
