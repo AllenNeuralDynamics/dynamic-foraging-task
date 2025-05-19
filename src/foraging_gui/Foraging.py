@@ -344,7 +344,6 @@ class Window(QMainWindow):
         # Stage Widget
         self.stage_widget = None
         # initialize empty timers
-        wait = self.operation_control_model.lick_spout_retraction_specs.wait_time
         self.left_retract_timer = QTimer(timeout=lambda: None)
         self.left_retract_timer.setSingleShot(True)
         self.right_retract_timer = QTimer(timeout=lambda: None)
@@ -620,6 +619,7 @@ class Window(QMainWindow):
                 layout.itemAt(i).widget().setVisible(False)
             # Insert new stage_widget
             self.stage_widget = get_stage_widget()
+            self.set_stage_speed_to_normal()
             layout.addWidget(self.stage_widget)
 
     def retract_lick_spout(self, lick_spout_licked: Literal["Left", "Right"], pos: float = 0) -> None:
@@ -638,7 +638,7 @@ class Window(QMainWindow):
             logger.info("Retracting lick spout.")
             motor = 1 if lick_spout_licked == "Left" else 2                             # TODO: is this the correct mapping
             curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor)    # TODO: Do I need to set rel_to_monument to True?
-            #self.stage_widget.stage_model.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=True)
+            self.stage_widget.stage_model.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=True)
 
             # configure timer to un-retract lick spout
             timer.timeout.disconnect()
@@ -663,7 +663,6 @@ class Window(QMainWindow):
 
         """
         if self.stage_widget is not None:
-            print('in unretractiong')
             logger.info("Un-retracting lick spout.")
             speed = self.operation_control_model.lick_spout_retraction_specs.un_retract_speed.value
             motor = 1 if lick_spout_licked == "Left" else 2
