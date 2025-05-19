@@ -635,7 +635,7 @@ class Window(QMainWindow):
         timer = getattr(self, f"{lick_spout_retract}_retract_timer")
         tp = self.task_logic.task_parameters
         print("in retract")
-        logger.info("In retract_lick_spout", tp.lick_spout_retraction, self.stage_widget, timer.isActive())
+        logger.info("In retract_lick_spout")
 
         if tp.lick_spout_retraction and self.stage_widget is not None and not timer.isActive():
             motor = 1 if lick_spout_licked == "Left" else 0                             # TODO: is this the correct mapping
