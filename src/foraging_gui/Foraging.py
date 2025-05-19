@@ -634,7 +634,7 @@ class Window(QMainWindow):
         lick_spout_retract = "right" if lick_spout_licked == "Left" else "left"
         timer = getattr(self, f"{lick_spout_retract}_retract_timer")
         tp = self.task_logic.task_parameters
-
+        print("in retract")
         logger.info("In retract_lick_spout", tp.lick_spout_retraction, self.stage_widget, timer.isActive())
 
         if tp.lick_spout_retraction and self.stage_widget is not None and not timer.isActive():
@@ -666,6 +666,7 @@ class Window(QMainWindow):
 
         """
         if self.stage_widget is not None:
+            print('in unretractiong')
             logger.info("unretracting ")
             speed = self.operation_control_model.lick_spout_retraction_specs.un_retract_speed.value
             motor = 1 if lick_spout_licked == "Left" else 0
