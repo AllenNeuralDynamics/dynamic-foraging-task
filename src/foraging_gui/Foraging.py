@@ -5047,6 +5047,9 @@ class Window(QMainWindow):
                 self.Start.setChecked(True)
                 return
 
+            # save models
+            self.save_task_models()
+
             # enable task model widgets
             self.task_widget.setEnabled(
                 not self.on_curriculum.isVisible()
