@@ -634,16 +634,11 @@ class Window(QMainWindow):
         lick_spout_retract = "right" if lick_spout_licked == "Left" else "left"
         timer = getattr(self, f"{lick_spout_retract}_retract_timer")
         tp = self.task_logic.task_parameters
-        print("in retract")
-        logger.info("In retract_lick_spout")
-
         if tp.lick_spout_retraction and self.stage_widget is not None and not timer.isActive():
+            logger.info("Retracting lick spout.")
             motor = 1 if lick_spout_licked == "Left" else 2                             # TODO: is this the correct mapping
-            print()
             curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor)    # TODO: Do I need to set rel_to_monument to True?
-            print(pos, curr_pos, motor, 0 <= motor <= 3, self.stage_widget.stage_model.get_current_positions_mm(1))
-            logger.info("fast retracting")
-            self.stage_widget.stage_model.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=True)
+            #self.stage_widget.stage_model.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=True)
 
             # configure timer to un-retract lick spout
             timer.timeout.disconnect()
@@ -669,13 +664,14 @@ class Window(QMainWindow):
         """
         if self.stage_widget is not None:
             print('in unretractiong')
-            logger.info("unretracting ")
+            logger.info("Un-retracting lick spout.")
             speed = self.operation_control_model.lick_spout_retraction_specs.un_retract_speed.value
             motor = 1 if lick_spout_licked == "Left" else 2
-            self.stage_widget.update_speed(value=speed)
-            self.stage_widget.update_position(positions={motor:pos})
+            self.stage_widget.stage_model.update_speed(value=speed)
+            self.stage_widget.stage_model.update_position(positions={motor:pos})
             try:
-                self.stage_widget.move_worker.finished.connect(self.set_stage_speed_to_normal, type=Qt.UniqueConnection)
+                self.stage_widget.stage_model.move_worker.finished.connect(self.set_stage_speed_to_normal,
+                                                                           type=Qt.UniqueConnection)
             except TypeError:   # signal is already connected
                 pass
         else:
