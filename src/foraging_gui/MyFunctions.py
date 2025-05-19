@@ -2151,9 +2151,9 @@ class GenerateTrials:
             np.where(~auto_rewards.astype(bool))
         ]  # isolate non-auto-reward
         if (
-            self.BS_CurrentRunningTime / 60 >= min_time
+            self.BS_CurrentRunningTime >= min_time
             and len(
-                np.where(non_auto_reward[-oc.auto_stop.ignore_win :] == 2)[0]
+                np.where(non_auto_reward[-oc.auto_stop.ignore_win:] == 2)[0]
             )
             >= stop_ignore
         ):
