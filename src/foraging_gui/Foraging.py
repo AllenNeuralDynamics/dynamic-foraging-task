@@ -683,7 +683,7 @@ class Window(QMainWindow):
         """
 
         if self.stage_widget is not None:
-            self.stage_widget.update_speed(value=1)
+            self.stage_widget.stage_model.update_speed(value=1)
 
         else:
             logger.info("Can't set stage speed because no AIND stage connected")
