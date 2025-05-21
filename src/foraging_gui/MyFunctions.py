@@ -17,15 +17,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
 from aind_behavior_dynamic_foraging.DataSchemas.operation_control import (
     OperationalControl,
 )
-from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
-    Optogenetics,
-    LaserColorOne,
-    LaserColorTwo,
-    LaserColorThree,
-    LaserColorFour,
-    LaserColorFive,
-    LaserColorSix
-)
+from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import Optogenetics
 from aind_behavior_services.session import AindBehaviorSessionModel
 from PyQt5 import QtCore, QtWidgets
 from serial.tools.list_ports import comports as list_comports
@@ -182,6 +174,14 @@ class GenerateTrials:
             "TP_LeftValue": [],  # left valve open times
             "TP_RightValue": [],
             "multipliers": [],
+            "AutoTrain": False,
+            "TP_AutoTrain": [],
+            "TP_auto_train_curriculum_name": [],
+            "TP_auto_train_curriculum_schema_version": [],
+            "TP_auto_train_curriculum_version": [],
+            "TP_auto_train_engaged": [],
+            "TP_auto_train_stage": [],
+            "TP_auto_train_stage_overridden": [],
             "TP_Laser_calibration": [],
             "TP_LatestCalibrationDate": [],
             "TP_laser_1_calibration_power": [],
@@ -3266,6 +3266,18 @@ class GenerateTrials:
         self.Obj["TP_laser_2_target"].append(
             self.win.Opto_dialog.laser_2_target.text()
         )
+
+        # add auto train parameters
+        curriculum = self.win.slims_handler.curriculum
+        self.Obj["AutoTrain"] = curriculum is not None
+        self.Obj["TP_AutoTrain"].append(curriculum is not None)
+        self.Obj["TP_auto_train_curriculum_name"].append(getattr(curriculum, 'name', None))
+        self.Obj["TP_auto_train_curriculum_schema_version"].append(self.task_logic.version)
+        self.Obj["TP_auto_train_curriculum_version"].append(getattr(curriculum, 'version', None))
+        self.Obj["TP_auto_train_engaged"].append(curriculum is not None)
+        self.Obj["TP_auto_train_engaged"].append(getattr(self.win.slims_handler.trainer_state, 'stage', None))
+        self.Obj["TP_auto_train_stage_overridden"].append(not self.win.on_curriculum.isChecked() if curriculum is
+                                                                                                    not None else None)
 
 
 class NewScaleSerialY:
