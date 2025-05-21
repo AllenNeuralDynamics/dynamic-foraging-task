@@ -235,7 +235,7 @@ class LoadedMouseSlimsHandler:
         Optogenetics or None,
         FiberPhotometry or None,
         OperationalControl or None,
-        str,
+        str
     ]:
         """
         Load in specified mouse from slims
@@ -265,7 +265,7 @@ class LoadedMouseSlimsHandler:
                 self.curriculum is None
             ):  # no curriculum in slims for this mouse
                 self.log.info(f"No curriculum in slims for mouse {mouse_id}")
-                return None, None, None, None, None, None, None, None
+                return None, None, None, None, None, None, None, mouse_id
 
             task_logic = AindDynamicForagingTaskLogic(
                 **self.trainer_state.stage.task.model_dump()
@@ -489,28 +489,31 @@ class LoadedMouseSlimsHandler:
         :param serialized_json: string json content
         """
         if self.slims_client is not None:
-            fetched = self.slims_client.fetch_models(
-                models.SlimsBehaviorSession, mouse_pk=self._slims_mouse.pk
-            )[-1]
-            attachments = self.slims_client.db.slims_api.get_entities(
-                f"attachment/{fetched._slims_table}/{fetched.pk}"
-            )
-            attachment_names = [
-                attach.attm_name.value for attach in attachments
-            ]
+            try:
+                fetched = self.slims_client.fetch_models(
+                    models.SlimsBehaviorSession, mouse_pk=self._slims_mouse.pk
+                )[-1]
+                attachments = self.slims_client.db.slims_api.get_entities(
+                    f"attachment/{fetched._slims_table}/{fetched.pk}"
+                )
+                attachment_names = [
+                    attach.attm_name.value for attach in attachments
+                ]
 
-            if attachment_name in attachment_names:
-                # delete attachment since we can't delete
-                attachments[attachment_names.index(attachment_name)].remove()
+                if attachment_name in attachment_names:
+                    # delete attachment since we can't delete
+                    attachments[attachment_names.index(attachment_name)].remove()
 
-            # re-add with new content
-            action = (
-                "Updating" if attachment_name in attachment_names else "Adding"
-            )
-            self.log.info(f"{action} attachment {attachment_name} to session.")
-            self.slims_client.add_attachment_content(
-                record=fetched, name=attachment_name, content=serialized_json
-            )
+                # re-add with new content
+                action = (
+                    "Updating" if attachment_name in attachment_names else "Adding"
+                )
+                self.log.info(f"{action} attachment {attachment_name} to session.")
+                self.slims_client.add_attachment_content(
+                    record=fetched, name=attachment_name, content=serialized_json
+                )
+            except IndexError:
+                self.log.info("No behavior session in slims.")
 
         else:
             self.log.warning("No client connected.")

@@ -1045,7 +1045,7 @@ class Window(QMainWindow):
         """
 
         try:
-            print(sess)
+
             if trainer_state is None:  # no curriculum in slims for this mouse
                 logging.info(
                     f"Attempting to create curriculum for mouse {mouse_id} from schedule."
@@ -1188,7 +1188,7 @@ class Window(QMainWindow):
         index = (
             0
             if isinstance(stage, float) and math.isnan(stage)
-            else stage_mapping.get(stage, int(stage))
+            else stage_mapping.get(stage) or int(stage)
         )
         logging.info("Creating trainer state")
         ts = TrainerState(
