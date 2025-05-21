@@ -1045,6 +1045,7 @@ class Window(QMainWindow):
         """
 
         try:
+            print(sess)
             if trainer_state is None:  # no curriculum in slims for this mouse
                 logging.info(
                     f"Attempting to create curriculum for mouse {mouse_id} from schedule."
@@ -1091,7 +1092,7 @@ class Window(QMainWindow):
             self.session_model.experiment = sess.experiment
             self.session_model.experimenter = sess.experimenter
             self.session_model.subject = sess.subject
-            self.session_model.notes = self.session_model.notes
+            self.session_model.notes = sess.notes
 
             # enable or disable widget based on if session is on curriculum
             self.task_widget.setEnabled(
