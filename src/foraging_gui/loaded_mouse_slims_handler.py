@@ -366,7 +366,7 @@ class LoadedMouseSlimsHandler:
             self.trainer_state = trainer_state
             self.curriculum = curriculum
             self._loaded_slims_session = (
-                models.SlimsBehaviorSession()
+                models.SlimsBehaviorSession(is_curriculum_suggestion=True)
             )  # create empty model to update on_curriculum
         else:
             self.log.warning("No client connected.")
@@ -488,35 +488,33 @@ class LoadedMouseSlimsHandler:
         :param attachment_name: name of attachment to update
         :param serialized_json: string json content
         """
-        if self.slims_client is not None:
-            try:
-                fetched = self.slims_client.fetch_models(
-                    models.SlimsBehaviorSession, mouse_pk=self._slims_mouse.pk
-                )[-1]
-                attachments = self.slims_client.db.slims_api.get_entities(
-                    f"attachment/{fetched._slims_table}/{fetched.pk}"
-                )
-                attachment_names = [
-                    attach.attm_name.value for attach in attachments
-                ]
+        if not self.slims_client  and self.loaded_slims_session:
+            fetched = self.slims_client.fetch_models(
+                models.SlimsBehaviorSession, mouse_pk=self._slims_mouse.pk
+            )[-1]
+            attachments = self.slims_client.db.slims_api.get_entities(
+                f"attachment/{fetched._slims_table}/{fetched.pk}"
+            )
+            attachment_names = [
+                attach.attm_name.value for attach in attachments
+            ]
 
-                if attachment_name in attachment_names:
-                    # delete attachment since we can't delete
-                    attachments[attachment_names.index(attachment_name)].remove()
+            if attachment_name in attachment_names:
+                # delete attachment since we can't delete
+                attachments[attachment_names.index(attachment_name)].remove()
 
-                # re-add with new content
-                action = (
-                    "Updating" if attachment_name in attachment_names else "Adding"
-                )
-                self.log.info(f"{action} attachment {attachment_name} to session.")
-                self.slims_client.add_attachment_content(
-                    record=fetched, name=attachment_name, content=serialized_json
-                )
-            except IndexError:
-                self.log.info("No behavior session in slims.")
+            # re-add with new content
+            action = (
+                "Updating" if attachment_name in attachment_names else "Adding"
+            )
+            self.log.info(f"{action} attachment {attachment_name} to session.")
+            self.slims_client.add_attachment_content(
+                record=fetched, name=attachment_name, content=serialized_json
+            )
 
         else:
-            self.log.warning("No client connected.")
+            msg = "No client connected." if not self.slims_client else "No session loaded."
+            self.log.warning(msg)
 
     def go_off_curriculum(self) -> None:
         """
