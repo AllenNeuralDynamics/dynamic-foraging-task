@@ -645,6 +645,7 @@ class Window(QMainWindow):
             timer.timeout.disconnect()
             timer.timeout.connect(lambda: self.un_retract_lick_spout(lick_spout_licked, curr_pos))
             timer.setInterval(self.operation_control_model.lick_spout_retraction_specs.wait_time*1000)
+            timer.setSingleShot(True)
             timer.start()
 
         elif self.stage_widget is None:
@@ -668,28 +669,26 @@ class Window(QMainWindow):
             logger.info("Un-retracting lick spout.")
             speed = self.operation_control_model.lick_spout_retraction_specs.un_retract_speed.value
             motor = 1 if lick_spout_licked == "Left" else 2
+            logger.info("Setting speed and pos")
             self.stage_widget.stage_model.update_speed(value=speed)
             self.stage_widget.stage_model.update_position(positions={motor:pos})
-            try:
-                self.stage_widget.stage_model.move_worker.finished.connect(self.set_stage_speed_to_normal,
-                                                                           type=Qt.UniqueConnection)
-            except TypeError:   # signal is already connected
-                pass
+            self.stage_widget.stage_model.update_speed(value=1)
         else:
             logger.info("Can't un retract lick spout because no AIND stage connected")
 
         self.GeneratedTrials.mouseLicked.connect(self.retract_lick_spout)
 
-    def set_stage_speed_to_normal(self):
-        """"
-        Sets AIND stage to normal speed
-        """
-
-        if self.stage_widget is not None:
-            self.stage_widget.stage_model.update_speed(value=1)
-
-        else:
-            logger.info("Can't set stage speed because no AIND stage connected")
+    # def set_stage_speed_to_normal(self):
+    #     """"
+    #     Sets AIND stage to normal speed
+    #     """
+    #
+    #     if self.stage_widget is not None:
+    #         logger.info("Setting stage to normal speed.")
+    #         self.stage_widget.stage_model.update_speed(value=1)
+    #
+    #     else:
+    #         logger.info("Can't set stage speed because no AIND stage connected")
 
     def _LoadUI(self):
         """
