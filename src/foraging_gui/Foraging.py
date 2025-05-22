@@ -672,23 +672,28 @@ class Window(QMainWindow):
             logger.info("Setting speed and pos")
             self.stage_widget.stage_model.update_speed(value=speed)
             self.stage_widget.stage_model.update_position(positions={motor:pos})
-            #self.stage_widget.stage_model.update_speed(value=1)
+            try:
+                self.stage_widget.stage_model.move_worker.finished.connect(self.set_stage_speed_to_normal,
+                                                                           type=Qt.UniqueConnection)
+            except TypeError:   # signal is already connected
+                pass
         else:
             logger.info("Can't un retract lick spout because no AIND stage connected")
 
         self.GeneratedTrials.mouseLicked.connect(self.retract_lick_spout)
 
-    # def set_stage_speed_to_normal(self):
-    #     """"
-    #     Sets AIND stage to normal speed
-    #     """
-    #
-    #     if self.stage_widget is not None:
-    #         logger.info("Setting stage to normal speed.")
-    #         self.stage_widget.stage_model.update_speed(value=1)
-    #
-    #     else:
-    #         logger.info("Can't set stage speed because no AIND stage connected")
+    def set_stage_speed_to_normal(self):
+        """"
+        Sets AIND stage to normal speed
+        """
+
+        if self.stage_widget is not None:
+            logger.info("Setting stage to normal speed.")
+            self.stage_widget.stage_model.move_worker.finished.disconnect(self.set_stage_speed_to_normal)
+            self.stage_widget.stage_model.update_speed(value=1)
+
+        else:
+            logger.info("Can't set stage speed because no AIND stage connected")
 
     def _LoadUI(self):
         """
