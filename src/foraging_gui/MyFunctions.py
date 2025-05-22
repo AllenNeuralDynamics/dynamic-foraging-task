@@ -2921,14 +2921,6 @@ class GenerateTrials(QtCore.QObject):
                         self.B_Baited[1] = False
                         self.B_CurrentRewarded[0] = False
                         self.B_CurrentRewarded[1] = False
-
-                if self.B_AnimalCurrentResponse == 0:
-                    self.mouseLicked.emit("Left")
-                    logging.info("Left emit")
-                elif self.B_AnimalCurrentResponse == 1:
-                    self.mouseLicked.emit("Right")
-                    logging.info("Right emit")
-
                 B_CurrentRewarded = self.B_CurrentRewarded
                 B_AnimalCurrentResponse = self.B_AnimalCurrentResponse
             elif Rec[0].address == "/TrialEndTime":
@@ -3082,10 +3074,15 @@ class GenerateTrials(QtCore.QObject):
                 self.B_LeftLickTime = np.append(
                     self.B_LeftLickTime, Rec[1][1][0]
                 )
+                self.mouseLicked.emit("Left")
+                logging.info("Left emit")
+            
             elif Rec[0].address == "/RightLickTime":
                 self.B_RightLickTime = np.append(
                     self.B_RightLickTime, Rec[1][1][0]
                 )
+                self.mouseLicked.emit("Right")
+                logging.info("Right emit")
             elif Rec[0].address == "/LeftRewardDeliveryTime":
                 self.B_LeftRewardDeliveryTime = np.append(
                     self.B_LeftRewardDeliveryTime, Rec[1][1][0]
