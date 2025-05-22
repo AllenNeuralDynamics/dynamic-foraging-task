@@ -2928,6 +2928,7 @@ class GenerateTrials(QtCore.QObject):
                 elif self.B_AnimalCurrentResponse == 1:
                     self.mouseLicked.emit("Right")
                     logging.info("Right emit")
+
                 B_CurrentRewarded = self.B_CurrentRewarded
                 B_AnimalCurrentResponse = self.B_AnimalCurrentResponse
             elif Rec[0].address == "/TrialEndTime":
