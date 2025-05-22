@@ -5752,7 +5752,7 @@ class Window(QMainWindow):
                         "Continue anyways?",
                         QMessageBox.Yes | QMessageBox.Cancel,
                     )
-                    if reply == QMessageBox.No:
+                    if reply == QMessageBox.Cancel:
                         self.Start.setChecked(False)
                         logging.info(
                             "User declines starting session due to conflicting FIP information"
