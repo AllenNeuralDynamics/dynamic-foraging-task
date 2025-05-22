@@ -2922,11 +2922,10 @@ class GenerateTrials(QtCore.QObject):
                         self.B_CurrentRewarded[0] = False
                         self.B_CurrentRewarded[1] = False
 
-                choice = random.randint(0, 1)
-                if self.B_AnimalCurrentResponse == 0 or choice == 0:
+                if self.B_AnimalCurrentResponse == 0:
                     self.mouseLicked.emit("Left")
                     logging.info("Left emit")
-                elif self.B_AnimalCurrentResponse == 1 or choice == 1:
+                elif self.B_AnimalCurrentResponse == 1:
                     self.mouseLicked.emit("Right")
                     logging.info("Right emit")
                 B_CurrentRewarded = self.B_CurrentRewarded

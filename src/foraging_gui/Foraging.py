@@ -669,14 +669,10 @@ class Window(QMainWindow):
             logger.info("Un-retracting lick spout.")
             speed = self.operation_control_model.lick_spout_retraction_specs.un_retract_speed.value
             motor = 1 if lick_spout_licked == "Left" else 2
-            logger.info("Setting speed and pos")
             self.stage_widget.stage_model.update_speed(value=speed)
             self.stage_widget.stage_model.update_position(positions={motor:pos})
-            try:
-                self.stage_widget.stage_model.move_worker.finished.connect(self.set_stage_speed_to_normal,
+            self.stage_widget.stage_model.move_worker.finished.connect(self.set_stage_speed_to_normal,
                                                                            type=Qt.UniqueConnection)
-            except TypeError:   # signal is already connected
-                pass
         else:
             logger.info("Can't un retract lick spout because no AIND stage connected")
 
@@ -689,7 +685,11 @@ class Window(QMainWindow):
 
         if self.stage_widget is not None:
             logger.info("Setting stage to normal speed.")
-            self.stage_widget.stage_model.move_worker.finished.disconnect(self.set_stage_speed_to_normal)
+            try:
+
+                self.stage_widget.stage_model.move_worker.finished.disconnect(self.set_stage_speed_to_normal)
+            except TypeError:   # signal isn't connected
+                pass
             self.stage_widget.stage_model.update_speed(value=1)
 
         else:
