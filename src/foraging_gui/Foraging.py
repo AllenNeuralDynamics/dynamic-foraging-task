@@ -629,11 +629,13 @@ class Window(QMainWindow):
         :param pos: pos to move lick spout to. Default is 0
 
         """
+        # disconnect so it's only triggered once
+        self.GeneratedTrials.mouseLicked.disconnect(self.retract_lick_spout)
 
         lick_spout_retract = "right" if lick_spout_licked == "Left" else "left"
         timer = getattr(self, f"{lick_spout_retract}_retract_timer")
         tp = self.task_logic.task_parameters
-        if tp.lick_spout_retraction and self.stage_widget is not None and not timer.isActive():
+        if tp.lick_spout_retraction and self.stage_widget is not None:
             logger.info("Retracting lick spout.")
             motor = 1 if lick_spout_licked == "Left" else 2                             # TODO: is this the correct mapping
             curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor)    # TODO: Do I need to set rel_to_monument to True?
@@ -674,6 +676,8 @@ class Window(QMainWindow):
                 pass
         else:
             logger.info("Can't un retract lick spout because no AIND stage connected")
+
+        self.GeneratedTrials.mouseLicked.connect(self.retract_lick_spout)
 
     def set_stage_speed_to_normal(self):
         """"
