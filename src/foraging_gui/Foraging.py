@@ -672,7 +672,7 @@ class Window(QMainWindow):
             logger.info("Setting speed and pos")
             self.stage_widget.stage_model.update_speed(value=speed)
             self.stage_widget.stage_model.update_position(positions={motor:pos})
-            self.stage_widget.stage_model.update_speed(value=1)
+            #self.stage_widget.stage_model.update_speed(value=1)
         else:
             logger.info("Can't un retract lick spout because no AIND stage connected")
 
