@@ -5750,7 +5750,7 @@ class Window(QMainWindow):
                         "Box {}, Start".format(self.box_letter),
                         'Photometry is set to "on", but the FIP Mode is not in schedule. '
                         "Continue anyways?",
-                        QMessageBox.Yes | QMessageBox.No,
+                        QMessageBox.Yes | QMessageBox.Cancel,
                     )
                     if reply == QMessageBox.No:
                         self.Start.setChecked(False)
