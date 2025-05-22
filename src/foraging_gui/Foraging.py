@@ -651,8 +651,9 @@ class Window(QMainWindow):
             logger.info("Can't fast retract stage because AIND stage is not being used.",
                         extra={"tags": [self.warning_log_tag]})
 
-        elif timer.isActive():
-            logger.info(f"{lick_spout_licked.title()} is still in retraction process from last lick.",
+        elif tp.lick_spout_retraction:
+            self.GeneratedTrials.mouseLicked.connect(self.retract_lick_spout)
+            logger.info(f"Retraction turned off.",
                         extra={"tags": [self.warning_log_tag]})
 
     def un_retract_lick_spout(self, lick_spout_licked: Literal["Left", "Right"], pos: float = 0) -> None:
