@@ -2029,15 +2029,16 @@ class Window(QMainWindow):
         logging.info(
             "Creating SlimsWaterlogResult based on session information."
         )
+        print(water)
         model = models.SlimsWaterlogResult(
             mouse_pk=mouse.pk,
-            date=session.session_start_time,
+            date=datetime.now(),
             weight_g=session.animal_weight_post,
             operator=self.behavior_session_model.experimenter[0],
-            water_earned_ml=water["water_in_session_foraging"],
+            water_earned_ml=water["water_in_session_total"],
             water_supplement_delivered_ml=water["water_after_session"],
             water_supplement_recommended_ml=None,
-            total_water_ml=water["water_in_session_total"],
+            total_water_ml=water["water_in_session_total"]+water["water_after_session"],
             comments=session.notes,
             workstation=session.rig_id,
             sw_source=software.url,
@@ -6201,7 +6202,7 @@ class Window(QMainWindow):
                 self,
                 "Box {}, Start".format(self.box_letter),
                 'Photometry is set to "on", but excitation is not running. Start excitation now?',
-                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes | QMessageBox.Cancel,
                 QMessageBox.Yes,
             )
             if reply == QMessageBox.Yes:
