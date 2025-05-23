@@ -7,6 +7,7 @@ import traceback
 from datetime import datetime
 from itertools import accumulate
 from sys import platform as PLATFORM
+from threading import Lock
 
 import numpy as np
 import requests
@@ -2835,7 +2836,7 @@ class GenerateTrials(QtCore.QObject):
                         self.BlockLenHistory[i][-1] + 1
                     )
 
-    def _GetAnimalResponse(self, Channel1, Channel3, data_lock):
+    def _GetAnimalResponse(self, Channel1, Channel3, data_lock: Lock):
         """Get the animal's response"""
         self._CheckSimulationSession()
         if self.CurrentSimulation:
@@ -3066,77 +3067,92 @@ class GenerateTrials(QtCore.QObject):
         channel3.ManualWater_Right(int(1))
         channel3.RightValue1(float(self.win.right_valve_open_time * 1000))
 
-    def _get_irregular_timestamp(self, Channel2):
+    def _get_irregular_timestamp(self, Channel2, data_lock: Lock):
         """Get timestamps occurred irregularly (e.g. licks and reward delivery time)"""
-        print("IN IRREGULAR TIME ")
+
         while not Channel2.msgs.empty():
             Rec = Channel2.receive()
-            chance = random.randint(0, 5)
+            chance = random.randint(0, 100)
             if Rec[0].address == "/LeftLickTime" or chance == 0:
-                self.B_LeftLickTime = np.append(
-                    self.B_LeftLickTime, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_LeftLickTime = np.append(
+                        self.B_LeftLickTime, Rec[1][1][0]
+                    )
                 self.mouseLicked.emit("Left")
                 logging.info("Left emit")
             
             elif Rec[0].address == "/RightLickTime" or chance == 1:
-                self.B_RightLickTime = np.append(
-                    self.B_RightLickTime, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_RightLickTime = np.append(
+                        self.B_RightLickTime, Rec[1][1][0]
+                    )
                 self.mouseLicked.emit("Right")
                 logging.info("Right emit")
             elif Rec[0].address == "/LeftRewardDeliveryTime":
-                self.B_LeftRewardDeliveryTime = np.append(
-                    self.B_LeftRewardDeliveryTime, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_LeftRewardDeliveryTime = np.append(
+                        self.B_LeftRewardDeliveryTime, Rec[1][1][0]
+                    )
             elif Rec[0].address == "/RightRewardDeliveryTime":
-                self.B_RightRewardDeliveryTime = np.append(
-                    self.B_RightRewardDeliveryTime, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_RightRewardDeliveryTime = np.append(
+                        self.B_RightRewardDeliveryTime, Rec[1][1][0]
+                    )
             elif Rec[0].address == "/LeftRewardDeliveryTimeHarp":
-                self.B_LeftRewardDeliveryTimeHarp = np.append(
-                    self.B_LeftRewardDeliveryTimeHarp, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_LeftRewardDeliveryTimeHarp = np.append(
+                        self.B_LeftRewardDeliveryTimeHarp, Rec[1][1][0]
+                    )
             elif Rec[0].address == "/RightRewardDeliveryTimeHarp":
-                self.B_RightRewardDeliveryTimeHarp = np.append(
-                    self.B_RightRewardDeliveryTimeHarp, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_RightRewardDeliveryTimeHarp = np.append(
+                        self.B_RightRewardDeliveryTimeHarp, Rec[1][1][0]
+                    )
             elif Rec[0].address == "/PhotometryRising":
-                self.B_PhotometryRisingTimeHarp = np.append(
-                    self.B_PhotometryRisingTimeHarp, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_PhotometryRisingTimeHarp = np.append(
+                        self.B_PhotometryRisingTimeHarp, Rec[1][1][0]
+                    )
             elif Rec[0].address == "/PhotometryFalling":
-                self.B_PhotometryFallingTimeHarp = np.append(
-                    self.B_PhotometryFallingTimeHarp, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_PhotometryFallingTimeHarp = np.append(
+                        self.B_PhotometryFallingTimeHarp, Rec[1][1][0]
+                    )
             elif Rec[0].address == "/OptogeneticsTimeHarp":
-                self.B_OptogeneticsTimeHarp = np.append(
-                    self.B_OptogeneticsTimeHarp, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_OptogeneticsTimeHarp = np.append(
+                        self.B_OptogeneticsTimeHarp, Rec[1][1][0]
+                    )
             elif Rec[0].address == "/ManualLeftWaterStartTime":
-                self.B_ManualLeftWaterStartTime = np.append(
-                    self.B_ManualLeftWaterStartTime, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_ManualLeftWaterStartTime = np.append(
+                        self.B_ManualLeftWaterStartTime, Rec[1][1][0]
+                    )
             elif Rec[0].address == "/ManualRightWaterStartTime":
-                self.B_ManualRightWaterStartTime = np.append(
-                    self.B_ManualRightWaterStartTime, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_ManualRightWaterStartTime = np.append(
+                        self.B_ManualRightWaterStartTime, Rec[1][1][0]
+                    )
             elif Rec[0].address == "/EarnedLeftWaterStartTime":
-                self.B_EarnedLeftWaterStartTime = np.append(
-                    self.B_EarnedLeftWaterStartTime, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_EarnedLeftWaterStartTime = np.append(
+                        self.B_EarnedLeftWaterStartTime, Rec[1][1][0]
+                    )
             elif Rec[0].address == "/EarnedRightWaterStartTime":
-                self.B_EarnedRightWaterStartTime = np.append(
-                    self.B_EarnedRightWaterStartTime, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_EarnedRightWaterStartTime = np.append(
+                        self.B_EarnedRightWaterStartTime, Rec[1][1][0]
+                    )
             elif Rec[0].address == "/AutoLeftWaterStartTime":
-                self.B_AutoLeftWaterStartTime = np.append(
-                    self.B_AutoLeftWaterStartTime, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_AutoLeftWaterStartTime = np.append(
+                        self.B_AutoLeftWaterStartTime, Rec[1][1][0]
+                    )
             elif Rec[0].address == "/AutoRightWaterStartTime":
-                self.B_AutoRightWaterStartTime = np.append(
-                    self.B_AutoRightWaterStartTime, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_AutoRightWaterStartTime = np.append(
+                        self.B_AutoRightWaterStartTime, Rec[1][1][0]
+                    )
 
     def _DeletePreviousLicks(self, Channel2):
         """Delete licks from the previous session"""

@@ -3663,7 +3663,7 @@ class Window(QMainWindow):
             and self.InitializeBonsaiSuccessfully == 1
             and BackupSave == 0
         ):
-            self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
+            self.GeneratedTrials._get_irregular_timestamp(self.Channel2, self.data_lock)
 
         # Create new folders.
         if self.CreateNewFolder == 1:
@@ -4297,7 +4297,11 @@ class Window(QMainWindow):
             return
 
         self.PlotM = PlotV(
-            win=self, GeneratedTrials=self.GeneratedTrials, width=5, height=4
+            win=self,
+            data_lock=self.data_lock,
+            GeneratedTrials=self.GeneratedTrials,
+            width=5,
+            height=4
         )
         self.PlotM.setSizePolicy(
             QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding
@@ -5213,7 +5217,11 @@ class Window(QMainWindow):
             self.GeneratedTrials.mouseLicked.connect(self.retract_lick_spout)
             self.StartANewSession = 0
             PlotM = PlotV(
-                win=self, GeneratedTrials=GeneratedTrials, width=5, height=4
+                win=self,
+                data_lock=self.data_lock,
+                GeneratedTrials=GeneratedTrials,
+                width=5,
+                height=4
             )
             # PlotM.finish=1
             self.PlotM = PlotM
@@ -5265,10 +5273,17 @@ class Window(QMainWindow):
                 self.data_lock,
             )
             worker1.signals.finished.connect(self._thread_complete)
+
+            def loop_get_irregular_timestamp(Channel2, data_lock: Lock):
+                while self.Start.isChecked():
+                    GeneratedTrials._get_irregular_timestamp(Channel2, data_lock)
+
             workerLick = Worker(
-                GeneratedTrials._get_irregular_timestamp, self.Channel2
+                loop_get_irregular_timestamp, self.Channel2, self.data_lock
             )
             workerLick.signals.finished.connect(self._thread_complete2)
+            self.threadpool2.start(workerLick)
+
             workerPlot = Worker(
                 PlotM._Update,
                 GeneratedTrials=GeneratedTrials,
