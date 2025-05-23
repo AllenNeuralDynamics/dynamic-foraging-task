@@ -3068,9 +3068,9 @@ class GenerateTrials(QtCore.QObject):
 
     def _get_irregular_timestamp(self, Channel2):
         """Get timestamps occurred irregularly (e.g. licks and reward delivery time)"""
+        print("IN IRREGULAR TIME ")
         while not Channel2.msgs.empty():
             Rec = Channel2.receive()
-            print("IN IRREGULAR TIME ")
             chance = random.randint(0, 5)
             if Rec[0].address == "/LeftLickTime" or chance == 0:
                 self.B_LeftLickTime = np.append(
