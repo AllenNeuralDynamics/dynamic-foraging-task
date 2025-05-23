@@ -3072,8 +3072,7 @@ class GenerateTrials(QtCore.QObject):
 
         while not Channel2.msgs.empty():
             Rec = Channel2.receive()
-            chance = random.randint(0, 100)
-            if Rec[0].address == "/LeftLickTime" or chance == 0:
+            if Rec[0].address == "/LeftLickTime":
                 with data_lock:
                     self.B_LeftLickTime = np.append(
                         self.B_LeftLickTime, Rec[1][1][0]
@@ -3081,7 +3080,7 @@ class GenerateTrials(QtCore.QObject):
                 self.mouseLicked.emit("Left")
                 logging.info("Left emit")
             
-            elif Rec[0].address == "/RightLickTime" or chance == 1:
+            elif Rec[0].address == "/RightLickTime":
                 with data_lock:
                     self.B_RightLickTime = np.append(
                         self.B_RightLickTime, Rec[1][1][0]
