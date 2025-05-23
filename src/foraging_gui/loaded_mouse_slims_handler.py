@@ -546,12 +546,20 @@ class LoadedMouseSlimsHandler:
         """
 
         if self._loaded_mouse_id is not None and self.slims_client is not None:
+            offsets = self.slims_client.fetch_models(models.SlimsMouseLickspoutOffsets, barcode=self._loaded_mouse_id)
 
-            return {
-                "x": self._slims_mouse.x_offset,
-                "y": self._slims_mouse.y_offset,
-                "z": self._slims_mouse.z_offset,
-            }
+            if not offsets:     # list is not empty
+                return {
+                    "x": offsets[0].x_offset,
+                    "y": offsets[0].y_offset,
+                    "z": offsets[0].z_offset,
+                }
+            else:
+                return {
+                    "x": None,
+                    "y": None,
+                    "z": None,
+                }
         else:
             self.log.info("No mouse loaded so can't return offset.")
 
@@ -567,19 +575,13 @@ class LoadedMouseSlimsHandler:
         """
 
         if self._loaded_mouse_id is not None and self.slims_client is not None:
-            mouse = self._slims_mouse
-            if [mouse.x_offset, mouse.y_offset, mouse.z_offset] == [
-                x,
-                y,
-                z,
-            ]:  # skip update if offset is the same
-                return
-            mouse.x_offset = x
-            mouse.y_offset = y
-            mouse.z_offset = z
+            new_offset = models.SlimsMouseLickspoutOffsets(barcode=self._loaded_mouse_id,
+                                                           x_offset=x,
+                                                           y_offset=y,
+                                                           z_offset=z)
             self.log.info(
-                f"Updating mouse offset to x: {x}, y: {y}, z: {z} for mouse {self._loaded_mouse_id}"
+                f"Adding offset x: {x}, y: {y}, z: {z} for mouse {self._loaded_mouse_id}"
             )
-            self.slims_client.update_model(model=mouse)  # update model
+            self.slims_client.add_model(new_offset)
         else:
             self.log.info("No mouse loaded so can't set offset.")
