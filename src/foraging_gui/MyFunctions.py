@@ -3070,14 +3070,16 @@ class GenerateTrials(QtCore.QObject):
         """Get timestamps occurred irregularly (e.g. licks and reward delivery time)"""
         while not Channel2.msgs.empty():
             Rec = Channel2.receive()
-            if Rec[0].address == "/LeftLickTime":
+            print("IN IRREGULAR TIME ")
+            chance = random.randint(0, 5)
+            if Rec[0].address == "/LeftLickTime" or chance == 0:
                 self.B_LeftLickTime = np.append(
                     self.B_LeftLickTime, Rec[1][1][0]
                 )
                 self.mouseLicked.emit("Left")
                 logging.info("Left emit")
             
-            elif Rec[0].address == "/RightLickTime":
+            elif Rec[0].address == "/RightLickTime" or chance == 1:
                 self.B_RightLickTime = np.append(
                     self.B_RightLickTime, Rec[1][1][0]
                 )
