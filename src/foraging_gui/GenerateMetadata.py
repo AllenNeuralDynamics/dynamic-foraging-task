@@ -1066,6 +1066,9 @@ class generate_metadata:
             "DelayMax",
             "LeftValue_volume",
             "RightValue_volume",
+            "stage_in_use",
+            "curriculum_in_use"
+
         ]
         reward_probability = self._get_reward_probability()
         task_parameters = {
