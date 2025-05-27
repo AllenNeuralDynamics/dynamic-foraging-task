@@ -401,9 +401,13 @@ class Window(QMainWindow):
         self.bias_indicator.biasValue.connect(
             self.bias_calculated
         )  # update dashboard value
+        self.bias_indicator.biasOver.connect(self.lick_spout_bias_correction)
+        self.bias_indicator.biasUnder.connect(self.lick_spout_bias_correction)
         self.bias_indicator.setSizePolicy(
             QSizePolicy.Maximum, QSizePolicy.Maximum
         )
+        self.last_bias_move = 0
+        self.lick_spout_origin = self._GetPositions()  # "origin" of lick spout for mouse
         self.bias_thread = Thread()  # dummy thread
 
         # create sound button
@@ -5159,6 +5163,8 @@ class Window(QMainWindow):
                     self.end_session_log()
                 self.log_session()  # start log for new session
 
+            self.lick_spout_origin = self._GetPositions()   # "origin" of lick spout for mouse
+
         else:
             GeneratedTrials = self.GeneratedTrials
 
@@ -5713,6 +5719,35 @@ class Window(QMainWindow):
             self._Save(BackupSave=BackupSave)
         except Exception as e:
             logging.error("backup save failed: {}".format(e))
+
+    def lick_spout_bias_correction(self,
+                                   bias: float,
+                                   trial_number: int):
+
+        """
+         Evaluate and move lick spout based on bias. Negative bias correlates to left; positive, right.
+        :param bias: bias value
+        :param trial_number: trial number at which bias value was calculated
+        """
+
+        specs = self.operation_control_model.lick_spout_bias_movement
+        pos = self._GetPositions()
+        if specs and specs.trial_interval >= trial_number-self.last_bias_move and pos != self.lick_spout_origin:
+
+            if abs(bias) < specs.bias_lower_threshold: # move lick spouts back to position at start of session
+                delta_step = specs.step_size_um if bias < 0 else -specs.step_size_um
+
+            else: # move lick spouts towards unbiased side
+                delta_step = specs.step_size_um if bias >= 0 else -specs.step_size_um
+
+            if self.stage_widget is not None:
+                pos["y1"] += delta_step
+                pos["y2"] += delta_step
+                self.stage_widget.stage_model.update_position(pos)
+            else:
+                self._Move("y", pos["y"] + delta_step)
+
+            self.last_bias_move = trial_number  # reset check
 
     def bias_calculated(
         self,

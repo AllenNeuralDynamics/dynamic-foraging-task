@@ -27,6 +27,7 @@ class BiasIndicator(QMainWindow):
     """Widget to calculate, display, and alert user of lick bias"""
 
     biasOver = pyqtSignal(float, int)  # emit bias and trial number it occurred
+    biasUnder = pyqtSignal(float, int)  # emit bias and trial number it occurred
     biasError = pyqtSignal(str, int)  # emit error and trial number it occurred
     biasValue = pyqtSignal(
         float, list, int
@@ -34,21 +35,24 @@ class BiasIndicator(QMainWindow):
 
     def __init__(
         self,
-        bias_threshold: float = 0.7,
+        bias_upper_threshold: float = 0.7,
+        bias_lower_threshold: float = 0.3,
         x_range: int = 15,
         data_lock: Lock = Lock(),
         *args,
         **kwargs,
     ):
         """
-        :param bias_limit: decimal to alert user if bias is above between 0 and 1
+        :param bias_upper_threshold: decimal to alert user if bias is above
+        :param bias_lower_threshold: decimal to alert user if bias is under
         :param x_range: total number of values displayed on the x axis as graph is scrolling
         :param data_lock: optional data lock to use when manipulating data
         """
 
         super().__init__(*args, **kwargs)
         self.log = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-        self.bias_threshold = bias_threshold
+        self.bias_upper_threshold = bias_upper_threshold
+        self.bias_lower_threshold = bias_lower_threshold
         self.lock = data_lock
 
         # initialize biases as empy list and x_range
@@ -62,21 +66,21 @@ class BiasIndicator(QMainWindow):
         self.bias_plot.setMouseTracking(False)
         self.bias_plot.setRange(
             xRange=[1, self.x_range],
-            yRange=[-self.bias_threshold - 0.3, 0.3 + self.bias_threshold],
+            yRange=[-self.bias_upper_threshold - 0.3, 0.3 + self.bias_upper_threshold],
         )
         self.bias_plot.setLabels(
             left="Bias", bottom="Trial #"
         )  # make label bigger
         self.bias_plot.getAxis("left").setTicks(
-            [[(-bias_threshold, "L"), (bias_threshold, "R")]]
+            [[(-bias_upper_threshold, "L"), (bias_upper_threshold, "R")]]
         )
         self.bias_plot.addLine(
             y=0, pen="black"
         )  # add line at 0 to help user see if slight bias
         self.bias_plot.addLine(
-            y=bias_threshold, pen="b"
+            y=bias_upper_threshold, pen="b"
         )  # add lines at threshold to make clearer when bias goes over
-        self.bias_plot.addLine(y=-bias_threshold, pen="r")
+        self.bias_plot.addLine(y=-bias_upper_threshold, pen="r")
         self.setCentralWidget(self.bias_plot)
 
         # create gradient pen
@@ -84,7 +88,7 @@ class BiasIndicator(QMainWindow):
         cm.reverse()  # reverse to red == left and blue == right
         cm.setMappingMode("diverging")  # set mapping mode
         self.bias_pen = cm.getPen(
-            span=(1.5 * -bias_threshold, 1.5 * bias_threshold), width=5
+            span=(1.5 * -bias_upper_threshold, 1.5 * bias_upper_threshold), width=5
         )  # red at -threshold to blue at +threshold
 
         # create upper and lower CI curves
@@ -127,12 +131,12 @@ class BiasIndicator(QMainWindow):
         self.bias_plot.addItem(self.bias_label)
 
     @property
-    def bias_threshold(self) -> float:
+    def bias_upper_threshold(self) -> float:
         """Decimal threshold at which alert user if bias is above"""
         return self._bias_threshold
 
-    @bias_threshold.setter
-    def bias_threshold(self, value: float) -> None:
+    @bias_upper_threshold.setter
+    def bias_upper_threshold(self, value: float) -> None:
         """
         Set decimal threshold at which alert user if bias is above
         :param value: float value to set bias to
@@ -276,9 +280,9 @@ class BiasIndicator(QMainWindow):
                     )
 
             # emit signal and flash current bias point if over
-            if abs(bias) > self.bias_threshold:
+            if abs(bias) > self.bias_upper_threshold:
                 self.log.info(
-                    f"Bias value calculated over a threshold of {self.bias_threshold}. Bias: {bias} "
+                    f"Bias value calculated over a threshold of {self.bias_upper_threshold}. Bias: {bias} "
                     f"Trial Count: {trial_count}"
                 )
                 self.biasOver.emit(bias, trial_count)
@@ -288,6 +292,13 @@ class BiasIndicator(QMainWindow):
                     brush=QColor("purple"),
                     size=9,
                 )
+
+            elif abs(bias) > self.bias_lower_threshold:
+                self.log.info(
+                    f"Bias value calculated under a threshold of {self.bias_lower_threshold}. Bias: {bias} "
+                    f"Trial Count: {trial_count}"
+                )
+                self.biasUnder.emit(bias, trial_count)
 
             else:
                 self._current_bias_point.setData(
@@ -306,12 +317,12 @@ class BiasIndicator(QMainWindow):
             y=0, pen="black"
         )  # add line at 0 to help user see if slight bias
         self.bias_plot.addLine(
-            y=self.bias_threshold, pen="b"
+            y=self.bias_upper_threshold, pen="b"
         )  # add lines at threshold to make clearer when bias goes over
-        self.bias_plot.addLine(y=-self.bias_threshold, pen="r")
+        self.bias_plot.addLine(y=-self.bias_upper_threshold, pen="r")
         self.bias_plot.setRange(
             xRange=[1, self.x_range],
-            yRange=[-self.bias_threshold - 0.3, 0.3 + self.bias_threshold],
+            yRange=[-self.bias_upper_threshold - 0.3, 0.3 + self.bias_upper_threshold],
         )
 
         # reset bias list
