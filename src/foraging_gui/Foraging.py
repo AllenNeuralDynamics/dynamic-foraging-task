@@ -3982,8 +3982,12 @@ class Window(QMainWindow):
         Obj["SaveFile"] = self.SaveFile
 
         # save the stage and curriculum version
-        Obj["stage_in_use"] = self.AutoTrain_dialog.stage_in_use
-        Obj["curriculum_in_use"] = get_curriculum_string(self.AutoTrain_dialog.curriculum_in_use)
+        if self.AutoTrain_dialog.auto_train_engaged:
+            Obj["stage_in_use"] = self.AutoTrain_dialog.stage_in_use
+            Obj["curriculum_in_use"] = get_curriculum_string(self.AutoTrain_dialog.curriculum_in_use)
+        else:
+            Obj["stage_in_use"] = "unknown training stage"
+            Obj["curriculum_in_use"] = "unknown curriculum"
 
         # generate the metadata file and update slims
         try:
