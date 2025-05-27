@@ -61,6 +61,7 @@ from foraging_gui.Dialogs import (
     OptogeneticsDialog,
     TimeDistributionDialog,
     WaterCalibrationDialog,
+    get_curriculum_string,
 )
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.MyFunctions import (
@@ -3982,7 +3983,7 @@ class Window(QMainWindow):
 
         # save the stage and curriculum version
         Obj["stage_in_use"] = self.AutoTrain_dialog.stage_in_use
-        Obj["curriculum_in_use"] = self.AutoTrain_dialog.get_curriculum_string(self.AutoTrain_dialog.curriculum_in_use)
+        Obj["curriculum_in_use"] = get_curriculum_string(self.AutoTrain_dialog.curriculum_in_use)
 
         # generate the metadata file and update slims
         try:
