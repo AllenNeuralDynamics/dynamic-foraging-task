@@ -4067,8 +4067,17 @@ class Window(QMainWindow):
                     with open(self.SaveFile, "w") as outfile:
                         json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
                 elif self.SaveFile.endswith(".json"):
-                    with open(self.SaveFile, "w") as outfile:
+                    # Crashses during save can corupt a json file.
+                    # Make tmp file to save to
+                    tmp_file_name = self.SaveFile.split('.json')[0]
+                    tmp_file_name = tmp_file_name + '_tmp.json'
+                    with open(tmp_file_name, "w") as outfile:
                         json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
+                    # After file is safely saved, remove the old save file
+                    # and rewrite the new one.
+                    if os.path.isfile(self.SaveFile):
+                        os.remove(self.SaveFile)
+                    os.rename(tmp_file_name,self.SaveFile)
 
         # Toggle unsaved data to False
         if BackupSave == 0:
