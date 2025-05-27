@@ -5741,11 +5741,10 @@ class Window(QMainWindow):
                 delta_step = specs.step_size_um if bias >= 0 else -specs.step_size_um
 
             if self.stage_widget is not None:
-                pos["y1"] += delta_step
-                pos["y2"] += delta_step
+                pos["x"] += delta_step * 10e-3
                 self.stage_widget.stage_model.update_position(pos)
             else:
-                self._Move("y", pos["y"] + delta_step)
+                self._Move("x", pos["x"] + delta_step)
 
             self.last_bias_move = trial_number  # reset check
 
