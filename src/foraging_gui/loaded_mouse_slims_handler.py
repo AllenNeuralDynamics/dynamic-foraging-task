@@ -576,6 +576,7 @@ class LoadedMouseSlimsHandler:
 
         if self._loaded_mouse_id is not None and self.slims_client is not None:
             new_offset = models.SlimsMouseLickspoutOffsets(barcode=self._loaded_mouse_id,
+                                                           mouse_id=self._loaded_mouse_id,
                                                            x_offset=x,
                                                            y_offset=y,
                                                            z_offset=z)
