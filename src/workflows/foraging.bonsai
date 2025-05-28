@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<WorkflowBuilder Version="2.8.2"
+<WorkflowBuilder Version="2.8.5"
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xmlns:rx="clr-namespace:Bonsai.Reactive;assembly=Bonsai.Core"
                  xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -2270,6 +2270,12 @@
             <Expression xsi:type="MulticastSubject">
               <Name>ToBonsaiOSC</Name>
             </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>EnvironmentSensor</Name>
+            </Expression>
+            <Expression xsi:type="MulticastSubject">
+              <Name>ToBonsaiOSC</Name>
+            </Expression>
             <Expression xsi:type="beh:CreateMessage">
               <harp:MessageType>Write</harp:MessageType>
               <harp:Payload xsi:type="beh:CreatePulseDOPort2Payload">
@@ -2796,57 +2802,58 @@
             <Edge From="104" To="105" Label="Source1" />
             <Edge From="106" To="107" Label="Source1" />
             <Edge From="108" To="109" Label="Source1" />
-            <Edge From="109" To="110" Label="Source1" />
+            <Edge From="110" To="111" Label="Source1" />
             <Edge From="111" To="112" Label="Source1" />
-            <Edge From="112" To="113" Label="Source1" />
+            <Edge From="113" To="114" Label="Source1" />
             <Edge From="114" To="115" Label="Source1" />
-            <Edge From="115" To="116" Label="Source1" />
+            <Edge From="116" To="117" Label="Source1" />
             <Edge From="117" To="118" Label="Source1" />
             <Edge From="119" To="120" Label="Source1" />
             <Edge From="121" To="122" Label="Source1" />
             <Edge From="123" To="124" Label="Source1" />
-            <Edge From="124" To="125" Label="Source1" />
+            <Edge From="125" To="126" Label="Source1" />
             <Edge From="126" To="127" Label="Source1" />
-            <Edge From="127" To="128" Label="Source1" />
             <Edge From="128" To="129" Label="Source1" />
+            <Edge From="129" To="130" Label="Source1" />
             <Edge From="130" To="131" Label="Source1" />
-            <Edge From="131" To="134" Label="Source1" />
             <Edge From="132" To="133" Label="Source1" />
-            <Edge From="133" To="134" Label="Source2" />
+            <Edge From="133" To="136" Label="Source1" />
             <Edge From="134" To="135" Label="Source1" />
-            <Edge From="135" To="136" Label="Source1" />
+            <Edge From="135" To="136" Label="Source2" />
+            <Edge From="136" To="137" Label="Source1" />
             <Edge From="137" To="138" Label="Source1" />
             <Edge From="139" To="140" Label="Source1" />
-            <Edge From="140" To="141" Label="Source1" />
-            <Edge From="140" To="145" Label="Source2" />
             <Edge From="141" To="142" Label="Source1" />
             <Edge From="142" To="143" Label="Source1" />
+            <Edge From="142" To="147" Label="Source2" />
             <Edge From="143" To="144" Label="Source1" />
             <Edge From="144" To="145" Label="Source1" />
             <Edge From="145" To="146" Label="Source1" />
             <Edge From="146" To="147" Label="Source1" />
             <Edge From="147" To="148" Label="Source1" />
             <Edge From="148" To="149" Label="Source1" />
+            <Edge From="149" To="150" Label="Source1" />
             <Edge From="150" To="151" Label="Source1" />
-            <Edge From="151" To="152" Label="Source1" />
-            <Edge From="151" To="156" Label="Source2" />
             <Edge From="152" To="153" Label="Source1" />
             <Edge From="153" To="154" Label="Source1" />
+            <Edge From="153" To="158" Label="Source2" />
             <Edge From="154" To="155" Label="Source1" />
             <Edge From="155" To="156" Label="Source1" />
             <Edge From="156" To="157" Label="Source1" />
             <Edge From="157" To="158" Label="Source1" />
             <Edge From="158" To="159" Label="Source1" />
             <Edge From="159" To="160" Label="Source1" />
+            <Edge From="160" To="161" Label="Source1" />
             <Edge From="161" To="162" Label="Source1" />
-            <Edge From="162" To="163" Label="Source1" />
-            <Edge From="162" To="164" Label="Source1" />
-            <Edge From="165" To="166" Label="Source1" />
-            <Edge From="166" To="169" Label="Source1" />
+            <Edge From="163" To="164" Label="Source1" />
+            <Edge From="164" To="165" Label="Source1" />
+            <Edge From="164" To="166" Label="Source1" />
             <Edge From="167" To="168" Label="Source1" />
-            <Edge From="168" To="169" Label="Source2" />
+            <Edge From="168" To="171" Label="Source1" />
             <Edge From="169" To="170" Label="Source1" />
-            <Edge From="170" To="171" Label="Source1" />
+            <Edge From="170" To="171" Label="Source2" />
+            <Edge From="171" To="172" Label="Source1" />
+            <Edge From="172" To="173" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
@@ -3358,6 +3365,26 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="rx:SubscribeWhen" />
             </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>ComPorts</Name>
+            </Expression>
+            <Expression xsi:type="Index">
+              <Operand xsi:type="StringProperty">
+                <Value>EnvironmentSensor</Value>
+              </Operand>
+            </Expression>
+            <Expression xsi:type="PropertyMapping">
+              <PropertyMappings>
+                <Property Name="PortName" />
+              </PropertyMappings>
+            </Expression>
+            <Expression xsi:type="IncludeWorkflow" Path="AllenNeuralDynamics.HarpUtils:HarpEnvironmentSensor.bonsai">
+              <PortName>COM4</PortName>
+              <TriggerHarpReadDumpSubjectName>BehaviorEvents</TriggerHarpReadDumpSubjectName>
+            </Expression>
+            <Expression xsi:type="rx:PublishSubject">
+              <Name>EnvironmentSensor</Name>
+            </Expression>
           </Nodes>
           <Edges>
             <Edge From="0" To="4" Label="Source1" />
@@ -3378,6 +3405,10 @@
             <Edge From="18" To="19" Label="Source1" />
             <Edge From="19" To="20" Label="Source1" />
             <Edge From="20" To="21" Label="Source2" />
+            <Edge From="22" To="23" Label="Source1" />
+            <Edge From="23" To="24" Label="Source1" />
+            <Edge From="24" To="25" Label="Source1" />
+            <Edge From="25" To="26" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
@@ -4196,7 +4227,28 @@
                     <scr:Expression>new(it as Seconds)</scr:Expression>
                   </Expression>
                   <Expression xsi:type="osc:Format">
-                    <osc:Address>/TrialStartTime</osc:Address>
+                    <osc:Address>/EnvironmentSensor</osc:Address>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>ToBonsaiOSC</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>EnvironmentSensor</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>Timestamps</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:WithLatestFrom" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Item2</Selector>
+                  </Expression>
+                  <Expression xsi:type="scr:ExpressionTransform">
+                    <scr:Expression>new(it as Seconds)</scr:Expression>
+                  </Expression>
+                  <Expression xsi:type="osc:Format">
+                    <osc:Address>/EnvironmentSensor</osc:Address>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
                     <Name>ToBonsaiOSC</Name>
@@ -4584,12 +4636,12 @@
                   <Edge From="57" To="58" Label="Source1" />
                   <Edge From="58" To="59" Label="Source1" />
                   <Edge From="59" To="60" Label="Source1" />
-                  <Edge From="61" To="62" Label="Source1" />
-                  <Edge From="62" To="63" Label="Source1" />
-                  <Edge From="64" To="66" Label="Source1" />
-                  <Edge From="65" To="66" Label="Source2" />
+                  <Edge From="61" To="63" Label="Source1" />
+                  <Edge From="62" To="63" Label="Source2" />
+                  <Edge From="63" To="64" Label="Source1" />
+                  <Edge From="64" To="65" Label="Source1" />
+                  <Edge From="65" To="66" Label="Source1" />
                   <Edge From="66" To="67" Label="Source1" />
-                  <Edge From="67" To="68" Label="Source1" />
                   <Edge From="68" To="69" Label="Source1" />
                   <Edge From="69" To="70" Label="Source1" />
                   <Edge From="71" To="73" Label="Source1" />
@@ -4634,6 +4686,12 @@
                   <Edge From="116" To="117" Label="Source1" />
                   <Edge From="117" To="118" Label="Source1" />
                   <Edge From="118" To="119" Label="Source1" />
+                  <Edge From="120" To="122" Label="Source1" />
+                  <Edge From="121" To="122" Label="Source2" />
+                  <Edge From="122" To="123" Label="Source1" />
+                  <Edge From="123" To="124" Label="Source1" />
+                  <Edge From="124" To="125" Label="Source1" />
+                  <Edge From="125" To="126" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -9179,7 +9237,7 @@
         <Property Name="FileName" DisplayName="SettingsPath" />
       </Expression>
       <Expression xsi:type="io:CsvReader">
-        <io:FileName>C:\Users\svc_aind_ephys\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
+        <io:FileName>C:\Users\micah.woodard\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
         <io:ScanPattern>%s,%s</io:ScanPattern>
         <io:SkipRows>0</io:SkipRows>
       </Expression>
