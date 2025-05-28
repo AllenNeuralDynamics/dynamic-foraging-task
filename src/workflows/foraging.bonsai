@@ -12,16 +12,17 @@
                  xmlns:p1="clr-namespace:Harp.SoundCard;assembly=Harp.SoundCard"
                  xmlns:wie="clr-namespace:Bonsai.Windows.Input;assembly=Bonsai.Windows.Input"
                  xmlns:p2="clr-namespace:AllenNeuralDynamics.LicketySplitLickDetector;assembly=AllenNeuralDynamics.LicketySplitLickDetector"
+                 xmlns:p3="clr-namespace:AllenNeuralDynamics.EnvironmentSensor;assembly=AllenNeuralDynamics.EnvironmentSensor"
                  xmlns:dsp="clr-namespace:Bonsai.Dsp;assembly=Bonsai.Dsp"
-                 xmlns:p3="clr-namespace:Bonsai.DAQmx;assembly=Extensions"
+                 xmlns:p4="clr-namespace:Bonsai.DAQmx;assembly=Extensions"
                  xmlns:vid="clr-namespace:Bonsai.Video;assembly=Bonsai.Video"
                  xmlns:cv="clr-namespace:Bonsai.Vision;assembly=Bonsai.Vision"
                  xmlns:io="clr-namespace:Bonsai.IO;assembly=Bonsai.System"
                  xmlns:viz="clr-namespace:Bonsai.Design.Visualizers;assembly=Bonsai.Design.Visualizers"
                  xmlns:spk="clr-namespace:Bonsai.Spinnaker;assembly=Bonsai.Spinnaker"
-                 xmlns:p4="clr-namespace:AllenNeuralDynamics.Core;assembly=AllenNeuralDynamics.Core"
+                 xmlns:p5="clr-namespace:AllenNeuralDynamics.Core;assembly=AllenNeuralDynamics.Core"
                  xmlns:ffmpeg="clr-namespace:Bonsai.FFmpeg;assembly=Bonsai.FFmpeg"
-                 xmlns:p5="clr-namespace:;assembly=Extensions"
+                 xmlns:p6="clr-namespace:;assembly=Extensions"
                  xmlns:gui="clr-namespace:Bonsai.Gui;assembly=Bonsai.Gui"
                  xmlns="https://bonsai-rx.org/2018/workflow">
   <Workflow>
@@ -3378,9 +3379,16 @@
                 <Property Name="PortName" />
               </PropertyMappings>
             </Expression>
-            <Expression xsi:type="IncludeWorkflow" Path="AllenNeuralDynamics.HarpUtils:HarpEnvironmentSensor.bonsai">
-              <PortName>COM4</PortName>
-              <TriggerHarpReadDumpSubjectName>BehaviorEvents</TriggerHarpReadDumpSubjectName>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="p3:Device">
+                <harp:OperationMode>Active</harp:OperationMode>
+                <harp:OperationLed>On</harp:OperationLed>
+                <harp:DumpRegisters>true</harp:DumpRegisters>
+                <harp:VisualIndicators>On</harp:VisualIndicators>
+                <harp:Heartbeat>Disabled</harp:Heartbeat>
+                <harp:IgnoreErrors>false</harp:IgnoreErrors>
+                <harp:PortName>COMx</harp:PortName>
+              </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
               <Name>EnvironmentSensor</Name>
@@ -4744,29 +4752,29 @@
                     <Property Name="TriggerSource" />
                   </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="p3:TriggeredAnalogOutput">
-                      <p3:SignalSource />
-                      <p3:TriggerSource>/Dev1/PFI0</p3:TriggerSource>
-                      <p3:SampleRate>5000</p3:SampleRate>
-                      <p3:ActiveEdge>Rising</p3:ActiveEdge>
-                      <p3:SampleMode>FiniteSamples</p3:SampleMode>
-                      <p3:BufferSize>50002</p3:BufferSize>
-                      <p3:Channels>
-                        <p3:AnalogOutputChannelConfiguration>
-                          <p3:ChannelName />
-                          <p3:MinimumValue>-10</p3:MinimumValue>
-                          <p3:MaximumValue>10</p3:MaximumValue>
-                          <p3:PhysicalChannel>Dev1/ao0</p3:PhysicalChannel>
-                          <p3:VoltageUnits>Volts</p3:VoltageUnits>
-                        </p3:AnalogOutputChannelConfiguration>
-                        <p3:AnalogOutputChannelConfiguration>
-                          <p3:ChannelName />
-                          <p3:MinimumValue>-10</p3:MinimumValue>
-                          <p3:MaximumValue>10</p3:MaximumValue>
-                          <p3:PhysicalChannel>Dev1/ao1</p3:PhysicalChannel>
-                          <p3:VoltageUnits>Volts</p3:VoltageUnits>
-                        </p3:AnalogOutputChannelConfiguration>
-                      </p3:Channels>
+                    <Combinator xsi:type="p4:TriggeredAnalogOutput">
+                      <p4:SignalSource />
+                      <p4:TriggerSource>/Dev1/PFI0</p4:TriggerSource>
+                      <p4:SampleRate>5000</p4:SampleRate>
+                      <p4:ActiveEdge>Rising</p4:ActiveEdge>
+                      <p4:SampleMode>FiniteSamples</p4:SampleMode>
+                      <p4:BufferSize>50002</p4:BufferSize>
+                      <p4:Channels>
+                        <p4:AnalogOutputChannelConfiguration>
+                          <p4:ChannelName />
+                          <p4:MinimumValue>-10</p4:MinimumValue>
+                          <p4:MaximumValue>10</p4:MaximumValue>
+                          <p4:PhysicalChannel>Dev1/ao0</p4:PhysicalChannel>
+                          <p4:VoltageUnits>Volts</p4:VoltageUnits>
+                        </p4:AnalogOutputChannelConfiguration>
+                        <p4:AnalogOutputChannelConfiguration>
+                          <p4:ChannelName />
+                          <p4:MinimumValue>-10</p4:MinimumValue>
+                          <p4:MaximumValue>10</p4:MaximumValue>
+                          <p4:PhysicalChannel>Dev1/ao1</p4:PhysicalChannel>
+                          <p4:VoltageUnits>Volts</p4:VoltageUnits>
+                        </p4:AnalogOutputChannelConfiguration>
+                      </p4:Channels>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -7983,22 +7991,22 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="p4:AindSpinnakerCapture">
+                                <Combinator xsi:type="p5:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>23022717</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
-                                  <p4:ExposureTime>1000</p4:ExposureTime>
-                                  <p4:Gain>8</p4:Gain>
-                                  <p4:Binning>1</p4:Binning>
-                                  <p4:Gamma xsi:nil="true" />
-                                  <p4:PixelFormat>Mono8</p4:PixelFormat>
-                                  <p4:RegionOfInterest>
-                                    <p4:X>0</p4:X>
-                                    <p4:Y>0</p4:Y>
-                                    <p4:Width>0</p4:Width>
-                                    <p4:Height>0</p4:Height>
-                                  </p4:RegionOfInterest>
-                                  <p4:AdcBitDepth>Bit8</p4:AdcBitDepth>
+                                  <p5:ExposureTime>1000</p5:ExposureTime>
+                                  <p5:Gain>8</p5:Gain>
+                                  <p5:Binning>1</p5:Binning>
+                                  <p5:Gamma xsi:nil="true" />
+                                  <p5:PixelFormat>Mono8</p5:PixelFormat>
+                                  <p5:RegionOfInterest>
+                                    <p5:X>0</p5:X>
+                                    <p5:Y>0</p5:Y>
+                                    <p5:Width>0</p5:Width>
+                                    <p5:Height>0</p5:Height>
+                                  </p5:RegionOfInterest>
+                                  <p5:AdcBitDepth>Bit8</p5:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
@@ -8204,22 +8212,22 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="p4:AindSpinnakerCapture">
+                                <Combinator xsi:type="p5:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>23045805</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
-                                  <p4:ExposureTime>1000</p4:ExposureTime>
-                                  <p4:Gain>8</p4:Gain>
-                                  <p4:Binning>1</p4:Binning>
-                                  <p4:Gamma xsi:nil="true" />
-                                  <p4:PixelFormat>Mono8</p4:PixelFormat>
-                                  <p4:RegionOfInterest>
-                                    <p4:X>0</p4:X>
-                                    <p4:Y>0</p4:Y>
-                                    <p4:Width>0</p4:Width>
-                                    <p4:Height>0</p4:Height>
-                                  </p4:RegionOfInterest>
-                                  <p4:AdcBitDepth>Bit8</p4:AdcBitDepth>
+                                  <p5:ExposureTime>1000</p5:ExposureTime>
+                                  <p5:Gain>8</p5:Gain>
+                                  <p5:Binning>1</p5:Binning>
+                                  <p5:Gamma xsi:nil="true" />
+                                  <p5:PixelFormat>Mono8</p5:PixelFormat>
+                                  <p5:RegionOfInterest>
+                                    <p5:X>0</p5:X>
+                                    <p5:Y>0</p5:Y>
+                                    <p5:Width>0</p5:Width>
+                                    <p5:Height>0</p5:Height>
+                                  </p5:RegionOfInterest>
+                                  <p5:AdcBitDepth>Bit8</p5:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
@@ -8429,22 +8437,22 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="p4:AindSpinnakerCapture">
+                                <Combinator xsi:type="p5:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>23022710</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
-                                  <p4:ExposureTime>1000</p4:ExposureTime>
-                                  <p4:Gain>8</p4:Gain>
-                                  <p4:Binning>1</p4:Binning>
-                                  <p4:Gamma xsi:nil="true" />
-                                  <p4:PixelFormat>Mono8</p4:PixelFormat>
-                                  <p4:RegionOfInterest>
-                                    <p4:X>0</p4:X>
-                                    <p4:Y>0</p4:Y>
-                                    <p4:Width>0</p4:Width>
-                                    <p4:Height>0</p4:Height>
-                                  </p4:RegionOfInterest>
-                                  <p4:AdcBitDepth>Bit8</p4:AdcBitDepth>
+                                  <p5:ExposureTime>1000</p5:ExposureTime>
+                                  <p5:Gain>8</p5:Gain>
+                                  <p5:Binning>1</p5:Binning>
+                                  <p5:Gamma xsi:nil="true" />
+                                  <p5:PixelFormat>Mono8</p5:PixelFormat>
+                                  <p5:RegionOfInterest>
+                                    <p5:X>0</p5:X>
+                                    <p5:Y>0</p5:Y>
+                                    <p5:Width>0</p5:Width>
+                                    <p5:Height>0</p5:Height>
+                                  </p5:RegionOfInterest>
+                                  <p5:AdcBitDepth>Bit8</p5:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
@@ -8654,22 +8662,22 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="p4:AindSpinnakerCapture">
+                                <Combinator xsi:type="p5:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>22511912</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
-                                  <p4:ExposureTime>1000</p4:ExposureTime>
-                                  <p4:Gain>8</p4:Gain>
-                                  <p4:Binning>1</p4:Binning>
-                                  <p4:Gamma xsi:nil="true" />
-                                  <p4:PixelFormat>Mono8</p4:PixelFormat>
-                                  <p4:RegionOfInterest>
-                                    <p4:X>0</p4:X>
-                                    <p4:Y>0</p4:Y>
-                                    <p4:Width>0</p4:Width>
-                                    <p4:Height>0</p4:Height>
-                                  </p4:RegionOfInterest>
-                                  <p4:AdcBitDepth>Bit8</p4:AdcBitDepth>
+                                  <p5:ExposureTime>1000</p5:ExposureTime>
+                                  <p5:Gain>8</p5:Gain>
+                                  <p5:Binning>1</p5:Binning>
+                                  <p5:Gamma xsi:nil="true" />
+                                  <p5:PixelFormat>Mono8</p5:PixelFormat>
+                                  <p5:RegionOfInterest>
+                                    <p5:X>0</p5:X>
+                                    <p5:Y>0</p5:Y>
+                                    <p5:Width>0</p5:Width>
+                                    <p5:Height>0</p5:Height>
+                                  </p5:RegionOfInterest>
+                                  <p5:AdcBitDepth>Bit8</p5:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
@@ -9119,13 +9127,13 @@
               <Name>CameraImage_Bottom</Name>
             </Expression>
             <Expression xsi:type="VisualizerMapping">
-              <VisualizerType xsi:type="TypeMapping" TypeArguments="p5:IplImageRotateVisualizer" />
+              <VisualizerType xsi:type="TypeMapping" TypeArguments="p6:IplImageRotateVisualizer" />
             </Expression>
             <Expression xsi:type="SubscribeSubject">
               <Name>CameraImage_Right</Name>
             </Expression>
             <Expression xsi:type="VisualizerMapping">
-              <VisualizerType xsi:type="TypeMapping" TypeArguments="p5:IplImageRotateVisualizer" />
+              <VisualizerType xsi:type="TypeMapping" TypeArguments="p6:IplImageRotateVisualizer" />
             </Expression>
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
               <viz:Name>CameraRecording</viz:Name>
@@ -9442,22 +9450,22 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="p4:AindSpinnakerCapture">
+                                <Combinator xsi:type="p5:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>23022717</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
-                                  <p4:ExposureTime>1000</p4:ExposureTime>
-                                  <p4:Gain>8</p4:Gain>
-                                  <p4:Binning>1</p4:Binning>
-                                  <p4:Gamma xsi:nil="true" />
-                                  <p4:PixelFormat>Mono8</p4:PixelFormat>
-                                  <p4:RegionOfInterest>
-                                    <p4:X>0</p4:X>
-                                    <p4:Y>0</p4:Y>
-                                    <p4:Width>0</p4:Width>
-                                    <p4:Height>0</p4:Height>
-                                  </p4:RegionOfInterest>
-                                  <p4:AdcBitDepth>Bit8</p4:AdcBitDepth>
+                                  <p5:ExposureTime>1000</p5:ExposureTime>
+                                  <p5:Gain>8</p5:Gain>
+                                  <p5:Binning>1</p5:Binning>
+                                  <p5:Gamma xsi:nil="true" />
+                                  <p5:PixelFormat>Mono8</p5:PixelFormat>
+                                  <p5:RegionOfInterest>
+                                    <p5:X>0</p5:X>
+                                    <p5:Y>0</p5:Y>
+                                    <p5:Width>0</p5:Width>
+                                    <p5:Height>0</p5:Height>
+                                  </p5:RegionOfInterest>
+                                  <p5:AdcBitDepth>Bit8</p5:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="MemberSelector">
@@ -9561,22 +9569,22 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="p4:AindSpinnakerCapture">
+                                <Combinator xsi:type="p5:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>23045805</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
-                                  <p4:ExposureTime>1000</p4:ExposureTime>
-                                  <p4:Gain>8</p4:Gain>
-                                  <p4:Binning>1</p4:Binning>
-                                  <p4:Gamma xsi:nil="true" />
-                                  <p4:PixelFormat>Mono8</p4:PixelFormat>
-                                  <p4:RegionOfInterest>
-                                    <p4:X>0</p4:X>
-                                    <p4:Y>0</p4:Y>
-                                    <p4:Width>0</p4:Width>
-                                    <p4:Height>0</p4:Height>
-                                  </p4:RegionOfInterest>
-                                  <p4:AdcBitDepth>Bit8</p4:AdcBitDepth>
+                                  <p5:ExposureTime>1000</p5:ExposureTime>
+                                  <p5:Gain>8</p5:Gain>
+                                  <p5:Binning>1</p5:Binning>
+                                  <p5:Gamma xsi:nil="true" />
+                                  <p5:PixelFormat>Mono8</p5:PixelFormat>
+                                  <p5:RegionOfInterest>
+                                    <p5:X>0</p5:X>
+                                    <p5:Y>0</p5:Y>
+                                    <p5:Width>0</p5:Width>
+                                    <p5:Height>0</p5:Height>
+                                  </p5:RegionOfInterest>
+                                  <p5:AdcBitDepth>Bit8</p5:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="MemberSelector">
@@ -9684,22 +9692,22 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="p4:AindSpinnakerCapture">
+                                <Combinator xsi:type="p5:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>23022710</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
-                                  <p4:ExposureTime>1000</p4:ExposureTime>
-                                  <p4:Gain>8</p4:Gain>
-                                  <p4:Binning>1</p4:Binning>
-                                  <p4:Gamma xsi:nil="true" />
-                                  <p4:PixelFormat>Mono8</p4:PixelFormat>
-                                  <p4:RegionOfInterest>
-                                    <p4:X>0</p4:X>
-                                    <p4:Y>0</p4:Y>
-                                    <p4:Width>0</p4:Width>
-                                    <p4:Height>0</p4:Height>
-                                  </p4:RegionOfInterest>
-                                  <p4:AdcBitDepth>Bit8</p4:AdcBitDepth>
+                                  <p5:ExposureTime>1000</p5:ExposureTime>
+                                  <p5:Gain>8</p5:Gain>
+                                  <p5:Binning>1</p5:Binning>
+                                  <p5:Gamma xsi:nil="true" />
+                                  <p5:PixelFormat>Mono8</p5:PixelFormat>
+                                  <p5:RegionOfInterest>
+                                    <p5:X>0</p5:X>
+                                    <p5:Y>0</p5:Y>
+                                    <p5:Width>0</p5:Width>
+                                    <p5:Height>0</p5:Height>
+                                  </p5:RegionOfInterest>
+                                  <p5:AdcBitDepth>Bit8</p5:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="MemberSelector">
@@ -9807,22 +9815,22 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="p4:AindSpinnakerCapture">
+                                <Combinator xsi:type="p5:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>22511912</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
-                                  <p4:ExposureTime>1000</p4:ExposureTime>
-                                  <p4:Gain>8</p4:Gain>
-                                  <p4:Binning>1</p4:Binning>
-                                  <p4:Gamma xsi:nil="true" />
-                                  <p4:PixelFormat>Mono8</p4:PixelFormat>
-                                  <p4:RegionOfInterest>
-                                    <p4:X>0</p4:X>
-                                    <p4:Y>0</p4:Y>
-                                    <p4:Width>0</p4:Width>
-                                    <p4:Height>0</p4:Height>
-                                  </p4:RegionOfInterest>
-                                  <p4:AdcBitDepth>Bit8</p4:AdcBitDepth>
+                                  <p5:ExposureTime>1000</p5:ExposureTime>
+                                  <p5:Gain>8</p5:Gain>
+                                  <p5:Binning>1</p5:Binning>
+                                  <p5:Gamma xsi:nil="true" />
+                                  <p5:PixelFormat>Mono8</p5:PixelFormat>
+                                  <p5:RegionOfInterest>
+                                    <p5:X>0</p5:X>
+                                    <p5:Y>0</p5:Y>
+                                    <p5:Width>0</p5:Width>
+                                    <p5:Height>0</p5:Height>
+                                  </p5:RegionOfInterest>
+                                  <p5:AdcBitDepth>Bit8</p5:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="MemberSelector">
@@ -9975,13 +9983,13 @@
               <Name>CameraImage_Bottom_Preview</Name>
             </Expression>
             <Expression xsi:type="VisualizerMapping">
-              <VisualizerType xsi:type="TypeMapping" TypeArguments="p5:IplImageRotateVisualizer" />
+              <VisualizerType xsi:type="TypeMapping" TypeArguments="p6:IplImageRotateVisualizer" />
             </Expression>
             <Expression xsi:type="SubscribeSubject">
               <Name>CameraImage_Right_Preview</Name>
             </Expression>
             <Expression xsi:type="VisualizerMapping">
-              <VisualizerType xsi:type="TypeMapping" TypeArguments="p5:IplImageRotateVisualizer" />
+              <VisualizerType xsi:type="TypeMapping" TypeArguments="p6:IplImageRotateVisualizer" />
             </Expression>
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
               <viz:Name>CameraPreview</viz:Name>
