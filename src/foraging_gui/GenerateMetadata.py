@@ -843,7 +843,7 @@ class generate_metadata:
         # hard coded for now
         self.fiber_connections = [
             FiberConnectionConfig(
-                patch_cord_name="Patch Cord A",
+                patch_cord_name="Patch Cord 0",
                 patch_cord_output_power=patch_cord_output_powers[0],
                 output_power_unit="microwatt",
                 fiber_name="Fiber 0",
@@ -851,7 +851,7 @@ class generate_metadata:
         ]
         self.fiber_connections.append(
             FiberConnectionConfig(
-                patch_cord_name="Patch Cord B",
+                patch_cord_name="Patch Cord 1",
                 patch_cord_output_power=patch_cord_output_powers[1],
                 output_power_unit="microwatt",
                 fiber_name="Fiber 1",
@@ -859,7 +859,7 @@ class generate_metadata:
         )
         self.fiber_connections.append(
             FiberConnectionConfig(
-                patch_cord_name="Patch Cord C",
+                patch_cord_name="Patch Cord 2",
                 patch_cord_output_power=patch_cord_output_powers[2],
                 output_power_unit="microwatt",
                 fiber_name="Fiber 2",
@@ -867,7 +867,7 @@ class generate_metadata:
         )
         self.fiber_connections.append(
             FiberConnectionConfig(
-                patch_cord_name="Patch Cord D",
+                patch_cord_name="Patch Cord 3",
                 patch_cord_output_power=patch_cord_output_powers[3],
                 output_power_unit="microwatt",
                 fiber_name="Fiber 3",
