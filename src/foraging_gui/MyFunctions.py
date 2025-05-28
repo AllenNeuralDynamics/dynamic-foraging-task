@@ -39,9 +39,7 @@ if PLATFORM == "win32":
 VID_NEWSCALE = 0x10C4
 PID_NEWSCALE = 0xEA61
 
-class GenerateTrials(QtCore.QObject):
-
-    mouseLicked = QtCore.pyqtSignal(str)
+class GenerateTrials:
 
     def __init__(
         self,
@@ -3072,29 +3070,18 @@ class GenerateTrials(QtCore.QObject):
 
         while not Channel2.msgs.empty():
             Rec = Channel2.receive()
-            if Rec[0].address == "/LeftLick":
-                self.mouseLicked.emit("Left")
-                logging.info("Left emit")
 
-            elif Rec[0].address == "/RightLick":
-                self.mouseLicked.emit("Right")
-                logging.info("Right emit")
-
-            elif Rec[0].address == "/LeftLickTime":
+            if Rec[0].address == "/LeftLickTime":
                 with data_lock:
                     self.B_LeftLickTime = np.append(
                         self.B_LeftLickTime, Rec[1][1][0]
                     )
-                self.mouseLicked.emit("Left")
-                logging.info("Left emit")
-            
+
             elif Rec[0].address == "/RightLickTime":
                 with data_lock:
                     self.B_RightLickTime = np.append(
                         self.B_RightLickTime, Rec[1][1][0]
                     )
-                self.mouseLicked.emit("Right")
-                logging.info("Right emit")
             elif Rec[0].address == "/LeftRewardDeliveryTime":
                 with data_lock:
                     self.B_LeftRewardDeliveryTime = np.append(

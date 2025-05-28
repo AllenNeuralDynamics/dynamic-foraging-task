@@ -630,7 +630,7 @@ class Window(QMainWindow):
 
         """
         # disconnect so it's only triggered once
-        self.GeneratedTrials.mouseLicked.disconnect(self.retract_lick_spout)
+        self.Channel2.mouseLicked.disconnect(self.retract_lick_spout)
 
         lick_spout_retract = "right" if lick_spout_licked == "Left" else "left"
         timer = getattr(self, f"{lick_spout_retract}_retract_timer")
@@ -653,7 +653,7 @@ class Window(QMainWindow):
                         extra={"tags": [self.warning_log_tag]})
 
         elif tp.lick_spout_retraction:
-            self.GeneratedTrials.mouseLicked.connect(self.retract_lick_spout)
+            self.Channel2.mouseLicked.connect(self.retract_lick_spout)
             logger.info(f"Retraction turned off.",
                         extra={"tags": [self.warning_log_tag]})
 
@@ -672,11 +672,11 @@ class Window(QMainWindow):
             self.stage_widget.stage_model.update_speed(value=speed)
             self.stage_widget.stage_model.update_position(positions={motor:pos})
             self.stage_widget.stage_model.move_worker.finished.connect(self.set_stage_speed_to_normal,
-                                                                           type=Qt.UniqueConnection)
+                                                                       type=Qt.UniqueConnection)
         else:
             logger.info("Can't un retract lick spout because no AIND stage connected")
 
-        self.GeneratedTrials.mouseLicked.connect(self.retract_lick_spout)
+        self.Channel2.mouseLicked.connect(self.retract_lick_spout, type=Qt.UniqueConnection)
 
     def set_stage_speed_to_normal(self):
         """"
@@ -4273,7 +4273,6 @@ class Window(QMainWindow):
             self.fip_model,
             self.operation_control_model,
         )
-        self.GeneratedTrials.mouseLicked.connect(self.retract_lick_spout)
         # Iterate over all attributes of the GeneratedTrials object
         for attr_name in dir(self.GeneratedTrials):
             if attr_name in Obj.keys():
@@ -5161,6 +5160,9 @@ class Window(QMainWindow):
             self.sound_button.setEnabled(True)
             self.behavior_baseline_period.clear()   # set flag to break out of habituation period
 
+            # disconnect fast retract signals
+            self.Channel2.mouseLicked.disconnect()
+
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
             self._StopCurrentSession()
@@ -5214,7 +5216,6 @@ class Window(QMainWindow):
                 self.operation_control_model,
             )
             self.GeneratedTrials = GeneratedTrials
-            self.GeneratedTrials.mouseLicked.connect(self.retract_lick_spout)
             self.StartANewSession = 0
             PlotM = PlotV(
                 win=self,
@@ -5234,6 +5235,8 @@ class Window(QMainWindow):
             # delete licks from the previous session
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
             GeneratedTrials.lick_interval_time.start()  # start lick interval calculation
+
+            self.Channel2.mouseLicked.connect(self.retract_lick_spout)  # connect signal for fast retraction
 
             if self.Start.isChecked():
                 # if session log handler is not none, stop logging for previous session
@@ -5274,15 +5277,10 @@ class Window(QMainWindow):
             )
             worker1.signals.finished.connect(self._thread_complete)
 
-            def loop_get_irregular_timestamp(Channel2, data_lock: Lock):
-                while self.Start.isChecked():
-                    GeneratedTrials._get_irregular_timestamp(Channel2, data_lock)
-
             workerLick = Worker(
-                loop_get_irregular_timestamp, self.Channel2, self.data_lock
+                GeneratedTrials._get_irregular_timestamp, self.Channel2
             )
             workerLick.signals.finished.connect(self._thread_complete2)
-            self.threadpool2.start(workerLick)
 
             workerPlot = Worker(
                 PlotM._Update,
@@ -5370,7 +5368,6 @@ class Window(QMainWindow):
                 "Running photometry baseline",
                 extra={"tags": [self.warning_log_tag]},
             )
-
         self._StartTrialLoop(GeneratedTrials, worker1, worker_save)
 
         if self.actionDrawing_after_stopping.isChecked() == True:
