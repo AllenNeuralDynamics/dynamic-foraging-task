@@ -2974,7 +2974,7 @@ class GenerateTrials:
         """Get timestamps occurred irregularly (e.g. licks and reward delivery time)"""
         while not Channel2.msgs.empty():
             Rec = Channel2.receive()
-            logging.info(str(Rec))
+            logging.info("HEY THIS IS IMPORTANT", +str(Rec), extra={"tags": [self.win.warning_log_tag]})
             if Rec[0].address == "/LeftLickTime":
                 self.B_LeftLickTime = np.append(
                     self.B_LeftLickTime, Rec[1][1][0]
