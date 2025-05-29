@@ -25,7 +25,10 @@ PID_NEWSCALE = 0xEA61
 class GenerateTrials:
     def __init__(self, win):
         self.win = win
-        self.B_EnvironmentSensor = []
+        self.B_EnvironmentSensorTemperature = []
+        self.B_EnvironmentSensorHumidity = []
+        self.B_EnvironmentSensorPressure = []
+        self.B_EnvironmentSensorTimestamp = []
         self.B_LeftLickIntervalPercent = (
             None  # percentage of left lick intervals under 100ms
         )
@@ -3034,9 +3037,17 @@ class GenerateTrials:
                 self.B_AutoRightWaterStartTime = np.append(
                     self.B_AutoRightWaterStartTime, Rec[1][1][0]
                 )
-            elif Rec[0].address == "/EnvironmentSensor":
+            elif Rec[0].address == "/EnvironmentSensorTemperature":
+                self.B_EnvironmentSensorTemperature.append(Rec[1][1][0])
 
-                self.B_EnvironmentSensor.append(Rec[1][1][0])
+            elif Rec[0].address == "/EnvironmentSensorHumidity":
+                self.B_EnvironmentSensorHumidity.append(Rec[1][1][0])
+
+            elif Rec[0].address == "/EnvironmentSensorPressure":
+                self.B_EnvironmentSensorPressure.append(Rec[1][1][0])
+
+            elif Rec[0].address == "/EnvironmentSensorTimestamp":
+                self.B_EnvironmentSensorTimestamp.append(Rec[1][1][0])
 
     def _DeletePreviousLicks(self, Channel2):
         """Delete licks from the previous session"""
