@@ -3035,7 +3035,8 @@ class GenerateTrials:
                     self.B_AutoRightWaterStartTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/EnvironmentSensor":
-                self.B_EnvironmentSensor.append(Rec)
+                print(Rec)
+                self.B_EnvironmentSensor.append(Rec[1][1][0])
 
     def _DeletePreviousLicks(self, Channel2):
         """Delete licks from the previous session"""
