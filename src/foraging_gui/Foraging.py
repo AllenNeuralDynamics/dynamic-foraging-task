@@ -5016,7 +5016,7 @@ class Window(QMainWindow):
             self._set_metadata_enabled(False)
 
             # update slims with latest stage offset value for loaded mouse
-            self.update_loaded_mouse_offset()
+            #self.update_loaded_mouse_offset()
 
             # disable task model widgets
             self.task_widget.setEnabled(False)
