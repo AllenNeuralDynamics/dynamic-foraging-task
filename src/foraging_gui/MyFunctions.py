@@ -2795,7 +2795,7 @@ class GenerateTrials:
             if Rec[0].address == "/TrialStartTime":
                 TrialStartTime = Rec[1][1][0]
                 in_delay = 1  # the next /BehaviorEvent is the delay
-            elif Rec[0].adress == "/EnvironmentSensor":
+            elif Rec[0].address == "/EnvironmentSensor":
                 self.B_EnvironmentSensor.append(Rec)
             elif Rec[0].address == "/DelayStartTime":
                 DelayStartTime.append(Rec[1][1][0])
