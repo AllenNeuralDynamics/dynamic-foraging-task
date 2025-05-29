@@ -3378,7 +3378,7 @@
                 <harp:OperationLed>On</harp:OperationLed>
                 <harp:DumpRegisters>true</harp:DumpRegisters>
                 <harp:VisualIndicators>On</harp:VisualIndicators>
-                <harp:Heartbeat>Disabled</harp:Heartbeat>
+                <harp:Heartbeat>Enabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
                 <harp:PortName>COMx</harp:PortName>
               </Combinator>
