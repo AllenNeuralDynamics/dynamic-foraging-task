@@ -3372,9 +3372,6 @@
                 <Property Name="PortName" />
               </PropertyMappings>
             </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>BehaviorCommands</Name>
-            </Expression>
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="p3:Device">
                 <harp:OperationMode>Active</harp:OperationMode>
@@ -3411,9 +3408,8 @@
             <Edge From="20" To="21" Label="Source2" />
             <Edge From="22" To="23" Label="Source1" />
             <Edge From="23" To="24" Label="Source1" />
-            <Edge From="24" To="26" Label="Source1" />
-            <Edge From="25" To="26" Label="Source2" />
-            <Edge From="26" To="27" Label="Source1" />
+            <Edge From="24" To="25" Label="Source1" />
+            <Edge From="25" To="26" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
