@@ -2795,8 +2795,6 @@ class GenerateTrials:
             if Rec[0].address == "/TrialStartTime":
                 TrialStartTime = Rec[1][1][0]
                 in_delay = 1  # the next /BehaviorEvent is the delay
-            elif Rec[0].address == "/EnvironmentSensor":
-                self.B_EnvironmentSensor.append(Rec)
             elif Rec[0].address == "/DelayStartTime":
                 DelayStartTime.append(Rec[1][1][0])
                 if first_delay_start == 0:
@@ -3036,6 +3034,8 @@ class GenerateTrials:
                 self.B_AutoRightWaterStartTime = np.append(
                     self.B_AutoRightWaterStartTime, Rec[1][1][0]
                 )
+            elif Rec[0].address == "/EnvironmentSensor":
+                self.B_EnvironmentSensor.append(Rec)
 
     def _DeletePreviousLicks(self, Channel2):
         """Delete licks from the previous session"""
