@@ -4240,27 +4240,6 @@
                     <Name>ToBonsaiOSC</Name>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
-                    <Name>EnvironmentSensor</Name>
-                  </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>Timestamps</Name>
-                  </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:WithLatestFrom" />
-                  </Expression>
-                  <Expression xsi:type="MemberSelector">
-                    <Selector>Item2</Selector>
-                  </Expression>
-                  <Expression xsi:type="scr:ExpressionTransform">
-                    <scr:Expression>new(it as Seconds)</scr:Expression>
-                  </Expression>
-                  <Expression xsi:type="osc:Format">
-                    <osc:Address>/EnvironmentSensor</osc:Address>
-                  </Expression>
-                  <Expression xsi:type="MulticastSubject">
-                    <Name>ToBonsaiOSC2</Name>
-                  </Expression>
-                  <Expression xsi:type="SubscribeSubject">
                     <Name>DelayStart</Name>
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
@@ -4591,6 +4570,27 @@
                   <Expression xsi:type="MulticastSubject">
                     <Name>ToBonsaiOSC2</Name>
                   </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>EnvironmentSensor</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>Timestamps</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:WithLatestFrom" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Item2</Selector>
+                  </Expression>
+                  <Expression xsi:type="scr:ExpressionTransform">
+                    <scr:Expression>new(it as Seconds)</scr:Expression>
+                  </Expression>
+                  <Expression xsi:type="osc:Format">
+                    <osc:Address>/EnvironmentSensor</osc:Address>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>ToBonsaiOSC2</Name>
+                  </Expression>
                 </Nodes>
                 <Edges>
                   <Edge From="0" To="1" Label="Source1" />
@@ -4643,12 +4643,12 @@
                   <Edge From="57" To="58" Label="Source1" />
                   <Edge From="58" To="59" Label="Source1" />
                   <Edge From="59" To="60" Label="Source1" />
-                  <Edge From="61" To="63" Label="Source1" />
-                  <Edge From="62" To="63" Label="Source2" />
-                  <Edge From="63" To="64" Label="Source1" />
-                  <Edge From="64" To="65" Label="Source1" />
-                  <Edge From="65" To="66" Label="Source1" />
+                  <Edge From="61" To="62" Label="Source1" />
+                  <Edge From="62" To="63" Label="Source1" />
+                  <Edge From="64" To="66" Label="Source1" />
+                  <Edge From="65" To="66" Label="Source2" />
                   <Edge From="66" To="67" Label="Source1" />
+                  <Edge From="67" To="68" Label="Source1" />
                   <Edge From="68" To="69" Label="Source1" />
                   <Edge From="69" To="70" Label="Source1" />
                   <Edge From="71" To="73" Label="Source1" />
