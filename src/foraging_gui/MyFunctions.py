@@ -2974,6 +2974,7 @@ class GenerateTrials:
         """Get timestamps occurred irregularly (e.g. licks and reward delivery time)"""
         while not Channel2.msgs.empty():
             Rec = Channel2.receive()
+            logging.info(str(Rec))
             if Rec[0].address == "/LeftLickTime":
                 self.B_LeftLickTime = np.append(
                     self.B_LeftLickTime, Rec[1][1][0]
@@ -3035,7 +3036,7 @@ class GenerateTrials:
                     self.B_AutoRightWaterStartTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/EnvironmentSensor":
-                logging.info(str(Rec))
+
                 self.B_EnvironmentSensor.append(Rec[1][1][0])
 
     def _DeletePreviousLicks(self, Channel2):
