@@ -206,24 +206,24 @@ class Window(QMainWindow):
 
         # Stage Widget
         self.stage_widget = None
-        # try:
-        #     self._load_stage()
-        # except IOError as e:
-        #     msg = (
-        #         "ERROR...<br>"
-        #         "Dear scientist, please perform the following to document this issue:<br>"
-        #         "    1) Create comment here: <a href=https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/925>Github Link</a><br>"
-        #         "    2) In the comment list the following information:<br> "
-        #         "            - Date and time of error<br>"
-        #         "            - Box info (ex. 6D)<br>"
-        #         "            - Attach logs (found in  C:\\Users\\svc_aind_behavior\\Documents\\foraging_gui_logs). Please add the two most recent files<br>"
-        #         "            - Short description of the last thing done on the GUI before the error. (ex. overnight bleaching, closed gui, opened gui - error)<br>"
-        #         "Thank you, with your efforts hopefully we can vanquish this error and never see it again...<br>"
-        #     )
-        #     show_msg_box(
-        #         "Stage Widget Error", "Stage Widget Error Diagnostic Help", msg
-        #     )
-        #     raise e
+        try:
+            self._load_stage()
+        except IOError as e:
+            msg = (
+                "ERROR...<br>"
+                "Dear scientist, please perform the following to document this issue:<br>"
+                "    1) Create comment here: <a href=https://github.com/AllenNeuralDynamics/dynamic-foraging-task/issues/925>Github Link</a><br>"
+                "    2) In the comment list the following information:<br> "
+                "            - Date and time of error<br>"
+                "            - Box info (ex. 6D)<br>"
+                "            - Attach logs (found in  C:\\Users\\svc_aind_behavior\\Documents\\foraging_gui_logs). Please add the two most recent files<br>"
+                "            - Short description of the last thing done on the GUI before the error. (ex. overnight bleaching, closed gui, opened gui - error)<br>"
+                "Thank you, with your efforts hopefully we can vanquish this error and never see it again...<br>"
+            )
+            show_msg_box(
+                "Stage Widget Error", "Stage Widget Error Diagnostic Help", msg
+            )
+            raise e
 
         # Connect to Bonsai
         self._InitializeBonsai()
