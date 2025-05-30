@@ -636,7 +636,7 @@ class Window(QMainWindow):
         timer = getattr(self, f"{lick_spout_retract}_retract_timer")
         tp = self.task_logic.task_parameters
         if tp.lick_spout_retraction and self.stage_widget is not None:
-            logger.info("Retracting lick spout.")
+            logger.info(f"Retracting {lick_spout_retract} lick spout.")
             motor = 1 if lick_spout_licked == "Left" else 2                             # TODO: is this the correct mapping
             curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor)    # TODO: Do I need to set rel_to_monument to True?
             self.stage_widget.stage_model.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=True)
@@ -5161,8 +5161,11 @@ class Window(QMainWindow):
             self.sound_button.setEnabled(True)
             self.behavior_baseline_period.clear()   # set flag to break out of habituation period
 
-            # disconnect fast retract signals
-            self.Channel2.mouseLicked.disconnect()
+            # disconnect fast retract signals if connected
+            try:
+                self.Channel2.mouseLicked.disconnect(self.retract_lick_spout)
+            except:
+                pass
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
