@@ -4584,7 +4584,7 @@
                     <Name>EnvironmentSensor</Name>
                   </Expression>
                   <Expression xsi:type="p3:Parse">
-                    <harp:Register xsi:type="p3:TimestampedTemperature" />
+                    <harp:Register xsi:type="p3:Temperature" />
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorTemperature</osc:Address>
@@ -4596,7 +4596,7 @@
                     <Name>EnvironmentSensor</Name>
                   </Expression>
                   <Expression xsi:type="p3:Parse">
-                    <harp:Register xsi:type="p3:TimestampedHumidity" />
+                    <harp:Register xsi:type="p3:Humidity" />
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorHumidity</osc:Address>
@@ -4608,10 +4608,22 @@
                     <Name>EnvironmentSensor</Name>
                   </Expression>
                   <Expression xsi:type="p3:Parse">
-                    <harp:Register xsi:type="p3:TimestampedHumidity" />
+                    <harp:Register xsi:type="p3:Pressure" />
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorPressure</osc:Address>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>ToBonsaiOSC2</Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>EnvironmentSensor</Name>
+                  </Expression>
+                  <Expression xsi:type="p3:Parse">
+                    <harp:Register xsi:type="p3:TimestampedTemperature" />
+                  </Expression>
+                  <Expression xsi:type="osc:Format">
+                    <osc:Address>/EnvironmentSensorTimestamp</osc:Address>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
                     <Name>ToBonsaiOSC2</Name>
@@ -4727,6 +4739,9 @@
                   <Edge From="128" To="129" Label="Source1" />
                   <Edge From="129" To="130" Label="Source1" />
                   <Edge From="130" To="131" Label="Source1" />
+                  <Edge From="132" To="133" Label="Source1" />
+                  <Edge From="133" To="134" Label="Source1" />
+                  <Edge From="134" To="135" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
