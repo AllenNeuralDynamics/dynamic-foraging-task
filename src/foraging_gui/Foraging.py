@@ -2846,6 +2846,7 @@ class Window(QMainWindow):
         self.client2 = OSCStreamingClient()
         self.client2.connect((self.ip, self.request_port2))
         self.Channel2 = rigcontrol.RigClient(self.client2)
+        self.Channel2.mouseLicked.connect(self.retract_lick_spout)
         # manually give water
         self.client3 = OSCStreamingClient()  # Create client
         self.client3.connect((self.ip, self.request_port3))
