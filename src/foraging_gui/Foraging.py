@@ -635,7 +635,7 @@ class Window(QMainWindow):
         lick_spout_retract = "right" if lick_spout_licked == "Left" else "left"
         timer = getattr(self, f"{lick_spout_retract}_retract_timer")
         tp = self.task_logic.task_parameters
-        at_origin = list(self._GetPositions().values())[1:3] == [0,0]
+        at_origin = list(self._GetPositions().values())[1:3] == [0, 0]
         if tp.lick_spout_retraction and self.stage_widget is not None and not at_origin:
             logger.info(f"Retracting {lick_spout_retract} lick spout.")
             motor = 1 if lick_spout_licked == "Left" else 2                             # TODO: is this the correct mapping
@@ -657,9 +657,9 @@ class Window(QMainWindow):
             try:
                 self.Channel2.mouseLicked.connect(self.retract_lick_spout, type=Qt.UniqueConnection)
             except TypeError:  # signal already connected
-                pass
-            logger.info("Lickspouts at origin." if at_origin else "Retraction turned off.",
-                        extra={"tags": [self.warning_log_tag]})
+                logger.debug("Mouse lick signal already connected.")
+            logger.debug("Cannot retract stage because " + "lickspouts at origin." if at_origin
+                        else "retraction turned off.")
 
     def un_retract_lick_spout(self, lick_spout_licked: Literal["Left", "Right"], pos: float = 0) -> None:
         """
@@ -682,7 +682,7 @@ class Window(QMainWindow):
         try:
             self.Channel2.mouseLicked.connect(self.retract_lick_spout, type=Qt.UniqueConnection)
         except TypeError:   # signal already connected
-            pass
+            logger.debug("Mouse lick signal already connected.")
 
     def set_stage_speed_to_normal(self):
         """"
@@ -5114,6 +5114,11 @@ class Window(QMainWindow):
             # set flag to perform habituation period
             self.behavior_baseline_period.set()
 
+            try:    # connect signal for fast retraction
+                self.Channel2.mouseLicked.connect(self.retract_lick_spout, type=Qt.UniqueConnection)
+            except TypeError:  # signal already connected
+                logger.debug("Mouse lick signal already connected.")
+
             self.session_run = True  # session has been started
         else:
             # Prompt user to confirm stopping trials
@@ -5245,11 +5250,6 @@ class Window(QMainWindow):
             # delete licks from the previous session
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
             GeneratedTrials.lick_interval_time.start()  # start lick interval calculation
-
-            try:    # connect signal for fast retraction
-                self.Channel2.mouseLicked.connect(self.retract_lick_spout, type=Qt.UniqueConnection)
-            except TypeError:  # signal already connected
-                pass
 
             if self.Start.isChecked():
                 # if session log handler is not none, stop logging for previous session
