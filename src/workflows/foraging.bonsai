@@ -3373,6 +3373,23 @@
               </PropertyMappings>
             </Expression>
             <Expression xsi:type="Combinator">
+              <Combinator xsi:type="rx:Timer">
+                <rx:DueTime>PT0S</rx:DueTime>
+                <rx:Period>PT5S</rx:Period>
+              </Combinator>
+            </Expression>
+            <Expression xsi:type="harp:CreateMessage">
+              <harp:MessageType>Write</harp:MessageType>
+              <harp:Payload xsi:type="harp:CreateOperationControlPayload">
+                <harp:OperationMode>Active</harp:OperationMode>
+                <harp:DumpRegisters>true</harp:DumpRegisters>
+                <harp:MuteReplies>false</harp:MuteReplies>
+                <harp:VisualIndicators>Off</harp:VisualIndicators>
+                <harp:OperationLed>Off</harp:OperationLed>
+                <harp:Heartbeat>Enabled</harp:Heartbeat>
+              </harp:Payload>
+            </Expression>
+            <Expression xsi:type="Combinator">
               <Combinator xsi:type="p3:Device">
                 <harp:OperationMode>Active</harp:OperationMode>
                 <harp:OperationLed>On</harp:OperationLed>
@@ -3382,10 +3399,6 @@
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
                 <harp:PortName>COMx</harp:PortName>
               </Combinator>
-            </Expression>
-            <Expression xsi:type="p3:FilterRegister">
-              <harp:FilterType>Include</harp:FilterType>
-              <harp:Register xsi:type="p3:SensorData" />
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
               <Name>EnvironmentSensor</Name>
@@ -3412,9 +3425,10 @@
             <Edge From="20" To="21" Label="Source2" />
             <Edge From="22" To="23" Label="Source1" />
             <Edge From="23" To="24" Label="Source1" />
-            <Edge From="24" To="25" Label="Source1" />
+            <Edge From="24" To="27" Label="Source1" />
             <Edge From="25" To="26" Label="Source1" />
-            <Edge From="26" To="27" Label="Source1" />
+            <Edge From="26" To="27" Label="Source2" />
+            <Edge From="27" To="28" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
