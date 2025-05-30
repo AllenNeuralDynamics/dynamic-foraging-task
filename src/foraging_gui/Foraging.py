@@ -630,7 +630,10 @@ class Window(QMainWindow):
 
         """
         # disconnect so it's only triggered once
-        self.Channel2.mouseLicked.disconnect(self.retract_lick_spout)
+        try:
+            self.Channel2.mouseLicked.disconnect(self.retract_lick_spout)
+        except TypeError:
+            pass
 
         lick_spout_retract = "right" if lick_spout_licked == "Left" else "left"
         timer = getattr(self, f"{lick_spout_retract}_retract_timer")
@@ -692,7 +695,6 @@ class Window(QMainWindow):
         if self.stage_widget is not None:
             logger.info("Setting stage to normal speed.")
             try:
-
                 self.stage_widget.stage_model.move_worker.finished.disconnect(self.set_stage_speed_to_normal)
             except TypeError:   # signal isn't connected
                 pass
