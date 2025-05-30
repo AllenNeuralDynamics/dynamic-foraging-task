@@ -3372,11 +3372,8 @@
                 <Property Name="PortName" />
               </PropertyMappings>
             </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:Timer">
-                <rx:DueTime>PT0S</rx:DueTime>
-                <rx:Period>PT5S</rx:Period>
-              </Combinator>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>TrialEnd</Name>
             </Expression>
             <Expression xsi:type="harp:CreateMessage">
               <harp:MessageType>Write</harp:MessageType>
@@ -4587,7 +4584,7 @@
                     <Name>EnvironmentSensor</Name>
                   </Expression>
                   <Expression xsi:type="p3:Parse">
-                    <harp:Register xsi:type="p3:Temperature" />
+                    <harp:Register xsi:type="p3:TimestampedTemperature" />
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorTemperature</osc:Address>
@@ -4599,7 +4596,7 @@
                     <Name>EnvironmentSensor</Name>
                   </Expression>
                   <Expression xsi:type="p3:Parse">
-                    <harp:Register xsi:type="p3:Humidity" />
+                    <harp:Register xsi:type="p3:TimestampedHumidity" />
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorHumidity</osc:Address>
@@ -4611,31 +4608,10 @@
                     <Name>EnvironmentSensor</Name>
                   </Expression>
                   <Expression xsi:type="p3:Parse">
-                    <harp:Register xsi:type="p3:Pressure" />
+                    <harp:Register xsi:type="p3:TimestampedHumidity" />
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorPressure</osc:Address>
-                  </Expression>
-                  <Expression xsi:type="MulticastSubject">
-                    <Name>ToBonsaiOSC2</Name>
-                  </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>EnvironmentSensor</Name>
-                  </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>Timestamps</Name>
-                  </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:WithLatestFrom" />
-                  </Expression>
-                  <Expression xsi:type="MemberSelector">
-                    <Selector>Item2</Selector>
-                  </Expression>
-                  <Expression xsi:type="scr:ExpressionTransform">
-                    <scr:Expression>new(it as Seconds)</scr:Expression>
-                  </Expression>
-                  <Expression xsi:type="osc:Format">
-                    <osc:Address>/EnvironmentSensorTimestamp</osc:Address>
                   </Expression>
                   <Expression xsi:type="MulticastSubject">
                     <Name>ToBonsaiOSC2</Name>
@@ -4751,12 +4727,6 @@
                   <Edge From="128" To="129" Label="Source1" />
                   <Edge From="129" To="130" Label="Source1" />
                   <Edge From="130" To="131" Label="Source1" />
-                  <Edge From="132" To="134" Label="Source1" />
-                  <Edge From="133" To="134" Label="Source2" />
-                  <Edge From="134" To="135" Label="Source1" />
-                  <Edge From="135" To="136" Label="Source1" />
-                  <Edge From="136" To="137" Label="Source1" />
-                  <Edge From="137" To="138" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
