@@ -635,7 +635,8 @@ class Window(QMainWindow):
         lick_spout_retract = "right" if lick_spout_licked == "Left" else "left"
         timer = getattr(self, f"{lick_spout_retract}_retract_timer")
         tp = self.task_logic.task_parameters
-        if tp.lick_spout_retraction and self.stage_widget is not None:
+        at_origin = set(self._GetPositions().values()) == {0}
+        if tp.lick_spout_retraction and self.stage_widget is not None and not at_origin:
             logger.info(f"Retracting {lick_spout_retract} lick spout.")
             motor = 1 if lick_spout_licked == "Left" else 2                             # TODO: is this the correct mapping
             curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor)    # TODO: Do I need to set rel_to_monument to True?
@@ -652,8 +653,9 @@ class Window(QMainWindow):
             logger.info("Can't fast retract stage because AIND stage is not being used.",
                         extra={"tags": [self.warning_log_tag]})
 
-        elif tp.lick_spout_retraction:
+        elif tp.lick_spout_retraction or at_origin:
             self.Channel2.mouseLicked.connect(self.retract_lick_spout)
+            msg = "Lickspouts at origin." if at_origin else "Retraction turned off."
             logger.info(f"Retraction turned off.",
                         extra={"tags": [self.warning_log_tag]})
 
