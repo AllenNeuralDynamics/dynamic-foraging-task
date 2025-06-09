@@ -1265,7 +1265,7 @@
                       </property>
                       <property name="baseSize">
                        <size>
-                        <width>200</width>
+                        <width>0</width>
                         <height>140</height>
                        </size>
                       </property>
