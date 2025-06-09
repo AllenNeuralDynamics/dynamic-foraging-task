@@ -759,6 +759,12 @@
                         <verstretch>8</verstretch>
                        </sizepolicy>
                       </property>
+                      <property name="baseSize">
+                       <size>
+                        <width>270</width>
+                        <height>300</height>
+                       </size>
+                      </property>
                       <property name="minimumSize">
                        <size>
                         <width>255</width>
@@ -767,8 +773,8 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>270</width>
-                        <height>300</height>
+                        <width>16777215</width>
+                        <height>16777215</height>
                        </size>
                       </property>
                       <property name="font">
