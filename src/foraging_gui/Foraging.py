@@ -6202,7 +6202,7 @@ class Window(QMainWindow):
                 self,
                 "Box {}, Start".format(self.box_letter),
                 'Photometry is set to "on", but excitation is not running. Start excitation now?',
-                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes | QMessageBox.Cancel,
                 QMessageBox.Yes,
             )
             if reply == QMessageBox.Yes:
