@@ -1263,12 +1263,6 @@
                         <verstretch>15</verstretch>
                        </sizepolicy>
                       </property>
-                      <property name="baseSize">
-                       <size>
-                        <width>0</width>
-                        <height>140</height>
-                       </size>
-                      </property>
                       <property name="maximumSize">
                        <size>
                         <width>16777215</width>
