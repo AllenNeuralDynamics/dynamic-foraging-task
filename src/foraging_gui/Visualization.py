@@ -1,5 +1,5 @@
 import logging
-
+from threading import Lock
 import numpy as np
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import LaserColors
 from matplotlib.backends.backend_qt5agg import (
@@ -14,12 +14,14 @@ class PlotV(FigureCanvas):
     def __init__(
         self,
         win,
+        data_lock: Lock,
         GeneratedTrials=None,
         parent=None,
         dpi=100,
         width=5,
         height=4,
     ):
+        self.data_lock = data_lock
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         gs = GridSpec(
             10,
@@ -52,7 +54,7 @@ class PlotV(FigureCanvas):
             return
 
         if Channel is not None:
-            GeneratedTrials._get_irregular_timestamp(Channel)
+            GeneratedTrials._get_irregular_timestamp(Channel, self.data_lock)
 
         # Unpack data
         self.B_AnimalResponseHistory = GeneratedTrials.B_AnimalResponseHistory

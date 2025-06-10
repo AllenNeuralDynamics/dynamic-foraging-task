@@ -125,14 +125,6 @@ from foraging_gui.schema_widgets.session_parameters_widget import (
     SessionParametersWidget,
 )
 from foraging_gui.settings_model import BonsaiSettingsModel, DFTSettingsModel
-from foraging_gui.stage import Stage
-from foraging_gui.Visualization import (
-    PlotLickDistribution,
-    PlotTimeDistribution,
-    PlotV,
-)
-from foraging_gui.warning_widget import WarningWidget
-from foraging_gui.settings_model import BonsaiSettingsModel, DFTSettingsModel
 from foraging_gui.sound_button import SoundButton
 from foraging_gui.stage import Stage
 from foraging_gui.Visualization import (
@@ -347,6 +339,11 @@ class Window(QMainWindow):
 
         # Stage Widget
         self.stage_widget = None
+        # initialize empty timers
+        self.left_retract_timer = QTimer(timeout=lambda: None)
+        self.left_retract_timer.setSingleShot(True)
+        self.right_retract_timer = QTimer(timeout=lambda: None)
+        self.right_retract_timer.setSingleShot(True)
         try:
             self._load_stage()
         except IOError as e:
@@ -596,6 +593,7 @@ class Window(QMainWindow):
                 else "widget_2"
             )
             self._insert_stage_widget(widget_to_replace)
+
         else:
             self._GetPositions()
 
@@ -618,6 +616,88 @@ class Window(QMainWindow):
             # Insert new stage_widget
             self.stage_widget = get_stage_widget()
             layout.addWidget(self.stage_widget)
+
+    def retract_lick_spout(self, lick_spout_licked: Literal["Left", "Right"], pos: float = 0) -> None:
+        """
+        Fast retract lick spout based on lick spout licked
+
+        :param lick_spout_licked: lick spout that was licked. Opposite lickspout will be retracted
+        :param pos: pos to move lick spout to. Default is 0
+
+        """
+        # disconnect so it's only triggered once
+        try:
+            self.Channel2.mouseLicked.disconnect(self.retract_lick_spout)
+        except TypeError:
+            pass
+
+        lick_spout_retract = "right" if lick_spout_licked == "Left" else "left"
+        timer = getattr(self, f"{lick_spout_retract}_retract_timer")
+        tp = self.task_logic.task_parameters
+        at_origin = list(self._GetPositions().values())[1:3] == [0, 0]
+        if tp.lick_spout_retraction and self.stage_widget is not None and not at_origin:
+            logger.info(f"Retracting {lick_spout_retract} lick spout.")
+            motor = 1 if lick_spout_licked == "Left" else 2                             # TODO: is this the correct mapping
+            curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor)    # TODO: Do I need to set rel_to_monument to True?
+            self.stage_widget.stage_model.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=True)
+
+            # configure timer to un-retract lick spout
+            timer.timeout.disconnect()
+            timer.timeout.connect(lambda: self.un_retract_lick_spout(lick_spout_licked, curr_pos))
+            timer.setInterval(self.operation_control_model.lick_spout_retraction_specs.wait_time*1000)
+            timer.setSingleShot(True)
+            timer.start()
+
+        elif self.stage_widget is None:
+            logger.info("Can't fast retract stage because AIND stage is not being used.",
+                        extra={"tags": [self.warning_log_tag]})
+
+        elif tp.lick_spout_retraction or at_origin:
+            try:
+                self.Channel2.mouseLicked.connect(self.retract_lick_spout, type=Qt.UniqueConnection)
+            except TypeError:  # signal already connected
+                logger.debug("Mouse lick signal already connected.")
+            logger.debug("Cannot retract stage because " + "lickspouts at origin." if at_origin
+                        else "retraction turned off.")
+
+    def un_retract_lick_spout(self, lick_spout_licked: Literal["Left", "Right"], pos: float = 0) -> None:
+        """
+        Un-retract specified lick spout
+
+        :param lick_spout_licked: lick spout that was licked. Opposite licks pout will be un-retracted
+        :param pos: pos to move lick spout to. Default is 0
+
+        """
+        if self.stage_widget is not None:
+            logger.info("Un-retracting lick spout.")
+            speed = self.operation_control_model.lick_spout_retraction_specs.un_retract_speed.value
+            motor = 1 if lick_spout_licked == "Left" else 2
+            self.stage_widget.stage_model.update_speed(value=speed)
+            self.stage_widget.stage_model.update_position(positions={motor:pos})
+            self.stage_widget.stage_model.move_worker.finished.connect(self.set_stage_speed_to_normal,
+                                                                       type=Qt.UniqueConnection)
+        else:
+            logger.info("Can't un retract lick spout because no AIND stage connected")
+        try:
+            self.Channel2.mouseLicked.connect(self.retract_lick_spout, type=Qt.UniqueConnection)
+        except TypeError:   # signal already connected
+            logger.debug("Mouse lick signal already connected.")
+
+    def set_stage_speed_to_normal(self):
+        """"
+        Sets AIND stage to normal speed
+        """
+
+        if self.stage_widget is not None:
+            logger.info("Setting stage to normal speed.")
+            try:
+                self.stage_widget.stage_model.move_worker.finished.disconnect(self.set_stage_speed_to_normal)
+            except TypeError:   # signal isn't connected
+                pass
+            self.stage_widget.stage_model.update_speed(value=1)
+
+        else:
+            logger.info("Can't set stage speed because no AIND stage connected")
 
     def _LoadUI(self):
         """
@@ -844,7 +924,7 @@ class Window(QMainWindow):
             return
 
         elif list(current_positions.keys()) == ["x", "y", "z"]:
-            logging.info(
+            logging.debug(
                 "Can't update loaded mouse offset with non AIND stage coordinates."
             )
         else:
@@ -2767,6 +2847,7 @@ class Window(QMainWindow):
         self.client2 = OSCStreamingClient()
         self.client2.connect((self.ip, self.request_port2))
         self.Channel2 = rigcontrol.RigClient(self.client2)
+
         # manually give water
         self.client3 = OSCStreamingClient()  # Create client
         self.client3.connect((self.ip, self.request_port3))
@@ -3584,7 +3665,7 @@ class Window(QMainWindow):
             and self.InitializeBonsaiSuccessfully == 1
             and BackupSave == 0
         ):
-            self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
+            self.GeneratedTrials._get_irregular_timestamp(self.Channel2, self.data_lock)
 
         # Create new folders.
         if self.CreateNewFolder == 1:
@@ -4217,7 +4298,11 @@ class Window(QMainWindow):
             return
 
         self.PlotM = PlotV(
-            win=self, GeneratedTrials=self.GeneratedTrials, width=5, height=4
+            win=self,
+            data_lock=self.data_lock,
+            GeneratedTrials=self.GeneratedTrials,
+            width=5,
+            height=4
         )
         self.PlotM.setSizePolicy(
             QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding
@@ -5024,6 +5109,11 @@ class Window(QMainWindow):
             # set flag to perform habituation period
             self.behavior_baseline_period.set()
 
+            try:    # connect signal for fast retraction
+                self.Channel2.mouseLicked.connect(self.retract_lick_spout, type=Qt.UniqueConnection)
+            except TypeError:  # signal already connected
+                logger.debug("Mouse lick signal already connected.")
+
             self.session_run = True  # session has been started
         else:
             # Prompt user to confirm stopping trials
@@ -5080,6 +5170,12 @@ class Window(QMainWindow):
             self.sound_button.setEnabled(True)
             self.behavior_baseline_period.clear()   # set flag to break out of habituation period
 
+            # disconnect fast retract signals if connected
+            try:
+                self.Channel2.mouseLicked.disconnect(self.retract_lick_spout)
+            except TypeError:
+                pass
+
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
             self._StopCurrentSession()
@@ -5135,7 +5231,11 @@ class Window(QMainWindow):
             self.GeneratedTrials = GeneratedTrials
             self.StartANewSession = 0
             PlotM = PlotV(
-                win=self, GeneratedTrials=GeneratedTrials, width=5, height=4
+                win=self,
+                data_lock=self.data_lock,
+                GeneratedTrials=GeneratedTrials,
+                width=5,
+                height=4
             )
             # PlotM.finish=1
             self.PlotM = PlotM
@@ -5187,10 +5287,12 @@ class Window(QMainWindow):
                 self.data_lock,
             )
             worker1.signals.finished.connect(self._thread_complete)
+
             workerLick = Worker(
                 GeneratedTrials._get_irregular_timestamp, self.Channel2
             )
             workerLick.signals.finished.connect(self._thread_complete2)
+
             workerPlot = Worker(
                 PlotM._Update,
                 GeneratedTrials=GeneratedTrials,
@@ -5277,7 +5379,6 @@ class Window(QMainWindow):
                 "Running photometry baseline",
                 extra={"tags": [self.warning_log_tag]},
             )
-
         self._StartTrialLoop(GeneratedTrials, worker1, worker_save)
 
         if self.actionDrawing_after_stopping.isChecked() == True:
