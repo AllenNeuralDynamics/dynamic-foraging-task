@@ -210,6 +210,11 @@ class BehaviorParametersWidget(SchemaWidgetBase):
                 ):  # can't handle added indexes yet
                     self.update_field_widget(f"{name}.{i}")
 
+    def apply_schema(self, schema: BaseModel):
+        """Overwrite to emit volumeChaned signal"""
+        super().apply_schema(schema)
+        self.volumeChanged.emit("Right")
+        self.volumeChanged.emit("Left")
 
 if __name__ == "__main__":
     import sys

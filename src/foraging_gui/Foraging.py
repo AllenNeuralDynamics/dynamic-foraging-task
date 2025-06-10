@@ -160,7 +160,6 @@ class NumpyEncoder(json.JSONEncoder):
 
 class Window(QMainWindow):
     Time = QtCore.pyqtSignal(int)  # Photometry timer signal
-    sessionEnded = QtCore.pyqtSignal()
 
     def __init__(self, parent=None, box_number=1, start_bonsai_ide=True):
         logging.info("Creating Window")
@@ -319,9 +318,6 @@ class Window(QMainWindow):
         ):
             self.fip_layout.insertWidget(i, widget)
             self.fip_layout.insertWidget(i, widget)
-
-        # when session is ended, save relevant models
-        self.sessionEnded.connect(self.save_task_models)
 
         # add warning_widget to layout and set color
         self.warning_widget = WarningWidget(
@@ -792,28 +788,6 @@ class Window(QMainWindow):
         elif self.stage_widget is not None:
             view = self.stage_widget.movement_page_view
 
-            # connect aind stage widgets to update loaded mouse offset if text has been changed by user or button press
-            view.lineEdit_z.textChanged.connect(
-                lambda v: Thread(
-                    target=self.update_loaded_mouse_offset
-                ).start()
-            )
-            view.lineEdit_x.textChanged.connect(
-                lambda v: Thread(
-                    target=self.update_loaded_mouse_offset
-                ).start()
-            )
-            view.lineEdit_y1.textChanged.connect(
-                lambda v: Thread(
-                    target=self.update_loaded_mouse_offset
-                ).start()
-            )
-            view.lineEdit_y2.textChanged.connect(
-                lambda v: Thread(
-                    target=self.update_loaded_mouse_offset
-                ).start()
-            )
-
             # Connect aind stage widgets to update operational control model
             view.lineEdit_z.textChanged.connect(
                 self.update_operational_control_stage_positions
@@ -1049,6 +1023,7 @@ class Window(QMainWindow):
         """
 
         try:
+
             if trainer_state is None:  # no curriculum in slims for this mouse
                 logging.info(
                     f"Attempting to create curriculum for mouse {mouse_id} from schedule."
@@ -1095,7 +1070,7 @@ class Window(QMainWindow):
             self.session_model.experiment = sess.experiment
             self.session_model.experimenter = sess.experimenter
             self.session_model.subject = sess.subject
-            self.session_model.notes = self.session_model.notes
+            self.session_model.notes = sess.notes
 
             # enable or disable widget based on if session is on curriculum
             self.task_widget.setEnabled(
@@ -1191,7 +1166,7 @@ class Window(QMainWindow):
         index = (
             0
             if isinstance(stage, float) and math.isnan(stage)
-            else stage_mapping.get(stage, int(stage))
+            else stage_mapping.get(stage) or int(stage)
         )
         logging.info("Creating trainer state")
         ts = TrainerState(
@@ -5050,6 +5025,9 @@ class Window(QMainWindow):
                 logging.info("Start button pressed: user continued session")
                 self.Start.setChecked(True)
                 return
+
+            # save models
+            self.save_task_models()
 
             # enable task model widgets
             self.task_widget.setEnabled(

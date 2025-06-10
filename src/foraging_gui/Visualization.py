@@ -325,7 +325,7 @@ class PlotV(FigureCanvas):
                 )
             if self.B_LaserOnTrial[-1] == 1:
                 current_color = color_mapping[
-                    "Condition" + self.B_SelectedCondition[-1].name
+                    "Condition" + str(self.B_SelectedCondition[-1])
                 ]
                 self.ax1.plot(
                     NewTrialStart2,
@@ -392,25 +392,12 @@ class PlotV(FigureCanvas):
                 label="ManualWater",
             )
 
-        # backwards compatible for opening old behavior jsons
-        non_none_conditions = (
-            [x for x in self.B_SelectedCondition if x != 0]
-            if all(
-                not isinstance(x, LaserColors)
-                for x in self.B_SelectedCondition
-            )
-            else [
-                condition.name
-                for condition in self.B_SelectedCondition
-                if condition is not None
-            ]
-        )
-        condition_list = list(set(non_none_conditions))
+        condition_list = list(set(self.B_SelectedCondition))
         for condition in condition_list:
             Optogenetics_On = np.where(
                 np.logical_and(
                     self.B_LaserOnTrial[:-1] == 1,
-                    non_none_conditions == condition,
+                    self.B_SelectedCondition[:-1] == condition,
                 )
             )
             if len(Optogenetics_On[0]) == 0:

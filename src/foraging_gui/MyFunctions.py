@@ -17,9 +17,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
 from aind_behavior_dynamic_foraging.DataSchemas.operation_control import (
     OperationalControl,
 )
-from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
-    Optogenetics,
-)
+from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import Optogenetics
 from aind_behavior_services.session import AindBehaviorSessionModel
 from PyQt5 import QtCore, QtWidgets
 from serial.tools.list_ports import comports as list_comports
@@ -176,6 +174,14 @@ class GenerateTrials:
             "TP_LeftValue": [],  # left valve open times
             "TP_RightValue": [],
             "multipliers": [],
+            "AutoTrain": False,
+            "TP_AutoTrain": [],
+            "TP_auto_train_curriculum_name": [],
+            "TP_auto_train_curriculum_schema_version": [],
+            "TP_auto_train_curriculum_version": [],
+            "TP_auto_train_engaged": [],
+            "TP_auto_train_stage": [],
+            "TP_auto_train_stage_overridden": [],
             "TP_Laser_calibration": [],
             "TP_LatestCalibrationDate": [],
             "TP_laser_1_calibration_power": [],
@@ -328,7 +334,18 @@ class GenerateTrials:
                     self.B_LaserOnTrial.append(self.LaserOn)
                     # generate the optogenetics waveform of the next trial
                     self._GetLaserWaveForm()
-                    self.B_SelectedCondition.append(self.selected_condition)
+
+                    # map selected_condition to number to adhere to post-processing convention
+                    possible_lasers = [
+                        "LaserColorOne",
+                        "LaserColorTwo",
+                        "LaserColorThree",
+                        "LaserColorFour",
+                        "LaserColorFive",
+                        "LaserColorSix",
+                    ]
+                    condition_num = possible_lasers.index(self.selected_condition.name) + 1
+                    self.B_SelectedCondition.append(condition_num)
                 else:
                     # this is the control trial
                     control_trial = 1
@@ -349,7 +366,7 @@ class GenerateTrials:
             self.B_LaserOnTrial.append(self.LaserOn)
             self.B_LaserAmplitude.append([0, 0])
             self.B_LaserDuration.append(0)
-            self.B_SelectedCondition.append(None)
+            self.B_SelectedCondition.append(0)
             self.CurrentLaserAmplitude = [0, 0]
 
     def _CheckSessionControl(self):
@@ -2134,9 +2151,9 @@ class GenerateTrials:
             np.where(~auto_rewards.astype(bool))
         ]  # isolate non-auto-reward
         if (
-            self.BS_CurrentRunningTime / 60 >= min_time
+            self.BS_CurrentRunningTime >= min_time
             and len(
-                np.where(non_auto_reward[-oc.auto_stop.ignore_win :] == 2)[0]
+                np.where(non_auto_reward[-oc.auto_stop.ignore_win:] == 2)[0]
             )
             >= stop_ignore
         ):
@@ -2162,10 +2179,10 @@ class GenerateTrials:
         elif self.BS_CurrentRunningTime > max_time:
             stop = True
             msg = "Stopping the session because the session running time has reached {} minutes".format(
-                max_trial
+                max_time/60
             )
             warning_label_text = (
-                f"Stop because running time exceeds or equals: {max_time} m"
+                f"Stop because running time exceeds or equals: {max_time/60} m"
             )
         else:
             stop = False
@@ -2200,8 +2217,7 @@ class GenerateTrials:
                 )
                 self.fip_stop_timer.setSingleShot(True)
                 self.fip_stop_timer.start()
-            self.win.sessionEnded.emit()
-            self.win.write_session_to_slims(self.session_model.subject)
+            self.win.save_task_models()
 
             self.win.session_end_tasks()
 
@@ -2282,6 +2298,7 @@ class GenerateTrials:
         """
 
         laser = self.selected_condition
+
         # align to trial start
         if laser.end is not None and laser.start is not None:
             if (
@@ -2520,7 +2537,7 @@ class GenerateTrials:
         non_none_indices = [
             i
             for i, condition in enumerate(self.B_SelectedCondition)
-            if condition is not None
+            if condition != 0
         ]
         if len(non_none_indices) > 0:
             if (
@@ -3249,6 +3266,19 @@ class GenerateTrials:
         self.Obj["TP_laser_2_target"].append(
             self.win.Opto_dialog.laser_2_target.text()
         )
+
+        # add auto train parameters
+        curriculum = self.win.slims_handler.curriculum
+        stage = getattr(self.win.slims_handler.trainer_state, 'stage', None)
+        self.Obj["AutoTrain"] = curriculum is not None
+        self.Obj["TP_AutoTrain"].append(curriculum is not None)
+        self.Obj["TP_auto_train_curriculum_name"].append(getattr(curriculum, 'name', None))
+        self.Obj["TP_auto_train_curriculum_schema_version"].append(self.task_logic.version)
+        self.Obj["TP_auto_train_curriculum_version"].append(getattr(curriculum, 'version', None))
+        self.Obj["TP_auto_train_engaged"].append(curriculum is not None)
+        self.Obj["TP_auto_train_stage"].append(getattr(stage, 'name', None))
+        self.Obj["TP_auto_train_stage_overridden"].append(not self.win.on_curriculum.isChecked() if curriculum is
+                                                                                                    not None else None)
 
 
 class NewScaleSerialY:
