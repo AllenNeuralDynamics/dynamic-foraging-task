@@ -2257,12 +2257,30 @@ class Window(QMainWindow):
     def _LoadSchedule(self):
         if os.path.exists(self.Settings["schedule_path"]):
             schedule = pd.read_csv(self.Settings["schedule_path"])
+
+            # Find the correct week on the schedule
+            dividers = schedule[[isinstance(x,str)and('/' in x) for x in schedule['Mouse ID'].values]]
+            today = datetime.now().strftime('%m/%d/%Y')
+
+            # Multiple weeks on the schedule
+            if len(dividers) > 1:
+                first = dividers.iloc[0]['Mouse ID']
+                if datetime.strptime(today, "%m/%d/%Y") < datetime.strptime(first,"%m/%d/%Y"):
+                    # Use last weeks schedule
+                    schedule = schedule.loc[dividers.index.values[1]:]
+                else:
+                    # Use this weeks schedule
+                    schedule = schedule.loc[0:dividers.index.values[1]]
+
+            # Determine what mice are on the schedule
             self.schedule_mice = [
                 x
                 for x in schedule["Mouse ID"].unique()
                 if isinstance(x, str) and (len(x) > 3) and ("/" not in x)
             ]
-            self.schedule = schedule.dropna(subset=["Mouse ID", "Box"]).copy()
+
+            # Clear rows without a mouse
+            self.schedule = schedule.dropna(subset=["Mouse ID"]).copy()
             logging.info("Loaded behavior schedule")
         else:
             self.schedule_mice = None
