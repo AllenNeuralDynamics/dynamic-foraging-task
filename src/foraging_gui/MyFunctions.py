@@ -49,8 +49,6 @@ class GenerateTrials:
         operation_control_model: OperationalControl,
     ):
 
-        super().__init__()
-
         self.win = win
         # set model attributes
         self.task_logic = task_logic
