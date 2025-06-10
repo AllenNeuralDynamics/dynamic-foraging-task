@@ -1,7 +1,7 @@
 import logging
 import math
 import os
-from datetime import timezone
+from datetime import timezone, datetime
 from typing import TypedDict
 
 from aind_behavior_curriculum import Curriculum, Trainer
@@ -181,13 +181,13 @@ class LoadedMouseSlimsHandler:
             )
             model = models.SlimsWaterlogResult(
                 mouse_pk=mouse.pk,
-                date=session.session_start_time,
+                date=datetime.now(),
                 weight_g=session.animal_weight_post,
                 operator=session.experimenter_full_name[0],
-                water_earned_ml=water["water_in_session_foraging"],
+                water_earned_ml=water["water_in_session_total"],
                 water_supplement_delivered_ml=water["water_after_session"],
                 water_supplement_recommended_ml=None,
-                total_water_ml=water["water_in_session_total"],
+                total_water_ml=water["water_in_session_total"]+water["water_after_session"],
                 comments=session.notes,
                 workstation=session.rig_id,
                 sw_source=software.url,
@@ -235,7 +235,7 @@ class LoadedMouseSlimsHandler:
         Optogenetics or None,
         FiberPhotometry or None,
         OperationalControl or None,
-        str,
+        str
     ]:
         """
         Load in specified mouse from slims
@@ -265,7 +265,7 @@ class LoadedMouseSlimsHandler:
                 self.curriculum is None
             ):  # no curriculum in slims for this mouse
                 self.log.info(f"No curriculum in slims for mouse {mouse_id}")
-                return None, None, None, None, None, None, None, None
+                return None, None, None, None, None, None, None, mouse_id
 
             task_logic = AindDynamicForagingTaskLogic(
                 **self.trainer_state.stage.task.model_dump()
@@ -366,7 +366,7 @@ class LoadedMouseSlimsHandler:
             self.trainer_state = trainer_state
             self.curriculum = curriculum
             self._loaded_slims_session = (
-                models.SlimsBehaviorSession()
+                models.SlimsBehaviorSession(is_curriculum_suggestion=True)
             )  # create empty model to update on_curriculum
         else:
             self.log.warning("No client connected.")
@@ -488,7 +488,7 @@ class LoadedMouseSlimsHandler:
         :param attachment_name: name of attachment to update
         :param serialized_json: string json content
         """
-        if self.slims_client is not None:
+        if not self.slims_client  and self.loaded_slims_session:
             fetched = self.slims_client.fetch_models(
                 models.SlimsBehaviorSession, mouse_pk=self._slims_mouse.pk
             )[-1]
@@ -513,7 +513,8 @@ class LoadedMouseSlimsHandler:
             )
 
         else:
-            self.log.warning("No client connected.")
+            msg = "No client connected." if not self.slims_client else "No session loaded."
+            self.log.warning(msg)
 
     def go_off_curriculum(self) -> None:
         """
@@ -545,12 +546,20 @@ class LoadedMouseSlimsHandler:
         """
 
         if self._loaded_mouse_id is not None and self.slims_client is not None:
+            offsets = self.slims_client.fetch_models(models.SlimsMouseLickspoutOffsets, barcode=self._loaded_mouse_id)
 
-            return {
-                "x": self._slims_mouse.x_offset,
-                "y": self._slims_mouse.y_offset,
-                "z": self._slims_mouse.z_offset,
-            }
+            if not offsets:     # list is not empty
+                return {
+                    "x": offsets[0].x_offset,
+                    "y": offsets[0].y_offset,
+                    "z": offsets[0].z_offset,
+                }
+            else:
+                return {
+                    "x": None,
+                    "y": None,
+                    "z": None,
+                }
         else:
             self.log.info("No mouse loaded so can't return offset.")
 
@@ -566,19 +575,14 @@ class LoadedMouseSlimsHandler:
         """
 
         if self._loaded_mouse_id is not None and self.slims_client is not None:
-            mouse = self._slims_mouse
-            if [mouse.x_offset, mouse.y_offset, mouse.z_offset] == [
-                x,
-                y,
-                z,
-            ]:  # skip update if offset is the same
-                return
-            mouse.x_offset = x
-            mouse.y_offset = y
-            mouse.z_offset = z
+            new_offset = models.SlimsMouseLickspoutOffsets(barcode=self._loaded_mouse_id,
+                                                           mouse_id=int(self._loaded_mouse_id), # mouse id is int in slims
+                                                           x_offset=x,
+                                                           y_offset=y,
+                                                           z_offset=z)
             self.log.info(
-                f"Updating mouse offset to x: {x}, y: {y}, z: {z} for mouse {self._loaded_mouse_id}"
+                f"Adding offset x: {x}, y: {y}, z: {z} for mouse {self._loaded_mouse_id}"
             )
-            self.slims_client.update_model(model=mouse)  # update model
+            self.slims_client.add_model(new_offset)
         else:
             self.log.info("No mouse loaded so can't set offset.")
