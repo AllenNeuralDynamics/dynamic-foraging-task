@@ -1,7 +1,7 @@
 import logging
 import math
 import os
-from datetime import timezone
+from datetime import timezone, datetime
 from typing import TypedDict
 
 from aind_behavior_curriculum import Curriculum, Trainer
@@ -181,13 +181,13 @@ class LoadedMouseSlimsHandler:
             )
             model = models.SlimsWaterlogResult(
                 mouse_pk=mouse.pk,
-                date=session.session_start_time,
+                date=datetime.now(),
                 weight_g=session.animal_weight_post,
                 operator=session.experimenter_full_name[0],
-                water_earned_ml=water["water_in_session_foraging"],
+                water_earned_ml=water["water_in_session_total"],
                 water_supplement_delivered_ml=water["water_after_session"],
                 water_supplement_recommended_ml=None,
-                total_water_ml=water["water_in_session_total"],
+                total_water_ml=water["water_in_session_total"]+water["water_after_session"],
                 comments=session.notes,
                 workstation=session.rig_id,
                 sw_source=software.url,
