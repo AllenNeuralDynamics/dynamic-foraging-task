@@ -3043,7 +3043,7 @@ class GenerateTrials:
 
             elif Rec[0].address == "/EnvironmentSensorHumidity":
                 value = Rec[1][1][0] if type(Rec[1][1][0]) != float else round(Rec[1][1][0], 1)
-                self.B_EnvironmentSensorTemperature.append(value)
+                self.B_EnvironmentSensorHumidity.append(value)
 
             elif Rec[0].address == "/EnvironmentSensorPressure":
                 self.B_EnvironmentSensorPressure.append(Rec[1][1][0])
