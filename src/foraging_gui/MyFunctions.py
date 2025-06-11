@@ -3038,10 +3038,12 @@ class GenerateTrials:
                     self.B_AutoRightWaterStartTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/EnvironmentSensorTemperature":
-                self.B_EnvironmentSensorTemperature.append(Rec[1][1][0])
+                value = Rec[1][1][0] if type(Rec[1][1][0]) != float else round(Rec[1][1][0], 1)
+                self.B_EnvironmentSensorTemperature.append(value)
 
             elif Rec[0].address == "/EnvironmentSensorHumidity":
-                self.B_EnvironmentSensorHumidity.append(Rec[1][1][0])
+                value = Rec[1][1][0] if type(Rec[1][1][0]) != float else round(Rec[1][1][0], 1)
+                self.B_EnvironmentSensorTemperature.append(value)
 
             elif Rec[0].address == "/EnvironmentSensorPressure":
                 self.B_EnvironmentSensorPressure.append(Rec[1][1][0])
