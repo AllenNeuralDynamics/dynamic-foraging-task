@@ -391,6 +391,7 @@ class Window(QMainWindow):
                 else "widget_2"
             )
             self._insert_stage_widget(widget_to_replace)
+            self.stage_widget.stage_model.initialize_stage()
         else:
             self._GetPositions()
 
