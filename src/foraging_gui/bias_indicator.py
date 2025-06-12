@@ -51,8 +51,8 @@ class BiasIndicator(QMainWindow):
 
         super().__init__(*args, **kwargs)
         self.log = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-        self.bias_upper_threshold = bias_upper_threshold
-        self.bias_lower_threshold = bias_lower_threshold
+        self._bias_upper_threshold = bias_upper_threshold
+        self._bias_lower_threshold = bias_lower_threshold
         self.lock = data_lock
 
         # initialize biases as empy list and x_range
@@ -133,21 +133,42 @@ class BiasIndicator(QMainWindow):
     @property
     def bias_upper_threshold(self) -> float:
         """Decimal threshold at which alert user if bias is above"""
-        return self._bias_threshold
+        return self._bias_upper_threshold
 
     @bias_upper_threshold.setter
     def bias_upper_threshold(self, value: float) -> None:
         """
         Set decimal threshold at which alert user if bias is above
-        :param value: float value to set bias to
+        :param value: float value to set bias threshold to
         """
         if not 0 <= value <= 1:
-            self._bias_threshold = 0.7
             raise ValueError(
-                "bias_threshold must be set between 0 and 1. Setting to .7"
+                "bias_upper_threshold must be set between 0 and 1."
             )
         else:
-            self._bias_threshold = value
+            self._bias_upper_threshold = value
+
+            if self.bias_lower_threshold > value:
+                self.bias_lower_threshold = value
+
+    @property
+    def bias_lower_threshold(self) -> float:
+        """Decimal threshold at which alert user if bias is below"""
+        return self._bias_lower_threshold
+
+    @bias_lower_threshold.setter
+    def bias_lower_threshold(self, value: float) -> None:
+        """
+        Set decimal threshold at which alert user if bias is below
+        :param value: float value to set bias threshold to
+        """
+        if not 0 <= value <= self.bias_upper_threshold:
+
+            raise ValueError(
+                f"bias_lower_threshold must be set between 0 and {self.bias_upper_threshold}."
+            )
+        else:
+            self._bias_lower_threshold = value
 
     @property
     def x_range(self) -> int:

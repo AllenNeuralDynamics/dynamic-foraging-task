@@ -392,8 +392,17 @@ class Window(QMainWindow):
         # create bias indicator
         self.bias_n_size = 200
         self.bias_indicator = BiasIndicator(
-            x_range=self.bias_n_size, data_lock=self.data_lock
+            x_range=self.bias_n_size,
+            data_lock=self.data_lock,
+            bias_upper_threshold=self.operation_control_model.lick_spout_bias_movement.bias_upper_threshold,
+            bias_lower_threshold=self.operation_control_model.lick_spout_bias_movement.bias_lower_threshold,
         )
+        self.operation_control_widget.lower_bias_changed.connect(lambda v: setattr(self.bias_indicator,
+                                                                                   "bias_lower_threshold",
+                                                                                   v))
+        self.operation_control_widget.upper_bias_changed.connect(lambda v: setattr(self.bias_indicator,
+                                                                                   "bias_upper_threshold",
+                                                                                   v))
         self.bias_indicator.biasValue.connect(
             self.bias_calculated
         )  # update dashboard value
