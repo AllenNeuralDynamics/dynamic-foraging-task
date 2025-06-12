@@ -5729,12 +5729,11 @@ class Window(QMainWindow):
         specs = self.operation_control_model.lick_spout_bias_movement
         pos = self._GetPositions()
         displacement = pos["x"] - self.lick_spout_origin["x"]
-        print(specs.trial_interval >= trial_number-self.last_bias_move)
         if specs and specs.trial_interval >= trial_number-self.last_bias_move:
 
             # aind stage uses mm and newscale stage us um. Convert units depending on what stage is being used
             step_size = specs.step_size_um if not self.stage_widget else specs.step_size_um * 10e-3
-
+            logging.info("specs", specs.step_size_um * 10e-3, specs.step_size_um, specs.trial_interval >= trial_number-self.last_bias_move, specs.trial_interval, trial_number-self.last_bias_move)
             if abs(bias) < specs.bias_lower_threshold:  # move lick spouts back to position at start of session
                 step_size = min(step_size, abs(displacement))  # only move as far back to original pos
                 delta_step = step_size if bias < 0 else -step_size
