@@ -5744,7 +5744,7 @@ class Window(QMainWindow):
 
             if self.stage_widget is not None:
                 pos["x"] += delta_step * 10e-3
-                self.stage_widget.stage_model.update_position(pos)
+                self.stage_widget.stage_model.update_position({i: x for i, x in enumerate(pos.values())})
             else:
                 self._Move("x", pos["x"] + delta_step)
 
