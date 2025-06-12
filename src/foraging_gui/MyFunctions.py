@@ -2999,12 +2999,7 @@ class GenerateTrials:
             if current_receiveN == ReceiveN:
                 break
         with data_lock:
-            if random.randint(0,1) == 0:
-                self.win.bias_indicator.biasOver.emit(.8, self.B_CurrentTrialN + 1)
-                logging.info('emiting over')
-            else:
-                self.win.bias_indicator.biasUnder.emit(.2, self.B_CurrentTrialN + 1)
-                logging.info('emiting under')
+           
             self.B_RewardedHistory = np.append(
                 self.B_RewardedHistory, B_CurrentRewarded, axis=1
             )
