@@ -5730,14 +5730,15 @@ class Window(QMainWindow):
         pos = self._GetPositions()
         displacement = pos["x"] - self.lick_spout_origin["x"]
         if specs and specs.trial_interval >= trial_number-self.last_bias_move:
-            logging.info(f"Moving lickspout for bias out of acceptable range: {bias}")
 
             if abs(bias) < specs.bias_lower_threshold:  # move lick spouts back to position at start of session
-                step_size = min(specs.step_size_um, abs(displacement)) # only move as far back to original pos
+                step_size = min(specs.step_size_um, abs(displacement))  # only move as far back to original pos
                 delta_step = step_size if bias < 0 else -step_size
+                logging.info(f"Moving lickspout {delta_step} towards original position.")
 
             else: # move lick spouts towards unbiased side
                 delta_step = specs.step_size_um if bias >= 0 else -specs.step_size_um
+                logging.info(f"Moving lickspout {delta_step} away from original position.")
 
             if self.stage_widget is not None:
                 pos["x"] += delta_step * 10e-3
