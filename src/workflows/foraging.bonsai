@@ -4662,7 +4662,10 @@
                     <harp:Register xsi:type="p3:TimestampedTemperature" />
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
-                    <Name>Timestamps</Name>
+                    <Name>BehaviorEvents</Name>
+                  </Expression>
+                  <Expression xsi:type="beh:Parse">
+                    <harp:Register xsi:type="beh:TimestampedDigitalInputState" />
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="rx:WithLatestFrom" />
@@ -4791,12 +4794,13 @@
                   <Edge From="129" To="130" Label="Source1" />
                   <Edge From="130" To="131" Label="Source1" />
                   <Edge From="132" To="133" Label="Source1" />
-                  <Edge From="133" To="135" Label="Source1" />
-                  <Edge From="134" To="135" Label="Source2" />
-                  <Edge From="135" To="136" Label="Source1" />
+                  <Edge From="133" To="136" Label="Source1" />
+                  <Edge From="134" To="135" Label="Source1" />
+                  <Edge From="135" To="136" Label="Source2" />
                   <Edge From="136" To="137" Label="Source1" />
                   <Edge From="137" To="138" Label="Source1" />
                   <Edge From="138" To="139" Label="Source1" />
+                  <Edge From="139" To="140" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
