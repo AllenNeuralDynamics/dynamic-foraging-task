@@ -1457,19 +1457,7 @@ class Window(QMainWindow):
                     f" on {trainer_state.stage.name} next session.",
                     extra={"tags": [self.warning_log_tag]},
                 )
-                # save trainer_state
-                id_name = self.session_model.session_name.split("behavior_")[
-                    -1
-                ]
-                with open(
-                    os.path.join(
-                        self.session_model.root_path,
-                        f"trainer_state_{id_name}.json",
-                    ),
-                    "w",
-                ) as outfile:
-                    outfile.write(trainer_state.model_dump_json(indent=1))
-
+                self.Obj["next_stage_suggested"] = trainer_state.stage.name
                 self.on_curriculum.setChecked(False)
                 self.on_curriculum.setVisible(False)
                 self.label_curriculum_stage.setText("")

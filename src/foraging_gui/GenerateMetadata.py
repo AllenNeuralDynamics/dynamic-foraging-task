@@ -1053,6 +1053,7 @@ class generate_metadata:
                 ),
             },
             "task_parameters": self._get_task_parameters(),
+            "curriculum": self._get_curriculum_parameters()
         }
 
         return output_parameters
@@ -1083,6 +1084,17 @@ class generate_metadata:
         task_parameters["reward_probability"] = reward_probability
 
         return task_parameters
+
+    def _get_curriculum_parameters(self) -> dict:
+        """Get curriculum parameters"""
+
+        return {
+                 "curriculum_name": self.Obj["TP_auto_train_curriculum_name"][-1],
+                 "curriculum_version": self.Obj["TP_auto_train_curriculum_schema_version"][-1],
+                 "current_stage_actual": self.Obj["TP_auto_train_stage"][-1],
+                 "current_stage_suggested": self.Obj["TP_auto_train_stage"][-1],
+                 "next_stage_suggested": self.Obj.get("next_stage_suggested", None),
+                 }
 
     def _get_reward_probability(self):
         """
