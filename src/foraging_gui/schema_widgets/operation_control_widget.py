@@ -30,15 +30,15 @@ class OperationControlWidget(SchemaWidgetBase):
 
         # add ranges for bias thresholds
         up_bias = getattr(self, "lick_spout_bias_movement.bias_upper_threshold_widget")
-        low_bias = getattr(self, "lick_spout_bias_movement.bias_upper_threshold_widget")
-        up_bias.setMinimum(0)
-        up_bias.setMaximum(1)
+        low_bias = getattr(self, "lick_spout_bias_movement.bias_lower_threshold_widget")
+        up_bias.setRange(0, 1)
+        up_bias.setStepSize(.1)
         up_bias.valueChanged.connect(low_bias.setMaximum)   # lower threshold must be lower that upper threshold
         getattr(self, "lick_spout_bias_movement.bias_upper_threshold_widget").setMinimum(0)
 
         # add signal emit when thresholds are changed
-        up_bias.valueChanged.emit(self.upper_bias_changed)
-        low_bias.valueChanged.emit(self.lower_bias_changed)
+        up_bias.valueChanged.connect(self.upper_bias_changed.emit)
+        low_bias.valueChanged.connect(self.lower_bias_changed.emit)
 
 
 
