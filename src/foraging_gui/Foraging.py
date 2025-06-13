@@ -1457,7 +1457,7 @@ class Window(QMainWindow):
                     f" on {trainer_state.stage.name} next session.",
                     extra={"tags": [self.warning_log_tag]},
                 )
-                self.Obj["next_stage_suggested"] = trainer_state.stage.name
+                self.GeneratedTrials.Obj["next_stage_suggested"] = trainer_state.stage.name
                 self.on_curriculum.setChecked(False)
                 self.on_curriculum.setVisible(False)
                 self.label_curriculum_stage.setText("")
