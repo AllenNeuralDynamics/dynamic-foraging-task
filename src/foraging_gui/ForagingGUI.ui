@@ -734,8 +734,8 @@
                    </property>
                    <property name="maximumSize">
                     <size>
-                     <width>300</width>
-                     <height>16777215</height>
+                     <width>240</width>
+                     <height>300</height>
                     </size>
                    </property>
                    <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -759,6 +759,12 @@
                         <verstretch>8</verstretch>
                        </sizepolicy>
                       </property>
+                      <property name="baseSize">
+                       <size>
+                        <width>270</width>
+                        <height>300</height>
+                       </size>
+                      </property>
                       <property name="minimumSize">
                        <size>
                         <width>255</width>
@@ -767,8 +773,8 @@
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>270</width>
-                        <height>300</height>
+                        <width>16777215</width>
+                        <height>16777215</height>
                        </size>
                       </property>
                       <property name="font">
@@ -1927,16 +1933,10 @@
                          <property name="enabled">
                           <bool>true</bool>
                          </property>
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
                          <property name="maximumSize">
                           <size>
                            <width>100</width>
-                           <height>150</height>
+                           <height>50</height>
                           </size>
                          </property>
                          <property name="currentIndex">
@@ -1956,12 +1956,6 @@
                        </item>
                        <item row="5" column="0">
                         <widget class="QLabel" name="label_34">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
                          <property name="text">
                           <string>align to go cue=</string>
                          </property>
@@ -1970,79 +1964,6 @@
                          </property>
                          <property name="alignment">
                           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QGroupBox" name="groupBox_7">
-                      <property name="maximumSize">
-                       <size>
-                        <width>260</width>
-                        <height>110</height>
-                       </size>
-                      </property>
-                      <property name="font">
-                       <font>
-                        <pointsize>8</pointsize>
-                        <weight>50</weight>
-                        <italic>false</italic>
-                        <bold>false</bold>
-                       </font>
-                      </property>
-                      <property name="title">
-                       <string>Manual motor stage</string>
-                      </property>
-                      <layout class="QGridLayout" name="gridLayout_11">
-                       <item row="0" column="0">
-                        <widget class="QPushButton" name="MoveXP_2">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="minimumSize">
-                          <size>
-                           <width>20</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>100</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string>Move Left</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="0" column="1">
-                        <widget class="QPushButton" name="MoveXN_2">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="minimumSize">
-                          <size>
-                           <width>20</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>100</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string>Move Right</string>
                          </property>
                         </widget>
                        </item>
@@ -5273,38 +5194,4 @@ Current pair:
   <tabstop>Task</tabstop>
  </tabstops>
  <resources/>
- <connections>
-  <connection>
-   <sender>MoveXP_2</sender>
-   <signal>clicked()</signal>
-   <receiver>MoveXP</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>412</x>
-     <y>128</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>337</x>
-     <y>414</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>MoveXN_2</sender>
-   <signal>clicked()</signal>
-   <receiver>MoveXN</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>487</x>
-     <y>132</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>404</x>
-     <y>424</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
 </ui>
