@@ -5283,7 +5283,7 @@ class Window(QMainWindow):
         :returns: boolean indicating if workflow is running or not. If None, fip is not configured
         """
 
-        if self.fib_model.enabled and (
+        if self.fip_model.enabled and (
                 not self.FIP_started
         ):
             QMessageBox.critical(
@@ -5299,7 +5299,7 @@ class Window(QMainWindow):
             return False
 
         # Check if photometry excitation is running or not
-        if self.fib_model.enabled and not self.StartExcitation.isChecked():
+        if self.fip_model.enabled and not self.StartExcitation.isChecked():
             logging.warning('photometry is set to "on", but excitation is not running')
 
             reply = QMessageBox.question(
