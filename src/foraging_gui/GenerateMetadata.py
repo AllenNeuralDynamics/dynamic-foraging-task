@@ -867,6 +867,7 @@ class generate_metadata:
                 output_power_unit="microwatt",
                 fiber_name="Fiber 3",
             )
+        )
         return
 
         # this is not complete.
