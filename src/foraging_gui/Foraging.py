@@ -61,6 +61,7 @@ from foraging_gui.Dialogs import (
     OptogeneticsDialog,
     TimeDistributionDialog,
     WaterCalibrationDialog,
+    get_curriculum_string,
 )
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.MyFunctions import (
@@ -3982,6 +3983,14 @@ class Window(QMainWindow):
         Obj["MetadataFolder"] = self.MetadataFolder
         Obj["SaveFile"] = self.SaveFile
 
+        # save the stage and curriculum version
+        if self.AutoTrain_dialog.auto_train_engaged:
+            Obj["stage_in_use"] = self.AutoTrain_dialog.stage_in_use
+            Obj["curriculum_in_use"] = get_curriculum_string(self.AutoTrain_dialog.curriculum_in_use)
+        else:
+            Obj["stage_in_use"] = "unknown training stage"
+            Obj["curriculum_in_use"] = "off curriculum"
+
         # generate the metadata file and update slims
         try:
             # save the metadata collected in the metadata dialogue
@@ -3989,7 +3998,7 @@ class Window(QMainWindow):
             Obj["meta_data_dialog"] = self.Metadata_dialog.meta_data
             # generate the metadata file
             generated_metadata = generate_metadata(
-                session_model=self.behavior_session_model, Obj=Obj
+                Obj=Obj
             )
             session = generated_metadata._session()
 
