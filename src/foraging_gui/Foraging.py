@@ -3988,7 +3988,7 @@ class Window(QMainWindow):
             Obj["curriculum_in_use"] = get_curriculum_string(self.AutoTrain_dialog.curriculum_in_use)
         else:
             Obj["stage_in_use"] = "unknown training stage"
-            Obj["curriculum_in_use"] = "unknown curriculum"
+            Obj["curriculum_in_use"] = "off curriculum"
 
         # generate the metadata file and update slims
         try:
