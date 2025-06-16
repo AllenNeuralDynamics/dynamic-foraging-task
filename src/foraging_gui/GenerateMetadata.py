@@ -1093,6 +1093,7 @@ class generate_metadata:
                  "curriculum_version": self.Obj["TP_auto_train_curriculum_schema_version"][-1],
                  "current_stage_actual": self.Obj["TP_auto_train_stage"][-1],
                  "current_stage_suggested": self.Obj["TP_auto_train_stage"][-1],
+                 "if_overriden_by_trainer": self.Obj["TP_auto_train_stage_overridden"][-1],
                  "next_stage_suggested": self.Obj.get("next_stage_suggested", None),
                  }
 
