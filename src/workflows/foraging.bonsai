@@ -10,10 +10,10 @@
                  xmlns:beh="clr-namespace:Harp.Behavior;assembly=Harp.Behavior"
                  xmlns:harp="clr-namespace:Bonsai.Harp;assembly=Bonsai.Harp"
                  xmlns:p1="clr-namespace:Harp.SoundCard;assembly=Harp.SoundCard"
-                 xmlns:p2="clr-namespace:AllenNeuralDynamics.EnvironmentSensor;assembly=AllenNeuralDynamics.EnvironmentSensor"
-                 xmlns:p3="clr-namespace:AllenNeuralDynamics.Core;assembly=AllenNeuralDynamics.Core"
                  xmlns:wie="clr-namespace:Bonsai.Windows.Input;assembly=Bonsai.Windows.Input"
-                 xmlns:p4="clr-namespace:AllenNeuralDynamics.LicketySplitLickDetector;assembly=AllenNeuralDynamics.LicketySplitLickDetector"
+                 xmlns:p2="clr-namespace:AllenNeuralDynamics.LicketySplitLickDetector;assembly=AllenNeuralDynamics.LicketySplitLickDetector"
+                 xmlns:p3="clr-namespace:AllenNeuralDynamics.EnvironmentSensor;assembly=AllenNeuralDynamics.EnvironmentSensor"
+                 xmlns:p4="clr-namespace:AllenNeuralDynamics.Core;assembly=AllenNeuralDynamics.Core"
                  xmlns:dsp="clr-namespace:Bonsai.Dsp;assembly=Bonsai.Dsp"
                  xmlns:p5="clr-namespace:Bonsai.DAQmx;assembly=Extensions"
                  xmlns:vid="clr-namespace:Bonsai.Video;assembly=Bonsai.Video"
@@ -2855,88 +2855,6 @@
         <Name>HardwareInputs</Name>
         <Workflow>
           <Nodes>
-            <Expression xsi:type="GroupWorkflow">
-              <Name>EnvironmentSensor</Name>
-              <Workflow>
-                <Nodes>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>ComPorts</Name>
-                  </Expression>
-                  <Expression xsi:type="Index">
-                    <Operand xsi:type="StringProperty">
-                      <Value>EnvironmentSensor</Value>
-                    </Operand>
-                  </Expression>
-                  <Expression xsi:type="PropertyMapping">
-                    <PropertyMappings>
-                      <Property Name="PortName" />
-                    </PropertyMappings>
-                  </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>TrialEnd</Name>
-                  </Expression>
-                  <Expression xsi:type="harp:CreateMessage">
-                    <harp:MessageType>Write</harp:MessageType>
-                    <harp:Payload xsi:type="harp:CreateOperationControlPayload">
-                      <harp:OperationMode>Active</harp:OperationMode>
-                      <harp:DumpRegisters>true</harp:DumpRegisters>
-                      <harp:MuteReplies>false</harp:MuteReplies>
-                      <harp:VisualIndicators>Off</harp:VisualIndicators>
-                      <harp:OperationLed>Off</harp:OperationLed>
-                      <harp:Heartbeat>Enabled</harp:Heartbeat>
-                    </harp:Payload>
-                  </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="p2:Device">
-                      <harp:OperationMode>Active</harp:OperationMode>
-                      <harp:OperationLed>On</harp:OperationLed>
-                      <harp:DumpRegisters>true</harp:DumpRegisters>
-                      <harp:VisualIndicators>On</harp:VisualIndicators>
-                      <harp:Heartbeat>Disabled</harp:Heartbeat>
-                      <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COMx</harp:PortName>
-                    </Combinator>
-                  </Expression>
-                  <Expression xsi:type="rx:PublishSubject">
-                    <Name>EnvironmentSensor</Name>
-                  </Expression>
-                  <Expression xsi:type="WorkflowOutput" />
-                </Nodes>
-                <Edges>
-                  <Edge From="0" To="1" Label="Source1" />
-                  <Edge From="1" To="2" Label="Source1" />
-                  <Edge From="2" To="5" Label="Source1" />
-                  <Edge From="3" To="4" Label="Source1" />
-                  <Edge From="4" To="5" Label="Source2" />
-                  <Edge From="5" To="6" Label="Source1" />
-                  <Edge From="6" To="7" Label="Source1" />
-                </Edges>
-              </Workflow>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>ComPorts</Name>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="p3:ContainsKey">
-                <p3:Key>EnvironmentSensor</p3:Key>
-              </Combinator>
-            </Expression>
-            <Expression xsi:type="rx:Condition">
-              <Workflow>
-                <Nodes>
-                  <Expression xsi:type="WorkflowInput">
-                    <Name>Source1</Name>
-                  </Expression>
-                  <Expression xsi:type="WorkflowOutput" />
-                </Nodes>
-                <Edges>
-                  <Edge From="0" To="1" Label="Source1" />
-                </Edges>
-              </Workflow>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="rx:SubscribeWhen" />
-            </Expression>
             <Expression xsi:type="rx:BehaviorSubject" TypeArguments="harp:HarpMessage">
               <rx:Name>BehaviorCommands</rx:Name>
             </Expression>
@@ -3223,7 +3141,7 @@
                     </PropertyMappings>
                   </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="p4:Device">
+                    <Combinator xsi:type="p2:Device">
                       <harp:OperationMode>Active</harp:OperationMode>
                       <harp:OperationLed>On</harp:OperationLed>
                       <harp:DumpRegisters>true</harp:DumpRegisters>
@@ -3253,7 +3171,7 @@
                     </PropertyMappings>
                   </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="p4:Device">
+                    <Combinator xsi:type="p2:Device">
                       <harp:OperationMode>Active</harp:OperationMode>
                       <harp:OperationLed>On</harp:OperationLed>
                       <harp:DumpRegisters>true</harp:DumpRegisters>
@@ -3269,14 +3187,14 @@
                   <Expression xsi:type="SubscribeSubject">
                     <Name>LickometerEventsLeft</Name>
                   </Expression>
-                  <Expression xsi:type="p4:Parse">
-                    <harp:Register xsi:type="p4:TimestampedLickState" />
+                  <Expression xsi:type="p2:Parse">
+                    <harp:Register xsi:type="p2:TimestampedLickState" />
                   </Expression>
                   <Expression xsi:type="MemberSelector">
                     <Selector>Value</Selector>
                   </Expression>
                   <Expression xsi:type="BitwiseAnd">
-                    <Operand xsi:type="WorkflowProperty" TypeArguments="p4:LickChannels">
+                    <Operand xsi:type="WorkflowProperty" TypeArguments="p2:LickChannels">
                       <Value>Channel0</Value>
                     </Operand>
                   </Expression>
@@ -3318,14 +3236,14 @@
                   <Expression xsi:type="SubscribeSubject">
                     <Name>LickometerEventsRight</Name>
                   </Expression>
-                  <Expression xsi:type="p4:Parse">
-                    <harp:Register xsi:type="p4:TimestampedLickState" />
+                  <Expression xsi:type="p2:Parse">
+                    <harp:Register xsi:type="p2:TimestampedLickState" />
                   </Expression>
                   <Expression xsi:type="MemberSelector">
                     <Selector>Value</Selector>
                   </Expression>
                   <Expression xsi:type="BitwiseAnd">
-                    <Operand xsi:type="WorkflowProperty" TypeArguments="p4:LickChannels">
+                    <Operand xsi:type="WorkflowProperty" TypeArguments="p2:LickChannels">
                       <Value>Channel0</Value>
                     </Operand>
                   </Expression>
@@ -3441,30 +3359,118 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="rx:SubscribeWhen" />
             </Expression>
+            <Expression xsi:type="GroupWorkflow">
+              <Name>EnvironmentSensor</Name>
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ComPorts</Name>
+                  </Expression>
+                  <Expression xsi:type="Index">
+                    <Operand xsi:type="StringProperty">
+                      <Value>EnvironmentSensor</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="PortName" />
+                    </PropertyMappings>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>TrialEnd</Name>
+                  </Expression>
+                  <Expression xsi:type="harp:CreateMessage">
+                    <harp:MessageType>Write</harp:MessageType>
+                    <harp:Payload xsi:type="harp:CreateOperationControlPayload">
+                      <harp:OperationMode>Active</harp:OperationMode>
+                      <harp:DumpRegisters>true</harp:DumpRegisters>
+                      <harp:MuteReplies>false</harp:MuteReplies>
+                      <harp:VisualIndicators>Off</harp:VisualIndicators>
+                      <harp:OperationLed>Off</harp:OperationLed>
+                      <harp:Heartbeat>Enabled</harp:Heartbeat>
+                    </harp:Payload>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="p3:Device">
+                      <harp:OperationMode>Active</harp:OperationMode>
+                      <harp:OperationLed>On</harp:OperationLed>
+                      <harp:DumpRegisters>true</harp:DumpRegisters>
+                      <harp:VisualIndicators>On</harp:VisualIndicators>
+                      <harp:Heartbeat>Disabled</harp:Heartbeat>
+                      <harp:IgnoreErrors>false</harp:IgnoreErrors>
+                      <harp:PortName>COMx</harp:PortName>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>EnvironmentSensor</Name>
+                  </Expression>
+                  <Expression xsi:type="WorkflowOutput" />
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="1" Label="Source1" />
+                  <Edge From="1" To="2" Label="Source1" />
+                  <Edge From="2" To="5" Label="Source1" />
+                  <Edge From="3" To="4" Label="Source1" />
+                  <Edge From="4" To="5" Label="Source2" />
+                  <Edge From="5" To="6" Label="Source1" />
+                  <Edge From="6" To="7" Label="Source1" />
+                </Edges>
+              </Workflow>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>ComPorts</Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="rx:Delay">
+                <rx:DueTime>PT10S</rx:DueTime>
+              </Combinator>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="p4:ContainsKey">
+                <p4:Key>EnvironmentSensor</p4:Key>
+              </Combinator>
+            </Expression>
+            <Expression xsi:type="rx:Condition">
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="WorkflowInput">
+                    <Name>Source1</Name>
+                  </Expression>
+                  <Expression xsi:type="WorkflowOutput" />
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="1" Label="Source1" />
+                </Edges>
+              </Workflow>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="rx:SubscribeWhen" />
+            </Expression>
           </Nodes>
           <Edges>
             <Edge From="0" To="4" Label="Source1" />
             <Edge From="1" To="2" Label="Source1" />
             <Edge From="2" To="3" Label="Source1" />
             <Edge From="3" To="4" Label="Source2" />
-            <Edge From="5" To="9" Label="Source1" />
+            <Edge From="4" To="5" Label="Source1" />
             <Edge From="6" To="7" Label="Source1" />
             <Edge From="7" To="8" Label="Source1" />
-            <Edge From="8" To="9" Label="Source2" />
-            <Edge From="9" To="10" Label="Source1" />
+            <Edge From="8" To="9" Label="Source1" />
+            <Edge From="10" To="15" Label="Source1" />
             <Edge From="11" To="12" Label="Source1" />
             <Edge From="12" To="13" Label="Source1" />
             <Edge From="13" To="14" Label="Source1" />
-            <Edge From="15" To="20" Label="Source1" />
-            <Edge From="16" To="17" Label="Source1" />
+            <Edge From="14" To="15" Label="Source2" />
+            <Edge From="16" To="21" Label="Source1" />
             <Edge From="17" To="18" Label="Source1" />
             <Edge From="18" To="19" Label="Source1" />
-            <Edge From="19" To="20" Label="Source2" />
-            <Edge From="21" To="26" Label="Source1" />
-            <Edge From="22" To="23" Label="Source1" />
+            <Edge From="19" To="20" Label="Source1" />
+            <Edge From="20" To="21" Label="Source2" />
+            <Edge From="22" To="27" Label="Source1" />
             <Edge From="23" To="24" Label="Source1" />
             <Edge From="24" To="25" Label="Source1" />
-            <Edge From="25" To="26" Label="Source2" />
+            <Edge From="25" To="26" Label="Source1" />
+            <Edge From="26" To="27" Label="Source2" />
           </Edges>
         </Workflow>
       </Expression>
@@ -4622,8 +4628,8 @@
                   <Expression xsi:type="SubscribeSubject">
                     <Name>EnvironmentSensor</Name>
                   </Expression>
-                  <Expression xsi:type="p2:Parse">
-                    <harp:Register xsi:type="p2:Temperature" />
+                  <Expression xsi:type="p3:Parse">
+                    <harp:Register xsi:type="p3:Temperature" />
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorTemperature</osc:Address>
@@ -4634,8 +4640,8 @@
                   <Expression xsi:type="SubscribeSubject">
                     <Name>EnvironmentSensor</Name>
                   </Expression>
-                  <Expression xsi:type="p2:Parse">
-                    <harp:Register xsi:type="p2:Humidity" />
+                  <Expression xsi:type="p3:Parse">
+                    <harp:Register xsi:type="p3:Humidity" />
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorHumidity</osc:Address>
@@ -4646,8 +4652,8 @@
                   <Expression xsi:type="SubscribeSubject">
                     <Name>EnvironmentSensor</Name>
                   </Expression>
-                  <Expression xsi:type="p2:Parse">
-                    <harp:Register xsi:type="p2:Pressure" />
+                  <Expression xsi:type="p3:Parse">
+                    <harp:Register xsi:type="p3:Pressure" />
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorPressure</osc:Address>
@@ -4658,8 +4664,8 @@
                   <Expression xsi:type="SubscribeSubject">
                     <Name>EnvironmentSensor</Name>
                   </Expression>
-                  <Expression xsi:type="p2:Parse">
-                    <harp:Register xsi:type="p2:TimestampedTemperature" />
+                  <Expression xsi:type="p3:Parse">
+                    <harp:Register xsi:type="p3:TimestampedTemperature" />
                   </Expression>
                   <Expression xsi:type="SubscribeSubject">
                     <Name>Timestamps</Name>
@@ -8088,22 +8094,22 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="p3:AindSpinnakerCapture">
+                                <Combinator xsi:type="p4:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>23022717</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
-                                  <p3:ExposureTime>1000</p3:ExposureTime>
-                                  <p3:Gain>8</p3:Gain>
-                                  <p3:Binning>1</p3:Binning>
-                                  <p3:Gamma xsi:nil="true" />
-                                  <p3:PixelFormat>Mono8</p3:PixelFormat>
-                                  <p3:RegionOfInterest>
-                                    <p3:X>0</p3:X>
-                                    <p3:Y>0</p3:Y>
-                                    <p3:Width>0</p3:Width>
-                                    <p3:Height>0</p3:Height>
-                                  </p3:RegionOfInterest>
-                                  <p3:AdcBitDepth>Bit8</p3:AdcBitDepth>
+                                  <p4:ExposureTime>1000</p4:ExposureTime>
+                                  <p4:Gain>8</p4:Gain>
+                                  <p4:Binning>1</p4:Binning>
+                                  <p4:Gamma xsi:nil="true" />
+                                  <p4:PixelFormat>Mono8</p4:PixelFormat>
+                                  <p4:RegionOfInterest>
+                                    <p4:X>0</p4:X>
+                                    <p4:Y>0</p4:Y>
+                                    <p4:Width>0</p4:Width>
+                                    <p4:Height>0</p4:Height>
+                                  </p4:RegionOfInterest>
+                                  <p4:AdcBitDepth>Bit8</p4:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
@@ -8309,22 +8315,22 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="p3:AindSpinnakerCapture">
+                                <Combinator xsi:type="p4:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>23045805</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
-                                  <p3:ExposureTime>1000</p3:ExposureTime>
-                                  <p3:Gain>8</p3:Gain>
-                                  <p3:Binning>1</p3:Binning>
-                                  <p3:Gamma xsi:nil="true" />
-                                  <p3:PixelFormat>Mono8</p3:PixelFormat>
-                                  <p3:RegionOfInterest>
-                                    <p3:X>0</p3:X>
-                                    <p3:Y>0</p3:Y>
-                                    <p3:Width>0</p3:Width>
-                                    <p3:Height>0</p3:Height>
-                                  </p3:RegionOfInterest>
-                                  <p3:AdcBitDepth>Bit8</p3:AdcBitDepth>
+                                  <p4:ExposureTime>1000</p4:ExposureTime>
+                                  <p4:Gain>8</p4:Gain>
+                                  <p4:Binning>1</p4:Binning>
+                                  <p4:Gamma xsi:nil="true" />
+                                  <p4:PixelFormat>Mono8</p4:PixelFormat>
+                                  <p4:RegionOfInterest>
+                                    <p4:X>0</p4:X>
+                                    <p4:Y>0</p4:Y>
+                                    <p4:Width>0</p4:Width>
+                                    <p4:Height>0</p4:Height>
+                                  </p4:RegionOfInterest>
+                                  <p4:AdcBitDepth>Bit8</p4:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
@@ -8534,22 +8540,22 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="p3:AindSpinnakerCapture">
+                                <Combinator xsi:type="p4:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>23022710</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
-                                  <p3:ExposureTime>1000</p3:ExposureTime>
-                                  <p3:Gain>8</p3:Gain>
-                                  <p3:Binning>1</p3:Binning>
-                                  <p3:Gamma xsi:nil="true" />
-                                  <p3:PixelFormat>Mono8</p3:PixelFormat>
-                                  <p3:RegionOfInterest>
-                                    <p3:X>0</p3:X>
-                                    <p3:Y>0</p3:Y>
-                                    <p3:Width>0</p3:Width>
-                                    <p3:Height>0</p3:Height>
-                                  </p3:RegionOfInterest>
-                                  <p3:AdcBitDepth>Bit8</p3:AdcBitDepth>
+                                  <p4:ExposureTime>1000</p4:ExposureTime>
+                                  <p4:Gain>8</p4:Gain>
+                                  <p4:Binning>1</p4:Binning>
+                                  <p4:Gamma xsi:nil="true" />
+                                  <p4:PixelFormat>Mono8</p4:PixelFormat>
+                                  <p4:RegionOfInterest>
+                                    <p4:X>0</p4:X>
+                                    <p4:Y>0</p4:Y>
+                                    <p4:Width>0</p4:Width>
+                                    <p4:Height>0</p4:Height>
+                                  </p4:RegionOfInterest>
+                                  <p4:AdcBitDepth>Bit8</p4:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
@@ -8759,22 +8765,22 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="p3:AindSpinnakerCapture">
+                                <Combinator xsi:type="p4:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>22511912</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
-                                  <p3:ExposureTime>1000</p3:ExposureTime>
-                                  <p3:Gain>8</p3:Gain>
-                                  <p3:Binning>1</p3:Binning>
-                                  <p3:Gamma xsi:nil="true" />
-                                  <p3:PixelFormat>Mono8</p3:PixelFormat>
-                                  <p3:RegionOfInterest>
-                                    <p3:X>0</p3:X>
-                                    <p3:Y>0</p3:Y>
-                                    <p3:Width>0</p3:Width>
-                                    <p3:Height>0</p3:Height>
-                                  </p3:RegionOfInterest>
-                                  <p3:AdcBitDepth>Bit8</p3:AdcBitDepth>
+                                  <p4:ExposureTime>1000</p4:ExposureTime>
+                                  <p4:Gain>8</p4:Gain>
+                                  <p4:Binning>1</p4:Binning>
+                                  <p4:Gamma xsi:nil="true" />
+                                  <p4:PixelFormat>Mono8</p4:PixelFormat>
+                                  <p4:RegionOfInterest>
+                                    <p4:X>0</p4:X>
+                                    <p4:Y>0</p4:Y>
+                                    <p4:Width>0</p4:Width>
+                                    <p4:Height>0</p4:Height>
+                                  </p4:RegionOfInterest>
+                                  <p4:AdcBitDepth>Bit8</p4:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
@@ -9547,22 +9553,22 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="p3:AindSpinnakerCapture">
+                                <Combinator xsi:type="p4:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>23022717</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
-                                  <p3:ExposureTime>1000</p3:ExposureTime>
-                                  <p3:Gain>8</p3:Gain>
-                                  <p3:Binning>1</p3:Binning>
-                                  <p3:Gamma xsi:nil="true" />
-                                  <p3:PixelFormat>Mono8</p3:PixelFormat>
-                                  <p3:RegionOfInterest>
-                                    <p3:X>0</p3:X>
-                                    <p3:Y>0</p3:Y>
-                                    <p3:Width>0</p3:Width>
-                                    <p3:Height>0</p3:Height>
-                                  </p3:RegionOfInterest>
-                                  <p3:AdcBitDepth>Bit8</p3:AdcBitDepth>
+                                  <p4:ExposureTime>1000</p4:ExposureTime>
+                                  <p4:Gain>8</p4:Gain>
+                                  <p4:Binning>1</p4:Binning>
+                                  <p4:Gamma xsi:nil="true" />
+                                  <p4:PixelFormat>Mono8</p4:PixelFormat>
+                                  <p4:RegionOfInterest>
+                                    <p4:X>0</p4:X>
+                                    <p4:Y>0</p4:Y>
+                                    <p4:Width>0</p4:Width>
+                                    <p4:Height>0</p4:Height>
+                                  </p4:RegionOfInterest>
+                                  <p4:AdcBitDepth>Bit8</p4:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="MemberSelector">
@@ -9666,22 +9672,22 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="p3:AindSpinnakerCapture">
+                                <Combinator xsi:type="p4:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>23045805</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
-                                  <p3:ExposureTime>1000</p3:ExposureTime>
-                                  <p3:Gain>8</p3:Gain>
-                                  <p3:Binning>1</p3:Binning>
-                                  <p3:Gamma xsi:nil="true" />
-                                  <p3:PixelFormat>Mono8</p3:PixelFormat>
-                                  <p3:RegionOfInterest>
-                                    <p3:X>0</p3:X>
-                                    <p3:Y>0</p3:Y>
-                                    <p3:Width>0</p3:Width>
-                                    <p3:Height>0</p3:Height>
-                                  </p3:RegionOfInterest>
-                                  <p3:AdcBitDepth>Bit8</p3:AdcBitDepth>
+                                  <p4:ExposureTime>1000</p4:ExposureTime>
+                                  <p4:Gain>8</p4:Gain>
+                                  <p4:Binning>1</p4:Binning>
+                                  <p4:Gamma xsi:nil="true" />
+                                  <p4:PixelFormat>Mono8</p4:PixelFormat>
+                                  <p4:RegionOfInterest>
+                                    <p4:X>0</p4:X>
+                                    <p4:Y>0</p4:Y>
+                                    <p4:Width>0</p4:Width>
+                                    <p4:Height>0</p4:Height>
+                                  </p4:RegionOfInterest>
+                                  <p4:AdcBitDepth>Bit8</p4:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="MemberSelector">
@@ -9789,22 +9795,22 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="p3:AindSpinnakerCapture">
+                                <Combinator xsi:type="p4:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>23022710</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
-                                  <p3:ExposureTime>1000</p3:ExposureTime>
-                                  <p3:Gain>8</p3:Gain>
-                                  <p3:Binning>1</p3:Binning>
-                                  <p3:Gamma xsi:nil="true" />
-                                  <p3:PixelFormat>Mono8</p3:PixelFormat>
-                                  <p3:RegionOfInterest>
-                                    <p3:X>0</p3:X>
-                                    <p3:Y>0</p3:Y>
-                                    <p3:Width>0</p3:Width>
-                                    <p3:Height>0</p3:Height>
-                                  </p3:RegionOfInterest>
-                                  <p3:AdcBitDepth>Bit8</p3:AdcBitDepth>
+                                  <p4:ExposureTime>1000</p4:ExposureTime>
+                                  <p4:Gain>8</p4:Gain>
+                                  <p4:Binning>1</p4:Binning>
+                                  <p4:Gamma xsi:nil="true" />
+                                  <p4:PixelFormat>Mono8</p4:PixelFormat>
+                                  <p4:RegionOfInterest>
+                                    <p4:X>0</p4:X>
+                                    <p4:Y>0</p4:Y>
+                                    <p4:Width>0</p4:Width>
+                                    <p4:Height>0</p4:Height>
+                                  </p4:RegionOfInterest>
+                                  <p4:AdcBitDepth>Bit8</p4:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="MemberSelector">
@@ -9912,22 +9918,22 @@
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="p3:AindSpinnakerCapture">
+                                <Combinator xsi:type="p4:AindSpinnakerCapture">
                                   <spk:Index xsi:nil="true" />
                                   <spk:SerialNumber>22511912</spk:SerialNumber>
                                   <spk:ColorProcessing>Default</spk:ColorProcessing>
-                                  <p3:ExposureTime>1000</p3:ExposureTime>
-                                  <p3:Gain>8</p3:Gain>
-                                  <p3:Binning>1</p3:Binning>
-                                  <p3:Gamma xsi:nil="true" />
-                                  <p3:PixelFormat>Mono8</p3:PixelFormat>
-                                  <p3:RegionOfInterest>
-                                    <p3:X>0</p3:X>
-                                    <p3:Y>0</p3:Y>
-                                    <p3:Width>0</p3:Width>
-                                    <p3:Height>0</p3:Height>
-                                  </p3:RegionOfInterest>
-                                  <p3:AdcBitDepth>Bit8</p3:AdcBitDepth>
+                                  <p4:ExposureTime>1000</p4:ExposureTime>
+                                  <p4:Gain>8</p4:Gain>
+                                  <p4:Binning>1</p4:Binning>
+                                  <p4:Gamma xsi:nil="true" />
+                                  <p4:PixelFormat>Mono8</p4:PixelFormat>
+                                  <p4:RegionOfInterest>
+                                    <p4:X>0</p4:X>
+                                    <p4:Y>0</p4:Y>
+                                    <p4:Width>0</p4:Width>
+                                    <p4:Height>0</p4:Height>
+                                  </p4:RegionOfInterest>
+                                  <p4:AdcBitDepth>Bit8</p4:AdcBitDepth>
                                 </Combinator>
                               </Expression>
                               <Expression xsi:type="MemberSelector">
