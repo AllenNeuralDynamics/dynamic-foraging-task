@@ -391,6 +391,7 @@ class Window(QMainWindow):
                 else "widget_2"
             )
             self._insert_stage_widget(widget_to_replace)
+            self.stage_widget.stage_model.initialize_stage()
         else:
             self._GetPositions()
 
@@ -6202,7 +6203,7 @@ class Window(QMainWindow):
                 self,
                 "Box {}, Start".format(self.box_letter),
                 'Photometry is set to "on", but excitation is not running. Start excitation now?',
-                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes | QMessageBox.Cancel,
                 QMessageBox.Yes,
             )
             if reply == QMessageBox.Yes:
