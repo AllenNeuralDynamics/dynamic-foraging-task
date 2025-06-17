@@ -5650,8 +5650,9 @@ class Window(QMainWindow):
                 ):
                     # Extra 10 seconds is to avoid any race conditions
                     # We are in the photometry baseline period
+                    logging.info("In photometery timer")
                     continue
-
+                logging.info(self.finish_Timer == 0, time.time() - last_trial_start, self.fip_model.baseline_time * 60 + 10)
                 # Prompt user to stop trials
                 elapsed_time = int(
                     np.floor(stall_duration * stall_iteration / 60)
