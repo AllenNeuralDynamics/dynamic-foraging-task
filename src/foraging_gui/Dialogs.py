@@ -1411,8 +1411,6 @@ class CameraDialog(QDialog):
             self.StartPreview.setEnabled(False)
             # disable the Load button
             self.MainWindow.Load.setEnabled(False)
-            # disable the Animal ID
-            self.MainWindow.ID.setEnabled(False)
             # set the camera start type
             self.MainWindow.Channel.CameraStartType(int(1))
             # set the camera frequency.
