@@ -1082,6 +1082,11 @@ class GenerateTrials:
                 self.B_for_eff_optimal_random_seed = np.nan
             """Some complex calculations can be separated from _GenerateATrial using different threads"""
 
+            # calculate ignore rate
+            auto_rewards = np.array([any(x) for x in np.column_stack(self.B_AutoWaterTrial.astype(bool))])
+            non_auto_reward = self.B_AnimalResponseHistory[np.where(~auto_rewards.astype(bool))]
+            self.B_ignore_rate = len(np.where(non_auto_reward == 2)[0])/len(non_auto_reward)
+
     def _process_values(
         self, values, auto_water_trial, multiplier_values, rewarded_history
     ):

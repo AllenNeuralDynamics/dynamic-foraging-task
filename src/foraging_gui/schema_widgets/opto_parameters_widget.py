@@ -15,7 +15,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
     SineProtocol,
 )
 from pydantic import BaseModel
-from PyQt5.QtWidgets import QCheckBox, QComboBox
+from PyQt5.QtWidgets import QCheckBox, QComboBox, QSizePolicy
 
 from foraging_gui.schema_widgets.schema_widget_base import (
     SchemaWidgetBase,
@@ -168,10 +168,15 @@ class OptoParametersWidget(SchemaWidgetBase):
         """
 
         widget_dict = getattr(self, name + "_widgets")
-        [
-            widget.show() if enabled else widget.hide()
-            for widget in widget_dict.values()
-        ]
+        for widget in widget_dict.values():
+            if enabled:
+                widget.show()
+                widget.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+            else:
+                widget.hide()
+                widget.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.adjustSize()
+
         name_lst = name.split(".")
 
         possible_lasers = [
@@ -519,6 +524,7 @@ if __name__ == "__main__":
 
     task_model.laser_colors = []
     task_widget.apply_schema(task_model)
+
     task_model.laser_colors.append(
         LaserColorFive(
             color="Blue",
