@@ -3376,8 +3376,11 @@
                       <Property Name="PortName" />
                     </PropertyMappings>
                   </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>TrialEnd</Name>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:Timer">
+                      <rx:DueTime>PT0S</rx:DueTime>
+                      <rx:Period>PT1S</rx:Period>
+                    </Combinator>
                   </Expression>
                   <Expression xsi:type="harp:CreateMessage">
                     <harp:MessageType>Write</harp:MessageType>
@@ -4661,18 +4664,6 @@
                   <Expression xsi:type="p3:Parse">
                     <harp:Register xsi:type="p3:TimestampedTemperature" />
                   </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>Timestamps</Name>
-                  </Expression>
-                  <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:WithLatestFrom" />
-                  </Expression>
-                  <Expression xsi:type="MemberSelector">
-                    <Selector>Item2</Selector>
-                  </Expression>
-                  <Expression xsi:type="scr:ExpressionTransform">
-                    <scr:Expression>new(it as Seconds)</scr:Expression>
-                  </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorTimestamp</osc:Address>
                   </Expression>
@@ -4791,12 +4782,8 @@
                   <Edge From="129" To="130" Label="Source1" />
                   <Edge From="130" To="131" Label="Source1" />
                   <Edge From="132" To="133" Label="Source1" />
-                  <Edge From="133" To="135" Label="Source1" />
-                  <Edge From="134" To="135" Label="Source2" />
-                  <Edge From="135" To="136" Label="Source1" />
-                  <Edge From="136" To="137" Label="Source1" />
-                  <Edge From="137" To="138" Label="Source1" />
-                  <Edge From="138" To="139" Label="Source1" />
+                  <Edge From="133" To="134" Label="Source1" />
+                  <Edge From="134" To="135" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -7939,6 +7926,12 @@
             <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogHarpDemux.bonsai">
               <LogName>LickometerEventsRight</LogName>
             </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>EnvironmentSensor</Name>
+            </Expression>
+            <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogHarpDemux.bonsai">
+              <LogName>LickometerEventsRight</LogName>
+            </Expression>
             <Expression xsi:type="GroupWorkflow">
               <Name>CameraRecording</Name>
               <Workflow>
@@ -9314,21 +9307,22 @@
             <Edge From="36" To="37" Label="Source1" />
             <Edge From="39" To="40" Label="Source1" />
             <Edge From="41" To="42" Label="Source1" />
-            <Edge From="43" To="48" Label="Source1" />
-            <Edge From="44" To="45" Label="Source1" />
-            <Edge From="45" To="46" Label="Source1" />
+            <Edge From="43" To="44" Label="Source1" />
+            <Edge From="45" To="50" Label="Source1" />
             <Edge From="46" To="47" Label="Source1" />
-            <Edge From="47" To="48" Label="Source2" />
-            <Edge From="49" To="54" Label="Source1" />
-            <Edge From="50" To="51" Label="Source1" />
-            <Edge From="51" To="52" Label="Source1" />
+            <Edge From="47" To="48" Label="Source1" />
+            <Edge From="48" To="49" Label="Source1" />
+            <Edge From="49" To="50" Label="Source2" />
+            <Edge From="51" To="56" Label="Source1" />
             <Edge From="52" To="53" Label="Source1" />
-            <Edge From="53" To="54" Label="Source2" />
-            <Edge From="55" To="56" Label="Source1" />
-            <Edge From="56" To="59" Label="Source1" />
+            <Edge From="53" To="54" Label="Source1" />
+            <Edge From="54" To="55" Label="Source1" />
+            <Edge From="55" To="56" Label="Source2" />
             <Edge From="57" To="58" Label="Source1" />
-            <Edge From="58" To="59" Label="Source2" />
-            <Edge From="60" To="61" Label="Source1" />
+            <Edge From="58" To="61" Label="Source1" />
+            <Edge From="59" To="60" Label="Source1" />
+            <Edge From="60" To="61" Label="Source2" />
+            <Edge From="62" To="63" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
