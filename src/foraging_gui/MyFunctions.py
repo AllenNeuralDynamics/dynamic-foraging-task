@@ -229,6 +229,7 @@ class GenerateTrials:
             # get all of the training parameters of the current trial
             self._GetTrainingParameters(self.win)
         # save all of the parameters in each trial
+        print("SAVING PARAMETERS", self.opto_model.laser_colors[0].location)
         self._SaveParameters()
         # get licks information. Starting from the second trial, and counting licks of the last completed trial
         if self.B_CurrentTrialN >= 1:
