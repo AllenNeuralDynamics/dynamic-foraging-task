@@ -3216,7 +3216,7 @@ class GenerateTrials:
             **oc_tp,
         }.items():
             if "TP_" == key[:3]:
-                self.Obj[key].apped(value)
+                self.Obj[key].append(value)
 
         # loop through and save all TP_ attributes
         for attr_name in dir(self):
