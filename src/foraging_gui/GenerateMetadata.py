@@ -1053,7 +1053,8 @@ class generate_metadata:
                 ),
             },
             "task_parameters": self._get_task_parameters(),
-            "curriculum": self._get_curriculum_parameters()
+            "streamlit": self._get_streamlit_parameters(),
+            "training_state": self._get_training_state_parameters(),
         }
 
         return output_parameters
@@ -1085,16 +1086,25 @@ class generate_metadata:
 
         return task_parameters
 
-    def _get_curriculum_parameters(self) -> dict:
-        """Get curriculum parameters"""
+    def _get_streamlit_parameters(self) -> dict:
+        """Get parameters used to fill out streamlit"""
 
         return {
-                 "curriculum_name": self.Obj["TP_auto_train_curriculum_name"][-1],
-                 "curriculum_version": self.Obj["TP_auto_train_curriculum_schema_version"][-1],
-                 "current_stage_actual": self.Obj["TP_auto_train_stage"][-1],
-                 "current_stage_suggested": self.Obj["TP_auto_train_stage"][-1],
-                 "if_overriden_by_trainer": self.Obj["TP_auto_train_stage_overridden"][-1],
+                 "curriculum_name": self.Obj["curriculum_name"][-1],
+                 "curriculum_version": self.Obj["curriculum_version"][-1],
+                 "current_stage_actual": self.Obj["curriculum_stage"][-1],
+                 "current_stage_suggested": self.Obj["curriculum_stage"][-1],
+                 "if_overriden_by_trainer": self.Obj["off_curriculum"][-1],
                  "next_stage_suggested": self.Obj.get("next_stage_suggested", None),
+                 }
+
+    def _get_training_state_parameters(self) -> dict:
+        """Get training state parameters"""
+
+        return {
+                 "curriculum_name": self.Obj["curriculum_name"][-1],
+                 "stage_name": self.Obj["curriculum_stage"][-1],
+                 "status": "off_curriculum" if self.Obj["off_curriculum"][-1] else "on_curriculum",
                  }
 
     def _get_reward_probability(self):
