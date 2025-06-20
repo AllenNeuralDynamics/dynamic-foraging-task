@@ -225,11 +225,6 @@ class GenerateTrials:
 
     def _GenerateATrial(self):
         self.finish_select_par = 0
-        if self.win.UpdateParameters == 1:
-            # get all of the training parameters of the current trial
-            self._GetTrainingParameters(self.win)
-        # save all of the parameters in each trial
-        self._SaveParameters()
         # get licks information. Starting from the second trial, and counting licks of the last completed trial
         if self.B_CurrentTrialN >= 1:
             self._LickSta([self.B_CurrentTrialN - 1])
@@ -2703,6 +2698,12 @@ class GenerateTrials:
                 Channel1.start(1)
                 self.CurrentStartType = 1
                 self.B_StartType.append(self.CurrentStartType)
+
+        if self.win.UpdateParameters == 1:
+            # get all of the training parameters of the current trial
+            self._GetTrainingParameters(self.win)
+        # save all of the parameters used in trial
+        self._SaveParameters()
 
     def _CheckSimulationSession(self):
         """To check if this is a simulation session"""
