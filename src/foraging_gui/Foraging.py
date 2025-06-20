@@ -5458,19 +5458,18 @@ class Window(QMainWindow):
 
                 # can start a new trial when we receive the trial end signal from Bonsai
                 self.ANewTrial = 0
-                GeneratedTrials.B_CurrentTrialN += 1
-                print(
-                    "Current trial: "
-                    + str(GeneratedTrials.B_CurrentTrialN + 1)
-                )
-                logging.info(
-                    "Current trial: "
-                    + str(GeneratedTrials.B_CurrentTrialN + 1)
-                )
-
                 # generate and initiate a trial
                 try:
                     GeneratedTrials._GenerateATrial()
+                    GeneratedTrials.B_CurrentTrialN += 1
+                    print(
+                        "Current trial: "
+                        + str(GeneratedTrials.B_CurrentTrialN + 1)
+                    )
+                    logging.info(
+                        "Current trial: "
+                        + str(GeneratedTrials.B_CurrentTrialN + 1)
+                    )
                     GeneratedTrials._InitiateATrial(
                         self.Channel, self.Channel4
                     )
