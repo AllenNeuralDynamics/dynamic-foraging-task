@@ -4751,12 +4751,6 @@ class Window(QMainWindow):
                             )
                         )
 
-    def _thread_complete(self):
-        """complete of a trial"""
-        if self.NewTrialRewardOrder == 0:
-            self.GeneratedTrials._GenerateATrial()
-        self.ANewTrial = 1
-
     def _thread_complete2(self):
         """complete of receive licks"""
         self.ToReceiveLicks = 1
@@ -5144,7 +5138,6 @@ class Window(QMainWindow):
             self.ToUpdateFigure = 1
             self.ToGenerateATrial = 1
             self.ToInitializeVisual = 1
-            GeneratedTrials._GenerateATrial()
             # delete licks from the previous session
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
             GeneratedTrials.lick_interval_time.start()  # start lick interval calculation
@@ -5186,7 +5179,7 @@ class Window(QMainWindow):
                 self.Channel3,
                 self.data_lock,
             )
-            worker1.signals.finished.connect(self._thread_complete)
+            worker1.signals.finished.connect(lambda: setattr(self, "ANewTrial", 1))
             workerLick = Worker(
                 GeneratedTrials._get_irregular_timestamp, self.Channel2
             )
@@ -5197,28 +5190,23 @@ class Window(QMainWindow):
                 Channel=self.Channel2,
             )
             workerPlot.signals.finished.connect(self._thread_complete3)
-            workerGenerateAtrial = Worker(GeneratedTrials._GenerateATrial)
-            workerGenerateAtrial.signals.finished.connect(
-                self._thread_complete4
-            )
+            # workerGenerateAtrial = Worker(GeneratedTrials._GenerateATrial)
+            # workerGenerateAtrial.signals.finished.connect(
+            #     self._thread_complete4
+            # )
             workerStartTrialLoop = Worker(
                 self._StartTrialLoop,
                 GeneratedTrials,
                 worker1,
                 workerPlot,
-                workerGenerateAtrial,
-            )
-            workerStartTrialLoop1 = Worker(
-                self._StartTrialLoop1, GeneratedTrials
             )
             worker_save = Worker(self._perform_backup, BackupSave=1)
             worker_save.signals.finished.connect(self._thread_complete6)
             self.worker1 = worker1
             self.workerLick = workerLick
             self.workerPlot = workerPlot
-            self.workerGenerateAtrial = workerGenerateAtrial
+            #self.workerGenerateAtrial = workerGenerateAtrial
             self.workerStartTrialLoop = workerStartTrialLoop
-            self.workerStartTrialLoop1 = workerStartTrialLoop1
             self.worker_save = worker_save
             self.data_lock = Lock()
         else:
@@ -5226,9 +5214,8 @@ class Window(QMainWindow):
             worker1 = self.worker1
             workerLick = self.workerLick
             workerPlot = self.workerPlot
-            workerGenerateAtrial = self.workerGenerateAtrial
+            #workerGenerateAtrial = self.workerGenerateAtrial
             workerStartTrialLoop = self.workerStartTrialLoop
-            workerStartTrialLoop1 = self.workerStartTrialLoop1
             worker_save = self.worker_save
 
         # pause for specified habituation time
@@ -5480,26 +5467,10 @@ class Window(QMainWindow):
                     "Current trial: "
                     + str(GeneratedTrials.B_CurrentTrialN + 1)
                 )
-                if (
-                    (
-                        self.task_logic.task_parameters.auto_water is not None
-                        or self.task_logic.task_parameters.block_parameters.min_reward
-                        > 0
-                        or self.session_model.experiment
-                        in ["Uncoupled Baiting", "Uncoupled Without Baiting"]
-                    )
-                    or self.task_logic.task_parameters.no_response_trial_addition
-                ):
-                    # The next trial parameters must be dependent on the current trial's choice
-                    # get animal response and then generate a new trial
-                    self.NewTrialRewardOrder = 0
-                else:
-                    # By default, to save time, generate a new trial as early as possible
-                    # generate a new trial and then get animal response
-                    self.NewTrialRewardOrder = 1
 
-                # initiate the generated trial
+                # generate and initiate a trial
                 try:
+                    GeneratedTrials._GenerateATrial()
                     GeneratedTrials._InitiateATrial(
                         self.Channel, self.Channel4
                     )
@@ -5616,11 +5587,7 @@ class Window(QMainWindow):
                 else:
                     # get the response of the animal using a different thread
                     self.threadpool.start(worker1)
-                # generate a new trial
-                if self.NewTrialRewardOrder == 1:
-                    GeneratedTrials._GenerateATrial()
 
-                # Save data in a separate thread
                 if (
                     GeneratedTrials.B_CurrentTrialN > 0
                     and self.previous_backup_completed == 1
@@ -5748,67 +5715,6 @@ class Window(QMainWindow):
             )
 
         self.GeneratedTrials.B_Bias[trial_number - 1 :] = bias
-
-    def _StartTrialLoop1(
-        self, GeneratedTrials, worker1, workerPlot, workerGenerateAtrial
-    ):
-        logging.info("starting trial loop 1")
-        while self.Start.isChecked():
-            QApplication.processEvents()
-            if (
-                self.ANewTrial == 1
-                and self.ToGenerateATrial == 1
-                and self.Start.isChecked()
-            ):
-                self.ANewTrial = 0  # can start a new trial when we receive the trial end signal from Bonsai
-                GeneratedTrials.B_CurrentTrialN += 1
-                print(
-                    "Current trial: "
-                    + str(GeneratedTrials.B_CurrentTrialN + 1)
-                )
-                logging.info(
-                    "Current trial: "
-                    + str(GeneratedTrials.B_CurrentTrialN + 1)
-                )
-                if not (
-                    self.task_logic.task_parameters.auto_water is not None
-                    or self.task_logic.task_parameters.block_parameters.min_reward
-                    > 0
-                ):
-                    # generate new trial and get reward
-                    self.NewTrialRewardOrder = 1
-                else:
-                    # get reward and generate new trial
-                    self.NewTrialRewardOrder = 0
-                # initiate the generated trial
-                GeneratedTrials._InitiateATrial(self.Channel, self.Channel4)
-                # receive licks and update figures
-                if self.test == 1:
-                    self.PlotM._Update(
-                        GeneratedTrials=GeneratedTrials, Channel=self.Channel2
-                    )
-                else:
-                    if self.ToUpdateFigure == 1:
-                        self.ToUpdateFigure = 0
-                        self.threadpool3.start(workerPlot)
-                # get the response of the animal using a different thread
-                self.threadpool.start(worker1)
-                """
-                if self.test==1:
-                    self.ANewTrial=1
-                    GeneratedTrials.GetResponseFinish=0
-                    GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3)
-                else:
-                    GeneratedTrials.GetResponseFinish=0
-                    self.threadpool.start(worker1)
-                """
-                # generate a new trial
-                if self.test == 1:
-                    self.ToGenerateATrial = 1
-                    GeneratedTrials._GenerateATrial()
-                else:
-                    self.ToGenerateATrial = 0
-                    self.threadpool4.start(workerGenerateAtrial)
 
     def _OptogeneticsB(self):
         """optogenetics control in the main window"""
