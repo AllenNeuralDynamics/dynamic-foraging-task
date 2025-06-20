@@ -174,14 +174,12 @@ class GenerateTrials:
             "TP_LeftValue": [],  # left valve open times
             "TP_RightValue": [],
             "multipliers": [],
-            "AutoTrain": False,
-            "TP_AutoTrain": [],
-            "TP_auto_train_curriculum_name": [],
-            "TP_auto_train_curriculum_schema_version": [],
-            "TP_auto_train_curriculum_version": [],
-            "TP_auto_train_engaged": [],
-            "TP_auto_train_stage": [],
-            "TP_auto_train_stage_overridden": [],
+            "curriculum_name": [],
+            "curriculum_schema_version": [],
+            "curriculum_version": [],
+            "curriculum_loaded": [],
+            "curriculum_stage": [],
+            "off_curriculum": [],
             "TP_Laser_calibration": [],
             "TP_LatestCalibrationDate": [],
             "TP_laser_1_calibration_power": [],
@@ -3270,15 +3268,13 @@ class GenerateTrials:
         # add auto train parameters
         curriculum = self.win.slims_handler.curriculum
         stage = getattr(self.win.slims_handler.trainer_state, 'stage', None)
-        self.Obj["AutoTrain"] = curriculum is not None
-        self.Obj["TP_AutoTrain"].append(curriculum is not None)
-        self.Obj["TP_auto_train_curriculum_name"].append(getattr(curriculum, 'name', None))
-        self.Obj["TP_auto_train_curriculum_schema_version"].append(self.task_logic.version)
-        self.Obj["TP_auto_train_curriculum_version"].append(getattr(curriculum, 'version', None))
-        self.Obj["TP_auto_train_engaged"].append(curriculum is not None)
-        self.Obj["TP_auto_train_stage"].append(getattr(stage, 'name', None))
-        self.Obj["TP_auto_train_stage_overridden"].append(not self.win.on_curriculum.isChecked() if curriculum is
-                                                                                                    not None else None)
+
+        self.Obj["curriculum_name"].append(getattr(curriculum, 'name', None))
+        self.Obj["curriculum_schema_version"].append(self.task_logic.version)
+        self.Obj["curriculum_version"].append(getattr(curriculum, 'version', None))
+        self.Obj["curriculum_loaded"].append(curriculum is not None)
+        self.Obj["curriculum_stage"].append(getattr(stage, 'name', None))
+        self.Obj["off_curriculum"].append(not self.win.on_curriculum.isChecked() if curriculum is not None else None)
 
 
 class NewScaleSerialY:
