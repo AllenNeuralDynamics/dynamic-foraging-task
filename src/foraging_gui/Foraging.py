@@ -5502,17 +5502,18 @@ class Window(QMainWindow):
 
                         break
                     else:
-                        reply = QMessageBox.critical(
-                            self,
-                            "Box {}, Error".format(self.box_letter),
-                            "Encountered the following error: {}".format(e),
-                            QMessageBox.Ok,
-                        )
-                        logging.error("Caught this error: {}".format(e))
-                        self.ANewTrial = 1
-                        self.Start.setChecked(False)
-                        self.Start.setStyleSheet("background-color : none")
-                        break
+                        # reply = QMessageBox.critical(
+                        #     self,
+                        #     "Box {}, Error".format(self.box_letter),
+                        #     "Encountered the following error: {}".format(e),
+                        #     QMessageBox.Ok,
+                        # )
+                        # logging.error("Caught this error: {}".format(e))
+                        # self.ANewTrial = 1
+                        # self.Start.setChecked(False)
+                        # self.Start.setStyleSheet("background-color : none")
+                        # break
+                        raise(e)
                 # receive licks and update figures
                 if self.actionDrawing_after_stopping.isChecked() == False:
                     self.PlotM._Update(
