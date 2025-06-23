@@ -2999,7 +2999,7 @@ class Window(QMainWindow):
             if hasattr(self.WaterCalibration_dialog, "PlotM"):
                 if hasattr(
                     self.WaterCalibration_dialog.PlotM, "FittingResults"
-                ):
+                ) and self.WaterCalibration_dialog.PlotM.FittingResults != {}:
                     self.set_water_calibration_latest_fitting(
                         self.WaterCalibration_dialog.PlotM.FittingResults
                     )
