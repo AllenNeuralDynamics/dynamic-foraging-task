@@ -217,6 +217,10 @@ class Window(QMainWindow):
         # Load User interface
         self._LoadUI()
 
+        # initialize thread locks
+        self.data_lock = Lock()
+        self.trial_lock = Lock()
+
         # create AINDBehaviorSession model and widget to be used and referenced for session info
         self.session_model = AindBehaviorSessionModel(
             experiment="Coupled Baiting",
@@ -238,7 +242,7 @@ class Window(QMainWindow):
             != "",
             skip_hardware_validation=True,
         )
-        self.session_widget = SessionParametersWidget(self.session_model)
+        self.session_widget = SessionParametersWidget(self.session_model, self.trial_lock)
         for i, widget in enumerate(
             self.session_widget.schema_fields_widgets.values()
         ):
@@ -269,6 +273,7 @@ class Window(QMainWindow):
         self.task_widget = BehaviorParametersWidget(
             self.task_logic.task_parameters,
             reward_families=self.RewardFamilies,
+            trial_lock=self.trial_lock
         )
         self.task_widget.taskUpdated.connect(self.update_session_task)
         self.update_session_task("coupled")  # initialize to coupled
@@ -299,7 +304,8 @@ class Window(QMainWindow):
             )
         )
         self.operation_control_widget = OperationControlWidget(
-            self.operation_control_model
+            self.operation_control_model,
+            trial_lock=self.trial_lock
         )
 
         # create layout for task and operation widget
@@ -312,7 +318,7 @@ class Window(QMainWindow):
 
         # add fip schema widget
         self.fip_model = FiberPhotometry(enabled=False)
-        self.fip_widget = FIBParametersWidget(self.fip_model)
+        self.fip_widget = FIBParametersWidget(self.fip_model, trial_lock=self.trial_lock)
         for i, widget in enumerate(
             list(self.fip_widget.schema_fields_widgets.values())
         ):
@@ -381,9 +387,6 @@ class Window(QMainWindow):
         self.load_mouse_thread = (
             QThreadPool()
         )  # threadpool for loading in mouse
-
-        # initialize thread lock
-        self.data_lock = Lock()
 
         # intialize behavior baseline time flag
         self.behavior_baseline_period = Event()
@@ -3297,7 +3300,7 @@ class Window(QMainWindow):
                 session_control=SessionControl(),
             )
             self.Opto_dialog = OptogeneticsDialog(
-                MainWindow=self, opto_model=self.opto_model
+                MainWindow=self, opto_model=self.opto_model, trial_lock=self.trial_lock
             )
             self.OpenOptogenetics = 1
         if self.action_Optogenetics.isChecked() == True:
@@ -5460,19 +5463,20 @@ class Window(QMainWindow):
                 self.ANewTrial = 0
                 # generate and initiate a trial
                 try:
-                    GeneratedTrials._GenerateATrial()
-                    GeneratedTrials.B_CurrentTrialN += 1
-                    print(
-                        "Current trial: "
-                        + str(GeneratedTrials.B_CurrentTrialN + 1)
-                    )
-                    logging.info(
-                        "Current trial: "
-                        + str(GeneratedTrials.B_CurrentTrialN + 1)
-                    )
-                    GeneratedTrials._InitiateATrial(
-                        self.Channel, self.Channel4
-                    )
+                    with self.trial_lock:
+                        GeneratedTrials._GenerateATrial()
+                        GeneratedTrials.B_CurrentTrialN += 1
+                        print(
+                            "Current trial: "
+                            + str(GeneratedTrials.B_CurrentTrialN + 1)
+                        )
+                        logging.info(
+                            "Current trial: "
+                            + str(GeneratedTrials.B_CurrentTrialN + 1)
+                        )
+                        GeneratedTrials._InitiateATrial(
+                            self.Channel, self.Channel4
+                        )
                 except Exception as e:
                     if "ConnectionAbortedError" in str(e):
                         logging.info("lost bonsai connection: InitiateATrial")
@@ -5501,18 +5505,18 @@ class Window(QMainWindow):
 
                         break
                     else:
-                        # reply = QMessageBox.critical(
-                        #     self,
-                        #     "Box {}, Error".format(self.box_letter),
-                        #     "Encountered the following error: {}".format(e),
-                        #     QMessageBox.Ok,
-                        # )
-                        # logging.error("Caught this error: {}".format(e))
-                        # self.ANewTrial = 1
-                        # self.Start.setChecked(False)
-                        # self.Start.setStyleSheet("background-color : none")
-                        # break
-                        raise(e)
+                        reply = QMessageBox.critical(
+                            self,
+                            "Box {}, Error".format(self.box_letter),
+                            "Encountered the following error: {}".format(e),
+                            QMessageBox.Ok,
+                        )
+                        logging.error("Caught this error: {}".format(e))
+                        self.ANewTrial = 1
+                        self.Start.setChecked(False)
+                        self.Start.setStyleSheet("background-color : none")
+                        break
+
                 # receive licks and update figures
                 if self.actionDrawing_after_stopping.isChecked() == False:
                     self.PlotM._Update(

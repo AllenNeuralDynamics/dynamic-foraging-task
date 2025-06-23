@@ -224,7 +224,7 @@ class GenerateTrials:
         )
 
     def _GenerateATrial(self):
-        logging.info("IN GENERATE TRIAL")
+
         self.finish_select_par = 0
         if self.win.UpdateParameters == 1:
             # get all of the training parameters of the current trial
@@ -2704,7 +2704,7 @@ class GenerateTrials:
                 Channel1.start(1)
                 self.CurrentStartType = 1
                 self.B_StartType.append(self.CurrentStartType)
-
+        
     def _CheckSimulationSession(self):
         """To check if this is a simulation session"""
         if (

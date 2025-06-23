@@ -2,17 +2,17 @@ from aind_behavior_dynamic_foraging.DataSchemas.operation_control import (
     OperationalControl,
 )
 
+from threading import Lock
 from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase
-
 
 class OperationControlWidget(SchemaWidgetBase):
     """
     Widget to expose fields from operation_control models
     """
 
-    def __init__(self, schema: OperationalControl):
+    def __init__(self, schema: OperationalControl, trial_lock: Lock):
 
-        super().__init__(schema)
+        super().__init__(schema, trial_lock)
 
         # hide unnecessary widgets
         self.schema_fields_widgets["stage_specs"].hide()
