@@ -1054,7 +1054,6 @@ class generate_metadata:
             },
             "task_parameters": self._get_task_parameters(),
             "streamlit": self._get_streamlit_parameters(),
-            "training_state": self._get_training_state_parameters(),
         }
 
         return output_parameters
@@ -1448,6 +1447,15 @@ class generate_metadata:
                 name="dynamic-foraging-task",
                 version=f"behavior branch:{self.Obj['current_branch']}   commit ID:{self.Obj['commit_ID']}    version:{self.Obj['version']}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}",
                 url=self.Obj["repo_url"],
+            )
+        )
+
+        # add training state software
+        self.behavior_software.append(
+            Software(
+                name="training_state",
+                version=f"behavior branch:{self.Obj['current_branch']}   commit ID:{self.Obj['commit_ID']}    version:{self.Obj['version']}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}",
+                parameters={self._get_training_state_parameters()},
             )
         )
 
