@@ -4753,6 +4753,11 @@ class Window(QMainWindow):
                                 elapsed_time
                             )
                         )
+    def animal_response_thread_complete(self):
+        """Function called after animal response thread has completed.
+        Sets ANewTrial to 1 to iterate through trial loop"""
+
+        self.ANewTrial = 1
 
     def _thread_complete2(self):
         """complete of receive licks"""
@@ -4761,10 +4766,6 @@ class Window(QMainWindow):
     def _thread_complete3(self):
         """complete of update figures"""
         self.ToUpdateFigure = 1
-
-    def _thread_complete4(self):
-        """complete of generating a trial"""
-        self.ToGenerateATrial = 1
 
     def _thread_complete6(self):
         """complete of save data"""
@@ -5139,7 +5140,6 @@ class Window(QMainWindow):
             # generate the first trial outside the loop, only for new session
             self.ToReceiveLicks = 1
             self.ToUpdateFigure = 1
-            self.ToGenerateATrial = 1
             self.ToInitializeVisual = 1
             # delete licks from the previous session
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
@@ -5182,7 +5182,7 @@ class Window(QMainWindow):
                 self.Channel3,
                 self.data_lock,
             )
-            worker1.signals.finished.connect(lambda: setattr(self, "ANewTrial", 1))
+            worker1.signals.finished.connect(self.animal_response_thread_complete)
             workerLick = Worker(
                 GeneratedTrials._get_irregular_timestamp, self.Channel2
             )
@@ -5193,10 +5193,6 @@ class Window(QMainWindow):
                 Channel=self.Channel2,
             )
             workerPlot.signals.finished.connect(self._thread_complete3)
-            # workerGenerateAtrial = Worker(GeneratedTrials._GenerateATrial)
-            # workerGenerateAtrial.signals.finished.connect(
-            #     self._thread_complete4
-            # )
             workerStartTrialLoop = Worker(
                 self._StartTrialLoop,
                 GeneratedTrials,
@@ -5208,7 +5204,6 @@ class Window(QMainWindow):
             self.worker1 = worker1
             self.workerLick = workerLick
             self.workerPlot = workerPlot
-            #self.workerGenerateAtrial = workerGenerateAtrial
             self.workerStartTrialLoop = workerStartTrialLoop
             self.worker_save = worker_save
             self.data_lock = Lock()
@@ -5217,7 +5212,6 @@ class Window(QMainWindow):
             worker1 = self.worker1
             workerLick = self.workerLick
             workerPlot = self.workerPlot
-            #workerGenerateAtrial = self.workerGenerateAtrial
             workerStartTrialLoop = self.workerStartTrialLoop
             worker_save = self.worker_save
 
@@ -5592,6 +5586,7 @@ class Window(QMainWindow):
                     # get the response of the animal using a different thread
                     self.threadpool.start(worker1)
 
+                # Save data in a separate thread
                 if (
                     GeneratedTrials.B_CurrentTrialN > 0
                     and self.previous_backup_completed == 1
