@@ -1076,17 +1076,13 @@ class Window(QMainWindow):
             self.session_model.notes = sess.notes
 
             # enable or disable widget based on if session is on curriculum
-            self.task_widget.setEnabled(
-                not slims_session.is_curriculum_suggestion
-            )
+            on_curr = slims_session.is_curriculum_suggestion
+            self.task_widget.setEnabled(not on_curr)
 
             # set state of on_curriculum check
-            self.on_curriculum.setChecked(
-                slims_session.is_curriculum_suggestion
-            )
-            self.on_curriculum.setEnabled(
-                slims_session.is_curriculum_suggestion
-            )
+            self.on_curriculum.setChecked(on_curr)
+            self.on_curriculum.setEnabled(on_curr)
+
             self.update_stage_positions_from_operational_control(oc)
 
             # update operational control model with latest stage coords
@@ -5012,11 +5008,7 @@ class Window(QMainWindow):
             # update slims with latest stage offset value for loaded mouse
             self.update_loaded_mouse_offset()
 
-            # disable task model widgets
-            self.task_widget.setEnabled(False)
-            self.session_widget.setEnabled(False)
-            self.Opto_dialog.opto_widget.setEnabled(False)
-            self.fip_widget.setEnabled(False)
+            # disableon curriculum widgets
             self.on_curriculum.setEnabled(False)
 
             # set flag to perform habituation period
@@ -5045,23 +5037,7 @@ class Window(QMainWindow):
             # save models
             self.save_task_models()
 
-            # enable task model widgets
-            self.task_widget.setEnabled(
-                not self.on_curriculum.isVisible()
-                or not self.on_curriculum.isChecked()
-            )
-            self.session_widget.setEnabled(
-                not self.on_curriculum.isVisible()
-                or not self.on_curriculum.isChecked()
-            )
-            self.Opto_dialog.opto_widget.setEnabled(
-                not self.on_curriculum.isVisible()
-                or not self.on_curriculum.isChecked()
-            )
-            self.fip_widget.setEnabled(
-                not self.on_curriculum.isVisible()
-                or not self.on_curriculum.isChecked()
-            )
+            # enable curriculum widget
             self.on_curriculum.setEnabled(True)
 
             # If the photometry timer is running, stop it
