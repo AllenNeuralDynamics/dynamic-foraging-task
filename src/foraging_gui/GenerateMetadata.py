@@ -1103,7 +1103,7 @@ class generate_metadata:
         return {
                  "curriculum_name": self.Obj["curriculum_name"][-1],
                  "stage_name": self.Obj["curriculum_stage"][-1],
-                 "status": "off_curriculum" if self.Obj["off_curriculum"][-1] else "on_curriculum",
+                 "status": "Off Curriculum" if self.Obj["off_curriculum"][-1] else "No Training Stage",
                  }
 
     def _get_reward_probability(self):
