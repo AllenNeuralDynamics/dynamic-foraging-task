@@ -7930,7 +7930,7 @@
               <Name>EnvironmentSensor</Name>
             </Expression>
             <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogHarpDemux.bonsai">
-              <LogName>LickometerEventsRight</LogName>
+              <LogName>EnvironmentSensorEvents</LogName>
             </Expression>
             <Expression xsi:type="GroupWorkflow">
               <Name>CameraRecording</Name>
@@ -9336,7 +9336,7 @@
         <Property Name="FileName" DisplayName="SettingsPath" />
       </Expression>
       <Expression xsi:type="io:CsvReader">
-        <io:FileName>C:\Users\svc_aind_ephys\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
+        <io:FileName>C:\Users\micah.woodard\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
         <io:ScanPattern>%s,%s</io:ScanPattern>
         <io:SkipRows>0</io:SkipRows>
       </Expression>
