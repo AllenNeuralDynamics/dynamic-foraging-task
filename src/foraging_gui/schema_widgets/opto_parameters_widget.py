@@ -15,7 +15,8 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
     SineProtocol,
 )
 from pydantic import BaseModel
-from PyQt5.QtWidgets import QCheckBox, QComboBox
+from PyQt5.QtWidgets import QCheckBox, QComboBox, QSizePolicy
+from threading import Lock
 
 from foraging_gui.schema_widgets.schema_widget_base import (
     SchemaWidgetBase,
@@ -29,8 +30,8 @@ class OptoParametersWidget(SchemaWidgetBase):
     Widget to expose task logic for behavior sessions
     """
 
-    def __init__(self, schema):
-        super().__init__(schema)
+    def __init__(self, schema, trial_lock: Lock):
+        super().__init__(schema, trial_lock)
 
         # delete widgets unrelated to session
         self.schema_fields_widgets["name"].hide()
@@ -168,10 +169,15 @@ class OptoParametersWidget(SchemaWidgetBase):
         """
 
         widget_dict = getattr(self, name + "_widgets")
-        [
-            widget.show() if enabled else widget.hide()
-            for widget in widget_dict.values()
-        ]
+        for widget in widget_dict.values():
+            if enabled:
+                widget.show()
+                widget.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+            else:
+                widget.hide()
+                widget.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.adjustSize()
+
         name_lst = name.split(".")
 
         possible_lasers = [
@@ -333,18 +339,19 @@ class OptoParametersWidget(SchemaWidgetBase):
     def apply_schema(self, schema: Optogenetics):
         """Overwrite to handle laser color and location"""
 
-        self.schema = schema
-        for name in self.schema.model_dump().keys():
-            if name == "laser_colors":
-                for color_i in range(6):
-                    self.update_field_widget(f"{name}.{color_i}")
-                    if self.path_get(self.schema, [name, color_i]) is not None:
-                        for loc_i in range(2):
-                            self.update_field_widget(
-                                f"{name}.{color_i}.location.{loc_i}"
-                            )
-            else:
-                self.update_field_widget(name)
+        with self.trial_lock:
+            self.schema = schema
+            for name in self.schema.model_dump().keys():
+                if name == "laser_colors":
+                    for color_i in range(6):
+                        self.update_field_widget(f"{name}.{color_i}")
+                        if self.path_get(self.schema, [name, color_i]) is not None:
+                            for loc_i in range(2):
+                                self.update_field_widget(
+                                    f"{name}.{color_i}.location.{loc_i}"
+                                )
+                else:
+                    self.update_field_widget(name)
 
     @staticmethod
     def path_set(iterable: Optogenetics, path: list[str], value) -> None:
@@ -519,6 +526,7 @@ if __name__ == "__main__":
 
     task_model.laser_colors = []
     task_widget.apply_schema(task_model)
+
     task_model.laser_colors.append(
         LaserColorFive(
             color="Blue",

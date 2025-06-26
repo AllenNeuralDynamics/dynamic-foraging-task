@@ -7,6 +7,7 @@ import time
 import webbrowser
 from datetime import datetime
 from typing import Literal
+from threading import Lock
 
 import numpy as np
 import pandas as pd
@@ -136,12 +137,12 @@ class TimeDistributionDialog(QDialog):
 class OptogeneticsDialog(QDialog):
     """Optogenetics dialog"""
 
-    def __init__(self, MainWindow, opto_model: Optogenetics, parent=None):
+    def __init__(self, MainWindow, opto_model: Optogenetics, trial_lock: Lock,parent=None):
         super().__init__(parent)
         uic.loadUi("Optogenetics.ui", self)
 
         self.opto_model = opto_model
-        self.opto_widget = OptoParametersWidget(self.opto_model)
+        self.opto_widget = OptoParametersWidget(self.opto_model, trial_lock)
         # initialize model as no optogenetics
         self.opto_model.laser_colors = []
         self.opto_model.session_control = None
@@ -1411,8 +1412,6 @@ class CameraDialog(QDialog):
             self.StartPreview.setEnabled(False)
             # disable the Load button
             self.MainWindow.Load.setEnabled(False)
-            # disable the Animal ID
-            self.MainWindow.ID.setEnabled(False)
             # set the camera start type
             self.MainWindow.Channel.CameraStartType(int(1))
             # set the camera frequency.

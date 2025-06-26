@@ -160,17 +160,21 @@ class GenerateTrials:
         )  # 1: normal trials with delay; 3: optogenetics trials without delay
         self.GeneFinish = 1
         self.GetResponseFinish = 1
+
+        # create dict with mapped parameter keys paired with empty list for Obj dict
+        task_parameter_lists = {k: [] for k in task_parameters_to_tp_conversion(self.task_logic.task_parameters).keys()}
+        session_lists = {k: [] for k in session_to_tp_conversion(self.session_model)}
+        fip_lists = {k: [] for k in fip_to_tp_conversion(self.fip_model)}
+        opto_lists = {k: [] for k in opto_to_tp_conversion(self.opto_model)}
+        oc_lists = {k: [] for k in operational_control_to_tp_conversion(self.operation_control_model)}
+
         self.Obj = {
             # initialize TP_ keys through mapping functions
-            **task_parameters_to_tp_conversion(
-                self.task_logic.task_parameters
-            ),
-            **session_to_tp_conversion(self.session_model),
-            **fip_to_tp_conversion(self.fip_model),
-            **opto_to_tp_conversion(self.opto_model),
-            **operational_control_to_tp_conversion(
-                self.operation_control_model
-            ),
+            **task_parameter_lists,
+            **session_lists,
+            **fip_lists,
+            **opto_lists,
+            **oc_lists,
             "TP_LeftValue": [],  # left valve open times
             "TP_RightValue": [],
             "multipliers": [],
@@ -218,11 +222,12 @@ class GenerateTrials:
         )
 
     def _GenerateATrial(self):
+
         self.finish_select_par = 0
         if self.win.UpdateParameters == 1:
             # get all of the training parameters of the current trial
             self._GetTrainingParameters(self.win)
-        # save all of the parameters in each trial
+        # save all of the parameters used in trial
         self._SaveParameters()
         # get licks information. Starting from the second trial, and counting licks of the last completed trial
         if self.B_CurrentTrialN >= 1:
@@ -1079,6 +1084,12 @@ class GenerateTrials:
                 self.B_for_eff_optimal = np.nan
                 self.B_for_eff_optimal_random_seed = np.nan
             """Some complex calculations can be separated from _GenerateATrial using different threads"""
+
+            # calculate ignore rate
+            auto_rewards = np.array([any(x) for x in np.column_stack(self.B_AutoWaterTrial.astype(bool))])
+            non_auto_reward = self.B_AnimalResponseHistory[np.where(~auto_rewards.astype(bool))]
+            if len(non_auto_reward) > 0:
+                self.B_ignore_rate = len(np.where(non_auto_reward == 2)[0])/len(non_auto_reward)
 
     def _process_values(
         self, values, auto_water_trial, multiplier_values, rewarded_history
@@ -3204,11 +3215,7 @@ class GenerateTrials:
             **oc_tp,
         }.items():
             if "TP_" == key[:3]:
-                self.Obj[key] = (
-                    [self.Obj[key], value]
-                    if type(self.Obj[key]) is not list
-                    else self.Obj[key] + [value]
-                )
+                self.Obj[key].append(value)
 
         # loop through and save all TP_ attributes
         for attr_name in dir(self):

@@ -1051,6 +1051,7 @@ class generate_metadata:
                 "foraging_efficiency_with_actual_random_seed": _get_field(
                     self.Obj, "B_for_eff_optimal_random_seed"
                 ),
+                "ignore_rate": self.Obj.get("B_ignore_rate", None)
             },
             "task_parameters": self._get_task_parameters(),
             "streamlit": self._get_streamlit_parameters(),
