@@ -224,6 +224,7 @@ class GenerateTrials:
         )
 
     def _GenerateATrial(self):
+
         self.finish_select_par = 0
         if self.win.UpdateParameters == 1:
             # get all of the training parameters of the current trial

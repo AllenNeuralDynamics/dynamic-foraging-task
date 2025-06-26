@@ -3,16 +3,16 @@ from aind_behavior_dynamic_foraging.DataSchemas.fiber_photometry import (
 )
 
 from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase
-
+from threading import Lock
 
 class FIBParametersWidget(SchemaWidgetBase):
     """
     Widget to expose task logic for fiber photometry sessions
     """
 
-    def __init__(self, schema: FiberPhotometry):
+    def __init__(self, schema: FiberPhotometry, trial_lock: Lock):
 
-        super().__init__(schema)
+        super().__init__(schema, trial_lock)
         self.schema_fields_widgets["name"].hide()
         self.enabled_widget.toggled.connect(self.toggle_enabled)
         self.toggle_enabled()
