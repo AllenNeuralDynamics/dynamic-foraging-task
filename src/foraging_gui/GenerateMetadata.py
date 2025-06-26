@@ -1455,7 +1455,7 @@ class generate_metadata:
             Software(
                 name="training_state",
                 version=f"behavior branch:{self.Obj['current_branch']}   commit ID:{self.Obj['commit_ID']}    version:{self.Obj['version']}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}",
-                parameters={self._get_training_state_parameters()},
+                parameters=self._get_training_state_parameters(),
             )
         )
 
