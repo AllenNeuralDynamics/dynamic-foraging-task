@@ -878,9 +878,7 @@ class Window(QMainWindow):
         self.operation_control_model.stage_specs.y = current_positions.get(
             "y"
         ) or current_positions.get("y1")
-        self.operation_control_model.stage_specs.step_size = \
-            float(self.stage_widget.movement_page_view.lineEdit_step_size.text())
-
+        
 
     def update_stage_positions_from_operational_control(
         self, oc: OperationalControl = None
