@@ -156,6 +156,7 @@ class SchemaWidgetBase(QMainWindow):
         setattr(
             self, f"{name}_widget", box
         )  # add attribute for widget input for easy access
+        box.wheelEvent = lambda event: None     # disable scroll
 
         return box
 

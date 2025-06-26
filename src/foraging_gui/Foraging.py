@@ -459,10 +459,7 @@ class Window(QMainWindow):
             )
 
         # initialize mouse selector
-        slims_mice = self.slims_handler.get_added_mice()
-        self.mouse_selector_dialog = MouseSelectorDialog(
-            [mouse.barcode for mouse in slims_mice], self.box_letter
-        )
+        self.mouse_selector_dialog = MouseSelectorDialog(self.box_letter, self.current_box, self.default_saveFolder)
 
         # create label giff to indicate mouse is being loaded
         movie = QtGui.QMovie("resources/mouse_loading.gif")
@@ -825,7 +822,7 @@ class Window(QMainWindow):
 
         self.load_mouse_worker = Worker(
             fn=self.slims_handler.load_mouse_curriculum,
-            mouse_id=self.mouse_selector_dialog.combo.currentText(),
+            mouse_id=self.mouse_selector_dialog.last_selected_mouse,
         )
         self.load_mouse_worker.signals.result.connect(
             lambda args: self.load_curriculum(*args)

@@ -51,15 +51,21 @@ class MouseSelectorDialog(QDialog):
 
     acceptedMouseID = pyqtSignal(str)
 
-    def __init__(self, mice: list[str], box_letter: str, parent=None):
+    def __init__(self, box_letter: str,
+                 current_box: str,
+                 save_folder: str = "C:\\behavior_data\\", parent=None):
         """
         QDialog that allows users to type and select mouse id from slims
-        :param mice: list of mice found on slims
         :param box_letter: box letter
+        :param current_box: current box
+        :param save_folder: folder where data is saved
         """
 
         super().__init__(parent)
-        self.mice = [""] + mice
+
+        self.last_selected_mouse = None
+
+        self.mice, self.experimenters = self.get_local_mice_and_experimenters(current_box, save_folder)
         self.setWindowTitle("Box {}, Load Mouse".format(box_letter))
         self.setFixedSize(250, 125)
 
@@ -69,7 +75,7 @@ class MouseSelectorDialog(QDialog):
         self.buttonBox.rejected.connect(self.reject)
 
         self.combo = QtWidgets.QComboBox()
-        self.combo.addItems(self.mice)
+        self.combo.addItems([""] + [m + " " + e for m, e in zip(self.mice, self.experimenters)])
         self.combo.setEditable(True)
         self.combo.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
         self.combo.completer().setCompletionMode(
@@ -92,6 +98,48 @@ class MouseSelectorDialog(QDialog):
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
 
+    def get_local_mice_and_experimenters(self, current_box, save_folder) -> (list[str], list[str]):
+        """
+        Returns a list of mice with data saved on this computer from past two weeks
+
+        :param save_folder: where local data is saved
+        :param current_box: current_box
+
+        :return: tuple containing the list of mice and list of experiments
+        locally saved from the past two weeks
+
+        """
+        filepath = os.path.join(save_folder, current_box)
+        now = datetime.now()
+        mouse_ids = os.listdir(filepath)    # folder names are mouse ids
+        mouse_ids.sort(
+            reverse=True,
+            key=lambda x: os.path.getmtime(os.path.join(filepath, x)),
+        )  # in order of date modified
+
+        two_week_mice = []
+        experimenters = []
+
+        for m_path in mouse_ids:
+
+            mod_date = datetime.fromtimestamp(os.path.getmtime(os.path.join(filepath, m_path)))
+            if (now - mod_date).days <= 14:
+
+                session_dir = os.path.join(save_folder, current_box, str(m_path))
+                sessions = os.listdir(session_dir)
+                sessions.sort(reverse=True)
+                for s in sessions:
+                    json_name = s.split("behavior_")[1]
+                    json_file = os.path.join(session_dir, s, "behavior", json_name + ".json")
+                    if os.path.isfile(json_file):
+                        with open(json_file, "r") as file:
+                            name = json.load(file).get("Experimenter", "")
+                        experimenters.append(name)
+                        two_week_mice.append(str(m_path))
+                        break
+
+        return two_week_mice, experimenters
+
     def check_mouse_selection(self):
         """
         Check if mouse selected is valid
@@ -101,17 +149,10 @@ class MouseSelectorDialog(QDialog):
         if text == "":
             return
 
+        # spit mouse and experimenter string
+        self.last_selected_mouse = text.split(" ")[0]
         self.accept()
-        self.acceptedMouseID.emit(text)
-
-    def add_mice(self, mice: list[str]):
-        """
-        Function to add mice to combobox
-        """
-
-        self.mice = [""] + mice
-        self.combo.clear()
-        self.combo.addItems(self.mice)
+        self.acceptedMouseID.emit(self.last_selected_mouse)
 
 
 class LickStaDialog(QDialog):
