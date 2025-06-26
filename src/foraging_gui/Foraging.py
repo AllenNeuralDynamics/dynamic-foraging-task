@@ -637,13 +637,13 @@ class Window(QMainWindow):
         at_origin = list(self._GetPositions().values())[1:3] == [0, 0]
         if tp.lick_spout_retraction and self.stage_widget is not None and not at_origin:
             logger.info(f"Retracting {lick_spout_retract} lick spout.")
-            motor = 1 if lick_spout_licked == "Left" else 2                             # TODO: is this the correct mapping
+            motor = 1 if lick_spout_licked == "Left" else 2
             curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor)    # TODO: Do I need to set rel_to_monument to True?
             self.stage_widget.stage_model.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=True)
 
             # configure timer to un-retract lick spout
             timer.timeout.disconnect()
-            timer.timeout.connect(lambda: self.un_retract_lick_spout(lick_spout_licked, curr_pos))
+            timer.timeout.connect(lambda: self.un_retract_lick_spout(lick_spout_retract.title(), curr_pos))
             timer.setInterval(self.operation_control_model.lick_spout_retraction_specs.wait_time*1000)
             timer.setSingleShot(True)
             timer.start()
@@ -660,18 +660,18 @@ class Window(QMainWindow):
             logger.debug("Cannot retract stage because " + "lickspouts at origin." if at_origin
                         else "retraction turned off.")
 
-    def un_retract_lick_spout(self, lick_spout_licked: Literal["Left", "Right"], pos: float = 0) -> None:
+    def un_retract_lick_spout(self, lick_spout_retracted: Literal["Left", "Right"], pos: float = 0) -> None:
         """
         Un-retract specified lick spout
 
-        :param lick_spout_licked: lick spout that was licked. Opposite licks pout will be un-retracted
+        :param lick_spout_retracted: lick spout that was retracted.
         :param pos: pos to move lick spout to. Default is 0
 
         """
         if self.stage_widget is not None:
-            logger.info("Un-retracting lick spout.")
+            logger.info(f"Un-retracting {lick_spout_retracted.lower()} lick spout.")
             speed = self.operation_control_model.lick_spout_retraction_specs.un_retract_speed.value
-            motor = 1 if lick_spout_licked == "Left" else 2
+            motor = 2 if lick_spout_retracted == "Left" else 1
             self.stage_widget.stage_model.update_speed(value=speed)
             self.stage_widget.stage_model.update_position(positions={motor:pos})
             self.stage_widget.stage_model.move_worker.finished.connect(self.set_stage_speed_to_normal,
