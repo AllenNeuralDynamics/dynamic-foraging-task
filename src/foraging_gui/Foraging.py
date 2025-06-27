@@ -634,11 +634,13 @@ class Window(QMainWindow):
         lick_spout_retract = "right" if lick_spout_licked == "Left" else "left"
         timer = getattr(self, f"{lick_spout_retract}_retract_timer")
         tp = self.task_logic.task_parameters
-        at_origin = list(self._GetPositions().values())[1:3] == [0, 0]
+        motor = 1 if lick_spout_licked == "Left" else 2
+        at_origin = list(self._GetPositions().values())[motor] == 0.0
         if tp.lick_spout_retraction and self.stage_widget is not None and not at_origin:
             logger.info(f"Retracting {lick_spout_retract} lick spout.")
             motor = 1 if lick_spout_licked == "Left" else 2
             curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor)    # TODO: Do I need to set rel_to_monument to True?
+            logger.info("CURR POS", curr_pos)
             self.stage_widget.stage_model.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=True)
 
             # configure timer to un-retract lick spout
@@ -660,7 +662,7 @@ class Window(QMainWindow):
             logger.debug("Cannot retract stage because " + "lickspouts at origin." if at_origin
                         else "retraction turned off.")
 
-    def un_retract_lick_spout(self, lick_spout_retracted: Literal["Left", "Right"], pos: float = 0) -> None:
+    def un_retract_lick_spout(self, lick_spout_retracted: Literal["Left", "Right"], pos: float) -> None:
         """
         Un-retract specified lick spout
 
@@ -669,7 +671,7 @@ class Window(QMainWindow):
 
         """
         if self.stage_widget is not None:
-            logger.info(f"Un-retracting {lick_spout_retracted.lower()} lick spout.")
+            logger.info(f"Un-retracting {lick_spout_retracted.lower()} lick spout. Moving pack to position {pos}.")
             speed = self.operation_control_model.lick_spout_retraction_specs.un_retract_speed.value
             motor = 2 if lick_spout_retracted == "Left" else 1
             self.stage_widget.stage_model.update_speed(value=speed)
