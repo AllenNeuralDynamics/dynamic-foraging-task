@@ -636,7 +636,6 @@ class Window(QMainWindow):
         tp = self.task_logic.task_parameters
         motor = 1 if lick_spout_licked == "Left" else 2
         at_origin = list(self._GetPositions().values())[motor] == 0.0
-        logger.info("In retraction", at_origin)
         if tp.lick_spout_retraction and self.stage_widget is not None and not at_origin:
             logger.info(f"Retracting {lick_spout_retract} lick spout.")
             motor = 1 if lick_spout_licked == "Left" else 2
