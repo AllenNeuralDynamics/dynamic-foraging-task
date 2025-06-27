@@ -162,11 +162,13 @@ class GenerateTrials:
         self.GetResponseFinish = 1
 
         # create dict with mapped parameter keys paired with empty list for Obj dict
-        task_parameter_lists = {k: [] for k in task_parameters_to_tp_conversion(self.task_logic.task_parameters).keys()}
-        session_lists = {k: [] for k in session_to_tp_conversion(self.session_model)}
-        fip_lists = {k: [] for k in fip_to_tp_conversion(self.fip_model)}
-        opto_lists = {k: [] for k in opto_to_tp_conversion(self.opto_model)}
-        oc_lists = {k: [] for k in operational_control_to_tp_conversion(self.operation_control_model)}
+        task_parameter_lists = {k: [] if "TP_" in k else v for k, v in
+                                task_parameters_to_tp_conversion(self.task_logic.task_parameters).items()}
+        session_lists = {k: [] if "TP_" in k else v for k, v in session_to_tp_conversion(self.session_model).items()}
+        fip_lists = {k: [] if "TP_" in k else v for k, v in fip_to_tp_conversion(self.fip_model).items()}
+        opto_lists = {k: [] if "TP_" in k else v for k, v in opto_to_tp_conversion(self.opto_model).items()}
+        oc_lists = {k: [] if "TP_" in k else v for k, v in
+                    operational_control_to_tp_conversion(self.operation_control_model).items()}
 
         self.Obj = {
             # initialize TP_ keys through mapping functions
