@@ -802,11 +802,7 @@ class Window(QMainWindow):
                 self.update_operational_control_stage_positions
             )
             view.lineEdit_step_size.textEdited.connect(
-                lambda v: setattr(
-                    self.operation_control_model.stage_specs,
-                    "step_size",
-                    float(v),
-                )
+                self.update_operational_control_stage_positions
             )
 
     def create_load_mouse_worker(self) -> None:
@@ -860,7 +856,7 @@ class Window(QMainWindow):
 
     def update_operational_control_stage_positions(self, *args) -> None:
         """
-        Update operational control model with the latest stage coordinates
+        Update operational control model with the latest stage coordinates and step size
 
         :params args: catchall for signal emit values
         """
@@ -878,6 +874,12 @@ class Window(QMainWindow):
         self.operation_control_model.stage_specs.y = current_positions.get(
             "y"
         ) or current_positions.get("y1")
+
+        if self.stage_widget:   # aind stage
+            step = float(self.stage_widget.movement_page_view.lineEdit_step_size.text())
+            self.operation_control_model.stage_specs.step_size = step
+
+
         
 
     def update_stage_positions_from_operational_control(
