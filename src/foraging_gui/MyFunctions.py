@@ -56,6 +56,10 @@ class GenerateTrials:
         self.fip_model = fip_model
         self.operation_control_model = operation_control_model
 
+        self.B_EnvironmentSensorTemperature = []
+        self.B_EnvironmentSensorHumidity = []
+        self.B_EnvironmentSensorPressure = []
+        self.B_EnvironmentSensorTimestamp = []
         self.B_LeftLickIntervalPercent = (
             None  # percentage of left lick intervals under 100ms
         )
@@ -3154,6 +3158,19 @@ class GenerateTrials:
                 self.B_AutoRightWaterStartTime = np.append(
                     self.B_AutoRightWaterStartTime, Rec[1][1][0]
                 )
+            elif Rec[0].address == "/EnvironmentSensorTemperature":
+                value = Rec[1][1][0] if type(Rec[1][1][0]) != float else round(Rec[1][1][0], 1)
+                self.B_EnvironmentSensorTemperature.append(value)
+
+            elif Rec[0].address == "/EnvironmentSensorHumidity":
+                value = Rec[1][1][0] if type(Rec[1][1][0]) != float else round(Rec[1][1][0], 1)
+                self.B_EnvironmentSensorHumidity.append(value)
+
+            elif Rec[0].address == "/EnvironmentSensorPressure":
+                self.B_EnvironmentSensorPressure.append(Rec[1][1][0])
+
+            elif Rec[0].address == "/EnvironmentSensorTimestamp":
+                self.B_EnvironmentSensorTimestamp.append(Rec[1][1][0])
 
     def _DeletePreviousLicks(self, Channel2):
         """Delete licks from the previous session"""
