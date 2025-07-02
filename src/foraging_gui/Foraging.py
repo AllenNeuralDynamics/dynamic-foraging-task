@@ -3232,7 +3232,7 @@ class Window(QMainWindow):
                         ),
                     ),
                     LaserColorTwo(
-                        color="Red",
+                        color="Blue",
                         pulse_condition="Right choice",
                         start=IntervalConditions(
                             interval_condition="Trial start", offset=0
@@ -3242,7 +3242,7 @@ class Window(QMainWindow):
                         ),
                     ),
                     LaserColorThree(
-                        color="Green",
+                        color="Blue",
                         pulse_condition="Right choice",
                         start=IntervalConditions(
                             interval_condition="Trial start", offset=0
@@ -3252,7 +3252,7 @@ class Window(QMainWindow):
                         ),
                     ),
                     LaserColorFour(
-                        color="Orange",
+                        color="Blue",
                         pulse_condition="Right choice",
                         start=IntervalConditions(
                             interval_condition="Trial start", offset=0
@@ -3262,7 +3262,7 @@ class Window(QMainWindow):
                         ),
                     ),
                     LaserColorFive(
-                        color="Orange",
+                        color="Blue",
                         pulse_condition="Right choice",
                         start=IntervalConditions(
                             interval_condition="Trial start", offset=0
@@ -3272,7 +3272,7 @@ class Window(QMainWindow):
                         ),
                     ),
                     LaserColorSix(
-                        color="Orange",
+                        color="Blue",
                         pulse_condition="Right choice",
                         start=IntervalConditions(
                             interval_condition="Trial start", offset=0

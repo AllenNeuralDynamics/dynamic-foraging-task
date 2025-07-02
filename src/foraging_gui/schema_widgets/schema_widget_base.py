@@ -167,6 +167,7 @@ class SchemaWidgetBase(QMainWindow):
         """Convenience function to build editable text boxes and add initial value and validator
         :param name: name to emit when text is edited is changed
         :param value: initial value to add to box"""
+
         value_type = type(value)
         if value_type in [int, float]:
             textbox = QEnterSpinBox() if value_type == int else QEnterDoubleSpinBox()
