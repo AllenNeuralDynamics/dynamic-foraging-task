@@ -35,6 +35,7 @@ class OptoParametersWidget(SchemaWidgetBase):
 
         # delete widgets unrelated to session
         self.schema_fields_widgets["name"].hide()
+        self.schema_fields_widgets["sample_frequency"].setEnabled(False)
 
         # add or remove laser colors
         for laser, widget in self.laser_colors_widgets.items():
