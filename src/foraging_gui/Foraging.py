@@ -1854,7 +1854,7 @@ class Window(QMainWindow):
         elif self.stage_widget is not None:  # aind stage
             # Get absolute position of motors in AIND stage
             positions = (
-                self.stage_widget.stage_model.get_current_positions_mm()
+                self.stage_widget.stage_model.get_current_positions_mm(rel_to_monument=True)
             )
             return {
                 "x": positions[0],
