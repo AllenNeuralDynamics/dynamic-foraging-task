@@ -607,7 +607,7 @@ if __name__ == "__main__":
         session_control=SessionControl(),
     )
     task_widget = OptoParametersWidget(task_model, Lock())
-    # task_widget.ValueChangedInside.connect(lambda name: print(task_model))
+    #task_widget.ValueChangedInside.connect(lambda name: print(task_model))
     task_widget.show()
 
     task_model.laser_colors = []
@@ -690,6 +690,6 @@ if __name__ == "__main__":
 
     task_widget.apply_schema(task_model)
 
-    task_widget.update_laser_power(task_model.laser_colors[0], task_model.laser_colors[0].location[0], [3, 4] )
-    print(task_model.laser_colors[0].location[0].power)
+    #task_widget.update_laser_power(task_model.laser_colors[0], task_model.laser_colors[0].location[0], [3, 4] )
+    #print(task_model.laser_colors[0].location[0].power)
     sys.exit(app.exec_())

@@ -497,7 +497,7 @@ class QEnterSpinBox(QSpinBox):
 
 
 class QEnterDoubleSpinBox(QDoubleSpinBox):
-    enterPressed = pyqtSignal(int)
+    enterPressed = pyqtSignal(float)
 
     def __init__(self, parent=None):
         super().__init__(parent)
