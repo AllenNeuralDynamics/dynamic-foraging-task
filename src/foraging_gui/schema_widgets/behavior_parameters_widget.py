@@ -245,9 +245,9 @@ if __name__ == "__main__":
     ]
 
     task_widget = BehaviorParametersWidget(
-        task_model.task_parameters, reward_families
+        task_model.task_parameters, Lock(), reward_families, "red"
     )
-    # task_widget.ValueChangedInside.connect(lambda name: print(task_model))
+    task_widget.ValueChangedInside.connect(lambda name: print(task_model))
     # task_widget.taskUpdated.connect(print)
     task_widget.show()
 

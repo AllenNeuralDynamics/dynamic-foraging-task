@@ -10,7 +10,7 @@ from threading import Lock
 import inflection
 from pydantic import BaseModel
 from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtGui import QKeyEvent
+from PyQt5.QtGui import QKeyEvent, QPalette, QColor
 from PyQt5.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -177,7 +177,7 @@ class SchemaWidgetBase(QMainWindow):
             textbox = QEnterSpinBox(self.unsaved_color) if value_type == int else QEnterDoubleSpinBox(self.unsaved_color)
             textbox.setRange(0, 1000000)
             textbox.setValue(value)
-            textbox.enterPressed.connect(
+            textbox.returnPressed.connect(
                 lambda v: self.textbox_edited(name, value_type(v))
             )
             textbox.setStyleSheet("color: black")
@@ -381,6 +381,27 @@ class SchemaWidgetBase(QMainWindow):
             )
         return iterable
 
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        super().keyPressEvent(event)
+        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+            for child in self.iterate_all_children(self):   # iterate through widgets and if text is unsaved, save
+                if hasattr(child, "palette") and \
+                        child.palette().color(QPalette.Text).name() == QColor(self.unsaved_color).name():
+                    if type(child) in [QEnterSpinBox, QEnterDoubleSpinBox]:
+                        child.returnPressed.emit(child.value())
+                    else:
+                        child.returnPressed.emit()
+    def iterate_all_children(self, widget: QWidget):
+        """
+            Recursively iterate through all children of widget
+        """
+        for child in widget.findChildren(QWidget):
+            if isinstance(child, (QEnterSpinBox, QEnterDoubleSpinBox, QLineEdit)):
+                yield child
+            yield from self.iterate_all_children(child)  # recurse into grandchildren
+
+
+
 
 # Convenience Functions
 
@@ -488,7 +509,7 @@ def add_border(
     return widget
 
 class QEnterSpinBox(QSpinBox):
-    enterPressed = pyqtSignal(int)
+    returnPressed = pyqtSignal(int)
 
     def __init__(self, unsaved_color: str, parent=None):
         super().__init__(parent)
@@ -497,11 +518,11 @@ class QEnterSpinBox(QSpinBox):
     def keyPressEvent(self, event: QKeyEvent) -> None:
         super().keyPressEvent(event)
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
-            self.enterPressed.emit(self.value())
+            self.returnPressed.emit(self.value())
 
 
 class QEnterDoubleSpinBox(QDoubleSpinBox):
-    enterPressed = pyqtSignal(float)
+    returnPressed = pyqtSignal(float)
 
     def __init__(self, unsaved_color, parent=None):
         super().__init__(parent)
@@ -510,7 +531,7 @@ class QEnterDoubleSpinBox(QDoubleSpinBox):
     def keyPressEvent(self, event: QKeyEvent) -> None:
         super().keyPressEvent(event)
         if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
-            self.enterPressed.emit(self.value())
+            self.returnPressed.emit(self.value())
 
 
 if __name__ == "__main__":
