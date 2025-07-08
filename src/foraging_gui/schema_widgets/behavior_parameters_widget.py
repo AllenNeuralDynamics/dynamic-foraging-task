@@ -26,10 +26,13 @@ class BehaviorParametersWidget(SchemaWidgetBase):
     volumeChanged = pyqtSignal(str)
 
     def __init__(
-        self, schema: AindDynamicForagingTaskParameters, trial_lock: Lock, reward_families: list
+        self, schema: AindDynamicForagingTaskParameters,
+            trial_lock: Lock,
+            reward_families: list,
+            unsaved_color: str = "purple"
     ):
 
-        super().__init__(schema, trial_lock)
+        super().__init__(schema, trial_lock, unsaved_color)
 
         self.reward_families = reward_families
 

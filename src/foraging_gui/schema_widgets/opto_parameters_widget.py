@@ -35,8 +35,8 @@ class OptoParametersWidget(SchemaWidgetBase):
     protocolChanged = pyqtSignal(dict)  # emit when protocol is changed and emit serialized condition
     laserColorChanged = pyqtSignal(dict)  # emit when laser color is changed and emit serialized condition
 
-    def __init__(self, schema, trial_lock: Lock):
-        super().__init__(schema, trial_lock)
+    def __init__(self, schema, trial_lock: Lock, unsaved_color: str = "purple"):
+        super().__init__(schema, trial_lock, unsaved_color)
 
         # delete widgets unrelated to session
         self.schema_fields_widgets["name"].hide()

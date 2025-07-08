@@ -32,16 +32,20 @@ class SchemaWidgetBase(QMainWindow):
     ValueChangedOutside = pyqtSignal((str,))
     ValueChangedInside = pyqtSignal((str,))
 
-    def __init__(self, schema: BaseModel, trial_lock: Lock):
+    def __init__(self, schema: BaseModel,
+                 trial_lock: Lock,
+                 unsaved_color: str):
 
         """
         Class to dynamically make widgets based on schema and update schema with user input
         :param schema: schema object to base widget on and update.
         :param trial_lock: lock to use when updating schema
+        :param unsaved_color: string specifying the color of unsaved data
         """
 
         self.log = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self.trial_lock = trial_lock
+        self.unsaved_color = unsaved_color
 
         super().__init__()
         self.schema = schema
@@ -170,7 +174,7 @@ class SchemaWidgetBase(QMainWindow):
 
         value_type = type(value)
         if value_type in [int, float]:
-            textbox = QEnterSpinBox() if value_type == int else QEnterDoubleSpinBox()
+            textbox = QEnterSpinBox(self.unsaved_color) if value_type == int else QEnterDoubleSpinBox(self.unsaved_color)
             textbox.setRange(0, 1000000)
             textbox.setValue(value)
             textbox.enterPressed.connect(
@@ -179,7 +183,7 @@ class SchemaWidgetBase(QMainWindow):
             textbox.setStyleSheet("color: black")
         else:
             textbox = QLineEdit(str(value))
-            textbox.textChanged.connect(lambda text, widget=textbox: widget.setStyleSheet("color: purple"))
+            textbox.textChanged.connect(lambda text, widget=textbox: widget.setStyleSheet(f"color: {self.unsaved_color}"))
             textbox.returnPressed.connect(lambda: self.textbox_edited(name))
         return textbox
 
@@ -486,9 +490,9 @@ def add_border(
 class QEnterSpinBox(QSpinBox):
     enterPressed = pyqtSignal(int)
 
-    def __init__(self, parent=None):
+    def __init__(self, unsaved_color: str, parent=None):
         super().__init__(parent)
-        self.valueChanged.connect(lambda v: self.setStyleSheet("color: purple"))
+        self.valueChanged.connect(lambda v: self.setStyleSheet(f"color: {unsaved_color}"))
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         super().keyPressEvent(event)
@@ -499,9 +503,9 @@ class QEnterSpinBox(QSpinBox):
 class QEnterDoubleSpinBox(QDoubleSpinBox):
     enterPressed = pyqtSignal(float)
 
-    def __init__(self, parent=None):
+    def __init__(self, unsaved_color, parent=None):
         super().__init__(parent)
-        self.valueChanged.connect(lambda v: self.setStyleSheet("color: purple"))
+        self.valueChanged.connect(lambda v: self.setStyleSheet(f"color: {unsaved_color}"))
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         super().keyPressEvent(event)

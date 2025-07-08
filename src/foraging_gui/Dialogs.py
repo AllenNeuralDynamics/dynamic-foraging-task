@@ -187,7 +187,7 @@ class OptogeneticsDialog(QDialog):
         self.MainWindow = MainWindow
 
         self.opto_model = opto_model
-        self.opto_widget = OptoParametersWidget(self.opto_model, trial_lock)
+        self.opto_widget = OptoParametersWidget(self.opto_model, trial_lock, self.MainWindow.default_text_color)
         if not hasattr(self.MainWindow, "LaserCalibrationResults"):  # disable opto widget if no calibration data found
             self.opto_widget.setEnabled(False)
         else:

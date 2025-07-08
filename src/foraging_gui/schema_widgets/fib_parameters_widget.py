@@ -10,9 +10,9 @@ class FIBParametersWidget(SchemaWidgetBase):
     Widget to expose task logic for fiber photometry sessions
     """
 
-    def __init__(self, schema: FiberPhotometry, trial_lock: Lock):
+    def __init__(self, schema: FiberPhotometry, trial_lock: Lock, unsaved_color: str = "purple"):
 
-        super().__init__(schema, trial_lock)
+        super().__init__(schema, trial_lock, unsaved_color)
         self.schema_fields_widgets["name"].hide()
         self.enabled_widget.toggled.connect(self.toggle_enabled)
         self.toggle_enabled()

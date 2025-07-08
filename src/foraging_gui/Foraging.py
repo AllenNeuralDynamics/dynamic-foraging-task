@@ -242,7 +242,7 @@ class Window(QMainWindow):
             != "",
             skip_hardware_validation=True,
         )
-        self.session_widget = SessionParametersWidget(self.session_model, self.trial_lock)
+        self.session_widget = SessionParametersWidget(self.session_model, self.trial_lock, self.default_text_color)
         for i, widget in enumerate(
             self.session_widget.schema_fields_widgets.values()
         ):
@@ -273,7 +273,8 @@ class Window(QMainWindow):
         self.task_widget = BehaviorParametersWidget(
             self.task_logic.task_parameters,
             reward_families=self.RewardFamilies,
-            trial_lock=self.trial_lock
+            trial_lock=self.trial_lock,
+            unsaved_color=self.default_text_color
         )
         self.task_widget.taskUpdated.connect(self.update_session_task)
         self.update_session_task("coupled")  # initialize to coupled
@@ -305,7 +306,8 @@ class Window(QMainWindow):
         )
         self.operation_control_widget = OperationControlWidget(
             self.operation_control_model,
-            trial_lock=self.trial_lock
+            trial_lock=self.trial_lock,
+            unsaved_color=self.default_text_color
         )
 
         # create layout for task and operation widget
@@ -318,7 +320,9 @@ class Window(QMainWindow):
 
         # add fip schema widget
         self.fip_model = FiberPhotometry(enabled=False)
-        self.fip_widget = FIBParametersWidget(self.fip_model, trial_lock=self.trial_lock)
+        self.fip_widget = FIBParametersWidget(self.fip_model,
+                                              trial_lock=self.trial_lock,
+                                              unsaved_color=self.default_text_color)
         for i, widget in enumerate(
             list(self.fip_widget.schema_fields_widgets.values())
         ):

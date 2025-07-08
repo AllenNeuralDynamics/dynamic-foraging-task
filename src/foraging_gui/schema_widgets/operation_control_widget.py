@@ -10,9 +10,9 @@ class OperationControlWidget(SchemaWidgetBase):
     Widget to expose fields from operation_control models
     """
 
-    def __init__(self, schema: OperationalControl, trial_lock: Lock):
+    def __init__(self, schema: OperationalControl, trial_lock: Lock, unsaved_color: str = "purple"):
 
-        super().__init__(schema, trial_lock)
+        super().__init__(schema, trial_lock, unsaved_color)
 
         # hide unnecessary widgets
         self.schema_fields_widgets["stage_specs"].hide()
