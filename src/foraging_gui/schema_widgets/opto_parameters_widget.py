@@ -87,6 +87,14 @@ class OptoParametersWidget(SchemaWidgetBase):
                     check_box,
                 )
 
+                # if power is updated, update amplitude
+                amp_widget = getattr(self, f"laser_colors.{laser}.location.{location}.amplitude_widget")
+                amp_widget.setEnabled(False)
+
+                power_widget = getattr(self, f"laser_colors.{laser}.location.{location}.power_widget")
+                power_widget.currentIndexChanged.connect(lambda i, amp=amp_widget: amp.setCurrentIndex(i))
+
+
             # add/remove start and end
             for interval in ["start", "end"]:
                 check_box = QCheckBox(interval.title())
@@ -288,13 +296,17 @@ class OptoParametersWidget(SchemaWidgetBase):
         getattr(self, f"{name}_widgets")["name"].hide()
         self.ValueChangedInside.emit(name)
 
-    def update_laser_power(self, condition: LaserColors, location: "LocationOne" or "LocationTwo", powers: list[float]):
+    def update_laser_power(self, condition: LaserColors,
+                           location: "LocationOne" or "LocationTwo",
+                           powers: list[float],
+                           amplitudes: list[float]):
         """
             Update power selection for location combo boxes
 
             :param condition: condition location is associated with
             :param location: location powers to update
             :param powers: list of powers to update
+            :param amplitudes: list of amplitudes to update
 
         """
         # map condition to schema
@@ -312,12 +324,19 @@ class OptoParametersWidget(SchemaWidgetBase):
         possible_locations = ["LocationOne", "LocationTwo"]
         location_index = possible_locations.index(location)
 
-        # find widget
+        # find power widget
         widget = getattr(self, f"laser_colors.{condition_index}.location.{location_index}.power_widget")
         widget.blockSignals(True)
         widget.clear()
         widget.blockSignals(False)
         widget.addItems([str(p) for p in powers])
+
+        # find amplitude widget
+        widget = getattr(self, f"laser_colors.{condition_index}.location.{location_index}.amplitude_widget")
+        widget.blockSignals(True)
+        widget.clear()
+        widget.blockSignals(False)
+        widget.addItems([str(a) for a in amplitudes])
 
     def update_laser_protocol(self, condition: LaserColors, location: LocationOne or LocationTwo, protocols: list[str]):
         """

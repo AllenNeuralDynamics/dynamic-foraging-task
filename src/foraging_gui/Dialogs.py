@@ -288,18 +288,18 @@ class OptogeneticsDialog(QDialog):
 
         recent_laser_calibration = {} if latest_cal == "NA" else self.MainWindow.LaserCalibrationResults[latest_cal]
         for location in ["LocationOne", "LocationTwo"]:
-            laser_powers = []
             laser_tag = "Laser_1" if location == "LocationOne" else "Laser_2"
             if protocol.name == "Sine":
                 freq_key = str(protocol.frequency)
-                for power in recent_laser_calibration[color][protocol.name][freq_key][laser_tag]["LaserPowerVoltage"]:
-                    laser_powers.append(power[0])
-            if protocol.name in ["Constant", "Pulse"]:
-                for power in recent_laser_calibration[color][protocol.name][laser_tag]["LaserPowerVoltage"]:
-                    laser_powers.append(power[0])
+                pairs = recent_laser_calibration[color][protocol.name][freq_key][laser_tag]["LaserPowerVoltage"]
+            else:
+                pairs = recent_laser_calibration[color][protocol.name][laser_tag]["LaserPowerVoltage"]
+            
+            sorted_pairs = pairs.sort(key=lambda x: [1])   # sort based on power
 
-            laser_powers = sorted(laser_powers)
-            self.opto_widget.update_laser_power(condition_model, location, laser_powers)
+            laser_powers = sorted_pairs[1][:]
+            daq_amps = sorted_pairs[0][:]
+            self.opto_widget.update_laser_power(condition_model, location, laser_powers, daq_amps)
 
 
 class WaterCalibrationDialog(QDialog):

@@ -2509,15 +2509,35 @@ class GenerateTrials:
         The voltage amplitude depends on Protocol, Laser Power, Laser color, and the stimulation locations<>
         """
         self.CurrentLaserAmplitude = [0, 0]
-        for location in self.selected_condition.location:
-            index = 0 if location.name == "LocationOne" else 1
-            self.CurrentLaserAmplitude[index] = location.power
-        if self.CurrentLaserAmplitude == [0, 0]:
+
+        if not self.selected_condition.location:    # no lasers defined
             logging.warning(
                 "No stimulation location defined!",
                 extra={"tags": [self.win.warning_log_tag]},
             )
+
+        for location in self.selected_condition.location:
+            index = 0 if location.name == "LocationOne" else 1
+            self.CurrentLaserAmplitude[index] = location.amplitude
+
         self.B_LaserAmplitude.append(self.CurrentLaserAmplitude)
+    def latest_calibration(self, color: str) -> dict:
+        """
+            Find the latest calibration for the selected laser
+
+            :param color: color of laser calibration data
+
+            :returns dictionary of the latest calibration data
+
+        """
+        # return none if no calibration file or data
+        if not getattr(self.win, "LaserCalibrationResults", {}):
+            return
+
+        dates = self.win.LaserCalibrationResults.keys()
+        sorted(dates, key=lambda x: datetime.strptime(x, '%Y-%m-%d'))   # sort keys (dates) chronologically
+
+        return self.win.LaserCalibrationResults[dates[-1]].get(color, None)     # return None if no color info
 
     def _SelectOptogeneticsCondition(self):
         """
