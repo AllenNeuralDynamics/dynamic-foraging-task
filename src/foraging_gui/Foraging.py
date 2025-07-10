@@ -50,13 +50,6 @@ from StageWidget.main import get_stage_widget
 
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
-from foraging_gui.Visualization import PlotV,PlotLickDistribution,PlotTimeDistribution
-from foraging_gui.Dialogs import OptogeneticsDialog,WaterCalibrationDialog,CameraDialog,MetadataDialog
-from foraging_gui.Dialogs import LaserCalibrationDialog,OpticalTaggingDialog,RandomRewardDialog
-from foraging_gui.Dialogs import LickStaDialog,TimeDistributionDialog
-from foraging_gui.Dialogs import AutoTrainDialog, MouseSelectorDialog
-from foraging_gui.MyFunctions import GenerateTrials, Worker,TimerWorker, NewScaleSerialY, EphysRecording
-from foraging_gui.stage import Stage
 from foraging_gui.bias_indicator import BiasIndicator
 from foraging_gui.Dialogs import (
     AutoTrainDialog,
@@ -68,6 +61,8 @@ from foraging_gui.Dialogs import (
     OptogeneticsDialog,
     TimeDistributionDialog,
     WaterCalibrationDialog,
+    OpticalTaggingDialog,
+    RandomRewardDialog
 )
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.MyFunctions import (
