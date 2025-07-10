@@ -644,7 +644,7 @@ class Window(QMainWindow):
             logger.info(f"Retracting {lick_spout_retract} lick spout.")
             motor = 1 if lick_spout_licked == "Left" else 2
             curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor)    # TODO: Do I need to set rel_to_monument to True?
-            self.stage_widget.stage_model.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=True)
+            self.stage_widget.stage_model.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=False)
             logger.info(f"Retracting {lick_spout_retract} lick spout to pos {pos} from current pos {curr_pos}.")
             # configure timer to un-retract lick spout
             timer.timeout.disconnect()
@@ -674,11 +674,11 @@ class Window(QMainWindow):
 
         """
         if self.stage_widget is not None:
-            logger.info(f"Un-retracting {lick_spout_retracted.lower()} lick spout. Moving pack to position {pos}.")
+            logger.info(f"Un-retracting {lick_spout_retracted.lower()} lick spout. Moving back to position {pos}.")
             speed = self.operation_control_model.lick_spout_retraction_specs.un_retract_speed.value
             motor = 2 if lick_spout_retracted == "Left" else 1
             self.stage_widget.stage_model.update_speed(value=speed)
-            self.stage_widget.stage_model.update_position(positions={motor:pos})
+            self.stage_widget.stage_model.update_position(positions={motor: pos})
             self.stage_widget.stage_model.move_worker.finished.connect(self.set_stage_speed_to_normal,
                                                                        type=Qt.UniqueConnection)
         else:
