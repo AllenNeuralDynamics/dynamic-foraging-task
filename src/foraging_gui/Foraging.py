@@ -631,14 +631,11 @@ class Window(QMainWindow):
         except TypeError:
             pass
 
-
-
         lick_spout_retract = "right" if lick_spout_licked == "Left" else "left"
         timer = getattr(self, f"{lick_spout_retract}_retract_timer")
         tp = self.task_logic.task_parameters
         motor = 1 if lick_spout_licked == "Left" else 2
         at_origin = list(self._GetPositions().values())[motor] == 0.0
-
 
         if tp.lick_spout_retraction and self.stage_widget is not None and not at_origin:
             logger.info(f"Retracting {lick_spout_retract} lick spout.")
@@ -646,6 +643,7 @@ class Window(QMainWindow):
             curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor)    # TODO: Do I need to set rel_to_monument to True?
             self.stage_widget.stage_model.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=False)
             logger.info(f"Retracting {lick_spout_retract} lick spout to pos {pos} from current pos {curr_pos}.")
+
             # configure timer to un-retract lick spout
             timer.timeout.disconnect()
             timer.timeout.connect(lambda: self.un_retract_lick_spout(lick_spout_retract.title(), curr_pos))
