@@ -631,7 +631,7 @@ class Window(QMainWindow):
         except TypeError:
             pass
 
-        logger.info(f"In fast retract")
+
 
         lick_spout_retract = "right" if lick_spout_licked == "Left" else "left"
         timer = getattr(self, f"{lick_spout_retract}_retract_timer")
@@ -639,16 +639,13 @@ class Window(QMainWindow):
         motor = 1 if lick_spout_licked == "Left" else 2
         at_origin = list(self._GetPositions().values())[motor] == 0.0
 
-        if at_origin:
-
-            logger.info(f"DID NOT RETRACT! Trying to Retracting {lick_spout_retract} lick spout with motor {motor} and at position {self._GetPositions()}")
 
         if tp.lick_spout_retraction and self.stage_widget is not None and not at_origin:
             logger.info(f"Retracting {lick_spout_retract} lick spout.")
             motor = 1 if lick_spout_licked == "Left" else 2
             curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor)    # TODO: Do I need to set rel_to_monument to True?
             self.stage_widget.stage_model.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=True)
-
+            logger.info(f"Retracting {lick_spout_retract} lick spout to pos {pos} from current pos {curr_pos}.")
             # configure timer to un-retract lick spout
             timer.timeout.disconnect()
             timer.timeout.connect(lambda: self.un_retract_lick_spout(lick_spout_retract.title(), curr_pos))
