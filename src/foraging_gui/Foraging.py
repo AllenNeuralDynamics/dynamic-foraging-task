@@ -17,7 +17,7 @@ from hashlib import md5
 from pathlib import Path
 
 import harp
-import logging_loki
+#import logging_loki
 import numpy as np
 import pandas as pd
 import requests
@@ -46,7 +46,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
 )
 from scipy.io import loadmat, savemat
-from StageWidget.main import get_stage_widget
+#from StageWidget.main import get_stage_widget
 
 import foraging_gui
 import foraging_gui.rigcontrol as rigcontrol
@@ -62,7 +62,8 @@ from foraging_gui.Dialogs import (
     TimeDistributionDialog,
     WaterCalibrationDialog,
     OpticalTaggingDialog,
-    RandomRewardDialog
+    RandomRewardDialog,
+    get_curriculum_string
 )
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.MyFunctions import (
@@ -4015,6 +4016,14 @@ class Window(QMainWindow):
         Obj["MetadataFolder"] = self.MetadataFolder
         Obj["SaveFile"] = self.SaveFile
 
+        # save the stage and curriculum version
+        if self.AutoTrain_dialog.auto_train_engaged:
+            Obj["stage_in_use"] = self.AutoTrain_dialog.stage_in_use
+            Obj["curriculum_in_use"] = get_curriculum_string(self.AutoTrain_dialog.curriculum_in_use)
+        else:
+            Obj["stage_in_use"] = "unknown training stage"
+            Obj["curriculum_in_use"] = "off curriculum"
+
         # save optical tagging parameters
         Obj['optical_tagging_par']=self.OpticalTagging_dialog.optical_tagging_par
 
@@ -4028,7 +4037,7 @@ class Window(QMainWindow):
             Obj["meta_data_dialog"] = self.Metadata_dialog.meta_data
             # generate the metadata file
             generated_metadata = generate_metadata(
-                session_model=self.behavior_session_model, Obj=Obj
+                Obj=Obj
             )
             session = generated_metadata._session()
 
