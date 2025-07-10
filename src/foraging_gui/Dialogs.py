@@ -295,10 +295,10 @@ class OptogeneticsDialog(QDialog):
             else:
                 pairs = recent_laser_calibration[color][protocol.name][laser_tag]["LaserPowerVoltage"]
             
-            sorted_pairs = pairs.sort(key=lambda x: [1])   # sort based on power
+            pairs.sort(key=lambda x: [1])   # sort based on power
 
-            laser_powers = sorted_pairs[1][:]
-            daq_amps = sorted_pairs[0][:]
+            laser_powers = pairs[1][:]
+            daq_amps = pairs[0][:]
             self.opto_widget.update_laser_power(condition_model, location, laser_powers, daq_amps)
 
 
