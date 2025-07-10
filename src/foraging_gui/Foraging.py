@@ -631,11 +631,18 @@ class Window(QMainWindow):
         except TypeError:
             pass
 
+        logger.info(f"In fast retract")
+
         lick_spout_retract = "right" if lick_spout_licked == "Left" else "left"
         timer = getattr(self, f"{lick_spout_retract}_retract_timer")
         tp = self.task_logic.task_parameters
         motor = 1 if lick_spout_licked == "Left" else 2
         at_origin = list(self._GetPositions().values())[motor] == 0.0
+
+        if at_origin:
+
+            logger.info(f"DID NOT RETRACT! Trying to Retracting {lick_spout_retract} lick spout with motor {motor} and at position {self._GetPositions()}")
+
         if tp.lick_spout_retraction and self.stage_widget is not None and not at_origin:
             logger.info(f"Retracting {lick_spout_retract} lick spout.")
             motor = 1 if lick_spout_licked == "Left" else 2
