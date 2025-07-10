@@ -19,3 +19,4 @@ notebooks
 .spyproject
 .venv/
 build/
+.vscode/
