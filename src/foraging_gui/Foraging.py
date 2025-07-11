@@ -209,6 +209,10 @@ class Window(QMainWindow):
         # Load User interface
         self._LoadUI()
 
+        # initialize thread locks
+        self.data_lock = Lock()
+        self.trial_lock = Lock()
+
         # create AINDBehaviorSession model and widget to be used and referenced for session info
         self.session_model = AindBehaviorSessionModel(
             experiment="Coupled Baiting",
@@ -230,7 +234,7 @@ class Window(QMainWindow):
             != "",
             skip_hardware_validation=True,
         )
-        self.session_widget = SessionParametersWidget(self.session_model)
+        self.session_widget = SessionParametersWidget(self.session_model, self.trial_lock, self.default_text_color)
         for i, widget in enumerate(
             self.session_widget.schema_fields_widgets.values()
         ):
@@ -261,6 +265,8 @@ class Window(QMainWindow):
         self.task_widget = BehaviorParametersWidget(
             self.task_logic.task_parameters,
             reward_families=self.RewardFamilies,
+            trial_lock=self.trial_lock,
+            unsaved_color=self.default_text_color
         )
         self.task_widget.taskUpdated.connect(self.update_session_task)
         self.update_session_task("coupled")  # initialize to coupled
@@ -291,7 +297,9 @@ class Window(QMainWindow):
             )
         )
         self.operation_control_widget = OperationControlWidget(
-            self.operation_control_model
+            self.operation_control_model,
+            trial_lock=self.trial_lock,
+            unsaved_color=self.default_text_color
         )
 
         # create layout for task and operation widget
@@ -304,7 +312,9 @@ class Window(QMainWindow):
 
         # add fip schema widget
         self.fip_model = FiberPhotometry(enabled=False)
-        self.fip_widget = FIBParametersWidget(self.fip_model)
+        self.fip_widget = FIBParametersWidget(self.fip_model,
+                                              trial_lock=self.trial_lock,
+                                              unsaved_color=self.default_text_color)
         for i, widget in enumerate(
             list(self.fip_widget.schema_fields_widgets.values())
         ):
@@ -379,9 +389,6 @@ class Window(QMainWindow):
             QThreadPool()
         )  # threadpool for loading in mouse
 
-        # initialize thread lock
-        self.data_lock = Lock()
-
         # intialize behavior baseline time flag
         self.behavior_baseline_period = Event()
         self.baseline_min_elapsed = 0
@@ -453,10 +460,7 @@ class Window(QMainWindow):
             )
 
         # initialize mouse selector
-        slims_mice = self.slims_handler.get_added_mice()
-        self.mouse_selector_dialog = MouseSelectorDialog(
-            [mouse.barcode for mouse in slims_mice], self.box_letter
-        )
+        self.mouse_selector_dialog = MouseSelectorDialog(self.box_letter, self.current_box, self.default_saveFolder)
 
         # create label giff to indicate mouse is being loaded
         movie = QtGui.QMovie("resources/mouse_loading.gif")
@@ -593,7 +597,7 @@ class Window(QMainWindow):
                 else "widget_2"
             )
             self._insert_stage_widget(widget_to_replace)
-
+            self.stage_widget.stage_model.initialize_stage()
         else:
             self._GetPositions()
 
@@ -885,11 +889,7 @@ class Window(QMainWindow):
                 self.update_operational_control_stage_positions
             )
             view.lineEdit_step_size.textEdited.connect(
-                lambda v: setattr(
-                    self.operation_control_model.stage_specs,
-                    "step_size",
-                    float(v),
-                )
+                self.update_operational_control_stage_positions
             )
 
     def create_load_mouse_worker(self) -> None:
@@ -905,7 +905,7 @@ class Window(QMainWindow):
 
         self.load_mouse_worker = Worker(
             fn=self.slims_handler.load_mouse_curriculum,
-            mouse_id=self.mouse_selector_dialog.combo.currentText(),
+            mouse_id=self.mouse_selector_dialog.last_selected_mouse,
         )
         self.load_mouse_worker.signals.result.connect(
             lambda args: self.load_curriculum(*args)
@@ -943,7 +943,7 @@ class Window(QMainWindow):
 
     def update_operational_control_stage_positions(self, *args) -> None:
         """
-        Update operational control model with the latest stage coordinates
+        Update operational control model with the latest stage coordinates and step size
 
         :params args: catchall for signal emit values
         """
@@ -961,6 +961,13 @@ class Window(QMainWindow):
         self.operation_control_model.stage_specs.y = current_positions.get(
             "y"
         ) or current_positions.get("y1")
+
+        if self.stage_widget:   # aind stage
+            step = float(self.stage_widget.movement_page_view.lineEdit_step_size.text())
+            self.operation_control_model.stage_specs.step_size = step
+
+
+
 
     def update_stage_positions_from_operational_control(
         self, oc: OperationalControl = None
@@ -1156,17 +1163,13 @@ class Window(QMainWindow):
             self.session_model.notes = sess.notes
 
             # enable or disable widget based on if session is on curriculum
-            self.task_widget.setEnabled(
-                not slims_session.is_curriculum_suggestion
-            )
+            on_curr = slims_session.is_curriculum_suggestion
+            self.task_widget.setEnabled(not on_curr)
 
             # set state of on_curriculum check
-            self.on_curriculum.setChecked(
-                slims_session.is_curriculum_suggestion
-            )
-            self.on_curriculum.setEnabled(
-                slims_session.is_curriculum_suggestion
-            )
+            self.on_curriculum.setChecked(on_curr)
+            self.on_curriculum.setEnabled(on_curr)
+
             self.update_stage_positions_from_operational_control(oc)
 
             # update operational control model with latest stage coords
@@ -1540,19 +1543,7 @@ class Window(QMainWindow):
                     f" on {trainer_state.stage.name} next session.",
                     extra={"tags": [self.warning_log_tag]},
                 )
-                # save trainer_state
-                id_name = self.session_model.session_name.split("behavior_")[
-                    -1
-                ]
-                with open(
-                    os.path.join(
-                        self.session_model.root_path,
-                        f"trainer_state_{id_name}.json",
-                    ),
-                    "w",
-                ) as outfile:
-                    outfile.write(trainer_state.model_dump_json(indent=1))
-
+                self.GeneratedTrials.Obj["next_stage_suggested"] = trainer_state.stage.name
                 self.on_curriculum.setChecked(False)
                 self.on_curriculum.setVisible(False)
                 self.label_curriculum_stage.setText("")
@@ -1949,7 +1940,7 @@ class Window(QMainWindow):
         elif self.stage_widget is not None:  # aind stage
             # Get absolute position of motors in AIND stage
             positions = (
-                self.stage_widget.stage_model.get_current_positions_mm()
+                self.stage_widget.stage_model.get_current_positions_mm(rel_to_monument=True)
             )
             return {
                 "x": positions[0],
@@ -3080,7 +3071,7 @@ class Window(QMainWindow):
             if hasattr(self.WaterCalibration_dialog, "PlotM"):
                 if hasattr(
                     self.WaterCalibration_dialog.PlotM, "FittingResults"
-                ):
+                ) and self.WaterCalibration_dialog.PlotM.FittingResults != {}:
                     self.set_water_calibration_latest_fitting(
                         self.WaterCalibration_dialog.PlotM.FittingResults
                     )
@@ -3328,7 +3319,7 @@ class Window(QMainWindow):
                         ),
                     ),
                     LaserColorTwo(
-                        color="Red",
+                        color="Blue",
                         pulse_condition="Right choice",
                         start=IntervalConditions(
                             interval_condition="Trial start", offset=0
@@ -3338,7 +3329,7 @@ class Window(QMainWindow):
                         ),
                     ),
                     LaserColorThree(
-                        color="Green",
+                        color="Blue",
                         pulse_condition="Right choice",
                         start=IntervalConditions(
                             interval_condition="Trial start", offset=0
@@ -3348,7 +3339,7 @@ class Window(QMainWindow):
                         ),
                     ),
                     LaserColorFour(
-                        color="Orange",
+                        color="Blue",
                         pulse_condition="Right choice",
                         start=IntervalConditions(
                             interval_condition="Trial start", offset=0
@@ -3358,7 +3349,7 @@ class Window(QMainWindow):
                         ),
                     ),
                     LaserColorFive(
-                        color="Orange",
+                        color="Blue",
                         pulse_condition="Right choice",
                         start=IntervalConditions(
                             interval_condition="Trial start", offset=0
@@ -3368,7 +3359,7 @@ class Window(QMainWindow):
                         ),
                     ),
                     LaserColorSix(
-                        color="Orange",
+                        color="Blue",
                         pulse_condition="Right choice",
                         start=IntervalConditions(
                             interval_condition="Trial start", offset=0
@@ -3381,7 +3372,7 @@ class Window(QMainWindow):
                 session_control=SessionControl(),
             )
             self.Opto_dialog = OptogeneticsDialog(
-                MainWindow=self, opto_model=self.opto_model
+                MainWindow=self, opto_model=self.opto_model, trial_lock=self.trial_lock
             )
             self.OpenOptogenetics = 1
         if self.action_Optogenetics.isChecked() == True:
@@ -4838,11 +4829,10 @@ class Window(QMainWindow):
                                 elapsed_time
                             )
                         )
+    def animal_response_thread_complete(self):
+        """Function called after animal response thread has completed.
+        Sets ANewTrial to 1 to iterate through trial loop"""
 
-    def _thread_complete(self):
-        """complete of a trial"""
-        if self.NewTrialRewardOrder == 0:
-            self.GeneratedTrials._GenerateATrial()
         self.ANewTrial = 1
 
     def _thread_complete2(self):
@@ -4852,10 +4842,6 @@ class Window(QMainWindow):
     def _thread_complete3(self):
         """complete of update figures"""
         self.ToUpdateFigure = 1
-
-    def _thread_complete4(self):
-        """complete of generating a trial"""
-        self.ToGenerateATrial = 1
 
     def _thread_complete6(self):
         """complete of save data"""
@@ -5102,11 +5088,7 @@ class Window(QMainWindow):
             # update slims with latest stage offset value for loaded mouse
             self.update_loaded_mouse_offset()
 
-            # disable task model widgets
-            self.task_widget.setEnabled(False)
-            self.session_widget.setEnabled(False)
-            self.Opto_dialog.opto_widget.setEnabled(False)
-            self.fip_widget.setEnabled(False)
+            # disableon curriculum widgets
             self.on_curriculum.setEnabled(False)
 
             # set flag to perform habituation period
@@ -5140,23 +5122,7 @@ class Window(QMainWindow):
             # save models
             self.save_task_models()
 
-            # enable task model widgets
-            self.task_widget.setEnabled(
-                not self.on_curriculum.isVisible()
-                or not self.on_curriculum.isChecked()
-            )
-            self.session_widget.setEnabled(
-                not self.on_curriculum.isVisible()
-                or not self.on_curriculum.isChecked()
-            )
-            self.Opto_dialog.opto_widget.setEnabled(
-                not self.on_curriculum.isVisible()
-                or not self.on_curriculum.isChecked()
-            )
-            self.fip_widget.setEnabled(
-                not self.on_curriculum.isVisible()
-                or not self.on_curriculum.isChecked()
-            )
+            # enable curriculum widget
             self.on_curriculum.setEnabled(True)
 
             # If the photometry timer is running, stop it
@@ -5245,9 +5211,7 @@ class Window(QMainWindow):
             # generate the first trial outside the loop, only for new session
             self.ToReceiveLicks = 1
             self.ToUpdateFigure = 1
-            self.ToGenerateATrial = 1
             self.ToInitializeVisual = 1
-            GeneratedTrials._GenerateATrial()
             # delete licks from the previous session
             GeneratedTrials._DeletePreviousLicks(self.Channel2)
             GeneratedTrials.lick_interval_time.start()  # start lick interval calculation
@@ -5289,8 +5253,7 @@ class Window(QMainWindow):
                 self.Channel3,
                 self.data_lock,
             )
-            worker1.signals.finished.connect(self._thread_complete)
-
+            worker1.signals.finished.connect(self.animal_response_thread_complete)
             workerLick = Worker(
                 GeneratedTrials._get_irregular_timestamp, self.Channel2
             )
@@ -5302,28 +5265,18 @@ class Window(QMainWindow):
                 Channel=self.Channel2,
             )
             workerPlot.signals.finished.connect(self._thread_complete3)
-            workerGenerateAtrial = Worker(GeneratedTrials._GenerateATrial)
-            workerGenerateAtrial.signals.finished.connect(
-                self._thread_complete4
-            )
             workerStartTrialLoop = Worker(
                 self._StartTrialLoop,
                 GeneratedTrials,
                 worker1,
                 workerPlot,
-                workerGenerateAtrial,
-            )
-            workerStartTrialLoop1 = Worker(
-                self._StartTrialLoop1, GeneratedTrials
             )
             worker_save = Worker(self._perform_backup, BackupSave=1)
             worker_save.signals.finished.connect(self._thread_complete6)
             self.worker1 = worker1
             self.workerLick = workerLick
             self.workerPlot = workerPlot
-            self.workerGenerateAtrial = workerGenerateAtrial
             self.workerStartTrialLoop = workerStartTrialLoop
-            self.workerStartTrialLoop1 = workerStartTrialLoop1
             self.worker_save = worker_save
             self.data_lock = Lock()
         else:
@@ -5331,9 +5284,7 @@ class Window(QMainWindow):
             worker1 = self.worker1
             workerLick = self.workerLick
             workerPlot = self.workerPlot
-            workerGenerateAtrial = self.workerGenerateAtrial
             workerStartTrialLoop = self.workerStartTrialLoop
-            workerStartTrialLoop1 = self.workerStartTrialLoop1
             worker_save = self.worker_save
 
         # pause for specified habituation time
@@ -5399,7 +5350,7 @@ class Window(QMainWindow):
         :returns: boolean indicating if workflow is running or not. If None, fip is not configured
         """
 
-        if self.fib_model.enabled and (
+        if self.fip_model.enabled and (
                 not self.FIP_started
         ):
             QMessageBox.critical(
@@ -5415,14 +5366,14 @@ class Window(QMainWindow):
             return False
 
         # Check if photometry excitation is running or not
-        if self.fib_model.enabled and not self.StartExcitation.isChecked():
+        if self.fip_model.enabled and not self.StartExcitation.isChecked():
             logging.warning('photometry is set to "on", but excitation is not running')
 
             reply = QMessageBox.question(
                 self,
                 "Box {}, Start".format(self.box_letter),
                 'Photometry is set to "on", but excitation is not running. Start excitation now?',
-                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes | QMessageBox.Cancel,
                 QMessageBox.Yes,
             )
             if reply == QMessageBox.Yes:
@@ -5575,38 +5526,22 @@ class Window(QMainWindow):
 
                 # can start a new trial when we receive the trial end signal from Bonsai
                 self.ANewTrial = 0
-                GeneratedTrials.B_CurrentTrialN += 1
-                print(
-                    "Current trial: "
-                    + str(GeneratedTrials.B_CurrentTrialN + 1)
-                )
-                logging.info(
-                    "Current trial: "
-                    + str(GeneratedTrials.B_CurrentTrialN + 1)
-                )
-                if (
-                    (
-                        self.task_logic.task_parameters.auto_water is not None
-                        or self.task_logic.task_parameters.block_parameters.min_reward
-                        > 0
-                        or self.session_model.experiment
-                        in ["Uncoupled Baiting", "Uncoupled Without Baiting"]
-                    )
-                    or self.task_logic.task_parameters.no_response_trial_addition
-                ):
-                    # The next trial parameters must be dependent on the current trial's choice
-                    # get animal response and then generate a new trial
-                    self.NewTrialRewardOrder = 0
-                else:
-                    # By default, to save time, generate a new trial as early as possible
-                    # generate a new trial and then get animal response
-                    self.NewTrialRewardOrder = 1
-
-                # initiate the generated trial
+                # generate and initiate a trial
                 try:
-                    GeneratedTrials._InitiateATrial(
-                        self.Channel, self.Channel4
-                    )
+                    with self.trial_lock:
+                        GeneratedTrials._GenerateATrial()
+                        GeneratedTrials.B_CurrentTrialN += 1
+                        print(
+                            "Current trial: "
+                            + str(GeneratedTrials.B_CurrentTrialN + 1)
+                        )
+                        logging.info(
+                            "Current trial: "
+                            + str(GeneratedTrials.B_CurrentTrialN + 1)
+                        )
+                        GeneratedTrials._InitiateATrial(
+                            self.Channel, self.Channel4
+                        )
                 except Exception as e:
                     if "ConnectionAbortedError" in str(e):
                         logging.info("lost bonsai connection: InitiateATrial")
@@ -5646,6 +5581,7 @@ class Window(QMainWindow):
                         self.Start.setChecked(False)
                         self.Start.setStyleSheet("background-color : none")
                         break
+
                 # receive licks and update figures
                 if self.actionDrawing_after_stopping.isChecked() == False:
                     self.PlotM._Update(
@@ -5720,9 +5656,6 @@ class Window(QMainWindow):
                 else:
                     # get the response of the animal using a different thread
                     self.threadpool.start(worker1)
-                # generate a new trial
-                if self.NewTrialRewardOrder == 1:
-                    GeneratedTrials._GenerateATrial()
 
                 # Save data in a separate thread
                 if (
@@ -5755,7 +5688,6 @@ class Window(QMainWindow):
                     # Extra 10 seconds is to avoid any race conditions
                     # We are in the photometry baseline period
                     continue
-
                 # Prompt user to stop trials
                 elapsed_time = int(
                     np.floor(stall_duration * stall_iteration / 60)
@@ -5853,67 +5785,6 @@ class Window(QMainWindow):
             )
 
         self.GeneratedTrials.B_Bias[trial_number - 1 :] = bias
-
-    def _StartTrialLoop1(
-        self, GeneratedTrials, worker1, workerPlot, workerGenerateAtrial
-    ):
-        logging.info("starting trial loop 1")
-        while self.Start.isChecked():
-            QApplication.processEvents()
-            if (
-                self.ANewTrial == 1
-                and self.ToGenerateATrial == 1
-                and self.Start.isChecked()
-            ):
-                self.ANewTrial = 0  # can start a new trial when we receive the trial end signal from Bonsai
-                GeneratedTrials.B_CurrentTrialN += 1
-                print(
-                    "Current trial: "
-                    + str(GeneratedTrials.B_CurrentTrialN + 1)
-                )
-                logging.info(
-                    "Current trial: "
-                    + str(GeneratedTrials.B_CurrentTrialN + 1)
-                )
-                if not (
-                    self.task_logic.task_parameters.auto_water is not None
-                    or self.task_logic.task_parameters.block_parameters.min_reward
-                    > 0
-                ):
-                    # generate new trial and get reward
-                    self.NewTrialRewardOrder = 1
-                else:
-                    # get reward and generate new trial
-                    self.NewTrialRewardOrder = 0
-                # initiate the generated trial
-                GeneratedTrials._InitiateATrial(self.Channel, self.Channel4)
-                # receive licks and update figures
-                if self.test == 1:
-                    self.PlotM._Update(
-                        GeneratedTrials=GeneratedTrials, Channel=self.Channel2
-                    )
-                else:
-                    if self.ToUpdateFigure == 1:
-                        self.ToUpdateFigure = 0
-                        self.threadpool3.start(workerPlot)
-                # get the response of the animal using a different thread
-                self.threadpool.start(worker1)
-                """
-                if self.test==1:
-                    self.ANewTrial=1
-                    GeneratedTrials.GetResponseFinish=0
-                    GeneratedTrials._GetAnimalResponse(self.Channel,self.Channel3)
-                else:
-                    GeneratedTrials.GetResponseFinish=0
-                    self.threadpool.start(worker1)
-                """
-                # generate a new trial
-                if self.test == 1:
-                    self.ToGenerateATrial = 1
-                    GeneratedTrials._GenerateATrial()
-                else:
-                    self.ToGenerateATrial = 0
-                    self.threadpool4.start(workerGenerateAtrial)
 
     def _OptogeneticsB(self):
         """optogenetics control in the main window"""

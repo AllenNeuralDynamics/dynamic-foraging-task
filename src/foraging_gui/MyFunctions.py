@@ -57,6 +57,10 @@ class GenerateTrials:
         self.fip_model = fip_model
         self.operation_control_model = operation_control_model
 
+        self.B_EnvironmentSensorTemperature = []
+        self.B_EnvironmentSensorHumidity = []
+        self.B_EnvironmentSensorPressure = []
+        self.B_EnvironmentSensorTimestamp = []
         self.B_LeftLickIntervalPercent = (
             None  # percentage of left lick intervals under 100ms
         )
@@ -161,28 +165,32 @@ class GenerateTrials:
         )  # 1: normal trials with delay; 3: optogenetics trials without delay
         self.GeneFinish = 1
         self.GetResponseFinish = 1
+
+        # create dict with mapped parameter keys paired with empty list for Obj dict
+        task_parameter_lists = {k: [] if "TP_" in k else v for k, v in
+                                task_parameters_to_tp_conversion(self.task_logic.task_parameters).items()}
+        session_lists = {k: [] if "TP_" in k else v for k, v in session_to_tp_conversion(self.session_model).items()}
+        fip_lists = {k: [] if "TP_" in k else v for k, v in fip_to_tp_conversion(self.fip_model).items()}
+        opto_lists = {k: [] if "TP_" in k else v for k, v in opto_to_tp_conversion(self.opto_model).items()}
+        oc_lists = {k: [] if "TP_" in k else v for k, v in
+                    operational_control_to_tp_conversion(self.operation_control_model).items()}
+
         self.Obj = {
             # initialize TP_ keys through mapping functions
-            **task_parameters_to_tp_conversion(
-                self.task_logic.task_parameters
-            ),
-            **session_to_tp_conversion(self.session_model),
-            **fip_to_tp_conversion(self.fip_model),
-            **opto_to_tp_conversion(self.opto_model),
-            **operational_control_to_tp_conversion(
-                self.operation_control_model
-            ),
+            **task_parameter_lists,
+            **session_lists,
+            **fip_lists,
+            **opto_lists,
+            **oc_lists,
             "TP_LeftValue": [],  # left valve open times
             "TP_RightValue": [],
             "multipliers": [],
-            "AutoTrain": False,
-            "TP_AutoTrain": [],
-            "TP_auto_train_curriculum_name": [],
-            "TP_auto_train_curriculum_schema_version": [],
-            "TP_auto_train_curriculum_version": [],
-            "TP_auto_train_engaged": [],
-            "TP_auto_train_stage": [],
-            "TP_auto_train_stage_overridden": [],
+            "curriculum_name": [],
+            "curriculum_schema_version": [],
+            "curriculum_version": [],
+            "curriculum_loaded": [],
+            "curriculum_stage": [],
+            "off_curriculum": [],
             "TP_Laser_calibration": [],
             "TP_LatestCalibrationDate": [],
             "TP_laser_1_calibration_power": [],
@@ -221,11 +229,12 @@ class GenerateTrials:
         )
 
     def _GenerateATrial(self):
+
         self.finish_select_par = 0
         if self.win.UpdateParameters == 1:
             # get all of the training parameters of the current trial
             self._GetTrainingParameters(self.win)
-        # save all of the parameters in each trial
+        # save all of the parameters used in trial
         self._SaveParameters()
         # get licks information. Starting from the second trial, and counting licks of the last completed trial
         if self.B_CurrentTrialN >= 1:
@@ -1082,6 +1091,12 @@ class GenerateTrials:
                 self.B_for_eff_optimal = np.nan
                 self.B_for_eff_optimal_random_seed = np.nan
             """Some complex calculations can be separated from _GenerateATrial using different threads"""
+
+            # calculate ignore rate
+            auto_rewards = np.array([any(x) for x in np.column_stack(self.B_AutoWaterTrial.astype(bool))])
+            non_auto_reward = self.B_AnimalResponseHistory[np.where(~auto_rewards.astype(bool))]
+            if len(non_auto_reward) > 0:
+                self.B_ignore_rate = len(np.where(non_auto_reward == 2)[0])/len(non_auto_reward)
 
     def _process_values(
         self, values, auto_water_trial, multiplier_values, rewarded_history
@@ -2495,15 +2510,35 @@ class GenerateTrials:
         The voltage amplitude depends on Protocol, Laser Power, Laser color, and the stimulation locations<>
         """
         self.CurrentLaserAmplitude = [0, 0]
-        for location in self.selected_condition.location:
-            index = 0 if location.name == "LocationOne" else 1
-            self.CurrentLaserAmplitude[index] = location.power
-        if self.CurrentLaserAmplitude == [0, 0]:
+
+        if not self.selected_condition.location:    # no lasers defined
             logging.warning(
                 "No stimulation location defined!",
                 extra={"tags": [self.win.warning_log_tag]},
             )
+
+        for location in self.selected_condition.location:
+            index = 0 if location.name == "LocationOne" else 1
+            self.CurrentLaserAmplitude[index] = location.amplitude
+
         self.B_LaserAmplitude.append(self.CurrentLaserAmplitude)
+    def latest_calibration(self, color: str) -> dict:
+        """
+            Find the latest calibration for the selected laser
+
+            :param color: color of laser calibration data
+
+            :returns dictionary of the latest calibration data
+
+        """
+        # return none if no calibration file or data
+        if not getattr(self.win, "LaserCalibrationResults", {}):
+            return
+
+        dates = self.win.LaserCalibrationResults.keys()
+        sorted(dates, key=lambda x: datetime.strptime(x, '%Y-%m-%d'))   # sort keys (dates) chronologically
+
+        return self.win.LaserCalibrationResults[dates[-1]].get(color, None)     # return None if no color info
 
     def _SelectOptogeneticsCondition(self):
         """
@@ -3162,6 +3197,22 @@ class GenerateTrials:
                     self.B_AutoRightWaterStartTime = np.append(
                         self.B_AutoRightWaterStartTime, Rec[1][1][0]
                     )
+                self.B_AutoRightWaterStartTime = np.append(
+                    self.B_AutoRightWaterStartTime, Rec[1][1][0]
+                )
+            elif Rec[0].address == "/EnvironmentSensorTemperature":
+                value = Rec[1][1][0] if type(Rec[1][1][0]) != float else round(Rec[1][1][0], 1)
+                self.B_EnvironmentSensorTemperature.append(value)
+
+            elif Rec[0].address == "/EnvironmentSensorHumidity":
+                value = Rec[1][1][0] if type(Rec[1][1][0]) != float else round(Rec[1][1][0], 1)
+                self.B_EnvironmentSensorHumidity.append(value)
+
+            elif Rec[0].address == "/EnvironmentSensorPressure":
+                self.B_EnvironmentSensorPressure.append(Rec[1][1][0])
+
+            elif Rec[0].address == "/EnvironmentSensorTimestamp":
+                self.B_EnvironmentSensorTimestamp.append(Rec[1][1][0])
 
     def _DeletePreviousLicks(self, Channel2):
         """Delete licks from the previous session"""
@@ -3225,11 +3276,7 @@ class GenerateTrials:
             **oc_tp,
         }.items():
             if "TP_" == key[:3]:
-                self.Obj[key] = (
-                    [self.Obj[key], value]
-                    if type(self.Obj[key]) is not list
-                    else self.Obj[key] + [value]
-                )
+                self.Obj[key].append(value)
 
         # loop through and save all TP_ attributes
         for attr_name in dir(self):
@@ -3289,15 +3336,13 @@ class GenerateTrials:
         # add auto train parameters
         curriculum = self.win.slims_handler.curriculum
         stage = getattr(self.win.slims_handler.trainer_state, 'stage', None)
-        self.Obj["AutoTrain"] = curriculum is not None
-        self.Obj["TP_AutoTrain"].append(curriculum is not None)
-        self.Obj["TP_auto_train_curriculum_name"].append(getattr(curriculum, 'name', None))
-        self.Obj["TP_auto_train_curriculum_schema_version"].append(self.task_logic.version)
-        self.Obj["TP_auto_train_curriculum_version"].append(getattr(curriculum, 'version', None))
-        self.Obj["TP_auto_train_engaged"].append(curriculum is not None)
-        self.Obj["TP_auto_train_stage"].append(getattr(stage, 'name', None))
-        self.Obj["TP_auto_train_stage_overridden"].append(not self.win.on_curriculum.isChecked() if curriculum is
-                                                                                                    not None else None)
+
+        self.Obj["curriculum_name"].append(getattr(curriculum, 'name', None))
+        self.Obj["curriculum_schema_version"].append(self.task_logic.version)
+        self.Obj["curriculum_version"].append(getattr(curriculum, 'version', None))
+        self.Obj["curriculum_loaded"].append(curriculum is not None)
+        self.Obj["curriculum_stage"].append(getattr(stage, 'name', None))
+        self.Obj["off_curriculum"].append(not self.win.on_curriculum.isChecked() if curriculum is not None else None)
 
 
 class NewScaleSerialY:
