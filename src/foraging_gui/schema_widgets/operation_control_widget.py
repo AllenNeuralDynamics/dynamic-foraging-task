@@ -3,7 +3,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.operation_control import (
 )
 
 from threading import Lock
-from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase
+from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase, add_border
 
 class OperationControlWidget(SchemaWidgetBase):
     """
