@@ -251,9 +251,10 @@ class OptoParametersWidget(SchemaWidgetBase):
         index = int(name_lst[-1])
         location_type = LocationTwo() if index == 1 else LocationOne()
         active_locations = self.path_get(self.schema, name_lst[:-1])
-        if enabled:
+
+        if enabled and location_type.name not in [loc.name for loc in active_locations]:
             active_locations.append(location_type)
-        else:
+        elif not enabled:
             remove_index = [
                 i
                 for i, location in enumerate(active_locations)
@@ -261,6 +262,7 @@ class OptoParametersWidget(SchemaWidgetBase):
             ]
             if len(remove_index) == 1:
                 del active_locations[remove_index[0]]
+
         self.path_set(self.schema, name_lst[:-1], active_locations)
         self.ValueChangedInside.emit(".".join(name_lst[:-1]))
 
