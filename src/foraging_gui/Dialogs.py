@@ -6,10 +6,21 @@ import subprocess
 import time
 import webbrowser
 from datetime import datetime
-from typing import Literal
+import logging
+import webbrowser
+import re
+import random
+from typing import Literal,Tuple
 
 import numpy as np
 import pandas as pd
+from sklearn.linear_model import LinearRegression
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QMessageBox, QGridLayout
+from PyQt5.QtWidgets import QLabel, QDialogButtonBox,QFileDialog,QInputDialog, QLineEdit
+from PyQt5 import QtWidgets, uic, QtGui
+from PyQt5.QtCore import QThreadPool,Qt, QAbstractTableModel, QItemSelectionModel, QObject, QTimer
+from PyQt5.QtSvg import QSvgWidget
 from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
 from aind_auto_train.curriculum_manager import CurriculumManager
 from aind_auto_train.schema.curriculum import DynamicForagingCurriculum
@@ -39,12 +50,18 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
 )
 
-from foraging_gui.MyFunctions import Worker
+from foraging_gui.MyFunctions import Worker,WorkerTagging
 from foraging_gui.Visualization import PlotWaterCalibration
 
 codebase_curriculum_schema_version = DynamicForagingCurriculum.model_fields[
     "curriculum_schema_version"
 ].default
+from aind_auto_train.curriculum_manager import CurriculumManager
+from aind_auto_train.auto_train_manager import DynamicForagingAutoTrainManager
+from aind_auto_train.schema.task import TrainingStage
+from aind_auto_train.schema.curriculum import DynamicForagingCurriculum
+from foraging_gui.GenerateMetadata import generate_metadata
+codebase_curriculum_schema_version = DynamicForagingCurriculum.model_fields['curriculum_schema_version'].default
 
 logger = logging.getLogger(__name__)
 
@@ -4080,3 +4097,961 @@ class PandasModel(QAbstractTableModel):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             return self._data.columns[col]
         return None
+
+
+class OpticalTaggingDialog(QDialog):
+
+    def __init__(self, MainWindow, parent=None):
+        super().__init__(parent)
+        uic.loadUi('OpticalTagging.ui', self)
+        self._connectSignalsSlots()
+        self.MainWindow = MainWindow
+        self.current_optical_tagging_par={}
+        self.optical_tagging_par={}
+        self.cycle_finish_tag = 1
+        self.thread_finish_tag = 1
+        self.threadpool = QThreadPool()
+        # find all buttons and set them to not be the default button
+        for container in [self]:
+            for child in container.findChildren((QtWidgets.QPushButton)):
+                child.setDefault(False)
+                child.setAutoDefault(False)
+
+    def _connectSignalsSlots(self):
+        self.Start.clicked.connect(self._Start)
+        self.WhichLaser.currentIndexChanged.connect(self._WhichLaser)
+        self.Restart.clicked.connect(self._start_over)
+        self.Save.clicked.connect(self._Save)
+        self.ClearData.clicked.connect(self._clear_data)
+
+    def _Save(self):
+        '''Save the optical tagging results'''
+        if self.optical_tagging_par=={}:
+            return
+        # giving the user a warning message to show "This will only save the current parameters and results related to the random reward. If you want to save more including the metadata, please go to the main window and click the save button."
+        QMessageBox.warning(
+            self,
+            "Save Warning",
+            "Only the current parameters and results related to the optical tagging will be saved. "
+            "To save additional data, including metadata, please use the Save button in the main window."
+        )
+        # get the save folder
+        if self.MainWindow.CreateNewFolder == 1:
+            self.MainWindow._GetSaveFolder()
+            self.MainWindow.CreateNewFolder = 0
+
+        save_file=self.MainWindow.SaveFileJson
+        if not os.path.exists(os.path.dirname(save_file)):
+            os.makedirs(os.path.dirname(save_file))
+            logging.info(f"Created new folder: {os.path.dirname(save_file)}")
+
+        self.optical_tagging_par["task_parameters"]={
+            "laser_name": self.WhichLaser.currentText(),
+            "protocol": self.Protocol.currentText(),
+            "laser_1_color": self.Laser_1_color.currentText(),
+            "laser_2_color": self.Laser_2_color.currentText(),
+            "laser_1_power": self.Laser_1_power.text(),
+            "laser_2_power": self.Laser_2_power.text(),
+            "frequency": self.Frequency.text(),
+            "pulse_duration": self.Pulse_duration.text(),
+            "duration_each_cycle": self.Duration_each_cycle.text(),
+            "interval_between_cycles": self.Interval_between_cycles.text(),
+            "cycles_each_condition": self.Cycles_each_condition.text(),
+        }
+        # save the data
+        with open(save_file, 'w') as f:
+            json.dump(self.optical_tagging_par, f, indent=4)
+
+    def _Start(self):
+        '''Start the optical tagging'''
+        # restart the logging if it is not started
+        if self.MainWindow.logging_type!=0 :
+            self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
+
+        # toggle the button color
+        if self.Start.isChecked():
+            self.Start.setStyleSheet("background-color : green;")
+        else:
+            self.Start.setStyleSheet("background-color : none")
+            return
+        # generate random conditions including lasers, laser power, laser color, and protocol
+        if self.cycle_finish_tag==1:
+            # generate new random conditions
+            self._generate_random_conditions()
+            self.index=list(range(len(self.current_optical_tagging_par['protocol_sampled_all'])))
+            self.cycle_finish_tag = 0
+
+        # send the trigger source
+        self.MainWindow.Channel.TriggerSource('/Dev1/PFI0')
+
+        # start the optical tagging in a different thread
+        worker_tagging = WorkerTagging(self._start_optical_tagging)
+        worker_tagging.signals.update_label.connect(self.label_show_current.setText)  # Connect to label update
+        worker_tagging.signals.finished.connect(self._thread_complete_tag)
+
+        # get the first start time
+        if "optical_tagging_start_time" not in self.optical_tagging_par:
+            self.optical_tagging_par["optical_tagging_start_time"] = str(datetime.now())
+        if self.optical_tagging_par["optical_tagging_start_time"]=='':
+            self.optical_tagging_par["optical_tagging_start_time"] = str(datetime.now())
+
+        # Execute
+        if self.thread_finish_tag == 1:
+            self.threadpool.start(worker_tagging)
+        else:
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
+        #self._start_optical_tagging()
+
+    def _clear_data(self):
+        '''Clear the optical tagging data'''
+        # ask for confirmation
+        reply = QMessageBox.question(self, 'Message', 'Are you sure to clear the optical tagging data?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.cycle_finish_tag = 1
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
+            # wait for the thread to finish
+            while self.thread_finish_tag == 0:
+                QApplication.processEvents()
+                time.sleep(0.1)
+            self.optical_tagging_par={}
+            self.label_show_current.setText('')
+            self.LocationTag.setValue(0)
+
+    def _start_over(self):
+        '''Stop the optical tagging and start over (parameters will be shuffled)'''
+        # ask for confirmation
+        reply = QMessageBox.question(self, 'Message', 'Are you sure to start over the optical tagging?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.cycle_finish_tag = 1
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
+
+    def _thread_complete_tag(self):
+        '''Complete the optical tagging'''
+        self.thread_finish_tag = 1
+        # Add 1 to the location tag when the cycle is finished
+        if self.cycle_finish_tag == 1:
+            self.LocationTag.setValue(self.LocationTag.value()+1)
+        self.Start.setChecked(False)
+        self.Start.setStyleSheet("background-color : none")
+        # update the stop time
+        self.optical_tagging_par["optical_tagging_end_time"] = str(datetime.now())
+        # toggle the start button in the main window
+        self.MainWindow.unsaved_data=True
+        self.MainWindow.Save.setStyleSheet("color: white;background-color : mediumorchid;")
+
+    def _start_optical_tagging(self,update_label):
+        '''Start the optical tagging in a different thread'''
+        self.thread_finish_tag = 0
+        # iterate each condition
+        for i in self.index[:]:
+            if self.Start.isChecked():
+                if i == self.index[-1]:
+                    self.cycle_finish_tag = 1
+                # exclude the index that has been run
+                self.index.remove(i)
+                success_tag=0
+                # get the current parameters
+                protocol = self.current_optical_tagging_par['protocol_sampled_all'][i]
+                frequency = self.current_optical_tagging_par['frequency_sampled_all'][i]
+                pulse_duration = self.current_optical_tagging_par['pulse_duration_sampled_all'][i]
+                laser_name = self.current_optical_tagging_par['laser_name_sampled_all'][i]
+                target_power = self.current_optical_tagging_par['target_power_sampled_all'][i]
+                laser_color = self.current_optical_tagging_par['laser_color_sampled_all'][i]
+                duration_each_cycle = self.current_optical_tagging_par['duration_each_cycle_sampled_all'][i]
+                interval_between_cycles = self.current_optical_tagging_par['interval_between_cycles_sampled_all'][i]
+                location_tag = self.current_optical_tagging_par['location_tag_sampled_all'][i]
+                # produce the waveforms
+                my_wave=self._produce_waveforms(protocol=protocol,
+                                                frequency=frequency,
+                                                pulse_duration=pulse_duration,
+                                                laser_name=laser_name,
+                                                target_power=target_power,
+                                                laser_color=laser_color,
+                                                duration_each_cycle=duration_each_cycle
+                                            )
+                my_wave_control=self._produce_waveforms(protocol=protocol,
+                                                        frequency=frequency,
+                                                        pulse_duration=pulse_duration,
+                                                        laser_name=laser_name,
+                                                        target_power=0,
+                                                        laser_color=laser_color,
+                                                        duration_each_cycle=duration_each_cycle
+                                                    )
+                if my_wave is None:
+                    continue
+                # send the waveform and size to the bonsai
+                if laser_name=='Laser_1':
+                    getattr(self.MainWindow.Channel, 'Location1_Size')(int(my_wave.size))
+                    getattr(self.MainWindow.Channel4, 'WaveForm1_1')(str(my_wave.tolist())[1:-1])
+                    getattr(self.MainWindow.Channel, 'Location2_Size')(int(my_wave_control.size))
+                    getattr(self.MainWindow.Channel4, 'WaveForm1_2')(str(my_wave_control.tolist())[1:-1])
+                elif laser_name=='Laser_2':
+                    getattr(self.MainWindow.Channel, 'Location2_Size')(int(my_wave.size))
+                    getattr(self.MainWindow.Channel4, 'WaveForm1_2')(str(my_wave.tolist())[1:-1])
+                    getattr(self.MainWindow.Channel, 'Location1_Size')(int(my_wave_control.size))
+                    getattr(self.MainWindow.Channel4, 'WaveForm1_1')(str(my_wave_control.tolist())[1:-1])
+                FinishOfWaveForm=self.MainWindow.Channel4.receive()
+                # initiate the laser
+                # need to change the bonsai code to initiate the laser
+                self._initiate_laser()
+                # receiving the timestamps of laser start and saving them. The laser waveforms should be sent to the NI-daq as a backup.
+                Rec=self.MainWindow.Channel.receive()
+
+                if Rec[0].address=='/ITIStartTimeHarp':
+                    laser_start_timestamp=Rec[1][1][0]
+                    # change the success_tag to 1
+                    success_tag=1
+                else:
+                    laser_start_timestamp=-999 # error tag
+
+                # save the data
+                self._save_data(protocol=protocol,
+                                frequency=frequency,
+                                pulse_duration=pulse_duration,
+                                laser_name=laser_name,
+                                target_power=target_power,
+                                laser_color=laser_color,
+                                duration_each_cycle=duration_each_cycle,
+                                interval_between_cycles=interval_between_cycles,
+                                location_tag=location_tag,
+                                laser_start_timestamp=laser_start_timestamp,
+                                success_tag=success_tag
+                            )
+                # show current cycle and parameters
+                # Emit signal to update the label
+                update_label(
+                    f"Cycles: {i+1}/{len(self.current_optical_tagging_par['protocol_sampled_all'])} \n"
+                    f"Color: {laser_color}\n"
+                    f"Laser: {laser_name}\n"
+                    f"Power: {target_power} mW\n"
+                    f"protocol: {protocol}\n"
+                    f"Frequency: {frequency} Hz\n"
+                    f"Pulse Duration: {pulse_duration} ms\n"
+                    f"Duration: {duration_each_cycle} s\n"
+                    f"Interval: {interval_between_cycles} s"
+                )
+                # wait to start the next cycle
+                time.sleep(duration_each_cycle+interval_between_cycles)
+            else:
+                break
+
+    def _save_data(self, protocol, frequency, pulse_duration, laser_name, target_power, laser_color, duration_each_cycle, interval_between_cycles, location_tag, laser_start_timestamp, success_tag):
+        '''Extend the current parameters to self.optical_tagging_par'''
+        if 'protocol' not in self.optical_tagging_par.keys():
+            self.optical_tagging_par['protocol']=[]
+            self.optical_tagging_par['frequency']=[]
+            self.optical_tagging_par['pulse_duration']=[]
+            self.optical_tagging_par['laser_name']=[]
+            self.optical_tagging_par['target_power']=[]
+            self.optical_tagging_par['laser_color']=[]
+            self.optical_tagging_par['duration_each_cycle']=[]
+            self.optical_tagging_par['interval_between_cycles']=[]
+            self.optical_tagging_par['location_tag']=[]
+            self.optical_tagging_par['laser_start_timestamp']=[]
+            self.optical_tagging_par['success_tag']=[]
+        else:
+            self.optical_tagging_par['protocol'].append(protocol)
+            self.optical_tagging_par['frequency'].append(frequency)
+            self.optical_tagging_par['pulse_duration'].append(pulse_duration)
+            self.optical_tagging_par['laser_name'].append(laser_name)
+            self.optical_tagging_par['target_power'].append(target_power)
+            self.optical_tagging_par['laser_color'].append(laser_color)
+            self.optical_tagging_par['duration_each_cycle'].append(duration_each_cycle)
+            self.optical_tagging_par['interval_between_cycles'].append(interval_between_cycles)
+            self.optical_tagging_par['location_tag'].append(location_tag)
+            self.optical_tagging_par['laser_start_timestamp'].append(laser_start_timestamp)
+            self.optical_tagging_par['success_tag'].append(success_tag)
+
+    def _initiate_laser(self):
+        '''Initiate laser in bonsai'''
+        # start generating waveform in bonsai
+        self.MainWindow.Channel.OptogeneticsCalibration(int(1))
+
+    def _generate_random_conditions(self):
+        """
+        Generate random conditions for the optical tagging process. Each condition corresponds to one cycle, with parameters randomly selected for each duration.
+
+        The parameters are chosen as follows:
+        - **Lasers**: One of the following is selected: `Laser_1` or `Laser_2`.
+        - **Laser Power**: If `Laser_1` is selected, `Laser_1_power` is used. If `Laser_2` is selected, `Laser_2_power` is used.
+        - **Laser Color**: If `Laser_1` is selected, `Laser_1_color` is used. If `Laser_2` is selected, `Laser_2_color` is used.
+        *Note: `Laser`, `Laser Power`, and `Laser Color` are selected together as a group.*
+
+        Additional parameters:
+        - **Protocol**: Currently supports only `Pulse`.
+        - **Frequency (Hz)**: Applied to both lasers during the cycle.
+        - **Pulse Duration (ms)**: Applied to both lasers during the cycle.
+        """
+        # get the protocol
+        protocol = self.Protocol.currentText()
+        if protocol!='Pulse':
+            raise ValueError(f"Unknown protocol: {protocol}")
+        # get the number of cycles
+        number_of_cycles = int(math.floor(float(self.Cycles_each_condition.text())))
+        # get the frequency
+        frequency_list = list(map(int, extract_numbers_from_string(self.Frequency.text())))
+        # get the pulse duration (seconds)
+        pulse_duration_list = extract_numbers_from_string(self.Pulse_duration.text())
+        # get the laser name
+        if self.WhichLaser.currentText()=="Both":
+            laser_name_list = ['Laser_1','Laser_2']
+            laser_config = {
+                'Laser_1': (self.Laser_1_power, self.Laser_1_color),
+                'Laser_2': (self.Laser_2_power, self.Laser_2_color)
+            }
+        elif self.WhichLaser.currentText() in ['Laser_1','Laser_2']:
+            laser_name_list = [self.WhichLaser.currentText()]
+            if laser_name_list[0]=='Laser_1':
+                laser_config = {
+                    'Laser_1': (self.Laser_1_power, self.Laser_1_color)
+                }
+            elif laser_name_list[0]=='Laser_2':
+                laser_config = {
+                    'Laser_2': (self.Laser_2_power, self.Laser_2_color)
+                }
+        else:
+            # give an popup error window if the laser is not selected
+            QMessageBox.critical(self.MainWindow, "Error", "Please select the laser to use.")
+            return
+
+        # Generate combinations for each laser
+        protocol_sampled, frequency_sampled, pulse_duration_sampled, laser_name_sampled, target_power_sampled, laser_color_sampled,duration_each_cycle_sampled,interval_between_cycles_sampled = zip(*[
+            (protocol, frequency, pulse_duration, laser_name, target_power, laser_config[laser_name][1].currentText(),duration_each_cycle,interval_between_cycles)
+            for frequency in frequency_list
+            for pulse_duration in pulse_duration_list
+            for laser_name, (power_field, _) in laser_config.items()
+            for target_power in extract_numbers_from_string(power_field.text())
+            for duration_each_cycle in extract_numbers_from_string(self.Duration_each_cycle.text())
+            for interval_between_cycles in extract_numbers_from_string(self.Interval_between_cycles.text())
+        ])
+
+        self.current_optical_tagging_par['protocol_sampled_all'] = []
+        self.current_optical_tagging_par['frequency_sampled_all'] = []
+        self.current_optical_tagging_par['pulse_duration_sampled_all'] = []
+        self.current_optical_tagging_par['laser_name_sampled_all'] = []
+        self.current_optical_tagging_par['target_power_sampled_all'] = []
+        self.current_optical_tagging_par['laser_color_sampled_all'] = []
+        self.current_optical_tagging_par['duration_each_cycle_sampled_all'] = []
+        self.current_optical_tagging_par['interval_between_cycles_sampled_all'] = []
+        self.current_optical_tagging_par['location_tag_sampled_all'] = []
+        for i in range(number_of_cycles):
+            # Generate a random index to sample conditions
+            random_indices = random.sample(range(len(protocol_sampled)), len(protocol_sampled))
+            # Use the random indices to shuffle the conditions
+            protocol_sampled_now = [protocol_sampled[i] for i in random_indices]
+            frequency_sampled_now = [frequency_sampled[i] for i in random_indices]
+            pulse_duration_sampled_now = [pulse_duration_sampled[i] for i in random_indices]
+            laser_name_sampled_now = [laser_name_sampled[i] for i in random_indices]
+            target_power_sampled_now = [target_power_sampled[i] for i in random_indices]
+            laser_color_sampled_now = [laser_color_sampled[i] for i in random_indices]
+            duration_each_cycle_sampled = [duration_each_cycle_sampled[i] for i in random_indices]
+            # Append the conditions
+            self.current_optical_tagging_par['protocol_sampled_all'].extend(protocol_sampled_now)
+            self.current_optical_tagging_par['frequency_sampled_all'].extend(frequency_sampled_now)
+            self.current_optical_tagging_par['pulse_duration_sampled_all'].extend(pulse_duration_sampled_now)
+            self.current_optical_tagging_par['laser_name_sampled_all'].extend(laser_name_sampled_now)
+            self.current_optical_tagging_par['target_power_sampled_all'].extend(target_power_sampled_now)
+            self.current_optical_tagging_par['laser_color_sampled_all'].extend(laser_color_sampled_now)
+            self.current_optical_tagging_par['duration_each_cycle_sampled_all'].extend(duration_each_cycle_sampled)
+            self.current_optical_tagging_par['interval_between_cycles_sampled_all'].extend(interval_between_cycles_sampled)
+            self.current_optical_tagging_par['location_tag_sampled_all'].extend([float(self.LocationTag.value())]*len(protocol_sampled))
+
+    def _WhichLaser(self):
+        '''Select the laser to use and disable non-relevant widgets'''
+        laser_name = self.WhichLaser.currentText()
+        if laser_name=='Laser_1':
+            self.Laser_2_power.setEnabled(False)
+            self.label1_16.setEnabled(False)
+            self.label1_3.setEnabled(True)
+            self.Laser_1_power.setEnabled(True)
+        elif laser_name=='Laser_2':
+            self.Laser_1_power.setEnabled(False)
+            self.label1_3.setEnabled(False)
+            self.label1_16.setEnabled(True)
+            self.Laser_2_power.setEnabled(True)
+        else:
+            self.Laser_1_power.setEnabled(True)
+            self.Laser_2_power.setEnabled(True)
+            self.label1_3.setEnabled(True)
+            self.label1_16.setEnabled(True)
+
+    def _produce_waveforms(self,protocol:str,frequency:int,pulse_duration:float,laser_name:str,target_power:float,laser_color:str,duration_each_cycle:float):
+        '''Produce the waveforms for the optical tagging'''
+        # get the amplitude of the laser
+        if target_power==0:
+            # force the input_voltage to be 0 when the target_power is 0
+            input_voltage=0
+        else:
+            input_voltage=self._get_laser_amplitude(target_power=target_power,
+                                                    laser_color=laser_color,
+                                                    protocol=protocol,
+                                                    laser_name=laser_name
+                                                )
+        if input_voltage is None:
+            return
+
+        # produce the waveform
+        my_wave=self._get_laser_waveform(protocol=protocol,
+                                         frequency=frequency,
+                                         pulse_duration=pulse_duration,
+                                         input_voltage=input_voltage,
+                                         duration_each_cycle=duration_each_cycle
+                                    )
+
+        return my_wave
+
+    def _get_laser_waveform(self,protocol:str,frequency:int,pulse_duration:float,input_voltage:float,duration_each_cycle:float)->np.array:
+        '''Get the waveform for the laser
+        Args:
+            protocol: The protocol to use (only 'Pulse' is supported).
+            frequency: The frequency of the pulse.
+            pulse_duration: The duration of the pulse.
+            input_voltage: The input voltage of the laser.
+        Returns:
+            np.array: The waveform of the laser.
+        '''
+        # get the waveform
+        if protocol!='Pulse':
+            logger.warning(f"Unknown protocol: {protocol}")
+            return
+        sample_frequency=5000 # should be replaced
+        PointsEachPulse=int(sample_frequency*pulse_duration/1000)
+        PulseIntervalPoints=int(1/frequency*sample_frequency-PointsEachPulse)
+        if PulseIntervalPoints<0:
+            logging.warning('Pulse frequency and pulse duration are not compatible!',
+                            extra={'tags': [self.MainWindow.warning_log_tag]})
+        TotalPoints=int(sample_frequency*duration_each_cycle)
+        PulseNumber=np.floor(duration_each_cycle*frequency)
+        EachPulse=input_voltage*np.ones(PointsEachPulse)
+        PulseInterval=np.zeros(PulseIntervalPoints)
+        WaveFormEachCycle=np.concatenate((EachPulse, PulseInterval), axis=0)
+        my_wave=np.empty(0)
+        # pulse number should be greater than 0
+        if PulseNumber>1:
+            for i in range(int(PulseNumber-1)):
+                my_wave=np.concatenate((my_wave, WaveFormEachCycle), axis=0)
+        else:
+            logging.warning('Pulse number is less than 1!', extra={'tags': [self.MainWindow.warning_log_tag]})
+            return
+        my_wave=np.concatenate((my_wave, EachPulse), axis=0)
+        my_wave=np.concatenate((my_wave, np.zeros(TotalPoints-np.shape(my_wave)[0])), axis=0)
+        my_wave=np.append(my_wave,[0,0])
+        return my_wave
+
+    def _get_laser_amplitude(self,target_power:float,laser_color:str,protocol:str,laser_name:str)->float:
+        '''Get the amplitude of the laser based on the calibraion results
+        Args:
+            target_power: The target power of the laser.
+            laser_color: The color of the laser.
+            protocol: The protocol to use.
+        Returns:
+            float: The amplitude of the laser.
+        '''
+        # get the current calibration results
+        latest_calibration_date=find_latest_calibration_date(self.MainWindow.LaserCalibrationResults,laser_color)
+        # get the selected laser
+        if latest_calibration_date=='NA':
+            logger.info(f"No calibration results found for {laser_color}")
+            return
+        else:
+            try:
+                calibration_results=self.MainWindow.LaserCalibrationResults[latest_calibration_date][laser_color][protocol][laser_name]['LaserPowerVoltage']
+            except:
+                logger.info(f"No calibration results found for {laser_color} and {laser_name}")
+                return
+        # fit the calibration results with a linear model
+        slope,intercept=fit_calibration_results(calibration_results)
+        # Find the corresponding input voltage for a target laser power
+        input_voltage_for_target = (target_power - intercept) / slope
+        return round(input_voltage_for_target, 2)
+
+def fit_calibration_results(calibration_results: list) -> Tuple[float, float]:
+    """
+    Fit the calibration results with a linear model.
+
+    Args:
+        calibration_results: A list of calibration results where each entry is [input_voltage, laser_power].
+
+    Returns:
+        A tuple (slope, intercept) of the fitted linear model.
+    """
+    # Convert to numpy array for easier manipulation
+    calibration_results = np.array(calibration_results)
+
+    # Separate input voltage and laser power
+    input_voltage = calibration_results[:, 0].reshape(-1, 1)  # X (features)
+    laser_power = calibration_results[:, 1]  # y (target)
+
+    # Fit the linear model
+    model = LinearRegression()
+    model.fit(input_voltage, laser_power)
+
+    # Extract model coefficients
+    slope = model.coef_[0]
+    intercept = model.intercept_
+
+    return slope, intercept
+
+def find_latest_calibration_date(calibration:list,laser_color:str)->str:
+    """
+    Find the latest calibration date for the selected laser.
+
+    Args:
+        calibration: The calibration object.
+        Laser: The selected laser color.
+
+    Returns:
+        str: The latest calibration date for the selected laser.
+    """
+    Dates=[]
+    for Date in calibration:
+        if laser_color in calibration[Date].keys():
+            Dates.append(Date)
+    sorted_dates = sorted(Dates)
+    if sorted_dates==[]:
+        return 'NA'
+    else:
+        return sorted_dates[-1]
+
+def extract_numbers_from_string(input_string:str)->list:
+    """
+    Extract numbers from a string.
+
+    Args:
+        string: The input string.
+
+    Returns:
+        list: The list of numbers.
+    """
+    # Regular expression to match floating-point numbers
+    float_pattern = r"[-+]?\d*\.\d+|\d+"  # Matches numbers like 0.4, -0.5, etc.
+    return [float(num) for num in re.findall(float_pattern, input_string)]
+
+class RandomRewardDialog(QDialog):
+
+    def __init__(self, MainWindow, parent=None):
+        super().__init__(parent)
+        uic.loadUi('RandomReward.ui', self)
+        self._connectSignalsSlots()
+        self.MainWindow = MainWindow
+        self.threadpool = QThreadPool()
+        self.cycle_finish_tag = 1
+        self.thread_finish_tag = 1
+        self.random_reward_par={}
+        # find all buttons and set them to not be the default button
+        for container in [self]:
+            for child in container.findChildren((QtWidgets.QPushButton)):
+                child.setDefault(False)
+                child.setAutoDefault(False)
+        self.random_reward_par['RandomWaterVolume']=[0,0]
+
+    def _connectSignalsSlots(self):
+        self.Start.clicked.connect(self._Start)
+        self.Start.toggled.connect(self._enable_disable)
+        self.WhichSpout.currentIndexChanged.connect(self._WhichSpout)
+        self.Restart.clicked.connect(self._start_over)
+        self.ClearData.clicked.connect(self._clear_data)
+        self.Save.clicked.connect(self._Save)
+
+    def _enable_disable(self):
+        """
+        Enables or disables the 'GiveLeft' and 'GiveRight' buttons based on the state of the 'Start' button.
+
+        When 'Start' is checked (active), 'GiveLeft' and 'GiveRight' buttons are disabled.
+        When 'Start' is unchecked (inactive), 'GiveLeft' and 'GiveRight' buttons are enabled.
+
+        This prevents users from manually triggering left or right rewards while a session is running.
+
+        Returns:
+            None
+        """
+        # Disable 'GiveLeft' and 'GiveRight' when 'Start' is checked (active)
+        # Enable them when 'Start' is unchecked (inactive)
+        self.MainWindow.GiveLeft.setEnabled(not self.Start.isChecked())
+        self.MainWindow.GiveRight.setEnabled(not self.Start.isChecked())
+
+    def _Save(self):
+        '''Save the random reward results'''
+        if self.random_reward_par=={}:
+            return
+        # giving the user a warning message to show "This will only save the current parameters and results related to the random reward. If you want to save more including the metadata, please go to the main window and click the save button."
+        QMessageBox.warning(
+            self,
+            "Save Warning",
+            "Only the current parameters and results related to the random reward will be saved. "
+            "To save additional data, including metadata, please use the Save button in the main window."
+        )
+        # get the save folder
+        if self.MainWindow.CreateNewFolder == 1:
+            self.MainWindow._GetSaveFolder()
+            self.MainWindow.CreateNewFolder = 0
+
+        save_file=self.MainWindow.SaveFileJson
+        if not os.path.exists(os.path.dirname(save_file)):
+            os.makedirs(os.path.dirname(save_file))
+            logging.info(f"Created new folder: {os.path.dirname(save_file)}")
+
+        self.random_reward_par['task_parameters'] = {
+            'task': 'Random reward',
+            'spout': self.WhichSpout.currentText(),
+            'left_reward_volume': self.LeftVolume.text(),
+            'right_reward_volume': self.RightVolume.text(),
+            'reward_number_each_condition': self.RewardN.text(),
+            'interval_distribution': self.IntervalDistribution.currentText(),
+            'interval_beta': self.IntervalBeta.text(),
+            'interval_min': self.IntervalMin.text(),
+            'interval_max': self.IntervalMax.text(),
+        }
+
+        # save the data in the standard format and folder
+        with open(save_file, 'w') as f:
+            json.dump(self.random_reward_par, f, indent=4)
+
+    def _clear_data(self):
+        '''Clear the data'''
+        # ask user if they want to clear the data
+        reply = QMessageBox.question(self, 'Message', 'Do you want to clear the data?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.cycle_finish_tag = 1
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
+            # wait for the thread to finish
+            while self.thread_finish_tag == 0:
+                QApplication.processEvents()
+                time.sleep(0.1)
+            self.random_reward_par={}
+            self.random_reward_par['RandomWaterVolume']=[0,0]
+            self.label_show_current.setText('')
+
+    def _start_over(self):
+        '''Stop the random reward and start over (parameters will be shuffled)'''
+        # ask user if they want to start over
+        reply = QMessageBox.question(self, 'Message', 'Do you want to start over?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.cycle_finish_tag = 1
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
+        else:
+            return
+
+    def _Start(self):
+        '''Start giving random rewards'''
+        # restart the logging if it is not started
+        if self.MainWindow.logging_type!=0 :
+            self.MainWindow.Ot_log_folder=self.MainWindow._restartlogging()
+
+        # toggle the button color
+        if self.Start.isChecked():
+            self.Start.setStyleSheet("background-color : green;")
+        else:
+            self.Start.setStyleSheet("background-color : none")
+            return
+        # generate random conditions including lick spouts, reward volume, and reward interval
+        if self.cycle_finish_tag==1:
+            # generate new random conditions
+            self._generate_random_conditions()
+            self.index=list(range(len(self.current_random_reward_par['volumes_all_random'])))
+            self.cycle_finish_tag = 0
+
+        # start the random reward in a different thread
+        worker_random_reward = WorkerTagging(self._start_random_reward)
+        worker_random_reward.signals.update_label.connect(self.label_show_current.setText)  # Connect to label update
+        worker_random_reward.signals.finished.connect(self._thread_complete_tag)
+
+        # get the first start time
+        if "random_reward_start_time" not in self.random_reward_par:
+            self.random_reward_par["random_reward_start_time"] = str(datetime.now())
+        if self.random_reward_par["random_reward_start_time"]=='':
+            self.random_reward_par["random_reward_start_time"] = str(datetime.now())
+
+        # Execute
+        if self.thread_finish_tag==1:
+            self.threadpool.start(worker_random_reward)
+        else:
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
+
+    def _start_random_reward(self,update_label):
+        '''Start the random reward in a different thread'''
+        if self.thread_finish_tag==0:
+            self.Start.setChecked(False)
+            self.Start.setStyleSheet("background-color : none")
+            return
+        # iterate each condition
+        self.thread_finish_tag = 0
+        for i in self.index[:]:
+            if self.Start.isChecked():
+                if i == self.index[-1]:
+                    self.cycle_finish_tag = 1
+                # exclude the index that has been run
+                # check if i is in the index
+                if i in self.index:
+                    self.index.remove(i)
+                else:
+                    continue
+                # get the current parameters
+                volume = self.current_random_reward_par['volumes_all_random'][i]
+                side = self.current_random_reward_par['sides_all_random'][i]
+                interval = self.current_random_reward_par['reward_intervals'][i]
+                # get all licks
+                self._get_lick_timestampes()
+                # give the reward
+                self._give_reward(volume=volume, side=side)
+                # receiving the timestamps of reward start time.
+                reward_start_timestamp_computer, reward_start_timestamp_harp=self._receiving_timestamps(side=side)
+                # save the data
+                self._save_data(volume=volume, side=side, interval=interval,timestamp_computer=reward_start_timestamp_computer,timestamp_harp=reward_start_timestamp_harp)
+                # show current cycle and parameters
+                # Emit signal to update the label
+                if side==0:
+                    side_spout='Left'
+                elif side==1:
+                    side_spout='Right'
+                update_label(
+                    f"Cycles: {i+1}/{len(self.current_random_reward_par['volumes_all_random'])} \n"
+                    f"Volume: {volume} uL\n"
+                    f"Side: {side_spout}\n"
+                    f"Interval: {interval} s"
+                )
+                # wait to start the next cycle (minus 0.2s to account for the delay to wait for the value to be set)
+                time.sleep(interval-0.2)
+                if self.CheckRewardCollection.currentText()=='Yes':
+                    # check if the reward has been collected by the animal
+                    received_licks=self._get_lick_timestampes(side=side)
+                    sleep_again=0
+                    if not received_licks:
+                        sleep_again=1
+                        # show the licks have not been received
+                        update_label(
+                            f"Cycles: {i+1}/{len(self.current_random_reward_par['volumes_all_random'])} \n"
+                            f"Volume: {volume} uL\n"
+                            f"Side: {side_spout}\n"
+                            f"Interval: {interval} s\n"
+                            f"Reward not collected"
+                        )
+                    else:
+                        continue
+                    # if not received any licks, sleep until we receive a lick
+                    while (not received_licks) and self.Start.isChecked():
+                        time.sleep(0.01)
+                        received_licks=self._get_lick_timestampes(side=side)
+                    if not self.Start.isChecked():
+                        update_label(
+                            f"Cycles: {i+1}/{len(self.current_random_reward_par['volumes_all_random'])} \n"
+                            f"Volume: {volume} uL\n"
+                            f"Side: {side_spout}\n"
+                            f"Interval: {interval} s\n"
+                            f"User stopped"
+                        )
+                    else:
+                        update_label(
+                            f"Cycles: {i+1}/{len(self.current_random_reward_par['volumes_all_random'])} \n"
+                            f"Volume: {volume} uL\n"
+                            f"Side: {side_spout}\n"
+                            f"Interval: {interval} s\n"
+                            f"Reward collected"
+                        )
+                        if sleep_again==1:
+                            # sleep another interval-0.2s when detected a lick
+                            time.sleep(interval-0.2)
+            else:
+                break
+
+    def _get_lick_timestampes(self,side=None)->bool:
+        '''Get the lick timestamps'''
+        if 'left_lick_time' not in self.random_reward_par:
+            self.random_reward_par['left_lick_time'] = []
+            self.random_reward_par['right_lick_time'] = []
+
+        Return = False # no licks received
+        while not self.MainWindow.Channel2.msgs.empty():
+            Rec = self.MainWindow.Channel2.receive()
+            address = Rec[0].address
+            lick_time = Rec[1][1][0]
+
+            if address == '/LeftLickTime':
+                self.random_reward_par['left_lick_time'].append(lick_time)
+                if side==0:
+                    Return = True # left licks received
+            elif address == '/RightLickTime':
+                self.random_reward_par['right_lick_time'].append(lick_time)
+                if side==1:
+                    Return = True # right licks received
+        return Return
+
+    def _receiving_timestamps(self, side: int):
+        """Receives the timestamps of reward start time from OSC messages.
+
+        Ensures both '/RandomLeftWaterStartTime' and '/LeftRewardDeliveryTimeHarp'
+        are received before returning when side == 0, and both '/RandomRightWaterStartTime' and
+        '/RightRewardDeliveryTimeHarp' are received before returning when side == 1.
+
+        Args:
+            side (int): 0 for left, 1 for right.
+
+        Returns:
+            tuple: (random water start time, reward delivery time harp)
+        """
+        if side == 0:
+            random_left_water_start_time = None
+            random_left_reward_delivery_time_harp = None
+
+            while random_left_water_start_time is None or random_left_reward_delivery_time_harp is None:
+                Rec = self.MainWindow.Channel2.receive()
+                if Rec[0].address == '/RandomLeftWaterStartTime':
+                    random_left_water_start_time = Rec[1][1][0]
+                elif Rec[0].address == '/LeftRewardDeliveryTimeHarp':
+                    random_left_reward_delivery_time_harp = Rec[1][1][0]
+
+            return random_left_water_start_time, random_left_reward_delivery_time_harp
+
+        elif side == 1:
+            random_right_water_start_time = None
+            random_right_reward_delivery_time_harp = None
+
+            while random_right_water_start_time is None or random_right_reward_delivery_time_harp is None:
+                Rec = self.MainWindow.Channel2.receive()
+                if Rec[0].address == '/RandomRightWaterStartTime':
+                    random_right_water_start_time = Rec[1][1][0]
+                elif Rec[0].address == '/RightRewardDeliveryTimeHarp':
+                    random_right_reward_delivery_time_harp = Rec[1][1][0]
+
+            return random_right_water_start_time, random_right_reward_delivery_time_harp
+
+
+    def _save_data(self, volume:float, side:int, interval:float, timestamp_computer:float, timestamp_harp:float):
+        '''Extend the current parameters to self.random_reward_par'''
+        if 'volumes' not in self.random_reward_par.keys():
+            self.random_reward_par['volumes']=[]
+            self.random_reward_par['sides']=[]
+            self.random_reward_par['intervals']=[]
+            self.random_reward_par['reward_start_timestamp_computer']=[]
+            self.random_reward_par['reward_start_timestamp_harp']=[]
+        else:
+            self.random_reward_par['volumes'].append(volume)
+            self.random_reward_par['sides'].append(side)
+            self.random_reward_par['intervals'].append(interval)
+            self.random_reward_par['reward_start_timestamp_computer'].append(timestamp_computer)
+            self.random_reward_par['reward_start_timestamp_harp'].append(timestamp_harp)
+
+    def _thread_complete_tag(self):
+        '''Complete the random reward'''
+        self.thread_finish_tag = 1
+        self.Start.setChecked(False)
+        self.Start.setStyleSheet("background-color : none")
+        # update the stop time
+        self.random_reward_par["random_reward_end_time"] = str(datetime.now())
+        # update the reward suggestion
+        self.MainWindow._UpdateSuggestedWater()
+
+    def _give_reward(self,volume:float,side:int):
+        '''Give the reward'''
+        if side==0:
+            left_valve_open_time=((float(volume)-self.MainWindow.latest_fitting['Left'][1])/self.MainWindow.latest_fitting['Left'][0])*1000
+            # set the left valve open time
+            self.MainWindow.Channel.LeftValue(float(left_valve_open_time))
+            # add 0.2s for the value to be set
+            time.sleep(0.2)
+            # open the left valve (adding 0.2s for the value to be set)
+            self.MainWindow.Channel3.RandomWater_Left(int(1))
+            self.random_reward_par['RandomWaterVolume'][0]=self.random_reward_par['RandomWaterVolume'][0]+float(volume)/1000
+        elif side==1:
+            right_valve_open_time=((float(volume)-self.MainWindow.latest_fitting['Right'][1])/self.MainWindow.latest_fitting['Right'][0])*1000
+            # set the right valve open time
+            self.MainWindow.Channel.RightValue(float(right_valve_open_time))
+            # add 0.2s for the value to be set
+            time.sleep(0.2)
+            # open the left valve (adding 0.2s for the value to be set)
+            self.MainWindow.Channel3.RandomWater_Right(int(1))
+            self.random_reward_par['RandomWaterVolume'][1]=self.random_reward_par['RandomWaterVolume'][1]+float(volume)/1000
+
+    def _WhichSpout(self):
+        '''Select the lick spout to use and disable non-relevant widgets'''
+        spout_name = self.WhichSpout.currentText()
+        if spout_name=='Left':
+            self.label1_21.setEnabled(False)
+            self.RightVolume.setEnabled(False)
+            self.label1_6.setEnabled(True)
+            self.LeftVolume.setEnabled(True)
+        elif spout_name=='Right':
+            self.label1_6.setEnabled(False)
+            self.LeftVolume.setEnabled(False)
+            self.label1_21.setEnabled(True)
+            self.RightVolume.setEnabled(True)
+        else:
+            self.label1_6.setEnabled(True)
+            self.LeftVolume.setEnabled(True)
+            self.label1_21.setEnabled(True)
+            self.RightVolume.setEnabled(True)
+
+    def _generate_random_conditions(self):
+        """
+        Generate random conditions
+
+        The parameters are chosen as follows:
+        - **Lick Spouts**: One of the following is selected: `Left`, `Right`, or `Both`.
+        - **Reward Volume**: If `Left` is selected, `LeftVolume` is used. If `Right` is selected, `RightVolume` is used.
+        - **Reward Interval**: The interval between rewards.
+        """
+        # Get the volume and reward sides
+        spout_name = self.WhichSpout.currentText()
+
+        if spout_name == 'Both':
+            # Extract volumes from left and right spouts
+            left_volumes = extract_numbers_from_string(self.LeftVolume.text())
+            right_volumes = extract_numbers_from_string(self.RightVolume.text())
+            volumes = left_volumes + right_volumes  # Combine into a single list
+
+            # Create sides: 0 for left, 1 for right
+            sides = np.zeros(len(left_volumes)).tolist() + np.ones(len(right_volumes)).tolist()
+
+        elif spout_name == 'Left':
+            # Extract volumes and assign sides for left spout
+            volumes = extract_numbers_from_string(self.LeftVolume.text())
+            sides = np.zeros(len(volumes)).tolist()  # 0 for left
+
+        elif spout_name == 'Right':
+            # Extract volumes and assign sides for right spout
+            volumes = extract_numbers_from_string(self.RightVolume.text())
+            sides = np.ones(len(volumes)).tolist()  # 1 for right
+
+        else:
+            # Popup error if spout is not selected or invalid input
+            QMessageBox.critical(self.MainWindow, "Error", "Please select a valid lick spout.")
+            return
+
+        # get all rewards
+        volumes_all = volumes*int(self.RewardN.value())
+        sides_all = sides*int(self.RewardN.value())
+
+        # randomize the rewards and sides
+        random_indices = random.sample(range(len(volumes_all)), len(volumes_all))
+        volumes_all_random = [volumes_all[i] for i in random_indices]
+        sides_all_random = [sides_all[i] for i in random_indices]
+
+        # get the reward interval
+        if self.IntervalDistribution.currentText() == "Exponential":
+            reward_intervals = np.random.exponential(float(self.IntervalBeta.text()), len(volumes_all_random))+float(self.IntervalMin.text())
+            if self.IntervalMax.text()!='':
+                reward_intervals = np.minimum(reward_intervals,float(self.IntervalMax.text()))
+            # keep one decimal
+            reward_intervals = np.round(reward_intervals,1)
+        elif self.IntervalDistribution.currentText() == "Uniform":
+            reward_intervals = np.random.uniform(float(self.IntervalMin.text()), float(self.IntervalMax.text()), len(volumes_all_random))
+            # keep one decimal
+            reward_intervals = np.round(reward_intervals,1)
+
+        # save the data
+        self.current_random_reward_par={}
+        self.current_random_reward_par['volumes_all_random']=volumes_all_random
+        self.current_random_reward_par['sides_all_random']=sides_all_random
+        self.current_random_reward_par['reward_intervals']=reward_intervals
+
+
+
+
+
+
