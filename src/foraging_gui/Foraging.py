@@ -683,8 +683,7 @@ class Window(QMainWindow):
             motor = 2 if lick_spout_retracted == "Left" else 1
             self.stage_widget.stage_model.update_speed(value=speed)
             self.stage_widget.stage_model.update_position(positions={motor: pos})
-            self.stage_widget.stage_model.move_worker.finished.connect(self.set_stage_speed_to_normal,
-                                                                       type=Qt.UniqueConnection)
+            self.stage_widget.stage_model.move_worker.finished.connect(self.set_stage_speed_to_normal)
         else:
             logger.info("Can't un retract lick spout because no AIND stage connected")
         try:
