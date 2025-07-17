@@ -1,12 +1,17 @@
 import logging
 import queue
 import time
-
+from PyQt5 import QtCore
 from pyOSC3.OSC3 import OSCMessage
 
 
-class RigClient:
+class RigClient(QtCore.QObject):
+    mouseLicked = QtCore.pyqtSignal(str)
+
     def __init__(self, client):
+
+        super().__init__()
+
         self.client = client
         self.client.addMsgHandler("default", self.msg_handler)
         self.msgs = queue.Queue(maxsize=0)
@@ -71,6 +76,11 @@ class RigClient:
             # Print and add to log
             print(CurrentMessage)
             logging.info(CurrentMessage)
+
+            if '/RightLick' in CurrentMessage:
+                self.mouseLicked.emit("Right")
+            elif '/LeftLick' in CurrentMessage:
+                self.mouseLicked.emit("Left")
 
     def send(self, address="", *args):
         message = OSCMessage(address, *args)

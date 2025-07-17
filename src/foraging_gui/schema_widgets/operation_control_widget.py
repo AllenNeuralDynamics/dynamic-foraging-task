@@ -3,7 +3,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.operation_control import (
 )
 
 from threading import Lock
-from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase
+from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase, add_border
 
 class OperationControlWidget(SchemaWidgetBase):
     """
@@ -14,10 +14,6 @@ class OperationControlWidget(SchemaWidgetBase):
 
         super().__init__(schema, trial_lock, unsaved_color)
 
-        # hide unnecessary widgets
-        self.schema_fields_widgets["stage_specs"].hide()
-        self.schema_fields_widgets["name"].hide()
-
         # add range for auto stop widgets
         getattr(self, "auto_stop.ignore_ratio_threshold_widget").setRange(0, 1)
         getattr(self, "auto_stop.ignore_win_widget").setMinimum(0)
@@ -25,6 +21,11 @@ class OperationControlWidget(SchemaWidgetBase):
         getattr(self, "auto_stop.max_time_widget").setMinimum(0)
         getattr(self, "auto_stop.min_time_widget").setMinimum(0)
 
+        # delete unneeded widgets
+        del self.schema_fields_widgets["stage_specs"]
+        del self.schema_fields_widgets["name"]
+
+        add_border(self)
 
 if __name__ == "__main__":
     import sys
