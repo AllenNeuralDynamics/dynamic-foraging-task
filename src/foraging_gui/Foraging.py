@@ -641,13 +641,11 @@ class Window(QMainWindow):
         motor = 1 if lick_spout_licked == "Left" else 2
         at_origin = list(self._GetPositions().values())[motor] == 0.0
 
-
         if tp.lick_spout_retraction and self.stage_widget is not None and not at_origin:
             logger.info(f"Retracting {lick_spout_retract} lick spout.")
-            motor = 1 if lick_spout_licked == "Left" else 2
-            curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor, rel_to_monument=True)    # TODO: Do I need to set rel_to_monument to True?
+            curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor, rel_to_monument=True)
             self.stage_widget.stage_model.quick_move(motor=motor, distance=delta, skip_if_busy=False)
-            logger.info(f"Retracting {lick_spout_retract} lick spout to pos {curr_pos-delta} from current pos {curr_pos}.")
+            logger.info(f"Retracting {lick_spout_retract} lick spout to pos {delta} from current pos {curr_pos}.")
             # configure timer to un-retract lick spout
             timer.timeout.disconnect()
             timer.timeout.connect(lambda: self.un_retract_lick_spout(lick_spout_retract.title(), curr_pos))
@@ -675,6 +673,7 @@ class Window(QMainWindow):
         :param pos: pos to move lick spout to.
 
         """
+
         if self.stage_widget is not None:
             logger.info(f"Un-retracting {lick_spout_retracted.lower()} lick spout. Moving back to position {pos}.")
             speed = self.operation_control_model.lick_spout_retraction_specs.un_retract_speed.value
@@ -682,18 +681,27 @@ class Window(QMainWindow):
             # set un-retract speed. Set back to normal when user presses stop
             self.stage_widget.stage_model.update_speed(value=speed)
             self.stage_widget.stage_model.update_position(positions={motor: pos})
-            self.stage_widget.stage_model.move_worker.finished.connect(self.reset_fast_retract,
-                                                                       type=Qt.UniqueConnection)
+
+            # create thread to track when stage has made it back to previous position and reconnect fast retract
+            Thread(target=self.reset_fast_retract, args=(motor, pos)).start()
 
         else:
             logger.info("Can't un retract lick spout because no AIND stage connected")
 
-    def reset_fast_retract(self):
+    def reset_fast_retract(self, motor: int, pos: float):
         """"
-        Resets AIND stage fast retract
+            Resets AIND stage fast retract when spout has returned to original pos
+
+            :param motor: motor index to query
+            :param pos: original pos to wait for
         """
 
         if self.stage_widget is not None:
+
+            while (curr := self.stage_widget.stage_model.get_current_positions_mm(motor, rel_to_monument=True)) < pos:
+                logger.info(f"Stage at {curr}")
+                time.sleep(.1)
+
             logger.info("Setting stage to normal speed.")
             try:
                 self.stage_widget.stage_model.move_worker.finished.disconnect(self.reset_fast_retract)
@@ -701,6 +709,7 @@ class Window(QMainWindow):
                 pass
             self.stage_widget.stage_model.update_speed(value=1)
 
+            logger.info("Reconnecting fast retract at pos.")
             try:
                 self.Channel2.mouseLicked.connect(self.retract_lick_spout, type=Qt.UniqueConnection)
             except TypeError:  # signal already connected
@@ -5147,9 +5156,6 @@ class Window(QMainWindow):
                 self.Channel2.mouseLicked.disconnect(self.retract_lick_spout)
             except TypeError:
                 pass
-            if self.stage_widget is not None:   # set stage back to normal speed
-                logger.info("Setting stage to normal speed.")
-                self.stage_widget.stage_model.update_speed(value=1)
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
