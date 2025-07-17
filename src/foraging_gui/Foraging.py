@@ -681,31 +681,15 @@ class Window(QMainWindow):
             logger.info(f"Un-retracting {lick_spout_retracted.lower()} lick spout. Moving back to position {pos}.")
             speed = self.operation_control_model.lick_spout_retraction_specs.un_retract_speed.value
             motor = 2 if lick_spout_retracted == "Left" else 1
+            # set un-retract speed. Set back to normal when user presses stop
             self.stage_widget.stage_model.update_speed(value=speed)
             self.stage_widget.stage_model.update_position(positions={motor: pos})
-            self.stage_widget.stage_model.move_worker.finished.connect(self.set_stage_speed_to_normal)
         else:
             logger.info("Can't un retract lick spout because no AIND stage connected")
         try:
             self.Channel2.mouseLicked.connect(self.retract_lick_spout, type=Qt.UniqueConnection)
         except TypeError:   # signal already connected
             logger.debug("Mouse lick signal already connected.")
-
-    def set_stage_speed_to_normal(self):
-        """"
-        Sets AIND stage to normal speed
-        """
-
-        if self.stage_widget is not None:
-            logger.info("Setting stage to normal speed.")
-            try:
-                self.stage_widget.stage_model.move_worker.finished.disconnect(self.set_stage_speed_to_normal)
-            except TypeError:   # signal isn't connected
-                pass
-            self.stage_widget.stage_model.update_speed(value=1)
-
-        else:
-            logger.info("Can't set stage speed because no AIND stage connected")
 
     def _LoadUI(self):
         """
@@ -5145,6 +5129,9 @@ class Window(QMainWindow):
                 self.Channel2.mouseLicked.disconnect(self.retract_lick_spout)
             except TypeError:
                 pass
+            if self.stage_widget is not None:   # set stage back to normal speed
+                logger.info("Setting stage to normal speed.")
+                self.stage_widget.stage_model.update_speed(value=1)
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
