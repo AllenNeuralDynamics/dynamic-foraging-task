@@ -621,12 +621,12 @@ class Window(QMainWindow):
             self.stage_widget = get_stage_widget()
             layout.addWidget(self.stage_widget)
 
-    def retract_lick_spout(self, lick_spout_licked: Literal["Left", "Right"], delta: float = -5) -> None:
+    def retract_lick_spout(self, lick_spout_licked: Literal["Left", "Right"], delta: float = -10) -> None:
         """
         Fast retract lick spout based on lick spout licked
 
         :param lick_spout_licked: lick spout that was licked. Opposite lickspout will be retracted
-        :param delta: change in pos to move lick spout to. Default is -5
+        :param delta: change in pos to move lick spout to. Default is -10
 
         """
         # disconnect so it's only triggered once
@@ -634,8 +634,6 @@ class Window(QMainWindow):
             self.Channel2.mouseLicked.disconnect(self.retract_lick_spout)
         except TypeError:
             pass
-
-
 
         lick_spout_retract = "right" if lick_spout_licked == "Left" else "left"
         timer = getattr(self, f"{lick_spout_retract}_retract_timer")
