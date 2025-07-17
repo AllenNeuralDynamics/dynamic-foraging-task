@@ -621,12 +621,12 @@ class Window(QMainWindow):
             self.stage_widget = get_stage_widget()
             layout.addWidget(self.stage_widget)
 
-    def retract_lick_spout(self, lick_spout_licked: Literal["Left", "Right"], pos: float = 0) -> None:
+    def retract_lick_spout(self, lick_spout_licked: Literal["Left", "Right"], delta: float = -5) -> None:
         """
         Fast retract lick spout based on lick spout licked
 
         :param lick_spout_licked: lick spout that was licked. Opposite lickspout will be retracted
-        :param pos: pos to move lick spout to. Default is 0
+        :param delta: change in pos to move lick spout to. Default is -5
 
         """
         # disconnect so it's only triggered once
@@ -647,9 +647,9 @@ class Window(QMainWindow):
         if tp.lick_spout_retraction and self.stage_widget is not None and not at_origin:
             logger.info(f"Retracting {lick_spout_retract} lick spout.")
             motor = 1 if lick_spout_licked == "Left" else 2
-            curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor)    # TODO: Do I need to set rel_to_monument to True?
-            self.stage_widget.stage_model.quick_move(motor=motor, distance=pos-curr_pos, skip_if_busy=False)
-            logger.info(f"Retracting {lick_spout_retract} lick spout to pos {pos} from current pos {curr_pos}.")
+            curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor, rel_to_monument=True)    # TODO: Do I need to set rel_to_monument to True?
+            self.stage_widget.stage_model.quick_move(motor=motor, distance=delta, skip_if_busy=False)
+            logger.info(f"Retracting {lick_spout_retract} lick spout to pos {curr_pos-delta} from current pos {curr_pos}.")
             # configure timer to un-retract lick spout
             timer.timeout.disconnect()
             timer.timeout.connect(lambda: self.un_retract_lick_spout(lick_spout_retract.title(), curr_pos))
@@ -674,7 +674,7 @@ class Window(QMainWindow):
         Un-retract specified lick spout
 
         :param lick_spout_retracted: lick spout that was retracted.
-        :param pos: pos to move lick spout to. Default is 0
+        :param pos: pos to move lick spout to.
 
         """
         if self.stage_widget is not None:
