@@ -696,7 +696,7 @@ class Window(QMainWindow):
         if self.stage_widget is not None:
             logger.info("Setting stage to normal speed.")
             try:
-                self.stage_widget.stage_model.move_worker.finished.disconnect(self.set_stage_speed_to_normal)
+                self.stage_widget.stage_model.move_worker.finished.disconnect(self.reset_fast_retract)
             except TypeError:  # signal isn't connected
                 pass
             self.stage_widget.stage_model.update_speed(value=1)
