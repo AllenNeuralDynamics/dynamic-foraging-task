@@ -5808,7 +5808,7 @@ class Window(QMainWindow):
 
             else:    # move lick spouts towards unbiased side
                 delta_step = step_size * pol
-                logging.info(f"Moving lickspout {delta_step} um away from original position at bias {bias}.",
+                logging.info(f"Moving lickspout {delta_step} um away from original position at bias {bias}. {abs(bias) < specs.bias_lower_threshold} {specs.bias_lower_threshold}",
                              extra={"tags": [self.warning_log_tag]})
 
             if self.stage_widget is not None:
