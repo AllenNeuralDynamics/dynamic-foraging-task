@@ -77,10 +77,10 @@ class BiasIndicator(QMainWindow):
         self.bias_plot.addLine(
             y=0, pen="black"
         )  # add line at 0 to help user see if slight bias
-        self.bias_plot.addLine(
+        self._left_bias_line = self.bias_plot.addLine(
             y=bias_upper_threshold, pen="b"
         )  # add lines at threshold to make clearer when bias goes over
-        self.bias_plot.addLine(y=-bias_upper_threshold, pen="r")
+        self._right_bias_line = self.bias_plot.addLine(y=-bias_upper_threshold, pen="r")
         self.setCentralWidget(self.bias_plot)
 
         # create gradient pen
@@ -147,6 +147,14 @@ class BiasIndicator(QMainWindow):
             )
         else:
             self._bias_upper_threshold = value
+
+            # redraw lines
+            self.bias_plot.removeItem(self._left_bias_line)
+            self.bias_plot.removeItem(self._right_bias_line)
+            self._left_bias_line = self.bias_plot.addLine(
+                y=self._bias_upper_threshold, pen="b"
+            )  # add lines at threshold to make clearer when bias goes over
+            self._right_bias_line = self._bias_plot.addLine(y=-self.bias_upper_threshold, pen="r")
 
             if self.bias_lower_threshold > value:
                 self.bias_lower_threshold = value
@@ -337,10 +345,10 @@ class BiasIndicator(QMainWindow):
         self.bias_plot.addLine(
             y=0, pen="black"
         )  # add line at 0 to help user see if slight bias
-        self.bias_plot.addLine(
+        self._left_bias_line = self.bias_plot.addLine(
             y=self.bias_upper_threshold, pen="b"
         )  # add lines at threshold to make clearer when bias goes over
-        self.bias_plot.addLine(y=-self.bias_upper_threshold, pen="r")
+        self._right_bias_line = self.bias_plot.addLine(y=-self.bias_upper_threshold, pen="r")
         self.bias_plot.setRange(
             xRange=[1, self.x_range],
             yRange=[-self.bias_upper_threshold - 0.3, 0.3 + self.bias_upper_threshold],

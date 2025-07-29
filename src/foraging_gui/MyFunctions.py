@@ -2748,7 +2748,7 @@ class GenerateTrials:
                     else:  # no response
                         self.B_AnimalCurrentResponse = random.choice(range(2))
             else:
-                self.B_AnimalCurrentResponse = random.choices([0, 1, 2], [.2, .2, .6])[0]
+                self.B_AnimalCurrentResponse = random.choices([0, 1, 2], [.2, .2, .8])[0]
                 # self.B_AnimalCurrentResponse = random.choice(range(2))
         # random forager
         elif self.win.actionRandom_choice.isChecked():
