@@ -3,6 +3,7 @@ from datetime import datetime
 from aind_behavior_services.session import AindBehaviorSessionModel
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QLabel, QTextEdit
+from threading import Lock
 
 from foraging_gui.schema_widgets.schema_widget_base import (
     SchemaWidgetBase,
@@ -15,9 +16,9 @@ class SessionParametersWidget(SchemaWidgetBase):
     Widget to expose fields from session models
     """
 
-    def __init__(self, schema: AindBehaviorSessionModel):
+    def __init__(self, schema: AindBehaviorSessionModel, trial_lock: Lock):
 
-        super().__init__(schema)
+        super().__init__(schema, trial_lock)
 
         # hide unnecessary widgets
         self.schema_fields_widgets["version"].hide()

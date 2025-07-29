@@ -5,6 +5,7 @@ import typing
 from importlib import import_module
 from inspect import currentframe
 from typing import Literal
+from threading import Lock
 
 import inflection
 from pydantic import BaseModel
@@ -30,9 +31,16 @@ class SchemaWidgetBase(QMainWindow):
     ValueChangedOutside = pyqtSignal((str,))
     ValueChangedInside = pyqtSignal((str,))
 
-    def __init__(self, schema: BaseModel):
+    def __init__(self, schema: BaseModel, trial_lock: Lock):
+
+        """
+        Class to dynamically make widgets based on schema and update schema with user input
+        :param schema: schema object to base widget on and update.
+        :param trial_lock: lock to use when updating schema
+        """
 
         self.log = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+        self.trial_lock = trial_lock
 
         super().__init__()
         self.schema = schema
@@ -148,6 +156,7 @@ class SchemaWidgetBase(QMainWindow):
         setattr(
             self, f"{name}_widget", box
         )  # add attribute for widget input for easy access
+        box.wheelEvent = lambda event: None     # disable scroll
 
         return box
 
@@ -301,16 +310,16 @@ class SchemaWidgetBase(QMainWindow):
         """
         Convenience function to apply new schema
         """
-
-        self.schema = schema
-        for name in self.schema.model_dump().keys():
-            try:
-                self.update_field_widget(name)
-            except RuntimeError as e:
-                if "has been deleted" not in str(
-                    e
-                ):  # catch errors not related to deleted widgets
-                    raise RuntimeError(e)
+        with self.trial_lock:
+            self.schema = schema
+            for name in self.schema.model_dump().keys():
+                try:
+                    self.update_field_widget(name)
+                except RuntimeError as e:
+                    if "has been deleted" not in str(
+                        e
+                    ):  # catch errors not related to deleted widgets
+                        raise RuntimeError(e)
 
     def __setattr__(self, name, value):
         """Overwrite __setattr__ to trigger update if property is changed"""

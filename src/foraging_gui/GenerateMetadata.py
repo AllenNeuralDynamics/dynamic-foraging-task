@@ -1051,8 +1051,10 @@ class generate_metadata:
                 "foraging_efficiency_with_actual_random_seed": _get_field(
                     self.Obj, "B_for_eff_optimal_random_seed"
                 ),
+                "ignore_rate": self.Obj.get("B_ignore_rate", None)
             },
             "task_parameters": self._get_task_parameters(),
+            "streamlit": self._get_streamlit_parameters(),
         }
 
         return output_parameters
@@ -1083,6 +1085,27 @@ class generate_metadata:
         task_parameters["reward_probability"] = reward_probability
 
         return task_parameters
+
+    def _get_streamlit_parameters(self) -> dict:
+        """Get parameters used to fill out streamlit"""
+
+        return {
+                 "curriculum_name": self.Obj["curriculum_name"][-1],
+                 "curriculum_version": self.Obj["curriculum_version"][-1],
+                 "current_stage_actual": self.Obj["curriculum_stage"][-1],
+                 "current_stage_suggested": self.Obj["curriculum_stage"][-1],
+                 "if_overriden_by_trainer": self.Obj["off_curriculum"][-1],
+                 "next_stage_suggested": self.Obj.get("next_stage_suggested", None),
+                 }
+
+    def _get_training_state_parameters(self) -> dict:
+        """Get training state parameters"""
+
+        return {
+                 "curriculum_name": self.Obj["curriculum_name"][-1],
+                 "stage_name": self.Obj["curriculum_stage"][-1],
+                 "status": "Off Curriculum" if self.Obj["off_curriculum"][-1] else "No Training Stage",
+                 }
 
     def _get_reward_probability(self):
         """
@@ -1425,6 +1448,15 @@ class generate_metadata:
                 name="dynamic-foraging-task",
                 version=f"behavior branch:{self.Obj['current_branch']}   commit ID:{self.Obj['commit_ID']}    version:{self.Obj['version']}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}",
                 url=self.Obj["repo_url"],
+            )
+        )
+
+        # add training state software
+        self.behavior_software.append(
+            Software(
+                name="training_state",
+                version=f"behavior branch:{self.Obj['current_branch']}   commit ID:{self.Obj['commit_ID']}    version:{self.Obj['version']}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}",
+                parameters=self._get_training_state_parameters(),
             )
         )
 

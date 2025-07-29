@@ -9,6 +9,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.task_logic import (
 from pydantic import BaseModel
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QCheckBox
+from threading import Lock
 
 from foraging_gui.schema_widgets.schema_widget_base import (
     SchemaWidgetBase,
@@ -25,10 +26,10 @@ class BehaviorParametersWidget(SchemaWidgetBase):
     volumeChanged = pyqtSignal(str)
 
     def __init__(
-        self, schema: AindDynamicForagingTaskParameters, reward_families: list
+        self, schema: AindDynamicForagingTaskParameters, trial_lock: Lock, reward_families: list
     ):
 
-        super().__init__(schema)
+        super().__init__(schema, trial_lock)
 
         self.reward_families = reward_families
 

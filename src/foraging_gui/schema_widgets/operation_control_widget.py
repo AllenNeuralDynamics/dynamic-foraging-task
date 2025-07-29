@@ -3,7 +3,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.operation_control import (
 )
 from PyQt5.QtCore import pyqtSignal
 from foraging_gui.schema_widgets.schema_widget_base import SchemaWidgetBase
-
+from threading import Lock
 
 class OperationControlWidget(SchemaWidgetBase):
     """
@@ -13,9 +13,9 @@ class OperationControlWidget(SchemaWidgetBase):
     upper_bias_changed = pyqtSignal(float)  # signal emiting new bias value
     lower_bias_changed = pyqtSignal(float)  # signal emiting new bias value
 
-    def __init__(self, schema: OperationalControl):
+    def __init__(self, schema: OperationalControl, trial_lock: Lock):
 
-        super().__init__(schema)
+        super().__init__(schema, trial_lock)
 
         # hide unnecessary widgets
         self.schema_fields_widgets["stage_specs"].hide()
@@ -32,7 +32,7 @@ class OperationControlWidget(SchemaWidgetBase):
         up_bias = getattr(self, "lick_spout_bias_movement.bias_upper_threshold_widget")
         low_bias = getattr(self, "lick_spout_bias_movement.bias_lower_threshold_widget")
         up_bias.setRange(0, 1)
-        up_bias.setStepSize(.1)
+        up_bias. setSingleStep(.1)
         up_bias.valueChanged.connect(low_bias.setMaximum)   # lower threshold must be lower that upper threshold
         getattr(self, "lick_spout_bias_movement.bias_upper_threshold_widget").setMinimum(0)
 
