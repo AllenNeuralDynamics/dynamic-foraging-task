@@ -5802,6 +5802,7 @@ class Window(QMainWindow):
             if abs(bias) < specs.bias_lower_threshold:  # move lick spouts back to position at start of session
                 step_size = min(step_size, abs(displacement))  # only move as far back to original pos
                 delta_step = step_size * pol
+                logging.info(displacement + ", " + pos["x"] + ", " +  self.lick_spout_start["x"] + ", " + step_size)
                 logging.info(f"Moving lickspout {delta_step} um towards original position at bias {bias}.",
                              extra={"tags": [self.warning_log_tag]})
 
