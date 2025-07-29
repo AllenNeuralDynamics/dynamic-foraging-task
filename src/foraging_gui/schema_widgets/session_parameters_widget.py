@@ -16,9 +16,9 @@ class SessionParametersWidget(SchemaWidgetBase):
     Widget to expose fields from session models
     """
 
-    def __init__(self, schema: AindBehaviorSessionModel, trial_lock: Lock):
+    def __init__(self, schema: AindBehaviorSessionModel, trial_lock: Lock, unsaved_color: str = "purple"):
 
-        super().__init__(schema, trial_lock)
+        super().__init__(schema, trial_lock, unsaved_color)
 
         # hide unnecessary widgets
         self.schema_fields_widgets["version"].hide()

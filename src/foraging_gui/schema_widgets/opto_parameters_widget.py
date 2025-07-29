@@ -1,4 +1,5 @@
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
+    LaserColors,
     ConstantProtocol,
     IntervalConditions,
     LaserColorFive,
@@ -16,6 +17,7 @@ from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
 )
 from pydantic import BaseModel
 from PyQt5.QtWidgets import QCheckBox, QComboBox, QSizePolicy
+from PyQt5.QtCore import pyqtSignal
 from threading import Lock
 
 from foraging_gui.schema_widgets.schema_widget_base import (
@@ -30,11 +32,15 @@ class OptoParametersWidget(SchemaWidgetBase):
     Widget to expose task logic for behavior sessions
     """
 
-    def __init__(self, schema, trial_lock: Lock):
-        super().__init__(schema, trial_lock)
+    protocolChanged = pyqtSignal(dict)  # emit when protocol is changed and emit serialized condition
+    laserColorChanged = pyqtSignal(dict)  # emit when laser color is changed and emit serialized condition
+
+    def __init__(self, schema, trial_lock: Lock, unsaved_color: str = "purple"):
+        super().__init__(schema, trial_lock, unsaved_color)
 
         # delete widgets unrelated to session
         self.schema_fields_widgets["name"].hide()
+        self.schema_fields_widgets["sample_frequency"].setEnabled(False)
 
         # add or remove laser colors
         for laser, widget in self.laser_colors_widgets.items():
@@ -50,6 +56,10 @@ class OptoParametersWidget(SchemaWidgetBase):
             # hide laser color name widget
             getattr(self, f"laser_colors.{laser}_widgets")["name"].hide()
             del getattr(self, f"laser_colors.{laser}_widgets")["name"]
+
+            # add signal for changing colors
+            getattr(self, f"laser_colors.{laser}.color_widget").currentTextChanged.connect(lambda text, laser_i=laser:
+                                                                                           self.laserColorChanged.emit(self.path_get(self.schema, ["laser_colors", str(laser_i)]).model_dump()))
 
             # add/remove locations
             for location, location_widget in getattr(
@@ -76,6 +86,14 @@ class OptoParametersWidget(SchemaWidgetBase):
                     f"laser_colors.{laser}.location.{location}_check_box",
                     check_box,
                 )
+
+                # if power is updated, update amplitude
+                amp_widget = getattr(self, f"laser_colors.{laser}.location.{location}.amplitude_widget")
+                amp_widget.setEnabled(False)
+
+                power_widget = getattr(self, f"laser_colors.{laser}.location.{location}.power_widget")
+                power_widget.currentIndexChanged.connect(lambda i, amp=amp_widget: amp.setCurrentIndex(i))
+
 
             # add/remove start and end
             for interval in ["start", "end"]:
@@ -118,6 +136,7 @@ class OptoParametersWidget(SchemaWidgetBase):
                     f"laser_colors.{laser_i}.protocol", text
                 )
             )
+            protocol_widget.currentTextChanged.connect(lambda text, laser_i=laser: self.protocolChanged.emit(self.path_get(self.schema, ["laser_colors", str(laser_i)]).model_dump()))
             getattr(
                 self, f"laser_colors.{laser}.protocol_widget"
             ).layout().insertWidget(0, protocol_widget)
@@ -232,9 +251,10 @@ class OptoParametersWidget(SchemaWidgetBase):
         index = int(name_lst[-1])
         location_type = LocationTwo() if index == 1 else LocationOne()
         active_locations = self.path_get(self.schema, name_lst[:-1])
-        if enabled:
+
+        if enabled and location_type.name not in [loc.name for loc in active_locations]:
             active_locations.append(location_type)
-        else:
+        elif not enabled:
             remove_index = [
                 i
                 for i, location in enumerate(active_locations)
@@ -242,6 +262,7 @@ class OptoParametersWidget(SchemaWidgetBase):
             ]
             if len(remove_index) == 1:
                 del active_locations[remove_index[0]]
+
         self.path_set(self.schema, name_lst[:-1], active_locations)
         self.ValueChangedInside.emit(".".join(name_lst[:-1]))
 
@@ -276,6 +297,92 @@ class OptoParametersWidget(SchemaWidgetBase):
         getattr(self, f"{name}_widget").layout().insertWidget(1, new_widget)
         getattr(self, f"{name}_widgets")["name"].hide()
         self.ValueChangedInside.emit(name)
+
+    def update_laser_power(self, condition: LaserColors,
+                           location: "LocationOne" or "LocationTwo",
+                           powers: list[float],
+                           amplitudes: list[float]):
+        """
+            Update power selection for location combo boxes
+
+            :param condition: condition location is associated with
+            :param location: location powers to update
+            :param powers: list of powers to update
+            :param amplitudes: list of amplitudes to update
+
+        """
+        # map condition to schema
+        possible_conditions = [
+            "LaserColorOne",
+            "LaserColorTwo",
+            "LaserColorThree",
+            "LaserColorFour",
+            "LaserColorFive",
+            "LaserColorSix",
+        ]
+        condition_index = possible_conditions.index(condition.name)
+
+        # map laser location to schema
+        possible_locations = ["LocationOne", "LocationTwo"]
+        location_index = possible_locations.index(location)
+
+        # find power widget
+        widget = getattr(self, f"laser_colors.{condition_index}.location.{location_index}.power_widget")
+        widget.blockSignals(True)
+        widget.clear()
+        widget.blockSignals(False)
+        widget.addItems([str(p) for p in powers])
+
+        # find amplitude widget
+        widget = getattr(self, f"laser_colors.{condition_index}.location.{location_index}.amplitude_widget")
+        widget.blockSignals(True)
+        widget.clear()
+        widget.blockSignals(False)
+        widget.addItems([str(a) for a in amplitudes])
+
+    def update_laser_protocol(self, condition: LaserColors, location: LocationOne or LocationTwo, protocols: list[str]):
+        """
+            Update power selection for location combo boxes
+
+            :param condition: condition location is associated with
+            :param location: location powers to update
+            :param protocols: list of protocols available
+
+        """
+        # map condition to schema
+        possible_conditions = [
+            "LaserColorOne",
+            "LaserColorTwo",
+            "LaserColorThree",
+            "LaserColorFour",
+            "LaserColorFive",
+            "LaserColorSix",
+        ]
+        condition_index = possible_conditions.index(condition.name)
+
+        # find widget
+        widget = getattr(self, f"laser_colors.{condition_index}.protocol_combo_box_widget")
+        widget.blockSignals(True)
+        widget.clear()
+        widget.blockSignals(False)
+        widget.addItems(protocols)
+        widget.currentTextChanged.emit(widget.currentText())  # emit signal to trigger power update
+
+    def update_laser_colors(self, colors: list[str]):
+        """
+            Update available laser colors based on what is in calibration file
+
+            :param colors: list of available colors to choose from
+        """
+
+        for i in range(6):
+            # find widget
+            widget = getattr(self, f"laser_colors.{i}.color_widget")
+            widget.blockSignals(True)
+            widget.clear()
+            widget.blockSignals(False)
+            widget.addItems(colors)
+
 
     def update_field_widget(self, name):
         """
@@ -520,8 +627,8 @@ if __name__ == "__main__":
         ],
         session_control=SessionControl(),
     )
-    task_widget = OptoParametersWidget(task_model)
-    # task_widget.ValueChangedInside.connect(lambda name: print(task_model))
+    task_widget = OptoParametersWidget(task_model, Lock())
+    #task_widget.ValueChangedInside.connect(lambda name: print(task_model))
     task_widget.show()
 
     task_model.laser_colors = []
@@ -591,17 +698,19 @@ if __name__ == "__main__":
         session_control=SessionControl(),
     ).model_dump()
     task_model = Optogenetics(**new_model)
-    task_model.laser_colors[0].location = []
+    task_model.laser_colors[0].location = [LocationOne()]
     task_model.laser_colors[0].probability = 0.75
     task_model.laser_colors[0].duration = 6
     task_model.laser_colors[0].pulse_condition = "Left reward"
     task_model.laser_colors[0].start = None
     task_model.laser_colors[0].end.interval_condition = "Reward outcome"
     task_model.laser_colors[0].end.offset = 1
-    task_model.laser_colors[0].protocol.frequency = 60
+    task_model.laser_colors[0].protocol.frequency = 40
     task_model.laser_colors[0].protocol.ramp_down = 4
     task_model.laser_colors[1].protocol = ConstantProtocol(ramp_down=4)
 
     task_widget.apply_schema(task_model)
 
+    #task_widget.update_laser_power(task_model.laser_colors[0], task_model.laser_colors[0].location[0], [3, 4] )
+    #print(task_model.laser_colors[0].location[0].power)
     sys.exit(app.exec_())

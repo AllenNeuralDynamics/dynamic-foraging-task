@@ -124,7 +124,14 @@ from foraging_gui.schema_widgets.operation_control_widget import (
 from foraging_gui.schema_widgets.session_parameters_widget import (
     SessionParametersWidget,
 )
-
+from foraging_gui.settings_model import BonsaiSettingsModel, DFTSettingsModel
+from foraging_gui.stage import Stage
+from foraging_gui.Visualization import (
+    PlotLickDistribution,
+    PlotTimeDistribution,
+    PlotV,
+)
+from foraging_gui.warning_widget import WarningWidget
 from foraging_gui.settings_model import BonsaiSettingsModel, DFTSettingsModel
 from foraging_gui.sound_button import SoundButton
 from foraging_gui.stage import Stage
@@ -235,7 +242,7 @@ class Window(QMainWindow):
             != "",
             skip_hardware_validation=True,
         )
-        self.session_widget = SessionParametersWidget(self.session_model, self.trial_lock)
+        self.session_widget = SessionParametersWidget(self.session_model, self.trial_lock, self.default_text_color)
         for i, widget in enumerate(
             self.session_widget.schema_fields_widgets.values()
         ):
@@ -266,7 +273,8 @@ class Window(QMainWindow):
         self.task_widget = BehaviorParametersWidget(
             self.task_logic.task_parameters,
             reward_families=self.RewardFamilies,
-            trial_lock=self.trial_lock
+            trial_lock=self.trial_lock,
+            unsaved_color=self.default_text_color
         )
         self.task_widget.taskUpdated.connect(self.update_session_task)
         self.update_session_task("coupled")  # initialize to coupled
@@ -298,7 +306,8 @@ class Window(QMainWindow):
         )
         self.operation_control_widget = OperationControlWidget(
             self.operation_control_model,
-            trial_lock=self.trial_lock
+            trial_lock=self.trial_lock,
+            unsaved_color=self.default_text_color
         )
 
         # create layout for task and operation widget
@@ -311,7 +320,9 @@ class Window(QMainWindow):
 
         # add fip schema widget
         self.fip_model = FiberPhotometry(enabled=False)
-        self.fip_widget = FIBParametersWidget(self.fip_model, trial_lock=self.trial_lock)
+        self.fip_widget = FIBParametersWidget(self.fip_model,
+                                              trial_lock=self.trial_lock,
+                                              unsaved_color=self.default_text_color)
         for i, widget in enumerate(
             list(self.fip_widget.schema_fields_widgets.values())
         ):
@@ -346,6 +357,11 @@ class Window(QMainWindow):
 
         # Stage Widget
         self.stage_widget = None
+        # initialize empty timers
+        self.left_retract_timer = QTimer(timeout=lambda: None)
+        self.left_retract_timer.setSingleShot(True)
+        self.right_retract_timer = QTimer(timeout=lambda: None)
+        self.right_retract_timer.setSingleShot(True)
         try:
             self._load_stage()
         except IOError as e:
@@ -626,6 +642,103 @@ class Window(QMainWindow):
             self.stage_widget = get_stage_widget()
             layout.addWidget(self.stage_widget)
 
+    def retract_lick_spout(self, lick_spout_licked: Literal["Left", "Right"], delta: float = -10) -> None:
+        """
+        Fast retract lick spout based on lick spout licked
+
+        :param lick_spout_licked: lick spout that was licked. Opposite lickspout will be retracted
+        :param delta: change in pos to move lick spout to. Default is -10
+
+        """
+        # disconnect so it's only triggered once
+        try:
+            self.Channel2.mouseLicked.disconnect(self.retract_lick_spout)
+        except TypeError:
+            pass
+
+        lick_spout_retract = "right" if lick_spout_licked == "Left" else "left"
+        timer = getattr(self, f"{lick_spout_retract}_retract_timer")
+        tp = self.task_logic.task_parameters
+        motor = 1 if lick_spout_licked == "Left" else 2
+        at_origin = list(self._GetPositions().values())[motor] == 0.0
+
+        if tp.lick_spout_retraction and self.stage_widget is not None and not at_origin:
+            logger.info(f"Retracting {lick_spout_retract} lick spout.")
+            curr_pos = self.stage_widget.stage_model.get_current_positions_mm(motor, rel_to_monument=True)
+            self.stage_widget.stage_model.quick_move(motor=motor, distance=delta, skip_if_busy=False)
+            logger.info(f"Retracting {lick_spout_retract} lick spout to pos {delta} from current pos {curr_pos}.")
+            # configure timer to un-retract lick spout
+            timer.timeout.disconnect()
+            timer.timeout.connect(lambda: self.un_retract_lick_spout(lick_spout_retract.title(), curr_pos))
+            timer.setInterval(self.operation_control_model.lick_spout_retraction_specs.wait_time*1000)
+            timer.setSingleShot(True)
+            timer.start()
+
+        elif self.stage_widget is None:
+            logger.info("Can't fast retract stage because AIND stage is not being used.",
+                        extra={"tags": [self.warning_log_tag]})
+
+        elif tp.lick_spout_retraction or at_origin:
+            try:
+                self.Channel2.mouseLicked.connect(self.retract_lick_spout, type=Qt.UniqueConnection)
+            except TypeError:  # signal already connected
+                logger.debug("Mouse lick signal already connected.")
+            logger.debug("Cannot retract stage because " + "lickspouts at origin." if at_origin
+                        else "retraction turned off.")
+
+    def un_retract_lick_spout(self, lick_spout_retracted: Literal["Left", "Right"], pos: float) -> None:
+        """
+        Un-retract specified lick spout
+
+        :param lick_spout_retracted: lick spout that was retracted.
+        :param pos: pos to move lick spout to.
+
+        """
+
+        if self.stage_widget is not None:
+            logger.info(f"Un-retracting {lick_spout_retracted.lower()} lick spout. Moving back to position {pos}.")
+            speed = self.operation_control_model.lick_spout_retraction_specs.un_retract_speed.value
+            motor = 2 if lick_spout_retracted == "Left" else 1
+            # set un-retract speed. Set back to normal when user presses stop
+            self.stage_widget.stage_model.update_speed(value=speed)
+            self.stage_widget.stage_model.update_position(positions={motor: pos})
+
+            # create thread to track when stage has made it back to previous position and reconnect fast retract
+            Thread(target=self.reset_fast_retract, args=(motor, pos)).start()
+
+        else:
+            logger.info("Can't un retract lick spout because no AIND stage connected")
+
+    def reset_fast_retract(self, motor: int, pos: float):
+        """"
+            Resets AIND stage fast retract when spout has returned to original pos
+
+            :param motor: motor index to query
+            :param pos: original pos to wait for
+        """
+
+        if self.stage_widget is not None:
+
+            while (curr := self.stage_widget.stage_model.get_current_positions_mm(motor, rel_to_monument=True)) < pos:
+                logger.info(f"Stage at {curr}")
+                time.sleep(.1)
+
+            logger.info("Setting stage to normal speed.")
+            try:
+                self.stage_widget.stage_model.move_worker.finished.disconnect(self.reset_fast_retract)
+            except TypeError:  # signal isn't connected
+                pass
+            self.stage_widget.stage_model.update_speed(value=1)
+
+            logger.info("Reconnecting fast retract at pos.")
+            try:
+                self.Channel2.mouseLicked.connect(self.retract_lick_spout, type=Qt.UniqueConnection)
+            except TypeError:  # signal already connected
+                logger.debug("Mouse lick signal already connected.")
+
+        else:
+            logger.info("Can't set stage speed because no AIND stage connected")
+
     def _LoadUI(self):
         """
         Determine which user interface to use
@@ -847,7 +960,7 @@ class Window(QMainWindow):
             return
 
         elif list(current_positions.keys()) == ["x", "y", "z"]:
-            logging.info(
+            logging.debug(
                 "Can't update loaded mouse offset with non AIND stage coordinates."
             )
         else:
@@ -887,7 +1000,7 @@ class Window(QMainWindow):
             self.operation_control_model.stage_specs.step_size = step
 
 
-        
+
 
     def update_stage_positions_from_operational_control(
         self, oc: OperationalControl = None
@@ -1860,7 +1973,7 @@ class Window(QMainWindow):
         elif self.stage_widget is not None:  # aind stage
             # Get absolute position of motors in AIND stage
             positions = (
-                self.stage_widget.stage_model.get_current_positions_mm()
+                self.stage_widget.stage_model.get_current_positions_mm(rel_to_monument=True)
             )
             return {
                 "x": positions[0],
@@ -2761,6 +2874,7 @@ class Window(QMainWindow):
         self.client2 = OSCStreamingClient()
         self.client2.connect((self.ip, self.request_port2))
         self.Channel2 = rigcontrol.RigClient(self.client2)
+
         # manually give water
         self.client3 = OSCStreamingClient()  # Create client
         self.client3.connect((self.ip, self.request_port3))
@@ -3238,7 +3352,7 @@ class Window(QMainWindow):
                         ),
                     ),
                     LaserColorTwo(
-                        color="Red",
+                        color="Blue",
                         pulse_condition="Right choice",
                         start=IntervalConditions(
                             interval_condition="Trial start", offset=0
@@ -3248,7 +3362,7 @@ class Window(QMainWindow):
                         ),
                     ),
                     LaserColorThree(
-                        color="Green",
+                        color="Blue",
                         pulse_condition="Right choice",
                         start=IntervalConditions(
                             interval_condition="Trial start", offset=0
@@ -3258,7 +3372,7 @@ class Window(QMainWindow):
                         ),
                     ),
                     LaserColorFour(
-                        color="Orange",
+                        color="Blue",
                         pulse_condition="Right choice",
                         start=IntervalConditions(
                             interval_condition="Trial start", offset=0
@@ -3268,7 +3382,7 @@ class Window(QMainWindow):
                         ),
                     ),
                     LaserColorFive(
-                        color="Orange",
+                        color="Blue",
                         pulse_condition="Right choice",
                         start=IntervalConditions(
                             interval_condition="Trial start", offset=0
@@ -3278,7 +3392,7 @@ class Window(QMainWindow):
                         ),
                     ),
                     LaserColorSix(
-                        color="Orange",
+                        color="Blue",
                         pulse_condition="Right choice",
                         start=IntervalConditions(
                             interval_condition="Trial start", offset=0
@@ -3578,7 +3692,7 @@ class Window(QMainWindow):
             and self.InitializeBonsaiSuccessfully == 1
             and BackupSave == 0
         ):
-            self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
+            self.GeneratedTrials._get_irregular_timestamp(self.Channel2, self.data_lock)
 
         # Create new folders.
         if self.CreateNewFolder == 1:
@@ -4211,7 +4325,11 @@ class Window(QMainWindow):
             return
 
         self.PlotM = PlotV(
-            win=self, GeneratedTrials=self.GeneratedTrials, width=5, height=4
+            win=self,
+            data_lock=self.data_lock,
+            GeneratedTrials=self.GeneratedTrials,
+            width=5,
+            height=4
         )
         self.PlotM.setSizePolicy(
             QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding
@@ -5009,6 +5127,11 @@ class Window(QMainWindow):
             # set flag to perform habituation period
             self.behavior_baseline_period.set()
 
+            try:    # connect signal for fast retraction
+                self.Channel2.mouseLicked.connect(self.retract_lick_spout, type=Qt.UniqueConnection)
+            except TypeError:  # signal already connected
+                logger.debug("Mouse lick signal already connected.")
+
             self.session_run = True  # session has been started
         else:
             # Prompt user to confirm stopping trials
@@ -5048,6 +5171,12 @@ class Window(QMainWindow):
             self.session_end_tasks()
             self.sound_button.setEnabled(True)
             self.behavior_baseline_period.clear()   # set flag to break out of habituation period
+
+            # disconnect fast retract signals if connected
+            try:
+                self.Channel2.mouseLicked.disconnect(self.retract_lick_spout)
+            except TypeError:
+                pass
 
         if (self.StartANewSession == 1) and (self.ANewTrial == 0):
             # If we are starting a new session, we should wait for the last trial to finish
@@ -5104,7 +5233,11 @@ class Window(QMainWindow):
             self.GeneratedTrials = GeneratedTrials
             self.StartANewSession = 0
             PlotM = PlotV(
-                win=self, GeneratedTrials=GeneratedTrials, width=5, height=4
+                win=self,
+                data_lock=self.data_lock,
+                GeneratedTrials=GeneratedTrials,
+                width=5,
+                height=4
             )
             # PlotM.finish=1
             self.PlotM = PlotM
@@ -5160,6 +5293,7 @@ class Window(QMainWindow):
                 GeneratedTrials._get_irregular_timestamp, self.Channel2
             )
             workerLick.signals.finished.connect(self._thread_complete2)
+
             workerPlot = Worker(
                 PlotM._Update,
                 GeneratedTrials=GeneratedTrials,
@@ -5234,7 +5368,6 @@ class Window(QMainWindow):
                 "Running photometry baseline",
                 extra={"tags": [self.warning_log_tag]},
             )
-
         self._StartTrialLoop(GeneratedTrials, worker1, worker_save)
 
         if self.actionDrawing_after_stopping.isChecked() == True:

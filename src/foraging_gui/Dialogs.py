@@ -6,13 +6,15 @@ import subprocess
 import time
 import webbrowser
 from datetime import datetime
-from typing import Literal
+from typing import Literal, get_args
 from threading import Lock
 
 import numpy as np
 import pandas as pd
 from aind_behavior_dynamic_foraging.DataSchemas.optogenetics import (
     Optogenetics,
+    LaserColors,
+    COLORS
 )
 from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar,
@@ -182,8 +184,20 @@ class OptogeneticsDialog(QDialog):
         super().__init__(parent)
         uic.loadUi("Optogenetics.ui", self)
 
+        self.MainWindow = MainWindow
+
         self.opto_model = opto_model
-        self.opto_widget = OptoParametersWidget(self.opto_model, trial_lock)
+        self.opto_widget = OptoParametersWidget(self.opto_model, trial_lock, self.MainWindow.default_text_color)
+        if not hasattr(self.MainWindow, "LaserCalibrationResults"):  # disable opto widget if no calibration data found
+            self.opto_widget.setEnabled(False)
+        else:
+            self.opto_widget.protocolChanged.connect(self.set_power_values)
+            self.opto_widget.laserColorChanged.connect(self.set_protocol_values)    # will trigger update to powers
+            self.set_color_values()
+            for laser in self.opto_model.laser_colors:
+                self.set_protocol_values(laser.model_dump())
+                self.set_power_values(laser.model_dump())
+
         # initialize model as no optogenetics
         self.opto_model.laser_colors = []
         self.opto_model.session_control = None
@@ -195,7 +209,6 @@ class OptogeneticsDialog(QDialog):
         self.QScrollOptogenetics.setVerticalScrollBarPolicy(
             Qt.ScrollBarAlwaysOn
         )
-        self.MainWindow = MainWindow
 
     def _connectSignalsSlots(self):
 
@@ -228,6 +241,65 @@ class OptogeneticsDialog(QDialog):
             return "NA"
         else:
             return sorted_dates[-1]
+
+    def set_color_values(self):
+        """
+            Set color values in opto widget based on local calibration data
+        """
+
+        colors = []
+        for color in get_args(COLORS):
+            latest_calibration_date = self._FindLatestCalibrationDate(color)
+
+            if latest_calibration_date != "NA":
+                colors.append(color)
+        self.opto_widget.update_laser_colors(colors)
+
+    def set_protocol_values(self, condition: dict) -> None:
+        """
+            Set available protocol values based on local calibration
+
+            :param condition: serialized LaserColors model
+
+        """
+        condition_model = LaserColors(**condition)
+        color = condition_model.color
+
+        latest_calibration_date = self._FindLatestCalibrationDate(color)
+
+        recent_laser_cal = self.MainWindow.LaserCalibrationResults[latest_calibration_date]
+
+        for location in condition_model.location:
+            self.opto_widget.update_laser_protocol(condition_model, location, list(recent_laser_cal[color].keys()))
+
+    def set_power_values(self, condition: dict) -> None:
+        """
+            Set available power values based on local calibration
+
+            :param condition: serialized LaserColors model
+
+        """
+
+        condition_model = LaserColors(**condition)
+        protocol = condition_model.protocol
+        color = condition_model.color
+
+        latest_cal = self._FindLatestCalibrationDate(color)
+
+        recent_laser_calibration = {} if latest_cal == "NA" else self.MainWindow.LaserCalibrationResults[latest_cal]
+        for location in ["LocationOne", "LocationTwo"]:
+            laser_tag = "Laser_1" if location == "LocationOne" else "Laser_2"
+            if protocol.name == "Sine":
+                freq_key = str(protocol.frequency)
+                pairs = recent_laser_calibration[color][protocol.name][freq_key][laser_tag]["LaserPowerVoltage"]
+            else:
+                pairs = recent_laser_calibration[color][protocol.name][laser_tag]["LaserPowerVoltage"]
+            
+            pairs.sort(key=lambda x: [1])   # sort based on power
+
+            laser_powers = pairs[1][:]
+            daq_amps = pairs[0][:]
+            self.opto_widget.update_laser_power(condition_model, location, laser_powers, daq_amps)
 
 
 class WaterCalibrationDialog(QDialog):

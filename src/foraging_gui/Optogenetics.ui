@@ -13,38 +13,6 @@
   <property name="windowTitle">
    <string>Optogenetics</string>
   </property>
-  <widget class="QLabel" name="label1">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>650</y>
-     <width>131</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>NIdaq sample frequency=</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="SampleFrequency">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>150</x>
-     <y>650</y>
-     <width>91</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>5000</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label1_20">
    <property name="enabled">
     <bool>false</bool>

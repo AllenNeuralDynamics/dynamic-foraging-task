@@ -9,7 +9,8 @@ from threading import Lock
 
 import inflection
 from pydantic import BaseModel
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtGui import QKeyEvent, QPalette, QColor
 from PyQt5.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -31,16 +32,20 @@ class SchemaWidgetBase(QMainWindow):
     ValueChangedOutside = pyqtSignal((str,))
     ValueChangedInside = pyqtSignal((str,))
 
-    def __init__(self, schema: BaseModel, trial_lock: Lock):
+    def __init__(self, schema: BaseModel,
+                 trial_lock: Lock,
+                 unsaved_color: str):
 
         """
         Class to dynamically make widgets based on schema and update schema with user input
         :param schema: schema object to base widget on and update.
         :param trial_lock: lock to use when updating schema
+        :param unsaved_color: string specifying the color of unsaved data
         """
 
         self.log = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self.trial_lock = trial_lock
+        self.unsaved_color = unsaved_color
 
         super().__init__()
         self.schema = schema
@@ -166,17 +171,20 @@ class SchemaWidgetBase(QMainWindow):
         """Convenience function to build editable text boxes and add initial value and validator
         :param name: name to emit when text is edited is changed
         :param value: initial value to add to box"""
+
         value_type = type(value)
         if value_type in [int, float]:
-            textbox = QSpinBox() if value_type == int else QDoubleSpinBox()
+            textbox = QEnterSpinBox(self.unsaved_color) if value_type == int else QEnterDoubleSpinBox(self.unsaved_color)
             textbox.setRange(0, 1000000)
             textbox.setValue(value)
-            textbox.valueChanged.connect(
+            textbox.returnPressed.connect(
                 lambda v: self.textbox_edited(name, value_type(v))
             )
+            textbox.setStyleSheet("color: black")
         else:
             textbox = QLineEdit(str(value))
-            textbox.editingFinished.connect(lambda: self.textbox_edited(name))
+            textbox.textChanged.connect(lambda text, widget=textbox: widget.setStyleSheet(f"color: {self.unsaved_color}"))
+            textbox.returnPressed.connect(lambda: self.textbox_edited(name))
         return textbox
 
     def textbox_edited(self, name, value=None):
@@ -188,12 +196,14 @@ class SchemaWidgetBase(QMainWindow):
         """
 
         name_lst = name.split(".")
+        widget = getattr(self, name + "_widget")
         value = (
             value
             if value is not None
-            else getattr(self, name + "_widget").text()
+            else widget.text()
         )
         self.path_set(self.schema, name_lst, value)
+        widget.setStyleSheet("color: black")   # set parameter to black to indicate applied
         self.ValueChangedInside.emit(name)
 
     def create_check_box(self, name, value: bool) -> QCheckBox:
@@ -283,6 +293,7 @@ class SchemaWidgetBase(QMainWindow):
         """Set widget text if widget is QLineEdit or QCombobox
         :param name: widget name to set text to
         :param value: value of text"""
+
         if hasattr(self, f"{name}_widget"):
             widget = getattr(self, f"{name}_widget")
             widget.blockSignals(
@@ -290,8 +301,9 @@ class SchemaWidgetBase(QMainWindow):
             )  # block signal indicating change since changing internally
             if type(widget) in [QLineEdit, QTextEdit]:
                 widget.setText(str(value))
-            elif type(widget) in [QSpinBox, QDoubleSpinBox, QSlider]:
+            elif type(widget) in [QEnterSpinBox, QEnterDoubleSpinBox, QSlider]:
                 widget.setValue(value)
+                widget.setStyleSheet("color: black")  # set parameter to black to indicate applied
             elif type(widget) == QComboBox:
                 value_type = type(self.path_get(self.schema, name.split(".")))
                 value = (
@@ -368,6 +380,27 @@ class SchemaWidgetBase(QMainWindow):
                 else getattr(iterable, k)
             )
         return iterable
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        super().keyPressEvent(event)
+        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+            for child in self.iterate_all_children(self):   # iterate through widgets and if text is unsaved, save
+                if hasattr(child, "palette") and \
+                        child.palette().color(QPalette.Text).name() == QColor(self.unsaved_color).name():
+                    if type(child) in [QEnterSpinBox, QEnterDoubleSpinBox]:
+                        child.returnPressed.emit(child.value())
+                    else:
+                        child.returnPressed.emit()
+    def iterate_all_children(self, widget: QWidget):
+        """
+            Recursively iterate through all children of widget
+        """
+        for child in widget.findChildren(QWidget):
+            if isinstance(child, (QEnterSpinBox, QEnterDoubleSpinBox, QLineEdit)):
+                yield child
+            yield from self.iterate_all_children(child)  # recurse into grandchildren
+
+
 
 
 # Convenience Functions
@@ -474,6 +507,31 @@ def add_border(
     widget.setCentralWidget(create_widget(orientation, *widgets))
 
     return widget
+
+class QEnterSpinBox(QSpinBox):
+    returnPressed = pyqtSignal(int)
+
+    def __init__(self, unsaved_color: str, parent=None):
+        super().__init__(parent)
+        self.valueChanged.connect(lambda v: self.setStyleSheet(f"color: {unsaved_color}"))
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        super().keyPressEvent(event)
+        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+            self.returnPressed.emit(self.value())
+
+
+class QEnterDoubleSpinBox(QDoubleSpinBox):
+    returnPressed = pyqtSignal(float)
+
+    def __init__(self, unsaved_color, parent=None):
+        super().__init__(parent)
+        self.valueChanged.connect(lambda v: self.setStyleSheet(f"color: {unsaved_color}"))
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        super().keyPressEvent(event)
+        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+            self.returnPressed.emit(self.value())
 
 
 if __name__ == "__main__":
