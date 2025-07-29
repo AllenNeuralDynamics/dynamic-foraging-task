@@ -2769,8 +2769,7 @@ class GenerateTrials:
                     else:  # no response
                         self.B_AnimalCurrentResponse = random.choice(range(2))
             else:
-                self.B_AnimalCurrentResponse = random.choices([0, 1, 2], [.2, .2, .8])[0]
-                # self.B_AnimalCurrentResponse = random.choice(range(2))
+                self.B_AnimalCurrentResponse = random.choice(range(2))
         # random forager
         elif self.win.actionRandom_choice.isChecked():
             if np.random.random(1) < 0.1:  # no response
@@ -2917,7 +2916,7 @@ class GenerateTrials:
             ReceiveN = 11
             DelayStartTimeHarp = []
             DelayStartTime = []
-        current_receiveN = 1
+        current_receiveN = 0
         behavior_eventN = 0
         in_delay = 0  # 0, the next /BehaviorEvent is not the delay; 1, the next /BehaviorEvent is the delay following the /TrialStartTime
         first_behavior_event = 0
@@ -3058,7 +3057,7 @@ class GenerateTrials:
                 self.B_GoCueTimeBehaviorBoard, GoCueTimeBehaviorBoard
             )
             self.B_GoCueTimeSoundCard = np.append(
-                self.B_GoCueTimeSoundCard, 0
+                self.B_GoCueTimeSoundCard, GoCueTimeSoundCard
             )
             # get the event time
             self.B_TrialStartTime = np.append(

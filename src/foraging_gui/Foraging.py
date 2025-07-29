@@ -401,6 +401,10 @@ class Window(QMainWindow):
         self.behavior_baseline_period = Event()
         self.baseline_min_elapsed = 0
 
+        self.operation_control_model.lick_spout_bias_movement.bias_upper_threshold = .1
+        self.operation_control_model.lick_spout_bias_movement.bias_lower_threshold = .05
+        self.operation_control_widget.apply_schema(self.operation_control_model)
+
         # create bias indicator
         self.bias_n_size = 200
         self.bias_indicator = BiasIndicator(
@@ -5794,31 +5798,39 @@ class Window(QMainWindow):
         specs = self.operation_control_model.lick_spout_bias_movement
         pos = self._GetPositions()
         displacement = pos["x"] - self.lick_spout_start["x"]
-        if specs and specs.trial_interval <= trial_number-self.last_bias_move:
+
+        if specs and specs.trial_interval <= trial_number-self.last_bias_move:  # check if stage needs to move
 
             # aind stage uses mm and newscale stage us um. Convert units depending on what stage is being used
             step_size = specs.step_size_um if not self.stage_widget else specs.step_size_um * 10e-4
-            pol = -1 if bias < 0 else 1
-            delta_step = None
-            if abs(bias) < specs.bias_lower_threshold:  # move lick spouts back to position at start of session
-                step_size = min(step_size, abs(displacement))  # only move as far back to original pos
-                delta_step = step_size * pol
-                logging.info(f"Moving lickspout {delta_step} um towards original position at bias {bias}.",
-                             extra={"tags": [self.warning_log_tag]})
+            pol = -1 if bias < 0 else 1       # polarity of bias
+            last_move_bias = self.GeneratedTrials.B_Bias[self.last_bias_move]
 
-            elif abs(bias) > specs.bias_upper_threshold:    # move lick spouts towards unbiased side
-                delta_step = step_size * pol
-                logging.info(f"Moving lickspout {delta_step} um away from original position at bias {bias}.",
-                             extra={"tags": [self.warning_log_tag]})
+            upper_correction = abs(bias) > specs.bias_upper_threshold
+            lower_correction = not upper_correction \
+                               and (pol * last_move_bias) > specs.bias_upper_threshold \
+                               and displacement != 0.0
 
-            if delta_step:
-                if self.stage_widget is not None:
-                    pos["x"] += delta_step
-                    self.stage_widget.stage_model.update_position({i: x for i, x in enumerate(pos.values())})
-                else:
-                    self._Move("x", pos["x"] + delta_step)
+            if not upper_correction and not lower_correction:   # no movement necessary
+                return
 
-                self.last_bias_move = trial_number  # reset check
+            if lower_correction:
+                delta_step = min(step_size, abs(displacement)) if bias < 0 else -min(step_size, abs(displacement))
+                direction = "towards"
+            else:
+                delta_step = step_size if bias >= 0 else -step_size
+                direction = "away"
+
+            logging.info(f"Moving lickspout {delta_step} um {direction} original position at bias {bias}.",
+                         extra={"tags": [self.warning_log_tag]})
+
+            if self.stage_widget is not None:
+                pos["x"] += delta_step
+                self.stage_widget.stage_model.update_position({i: x for i, x in enumerate(pos.values())})
+            else:
+                self._Move("x", pos["x"] + delta_step)
+
+            self.last_bias_move = trial_number  # reset check
 
     def bias_calculated(
         self,

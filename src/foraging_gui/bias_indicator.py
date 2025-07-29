@@ -233,7 +233,6 @@ class BiasIndicator(QMainWindow):
         # calculate logistic regression and extract bias
         choice_history = np.array(choice_history)
         if len(choice_history[~np.isnan(choice_history)]) >= n_trial_back + 2:
-            trial_count = len(choice_history)
 
             # Determine if we have valid data to fit model
             unique = np.unique(choice_history[~np.isnan(choice_history)])
@@ -315,30 +314,40 @@ class BiasIndicator(QMainWindow):
             if abs(bias) > self.bias_upper_threshold:
                 self.log.info(
                     f"Bias value calculated over a threshold of {self.bias_upper_threshold}. Bias: {bias} "
-                    f"Trial Count: {trial_count}"
+                    f"Trial Count: {trial_num}"
                 )
-                self.biasOver.emit(bias, trial_count)
-                self._current_bias_point.setData(
-                    pos=[[trial_num, bias]],
-                    pen=QColor("purple"),
-                    brush=QColor("purple"),
-                    size=9,
-                )
+                self.biasOver.emit(bias, trial_num)
+                self.update_bias_point("purple", bias, trial_num)
 
             elif abs(bias) < self.bias_lower_threshold:
                 self.log.info(
                     f"Bias value calculated under a threshold of {self.bias_lower_threshold}. Bias: {bias} "
-                    f"Trial Count: {trial_count}"
+                    f"Trial Count: {trial_num}"
                 )
-                self.biasUnder.emit(bias, trial_count)
+                self.biasUnder.emit(bias, trial_num)
+                self.update_bias_point("purple", bias, trial_num)
 
             else:
-                self._current_bias_point.setData(
-                    pos=[[trial_num, bias]],
-                    pen=QColor("green"),
-                    brush=QColor("green"),
-                    size=9,
-                )
+                self.update_bias_point("green", bias, trial_num)
+
+    def update_bias_point(self,
+                          color: str,
+                          bias: float,
+                          trial_num: str) -> None:
+        """
+        Update color and pos of bias point
+        :param color: color to set bias point
+        :param bias: y axis value
+        :param trial_num: x axis value
+
+        """
+
+        self._current_bias_point.setData(
+            pos=[[trial_num, bias]],
+            pen=QColor(color),
+            brush=QColor(color),
+            size=9,
+        )
 
     def clear(self):
         """Clear table of all items and clear biases list"""
