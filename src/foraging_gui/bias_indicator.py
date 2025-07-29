@@ -325,7 +325,7 @@ class BiasIndicator(QMainWindow):
                     size=9,
                 )
 
-            elif abs(bias) > self.bias_lower_threshold:
+            elif abs(bias) < self.bias_lower_threshold:
                 self.log.info(
                     f"Bias value calculated under a threshold of {self.bias_lower_threshold}. Bias: {bias} "
                     f"Trial Count: {trial_count}"
