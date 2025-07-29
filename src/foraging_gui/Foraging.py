@@ -5799,15 +5799,15 @@ class Window(QMainWindow):
             # aind stage uses mm and newscale stage us um. Convert units depending on what stage is being used
             step_size = specs.step_size_um if not self.stage_widget else specs.step_size_um * 10e-4
             pol = -1 if bias < 0 else 1
-            if abs(bias) < specs.bias_lower_threshold * pol:  # move lick spouts back to position at start of session
+            if abs(bias) < specs.bias_lower_threshold:  # move lick spouts back to position at start of session
                 step_size = min(step_size, abs(displacement))  # only move as far back to original pos
                 delta_step = step_size * pol
-                logging.info(f"Moving lickspout {delta_step} um towards original position. ",
+                logging.info(f"Moving lickspout {delta_step} um towards original position at bias {bias}.",
                              extra={"tags": [self.warning_log_tag]})
 
             else:    # move lick spouts towards unbiased side
                 delta_step = step_size * pol
-                logging.info(f"Moving lickspout {delta_step} um away from original position.",
+                logging.info(f"Moving lickspout {delta_step} um away from original position at bias {bias}.",
                              extra={"tags": [self.warning_log_tag]})
 
             if self.stage_widget is not None:
