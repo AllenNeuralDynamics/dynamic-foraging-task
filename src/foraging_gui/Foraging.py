@@ -5803,12 +5803,7 @@ class Window(QMainWindow):
             last_move_bias = self.GeneratedTrials.B_Bias[self.last_bias_move]
 
             upper_correction = abs(bias) > specs.bias_upper_threshold
-
-            # move toward center if last bias was above threshold in same direction.
-            # Avoid the situation where previous move was under threshold in either direction
-            lower_correction = not upper_correction \
-                               and (pol * last_move_bias) >= specs.bias_upper_threshold \
-                               and displacement != 0.0
+            lower_correction = not upper_correction and displacement != 0.0
 
             if not upper_correction and not lower_correction:   # no movement necessary
                 return
