@@ -5802,8 +5802,8 @@ class Window(QMainWindow):
             pol = -1 if bias < 0 else 1       # polarity of bias
             last_move_bias = self.GeneratedTrials.B_Bias[self.last_bias_move]
 
-            upper_correction = abs(bias) > specs.bias_upper_threshold
-            lower_correction = not upper_correction and displacement != 0.0
+            upper_correction = abs(bias) > specs.bias_upper_threshold and displacement > specs.range_um
+            lower_correction = abs(bias) < specs.bias_upper_threshold and displacement != 0.0
 
             if not upper_correction and not lower_correction:   # no movement necessary
                 return
