@@ -5799,8 +5799,6 @@ class Window(QMainWindow):
 
             # aind stage uses mm and newscale stage us um. Convert units depending on what stage is being used
             step_size = specs.step_size_um if not self.stage_widget else specs.step_size_um * 10e-4
-            pol = -1 if bias < 0 else 1       # polarity of bias
-            last_move_bias = self.GeneratedTrials.B_Bias[self.last_bias_move]
 
             upper_correction = abs(bias) > specs.bias_upper_threshold and displacement > specs.range_um
             lower_correction = abs(bias) < specs.bias_upper_threshold and displacement != 0.0
