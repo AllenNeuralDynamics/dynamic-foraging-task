@@ -3035,6 +3035,7 @@ class GenerateTrials:
             if current_receiveN == ReceiveN:
                 break
         with data_lock:
+
             self.B_RewardedHistory = np.append(
                 self.B_RewardedHistory, B_CurrentRewarded, axis=1
             )

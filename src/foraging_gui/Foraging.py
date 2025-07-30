@@ -125,6 +125,14 @@ from foraging_gui.schema_widgets.session_parameters_widget import (
     SessionParametersWidget,
 )
 from foraging_gui.settings_model import BonsaiSettingsModel, DFTSettingsModel
+from foraging_gui.stage import Stage
+from foraging_gui.Visualization import (
+    PlotLickDistribution,
+    PlotTimeDistribution,
+    PlotV,
+)
+from foraging_gui.warning_widget import WarningWidget
+from foraging_gui.settings_model import BonsaiSettingsModel, DFTSettingsModel
 from foraging_gui.sound_button import SoundButton
 from foraging_gui.stage import Stage
 from foraging_gui.Visualization import (
@@ -396,14 +404,27 @@ class Window(QMainWindow):
         # create bias indicator
         self.bias_n_size = 200
         self.bias_indicator = BiasIndicator(
-            x_range=self.bias_n_size, data_lock=self.data_lock
+            x_range=self.bias_n_size,
+            data_lock=self.data_lock,
+            bias_upper_threshold=self.operation_control_model.lick_spout_bias_movement.bias_upper_threshold,
+            bias_lower_threshold=self.operation_control_model.lick_spout_bias_movement.bias_lower_threshold,
         )
+        self.operation_control_widget.lower_bias_changed.connect(lambda v: setattr(self.bias_indicator,
+                                                                                   "bias_lower_threshold",
+                                                                                   v))
+        self.operation_control_widget.upper_bias_changed.connect(lambda v: setattr(self.bias_indicator,
+                                                                                   "bias_upper_threshold",
+                                                                                   v))
         self.bias_indicator.biasValue.connect(
             self.bias_calculated
         )  # update dashboard value
+        self.bias_indicator.biasOver.connect(self.lick_spout_bias_correction)
+        self.bias_indicator.biasUnder.connect(self.lick_spout_bias_correction)
         self.bias_indicator.setSizePolicy(
             QSizePolicy.Maximum, QSizePolicy.Maximum
         )
+        self.last_bias_move = 0
+        self.lick_spout_start = self._GetPositions()  # "origin" of lick spout for mouse
         self.bias_thread = Thread()  # dummy thread
 
         # create sound button
@@ -5234,6 +5255,8 @@ class Window(QMainWindow):
                     self.end_session_log()
                 self.log_session()  # start log for new session
 
+            self.lick_spout_start = self._GetPositions()   # "origin" of lick spout for mouse
+
         else:
             GeneratedTrials = self.GeneratedTrials
 
@@ -5757,6 +5780,49 @@ class Window(QMainWindow):
             self._Save(BackupSave=BackupSave)
         except Exception as e:
             logging.error("backup save failed: {}".format(e))
+
+    def lick_spout_bias_correction(self,
+                                   bias: float,
+                                   trial_number: int):
+
+        """
+         Evaluate and move lick spout based on bias. Negative bias correlates to left; positive, right.
+        :param bias: bias value
+        :param trial_number: trial number at which bias value was calculated
+        """
+
+        specs = self.operation_control_model.lick_spout_bias_movement
+        pos = self._GetPositions()
+        displacement = pos["x"] - self.lick_spout_start["x"]
+
+        if specs and specs.trial_interval <= trial_number-self.last_bias_move:  # check if stage needs to move
+
+            # aind stage uses mm and newscale stage us um. Convert units depending on what stage is being used
+            step_size = specs.step_size_um if not self.stage_widget else specs.step_size_um * 10e-4
+
+            upper_correction = abs(bias) > specs.bias_upper_threshold and displacement > specs.range_um
+            lower_correction = abs(bias) < specs.bias_upper_threshold and displacement != 0.0
+
+            if not upper_correction and not lower_correction:   # no movement necessary
+                return
+
+            if lower_correction:
+                delta_step = min(step_size, abs(displacement)) if bias < 0 else -min(step_size, abs(displacement))
+                direction = "towards"
+            else:
+                delta_step = step_size if bias >= 0 else -step_size
+                direction = "away"
+
+            logging.info(f"Moving lickspout {delta_step} um {direction} original position at bias {bias}.",
+                         extra={"tags": [self.warning_log_tag]})
+
+            if self.stage_widget is not None:
+                pos["x"] += delta_step
+                self.stage_widget.stage_model.update_position({i: x for i, x in enumerate(pos.values())})
+            else:
+                self._Move("x", pos["x"] + delta_step)
+
+            self.last_bias_move = trial_number  # reset check
 
     def bias_calculated(
         self,
