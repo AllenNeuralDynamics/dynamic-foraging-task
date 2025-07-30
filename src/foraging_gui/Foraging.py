@@ -401,10 +401,6 @@ class Window(QMainWindow):
         self.behavior_baseline_period = Event()
         self.baseline_min_elapsed = 0
 
-        self.operation_control_model.lick_spout_bias_movement.bias_upper_threshold = .1
-        self.operation_control_model.lick_spout_bias_movement.bias_lower_threshold = .05
-        self.operation_control_widget.apply_schema(self.operation_control_model)
-
         # create bias indicator
         self.bias_n_size = 200
         self.bias_indicator = BiasIndicator(
@@ -5807,8 +5803,11 @@ class Window(QMainWindow):
             last_move_bias = self.GeneratedTrials.B_Bias[self.last_bias_move]
 
             upper_correction = abs(bias) > specs.bias_upper_threshold
+
+            # move toward center if last bias was above threshold in same direction.
+            # Avoid the situation where previous move was under threshold in either direction
             lower_correction = not upper_correction \
-                               and (pol * last_move_bias) > specs.bias_upper_threshold \
+                               and (pol * last_move_bias) >= specs.bias_upper_threshold \
                                and displacement != 0.0
 
             if not upper_correction and not lower_correction:   # no movement necessary
