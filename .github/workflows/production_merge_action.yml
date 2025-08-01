@@ -18,7 +18,7 @@ jobs:
             - run: echo $date
             - run: echo "testing string ${{ env.date }}"
             - name: create pull request
-              run: gh pr create -B production_testing -H develop --title "[production merge] ${{ env.date }}" --body 'Created by Github Actions' --assignee alexpiet --reviewer alexpiet --reviewer hanhou --reviewer XX-Yin
+              run: gh pr create -B production_testing -H develop --title "[production merge] ${{ env.date }}" --body 'Created by Github Actions' --assignee alexpiet --reviewer alexpiet --reviewer hanhou --reviewer XX-Yin --reviewer ellahiltonvano
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
