@@ -31,12 +31,13 @@ class OperationControlWidget(SchemaWidgetBase):
         add_border(self)
 
         # add ranges for bias thresholds
-        up_bias = getattr(self, "bias_correction.lick_spout_movement.bias_upper_threshold_widget")
-        low_bias = getattr(self, "bias_correction.lick_spout_movement.bias_lower_threshold_widget")
+        up_bias = getattr(self, "bias_correction.bias_upper_threshold_widget")
+        low_bias = getattr(self, "bias_correction.bias_lower_threshold_widget")
         up_bias.setRange(0, 1)
         up_bias. setSingleStep(.1)
         up_bias.returnPressed.connect(low_bias.setMaximum)   # lower threshold must be lower that upper threshold
-        getattr(self, "lick_spout_bias_movement.bias_upper_threshold_widget").setMinimum(0)
+        low_bias.setRange(0, 1)
+        low_bias.setSingleStep(.1)
 
         # add signal emit when thresholds are changed
         up_bias.returnPressed.connect(self.upper_bias_changed.emit)

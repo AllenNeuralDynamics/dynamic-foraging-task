@@ -406,8 +406,8 @@ class Window(QMainWindow):
         self.bias_indicator = BiasIndicator(
             x_range=self.bias_n_size,
             data_lock=self.data_lock,
-            bias_upper_threshold=self.operation_control_model.bias_correction.lick_spout_movement.bias_upper_threshold,
-            bias_lower_threshold=self.operation_control_model.bias_correction.lick_spout_movement.bias_lower_threshold,
+            bias_upper_threshold=self.operation_control_model.bias_correction.bias_upper_threshold,
+            bias_lower_threshold=self.operation_control_model.bias_correction.bias_lower_threshold,
         )
         self.operation_control_widget.lower_bias_changed.connect(lambda v: setattr(self.bias_indicator,
                                                                                    "bias_lower_threshold",
@@ -5801,13 +5801,14 @@ class Window(QMainWindow):
 
             # disconnect signals so intervention isn't triggered twice
             self.bias_indicator.biasOver.disconnect(self.bias_correction)
-            self.bias_indicator.biasUnder.disconnect(self.bias_correction)
 
             # first try water intervention
             if self.water_reward_attempts > specs.max_water_reward_attempts:
-                watered = self.water_reward_bias_correction(bias, trial_number)
+                self.water_reward_bias_correction(bias, trial_number)
 
             else:
+                logging.info(f"Maximum watering attempts exceeded. Moving lickspouts for bias. ",
+                             extra={"tags": [self.warning_log_tag]})
                 self.lick_spout_bias_correction(bias, trial_number)
 
             # multiple trials could have elapsed in water reward so set to current trial
@@ -5815,7 +5816,7 @@ class Window(QMainWindow):
 
             # re-connect signals
             self.bias_indicator.biasOver.connect(self.bias_correction)
-            self.bias_indicator.biasUnder.connect(self.bias_correction)
+
 
     def water_reward_bias_correction(self,
                                      bias: float,
@@ -5839,6 +5840,9 @@ class Window(QMainWindow):
 
         if specs and pl != pr and set(past_n_choices) == {low_prob_choice}:
             valve = "Left" if low_prob_choice == 1 else "Right"     # give water on un-licked higher prob side
+
+            logging.info(f"Giving water on {valve} side.", extra={"tags": [self.warning_log_tag]})
+
             open_time = self.calculate_valve_open_time(valve, specs.volume_ul)
             getattr(self.GeneratedTrials, f"_Give{valve}")(self.Channel3, open_time)
             self.water_reward_attempts += 1
