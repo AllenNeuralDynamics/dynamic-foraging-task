@@ -5792,8 +5792,7 @@ class Window(QMainWindow):
 
         if specs.trial_interval <= trial_number-self.last_bias_intervention and abs(bias) > specs.bias_upper_threshold:
 
-            # disconnect signals so intervention isn't triggered twice
-            self.bias_indicator.biasOver.disconnect(self.bias_correction)
+            self.last_bias_intervention = trial_number
 
             # first try water intervention
             if self.water_reward_attempts > specs.max_water_reward_attempts:
@@ -5803,12 +5802,6 @@ class Window(QMainWindow):
                 logging.info(f"Maximum watering attempts exceeded. Moving lickspouts for bias. ",
                              extra={"tags": [self.warning_log_tag]})
                 self.lick_spout_bias_correction(bias, trial_number)
-
-            # multiple trials could have elapsed in water reward so set to current trial
-            self.last_bias_intervention = self.GeneratedTrials.B_CurrentTrialN
-
-            # re-connect signals
-            self.bias_indicator.biasOver.connect(self.bias_correction)
 
 
     def water_reward_bias_correction(self,
@@ -5823,6 +5816,7 @@ class Window(QMainWindow):
 
         """
 
+        threshold = self.operation_control_model.bias_correction.bias_upper_threshold
         specs = self.operation_control_model.bias_correction.water_reward
 
         pl = self.GeneratedTrials.B_CurrentRewardProb[0]    # probability left
@@ -5831,7 +5825,7 @@ class Window(QMainWindow):
         low_prob_choice = 0 if pl < pr else 1   # left choice will be 0, right 1
         past_n_choices = self.GeneratedTrials.B_AnimalResponseHistory[-specs.n_choices:]
 
-        if specs and pl != pr and set(past_n_choices) == {low_prob_choice}:
+        if specs and abs(bias) > threshold and pl != pr and set(past_n_choices) == {low_prob_choice}:
             valve = "Left" if low_prob_choice == 1 else "Right"     # give water on un-licked higher prob side
 
             logging.info(f"Giving water on {valve} side.", extra={"tags": [self.warning_log_tag]})
@@ -5840,7 +5834,6 @@ class Window(QMainWindow):
             getattr(self.GeneratedTrials, f"_Give{valve}")(self.Channel3, open_time)
             self.water_reward_attempts += 1
             self.last_bias_intervention = trial_number  # reset check
-
 
     def lick_spout_bias_correction(self,
                                    bias: float,
