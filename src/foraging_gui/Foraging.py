@@ -124,14 +124,7 @@ from foraging_gui.schema_widgets.operation_control_widget import (
 from foraging_gui.schema_widgets.session_parameters_widget import (
     SessionParametersWidget,
 )
-from foraging_gui.settings_model import BonsaiSettingsModel, DFTSettingsModel
-from foraging_gui.stage import Stage
-from foraging_gui.Visualization import (
-    PlotLickDistribution,
-    PlotTimeDistribution,
-    PlotV,
-)
-from foraging_gui.warning_widget import WarningWidget
+
 from foraging_gui.settings_model import BonsaiSettingsModel, DFTSettingsModel
 from foraging_gui.sound_button import SoundButton
 from foraging_gui.stage import Stage
