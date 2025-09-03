@@ -1814,6 +1814,7 @@ class Window(QMainWindow):
                 "aind_watchdog_service",
                 "manifest",
             ),
+            "transfer_service_job_type": "dynamic_foraging",
             "auto_engage": True,
             "clear_figure_after_save": True,
             "add_default_project_name": True,
@@ -7079,6 +7080,7 @@ class Window(QMainWindow):
             contents = {
                 "acquisition_datetime": self.behavior_session_model.date,
                 "name": self.behavior_session_model.session_name,
+                "transfer_service_job_type": self.Settings.get("transfer_service_job_type"),
                 "platform": "behavior",
                 "subject_id": int(self.behavior_session_model.subject),
                 "capsule_id": capsule_id,
