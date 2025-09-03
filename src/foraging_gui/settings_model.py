@@ -178,6 +178,7 @@ class DFTSettingsModel(BaseModel):
     save_each_trial: bool
     AutomaticUpload: bool
     manifest_flag_dir: str
+    transfer_service_job_type: str
     auto_engage: bool
     clear_figure_after_save: bool
     add_default_project_name: bool
