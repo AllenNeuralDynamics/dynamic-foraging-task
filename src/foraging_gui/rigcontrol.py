@@ -173,6 +173,12 @@ class RigClient:
     def AutoWater_Right(self, value):
         self.send("/AutoWater_Right", value)
 
+    def RandomWater_Left(self, value):
+        self.send("/RandomWater_Left", value)
+
+    def RandomWater_Right(self, value):
+        self.send("/RandomWater_Right", value)
+
     def Location1_Size(self, value):
         self.send("/Location1Size", value)
 
