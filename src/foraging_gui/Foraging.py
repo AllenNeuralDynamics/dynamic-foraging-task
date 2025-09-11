@@ -3445,6 +3445,10 @@ class Window(QMainWindow):
                 event.ignore()
                 return
 
+        # stop stage widget
+        if self.stage_widget:
+            self.stage_widget.stage_model.closeEvent()
+
         event.accept()
         self.Start.setChecked(False)
         if self.InitializeBonsaiSuccessfully == 1:
