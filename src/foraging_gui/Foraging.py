@@ -1573,7 +1573,7 @@ class Window(QMainWindow):
 
             # Multiple weeks on the schedule
             if len(dividers) > 1:
-                first = dividers.iloc[0]['Mouse ID']
+                first = datetime.strptime(dividers.iloc[0]['Mouse ID'], "%m/%d/%Y")
 
                 # switch schedule at Friday 5pm
                 cutoff = first - timedelta(days=3)  # Go back to Friday
