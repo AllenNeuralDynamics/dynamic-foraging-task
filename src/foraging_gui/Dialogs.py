@@ -826,7 +826,6 @@ class WaterCalibrationDialog(QDialog):
             0,
             1000,
             4,
-            min=0       # before weight cannot be below 0
         )
         if not ok:
             # User cancels
@@ -881,7 +880,6 @@ class WaterCalibrationDialog(QDialog):
             0,
             1000,
             4,
-            min=before_weight   # final tube weight cannot be less than init weight
         )
         if not ok:
             self.Warning.setText("Please repeat measurement")
@@ -927,8 +925,9 @@ class WaterCalibrationDialog(QDialog):
         else:
             self.Warning.setText(
                 "Recorded before and after tube weights do not pass checks. Please repeat check."
-                "Values have not been saved."
+                "Value has not been saved."
             )
+            self.Repeat.setStyleSheet("color: black;background-color : none;")
 
 
     def _StartCalibratingRight(self):
@@ -1022,7 +1021,6 @@ class WaterCalibrationDialog(QDialog):
             0,
             1000,
             4,
-            min=0   # weight cannot be below 0
         )
         if not ok:
             # User cancels
@@ -1077,7 +1075,6 @@ class WaterCalibrationDialog(QDialog):
             0,
             1000,
             4,
-            min=before_weight   # final weight cannot be below initial weight
         )
         if not ok:
             self.Warning.setText("Please repeat measurement")
@@ -1120,8 +1117,9 @@ class WaterCalibrationDialog(QDialog):
         else:
             self.Warning.setText(
                 "Recorded before and after tube weights do not pass checks. Please repeat check."
-                "Values have not been saved."
+                "Value has not been saved."
             )
+            self.Repeat.setStyleSheet("color: black;background-color : none;")
 
     def check_calibration_curve(self,
         after_tube_weight: float,
@@ -1136,7 +1134,7 @@ class WaterCalibrationDialog(QDialog):
         :returns boolean indicating whether values passed check
         """
 
-        if not all([x > 0 for x in [after_tube_weight, init_tube_weight]]):
+        if not after_tube_weight >= 0 or not init_tube_weight >= 0:
             return False
 
         if after_tube_weight <= init_tube_weight:
@@ -1410,7 +1408,6 @@ class WaterCalibrationDialog(QDialog):
                 0,
                 1000,
                 4,
-                min=0
             )
             if not ok:
                 # User cancels
@@ -1420,7 +1417,6 @@ class WaterCalibrationDialog(QDialog):
                 self.Warning.setText(f"Spot check {valve.lower()} cancelled")
                 pre_weight.setText("")
                 total_water.setText("")
-                save.setStyleSheet("color: black;background-color : none;")
                 return
             pre_weight.setText(str(empty_tube_weight))
 
@@ -1488,7 +1484,6 @@ class WaterCalibrationDialog(QDialog):
             0,
             1000,
             4,
-            min=empty_tube_weight  # final tube weight cannot be less than init weight
         )
         total_water.setText(str(final_tube_weight))
 
