@@ -572,8 +572,6 @@ class WaterCalibrationDialog(QDialog):
             lambda val: self.OpenRightForever.setDisabled(val)
         )
 
-        self.SaveLeft.clicked.connect(lambda: self._SaveValve("Left"))
-        self.SaveRight.clicked.connect(lambda: self._SaveValve("Right"))
         self.StartCalibratingLeft.clicked.connect(self._StartCalibratingLeft)
         self.StartCalibratingRight.clicked.connect(self._StartCalibratingRight)
         self.Continue.clicked.connect(self._Continue)
@@ -896,33 +894,41 @@ class WaterCalibrationDialog(QDialog):
             return
         self.WeightAfterLeft.setText(str(final_tube_weight))
 
-        # Mark measurement as complete, save data, and update figure
-        self.left_measurements[next_index] = True
-        self._Save(
-            valve="Left",
-            valve_open_time=str(current_valve_opentime),
-            valve_open_interval=str(self.params["Interval"]),
-            cycle=str(self.params["Cycle"]),
-            total_water=float(final_tube_weight),
-            tube_weight=float(before_weight),
-        )
-        self._UpdateFigure()
+        if self.check_calibration_curve(float(final_tube_weight), float(before_weight)):
+            # Mark measurement as complete, save data, and update figure
+            self.left_measurements[next_index] = True
+            self._Save(
+                valve="Left",
+                valve_open_time=str(current_valve_opentime),
+                valve_open_interval=str(self.params["Interval"]),
+                cycle=str(self.params["Cycle"]),
+                total_water=float(final_tube_weight),
+                tube_weight=float(before_weight),
+            )
+            self._UpdateFigure()
 
-        # Direct user for next steps
-        if np.all(self.left_measurements):
-            self.Warning.setText(
-                "Measurements recorded for all values. Please press Repeat, or Finished"
-            )
-            self.Repeat.setStyleSheet("color: black;background-color : none;")
-            self.Finished.setStyleSheet(
-                "color: white;background-color : mediumorchid;"
-            )
+            # Direct user for next steps
+            if np.all(self.left_measurements):
+                self.Warning.setText(
+                    "Measurements recorded for all values. Please press Repeat, or Finished"
+                )
+                self.Repeat.setStyleSheet("color: black;background-color : none;")
+                self.Finished.setStyleSheet(
+                    "color: white;background-color : mediumorchid;"
+                )
+            else:
+                self.Warning.setText("Please press Continue, Repeat, or Finished")
+                self.Continue.setStyleSheet(
+                    "color: white;background-color : mediumorchid;"
+                )
+                self.Repeat.setStyleSheet("color: black;background-color : none;")
         else:
-            self.Warning.setText("Please press Continue, Repeat, or Finished")
-            self.Continue.setStyleSheet(
-                "color: white;background-color : mediumorchid;"
+            self.Warning.setText(
+                "Recorded before and after tube weights do not pass checks. Please repeat check."
+                "Value has not been saved."
             )
             self.Repeat.setStyleSheet("color: black;background-color : none;")
+
 
     def _StartCalibratingRight(self):
         """start the calibration loop of right valve"""
@@ -1083,30 +1089,58 @@ class WaterCalibrationDialog(QDialog):
             return
         self.WeightAfterRight.setText(str(final_tube_weight))
 
-        # Mark measurement as complete, save data, and update figure
-        self.right_measurements[next_index] = True
-        self._Save(
-            valve="Right",
-            valve_open_time=str(current_valve_opentime),
-            valve_open_interval=str(self.params["Interval"]),
-            cycle=str(self.params["Cycle"]),
-            total_water=float(final_tube_weight),
-            tube_weight=float(before_weight),
-        )
-        self._UpdateFigure()
+        if self.check_calibration_curve(float(final_tube_weight), float(before_weight)):
+            # Mark measurement as complete, save data, and update figure
+            self.right_measurements[next_index] = True
+            self._Save(
+                valve="Right",
+                valve_open_time=str(current_valve_opentime),
+                valve_open_interval=str(self.params["Interval"]),
+                cycle=str(self.params["Cycle"]),
+                total_water=float(final_tube_weight),
+                tube_weight=float(before_weight),
+            )
+            self._UpdateFigure()
 
-        # Direct user for next steps
-        if np.all(self.right_measurements):
-            self.Warning.setText(
-                "Measurements recorded for all values. Please press Repeat, or Finished"
-            )
-            self.Repeat.setStyleSheet("color: black;background-color : none;")
+            # Direct user for next steps
+            if np.all(self.right_measurements):
+                self.Warning.setText(
+                    "Measurements recorded for all values. Please press Repeat, or Finished"
+                )
+                self.Repeat.setStyleSheet("color: black;background-color : none;")
+            else:
+                self.Warning.setText("Please press Continue, Repeat, or Finished")
+                self.Continue.setStyleSheet(
+                    "color: white;background-color : mediumorchid;"
+                )
+                self.Repeat.setStyleSheet("color: black;background-color : none;")
         else:
-            self.Warning.setText("Please press Continue, Repeat, or Finished")
-            self.Continue.setStyleSheet(
-                "color: white;background-color : mediumorchid;"
+            self.Warning.setText(
+                "Recorded before and after tube weights do not pass checks. Please repeat check."
+                "Value has not been saved."
             )
             self.Repeat.setStyleSheet("color: black;background-color : none;")
+
+    def check_calibration_curve(self,
+        after_tube_weight: float,
+        init_tube_weight: float) -> bool:
+
+        """
+        Check that values are positive and will not result in negative curve
+
+        :param after_tube_weight: tube weight after calibration
+        :param init_tube_weight: tube weight before calibration
+
+        :returns boolean indicating whether values passed check
+        """
+
+        if not after_tube_weight >= 0 or not init_tube_weight >= 0:
+            return False
+
+        if after_tube_weight <= init_tube_weight:
+            return False
+
+        return True
 
     def _CalibrationStatus(self, opentime, weight_before, i, cycle, interval):
         self.Warning.setText(
@@ -1174,6 +1208,7 @@ class WaterCalibrationDialog(QDialog):
             WaterCalibrationResults[date_str][valve][valve_open_time][
                 valve_open_interval
             ][cycle] = [np.round(total_water, 1)]
+
         self.WaterCalibrationResults = WaterCalibrationResults.copy()
 
         # save to the json file
@@ -1186,6 +1221,11 @@ class WaterCalibrationDialog(QDialog):
 
         # update the figure
         self._UpdateFigure()
+
+        # update calibration parameters ui uses
+        self.MainWindow._GetWaterCalibration()
+        FittingResults = self.PlotM.FittingResults
+        self.MainWindow._GetLatestFitting(FittingResults)
 
     def _UpdateFigure(self):
         """plot the calibration result"""
@@ -1322,7 +1362,6 @@ class WaterCalibrationDialog(QDialog):
         """
 
         spot_check = getattr(self, f"SpotCheck{valve}")
-        save = getattr(self, f"Save{valve}")
         total_water = getattr(self, f"TotalWaterSingle{valve}")
         pre_weight = getattr(self, f"SpotCheckPreWeight{valve}")
         volume = getattr(self, f"Spot{valve}Volume").text()
@@ -1331,7 +1370,6 @@ class WaterCalibrationDialog(QDialog):
         if self.MainWindow.InitializeBonsaiSuccessfully == 0:
             spot_check.setChecked(False)
             spot_check.setStyleSheet("background-color : none;")
-            save.setStyleSheet("color: black;background-color : none;")
             total_water.setText("")
             pre_weight.setText("")
             return
@@ -1352,7 +1390,6 @@ class WaterCalibrationDialog(QDialog):
                 self.Warning.setText("")
                 pre_weight.setText("")
                 total_water.setText("")
-                save.setStyleSheet("color: black;background-color : none;")
                 return
 
             logging.info(f"starting spot check {valve.lower()}")
@@ -1380,7 +1417,6 @@ class WaterCalibrationDialog(QDialog):
                 self.Warning.setText(f"Spot check {valve.lower()} cancelled")
                 pre_weight.setText("")
                 total_water.setText("")
-                save.setStyleSheet("color: black;background-color : none;")
                 return
             pre_weight.setText(str(empty_tube_weight))
 
@@ -1489,9 +1525,6 @@ class WaterCalibrationDialog(QDialog):
                     "Water calibration spot check, {}, exceeds tolerance: {}".format(
                         valve, error
                     )
-                )
-                save.setStyleSheet(
-                    "color: white;background-color : mediumorchid;"
                 )
                 self.Warning.setText(
                     f"Measuring {valve.lower()} valve: {volume}uL"
