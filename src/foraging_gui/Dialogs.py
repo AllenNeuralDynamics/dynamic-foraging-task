@@ -1089,9 +1089,9 @@ class WaterCalibrationDialog(QDialog):
             return
         self.WeightAfterRight.setText(str(final_tube_weight))
 
-        # Mark measurement as complete, save data, and update figure
-        self.right_measurements[next_index] = True
         if self.check_calibration_curve(float(final_tube_weight), float(before_weight)):
+            # Mark measurement as complete, save data, and update figure
+            self.right_measurements[next_index] = True
             self._Save(
                 valve="Right",
                 valve_open_time=str(current_valve_opentime),
