@@ -5795,14 +5795,14 @@ class Window(QMainWindow):
             self.last_bias_intervention = trial_number
 
             # first try water intervention
-            if self.water_reward_attempts > specs.max_water_reward_attempts:
+            if self.water_reward_attempts < specs.max_water_reward_attempts:
                 self.water_reward_bias_correction(bias, trial_number)
 
             else:
                 logging.info(f"Maximum watering attempts exceeded. Moving lickspouts for bias. ",
                              extra={"tags": [self.warning_log_tag]})
                 self.lick_spout_bias_correction(bias, trial_number)
-
+                self.water_reward_attempts = 0
 
     def water_reward_bias_correction(self,
                                      bias: float,
