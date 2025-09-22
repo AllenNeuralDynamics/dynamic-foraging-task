@@ -5825,7 +5825,7 @@ class Window(QMainWindow):
 
         low_prob_choice = 0 if pl < pr else 1   # left choice will be 0, right 1
         past_n_choices = self.GeneratedTrials.B_AnimalResponseHistory[-specs.n_choices:]
-
+        logging.info(f"{abs(bias) > threshold} {pl != pr} {set(past_n_choices) == {low_prob_choice}} {pl} {pr} {set(past_n_choices)} {low_prob_choice}")
         if specs and abs(bias) > threshold and pl != pr and set(past_n_choices) == {low_prob_choice}:
             valve = "Left" if low_prob_choice == 1 else "Right"     # give water on un-licked higher prob side
 
