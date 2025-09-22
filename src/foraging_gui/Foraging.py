@@ -5796,6 +5796,7 @@ class Window(QMainWindow):
 
             # first try water intervention
             if self.water_reward_attempts < specs.max_water_reward_attempts:
+                logging.info(f"Bias over threshold. Attempting water intervention.")
                 self.water_reward_bias_correction(bias, trial_number)
 
             else:
