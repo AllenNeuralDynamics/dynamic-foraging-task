@@ -325,7 +325,7 @@ class BiasIndicator(QMainWindow):
                     f"Trial Count: {trial_num}"
                 )
                 self.biasUnder.emit(bias, trial_num)
-                self.update_bias_point("purple", bias, trial_num)
+                self.update_bias_point("green", bias, trial_num)
 
             else:
                 self.update_bias_point("green", bias, trial_num)
