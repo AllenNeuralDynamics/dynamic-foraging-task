@@ -5846,17 +5846,18 @@ class Window(QMainWindow):
         """
 
         trial_interval = self.operation_control_model.bias_correction.trial_interval
-        specs = self.operation_control_model.bias_correction.lick_spout_movement
+        bias_specs = self.operation_control_model.bias_correction
+        spout_specs = bias_specs.lick_spout_movement
         pos = self._GetPositions()
         displacement = pos["x"] - self.lick_spout_start["x"]
 
-        if specs and trial_number - self.last_bias_intervention > trial_interval:  # check if stage needs to move
+        if spout_specs and trial_number - self.last_bias_intervention > trial_interval:  # check if stage needs to move
 
             # aind stage uses mm and newscale stage us um. Convert units depending on what stage is being used
-            step_size = specs.step_size_um if not self.stage_widget else specs.step_size_um * 10e-4
+            step_size = spout_specs.step_size_um if not self.stage_widget else spout_specs.step_size_um * 10e-4
 
-            upper_correction = abs(bias) > specs.bias_upper_threshold and displacement > specs.range_um
-            lower_correction = abs(bias) < specs.bias_upper_threshold and displacement != 0.0
+            upper_correction = abs(bias) > bias_specs.bias_upper_threshold and displacement > spout_specs.range_um
+            lower_correction = abs(bias) < bias_specs.bias_upper_threshold and displacement != 0.0
 
             if not upper_correction and not lower_correction:   # no movement necessary
                 return
