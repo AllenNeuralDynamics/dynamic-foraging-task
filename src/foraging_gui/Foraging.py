@@ -1569,12 +1569,17 @@ class Window(QMainWindow):
 
             # Find the correct week on the schedule
             dividers = schedule[[isinstance(x,str)and('/' in x) for x in schedule['Mouse ID'].values]]
-            today = datetime.now().strftime('%m/%d/%Y')
+            today = datetime.now()
 
             # Multiple weeks on the schedule
             if len(dividers) > 1:
-                first = dividers.iloc[0]['Mouse ID']
-                if datetime.strptime(today, "%m/%d/%Y") < datetime.strptime(first,"%m/%d/%Y"):
+                first = datetime.strptime(dividers.iloc[0]['Mouse ID'], "%m/%d/%Y")
+
+                # switch schedule at Friday 5pm
+                cutoff = first - timedelta(days=3)  # Go back to Friday
+                cutoff = cutoff.replace(hour=17, minute=0, second=0, microsecond=0)  # 5 PM
+
+                if today < cutoff:
                     # Use last weeks schedule
                     schedule = schedule.loc[dividers.index.values[1]:]
                 else:
