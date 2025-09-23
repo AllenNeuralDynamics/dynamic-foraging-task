@@ -4713,7 +4713,7 @@ class Window(QMainWindow):
                         elif widget.parent().objectName() == "MetaData":
                             CurrentObj = Obj["Metadata_dialog"]
                         elif widget.parent().objectName()=='RandomReward':
-                            CurrentObj=Obj['RandomReward_dialog']
+                            CurrentObj=Obj.get('RandomReward_dialog', None)
                         else:
                             CurrentObj = Obj.copy()
                     except Exception:
