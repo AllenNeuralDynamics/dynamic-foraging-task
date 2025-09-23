@@ -1463,9 +1463,9 @@
      <property name="value">
       <double>0.030000000000000</double>
      </property>
-     <property name="disabled">
-     <bool>true</bool>
-    </property>
+     <property name="disabled" stdset="0">
+      <bool>true</bool>
+     </property>
     </widget>
     <widget class="QDoubleSpinBox" name="GiveWaterR">
      <property name="geometry">
@@ -1491,9 +1491,9 @@
      <property name="value">
       <double>0.030000000000000</double>
      </property>
-     <property name="disabled">
-     <bool>true</bool>
-    </property>
+     <property name="disabled" stdset="0">
+      <bool>true</bool>
+     </property>
     </widget>
     <widget class="QLabel" name="label_56">
      <property name="geometry">
@@ -1884,9 +1884,9 @@
      <property name="value">
       <double>3.000000000000000</double>
      </property>
-     <property name="disabled">
-     <bool>true</bool>
-    </property>
+     <property name="disabled" stdset="0">
+      <bool>true</bool>
+     </property>
     </widget>
     <widget class="QDoubleSpinBox" name="GiveWaterR_volume">
      <property name="geometry">
@@ -1912,9 +1912,9 @@
      <property name="value">
       <double>3.000000000000000</double>
      </property>
-     <property name="disabled">
-     <bool>true</bool>
-    </property>
+     <property name="disabled" stdset="0">
+      <bool>true</bool>
+     </property>
     </widget>
     <widget class="QDoubleSpinBox" name="RightValue_volume">
      <property name="geometry">
@@ -2176,7 +2176,7 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
-     <widget class="QLineEdit" name="min_time">
+    <widget class="QLineEdit" name="min_time">
      <property name="geometry">
       <rect>
        <x>863</x>
@@ -4654,6 +4654,8 @@
     <addaction name="action_Calibration"/>
     <addaction name="actionLaser_Calibration"/>
     <addaction name="actionMeta_Data"/>
+    <addaction name="actionOptical_Tagging"/>
+    <addaction name="actionRandom_Reward"/>
     <addaction name="separator"/>
     <addaction name="menuSimulation"/>
     <addaction name="actionDrawing_after_stopping"/>
@@ -4779,6 +4781,7 @@
    </attribute>
    <addaction name="action_Calibration"/>
    <addaction name="actionLaser_Calibration"/>
+   <addaction name="actionOptical_Tagging"/>
    <addaction name="actionMeta_Data"/>
   </widget>
   <widget class="QToolBar" name="toolBar_3">
@@ -5041,6 +5044,26 @@
   <action name="actionOpen_video_folder">
    <property name="text">
     <string>Open video folder</string>
+   </property>
+  </action>
+  <action name="actionOptical_Tagging">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>resources/OpticalTagging.jpg</normaloff>resources/OpticalTagging.jpg</iconset>
+   </property>
+   <property name="text">
+    <string>Optical Tagging</string>
+   </property>
+  </action>
+  <action name="actionRandom_Reward">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Random Reward</string>
    </property>
   </action>
  </widget>
