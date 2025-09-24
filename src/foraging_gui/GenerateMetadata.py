@@ -1077,12 +1077,16 @@ class generate_metadata:
             "DelayMax",
             "LeftValue_volume",
             "RightValue_volume",
+            "stage_in_use",
+            "curriculum_in_use"
         ]
         reward_probability = self._get_reward_probability()
         task_parameters = {
             key: value for key, value in self.Obj.items() if key in keys
         }
         task_parameters["reward_probability"] = reward_probability
+        task_parameters["curriculum_in_use"] = self.Obj["curriculum_name"] or "off curriculum"
+        task_parameters["stage_in_use"] = self.Obj["curriculum_stage"] or "unknown training stage"
 
         return task_parameters
 
@@ -1090,21 +1094,12 @@ class generate_metadata:
         """Get parameters used to fill out streamlit"""
 
         return {
-                 "curriculum_name": self.Obj["curriculum_name"][-1],
-                 "curriculum_version": self.Obj["curriculum_version"][-1],
-                 "current_stage_actual": self.Obj["curriculum_stage"][-1],
-                 "current_stage_suggested": self.Obj["curriculum_stage"][-1],
-                 "if_overriden_by_trainer": self.Obj["off_curriculum"][-1],
+                 "curriculum_name": self.Obj["curriculum_name"],
+                 "curriculum_version": self.Obj["curriculum_version"],
+                 "current_stage_actual": self.Obj["curriculum_stage"],
+                 "current_stage_suggested": self.Obj["curriculum_stage"],
+                 "if_overriden_by_trainer": self.Obj["off_curriculum"],
                  "next_stage_suggested": self.Obj.get("next_stage_suggested", None),
-                 }
-
-    def _get_training_state_parameters(self) -> dict:
-        """Get training state parameters"""
-
-        return {
-                 "curriculum_name": self.Obj["curriculum_name"][-1],
-                 "stage_name": self.Obj["curriculum_stage"][-1],
-                 "status": "Off Curriculum" if self.Obj["off_curriculum"][-1] else "No Training Stage",
                  }
 
     def _get_reward_probability(self):
@@ -1448,15 +1443,6 @@ class generate_metadata:
                 name="dynamic-foraging-task",
                 version=f"behavior branch:{self.Obj['current_branch']}   commit ID:{self.Obj['commit_ID']}    version:{self.Obj['version']}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}",
                 url=self.Obj["repo_url"],
-            )
-        )
-
-        # add training state software
-        self.behavior_software.append(
-            Software(
-                name="training_state",
-                version=f"behavior branch:{self.Obj['current_branch']}   commit ID:{self.Obj['commit_ID']}    version:{self.Obj['version']}; metadata branch: {current_branch}   commit ID:{commit_ID}   version:{version}",
-                parameters=self._get_training_state_parameters(),
             )
         )
 

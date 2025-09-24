@@ -185,12 +185,12 @@ class GenerateTrials:
             "TP_LeftValue": [],  # left valve open times
             "TP_RightValue": [],
             "multipliers": [],
-            "curriculum_name": [],
-            "curriculum_schema_version": [],
-            "curriculum_version": [],
-            "curriculum_loaded": [],
-            "curriculum_stage": [],
-            "off_curriculum": [],
+            "curriculum_name": None,
+            "curriculum_schema_version": None,
+            "curriculum_version": None,
+            "curriculum_loaded": None,
+            "curriculum_stage": None,
+            "off_curriculum": None,
             "TP_Laser_calibration": [],
             "TP_LatestCalibrationDate": [],
             "TP_laser_1_calibration_power": [],
@@ -3351,12 +3351,12 @@ class GenerateTrials:
         curriculum = self.win.slims_handler.curriculum
         stage = getattr(self.win.slims_handler.trainer_state, 'stage', None)
 
-        self.Obj["curriculum_name"].append(getattr(curriculum, 'name', None))
-        self.Obj["curriculum_schema_version"].append(self.task_logic.version)
-        self.Obj["curriculum_version"].append(getattr(curriculum, 'version', None))
-        self.Obj["curriculum_loaded"].append(curriculum is not None)
-        self.Obj["curriculum_stage"].append(getattr(stage, 'name', None))
-        self.Obj["off_curriculum"].append(not self.win.on_curriculum.isChecked() if curriculum is not None else None)
+        self.Obj["curriculum_name"] = getattr(curriculum, 'name', None)
+        self.Obj["curriculum_schema_version"] = self.task_logic.version
+        self.Obj["curriculum_version"] = getattr(curriculum, 'version', None)
+        self.Obj["curriculum_loaded"] = curriculum is not None
+        self.Obj["curriculum_stage"] = getattr(stage, 'name', None)
+        self.Obj["off_curriculum"] = not self.win.on_curriculum.isChecked() if curriculum is not None else None
 
 
 class NewScaleSerialY:
