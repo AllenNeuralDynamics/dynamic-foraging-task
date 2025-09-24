@@ -124,6 +124,7 @@ from foraging_gui.schema_widgets.operation_control_widget import (
 from foraging_gui.schema_widgets.session_parameters_widget import (
     SessionParametersWidget,
 )
+
 from foraging_gui.settings_model import BonsaiSettingsModel, DFTSettingsModel
 from foraging_gui.sound_button import SoundButton
 from foraging_gui.stage import Stage
@@ -396,14 +397,28 @@ class Window(QMainWindow):
         # create bias indicator
         self.bias_n_size = 200
         self.bias_indicator = BiasIndicator(
-            x_range=self.bias_n_size, data_lock=self.data_lock
+            x_range=self.bias_n_size,
+            data_lock=self.data_lock,
+            bias_upper_threshold=self.operation_control_model.bias_correction.bias_upper_threshold,
+            bias_lower_threshold=self.operation_control_model.bias_correction.bias_lower_threshold,
         )
+        self.operation_control_widget.lower_bias_changed.connect(lambda v: setattr(self.bias_indicator,
+                                                                                   "bias_lower_threshold",
+                                                                                   v))
+        self.operation_control_widget.upper_bias_changed.connect(lambda v: setattr(self.bias_indicator,
+                                                                                   "bias_upper_threshold",
+                                                                                   v))
         self.bias_indicator.biasValue.connect(
             self.bias_calculated
         )  # update dashboard value
+        self.bias_indicator.biasOver.connect(self.bias_correction)  # check wether to give water or move lickspouts if bias is over
+        self.bias_indicator.biasUnder.connect(self.lick_spout_bias_correction)  # move lickspout back toward center when threshold is below
         self.bias_indicator.setSizePolicy(
             QSizePolicy.Maximum, QSizePolicy.Maximum
         )
+        self.last_bias_intervention = 0
+        self.water_reward_attempts = 0
+        self.lick_spout_start = self._GetPositions()  # "origin" of lick spout for mouse
         self.bias_thread = Thread()  # dummy thread
 
         # create sound button
@@ -3078,27 +3093,30 @@ class Window(QMainWindow):
         :param valve: valve to update
         """
 
+        volume = getattr(self.task_logic.task_parameters.reward_size, f"{valve.lower()}_value_volume")
+        valve_time = self.calculate_valve_open_time(valve, volume)
+
+        if valve_time:   # valid calibration data found
+            setattr(self, f"{valve.lower()}_open_time", valve_time)
+            getattr(self, f"GiveWater{valve[0]}").setValue(valve_time)
+            getattr(self, f"GiveWater{valve[0]}_volume").setValue(volume)
+
+    def calculate_valve_open_time(self, valve: Literal["Left", "Right"], volume: float) -> float:
+        """
+            Calculate valve open time based on calibration data and desired volume
+        """
+
         # use the latest calibration result
         if hasattr(self, "WaterCalibration_dialog"):
             if hasattr(self.WaterCalibration_dialog, "PlotM"):
                 if hasattr(
-                    self.WaterCalibration_dialog.PlotM, "FittingResults"
+                        self.WaterCalibration_dialog.PlotM, "FittingResults"
                 ) and self.WaterCalibration_dialog.PlotM.FittingResults != {}:
                     self.set_water_calibration_latest_fitting(
                         self.WaterCalibration_dialog.PlotM.FittingResults
                     )
-                    volume = getattr(
-                        self.task_logic.task_parameters.reward_size,
-                        f"{valve.lower()}_value_volume",
-                    )
-                    valve_time = (
-                        volume - self.latest_fitting[valve][1]
-                    ) / self.latest_fitting[valve][0]
-                    setattr(self, f"{valve.lower()}_open_time", valve_time)
-                    getattr(self, f"GiveWater{valve[0]}").setValue(valve_time)
-                    getattr(self, f"GiveWater{valve[0]}_volume").setValue(
-                        volume
-                    )
+                    return (volume - self.latest_fitting[valve][1]) / self.latest_fitting[valve][0]
+
 
     def set_water_calibration_latest_fitting(self, fitting_results: dict):
         """
@@ -5234,6 +5252,8 @@ class Window(QMainWindow):
                     self.end_session_log()
                 self.log_session()  # start log for new session
 
+            self.lick_spout_start = self._GetPositions()   # "origin" of lick spout for mouse
+
         else:
             GeneratedTrials = self.GeneratedTrials
 
@@ -5757,6 +5777,109 @@ class Window(QMainWindow):
             self._Save(BackupSave=BackupSave)
         except Exception as e:
             logging.error("backup save failed: {}".format(e))
+
+    def bias_correction(self,
+                        bias: float,
+                        trial_number: int):
+
+        """
+         Evaluate bias and implement water or lickspout intervention.
+        :param bias: bias value
+        :param trial_number: trial number at which bias value was calculated
+        """
+
+        specs = self.operation_control_model.bias_correction
+
+        if specs.trial_interval <= trial_number-self.last_bias_intervention and abs(bias) > specs.bias_upper_threshold:
+
+            self.last_bias_intervention = trial_number
+
+            # first try water intervention
+            if self.water_reward_attempts < specs.max_water_reward_attempts:
+                logging.info(f"Bias over threshold. Attempting water intervention.")
+                self.water_reward_bias_correction(bias, trial_number)
+
+            else:
+                logging.info(f"Maximum watering attempts exceeded. Moving lickspouts for bias. ",
+                             extra={"tags": [self.warning_log_tag]})
+                self.lick_spout_bias_correction(bias, trial_number)
+                self.water_reward_attempts = 0
+
+    def water_reward_bias_correction(self,
+                                     bias: float,
+                                     trial_number: int) -> bool:
+        """
+         Evaluate and give water reward on bias.
+        :param bias: bias value
+        :param trial_number: trial number at which bias value was calculated
+
+        :returns: boolean if water intervention was successful or not
+
+        """
+
+        threshold = self.operation_control_model.bias_correction.bias_upper_threshold
+        specs = self.operation_control_model.bias_correction.water_reward
+
+        pl = self.GeneratedTrials.B_CurrentRewardProb[0]    # probability left
+        pr = self.GeneratedTrials.B_CurrentRewardProb[1]    # probability right
+
+        low_prob_choice = 0 if pl < pr else 1   # left choice will be 0, right 1
+        past_n_choices = self.GeneratedTrials.B_AnimalResponseHistory[-specs.n_choices:]
+        logging.info(f"{abs(bias) > threshold} {pl != pr} {set(past_n_choices) == {low_prob_choice}} {pl} {pr} {set(past_n_choices)} {low_prob_choice}")
+        if specs and abs(bias) > threshold and pl != pr and set(past_n_choices) == {low_prob_choice}:
+            valve = "Left" if low_prob_choice == 1 else "Right"     # give water on un-licked higher prob side
+
+            logging.info(f"Giving water on {valve} side.", extra={"tags": [self.warning_log_tag]})
+
+            open_time = self.calculate_valve_open_time(valve, specs.volume_ul)
+            getattr(self.GeneratedTrials, f"_Give{valve}")(self.Channel3, open_time)
+            self.water_reward_attempts += 1
+            self.last_bias_intervention = trial_number  # reset check
+
+    def lick_spout_bias_correction(self,
+                                   bias: float,
+                                   trial_number: int):
+
+        """
+         Evaluate and move lick spout based on bias. Negative bias correlates to left; positive, right.
+        :param bias: bias value
+        :param trial_number: trial number at which bias value was calculated
+        """
+
+        trial_interval = self.operation_control_model.bias_correction.trial_interval
+        bias_specs = self.operation_control_model.bias_correction
+        spout_specs = bias_specs.lick_spout_movement
+        pos = self._GetPositions()
+        displacement = pos["x"] - self.lick_spout_start["x"]
+
+        if spout_specs and trial_number - self.last_bias_intervention > trial_interval:  # check if stage needs to move
+
+            # aind stage uses mm and newscale stage us um. Convert units depending on what stage is being used
+            step_size = spout_specs.step_size_um if not self.stage_widget else spout_specs.step_size_um * 10e-4
+
+            upper_correction = abs(bias) > bias_specs.bias_upper_threshold and displacement > spout_specs.range_um
+            lower_correction = abs(bias) < bias_specs.bias_upper_threshold and displacement != 0.0
+
+            if not upper_correction and not lower_correction:   # no movement necessary
+                return
+
+            if lower_correction:
+                delta_step = min(step_size, abs(displacement)) if bias < 0 else -min(step_size, abs(displacement))
+                direction = "towards"
+            else:
+                delta_step = step_size if bias >= 0 else -step_size
+                direction = "away"
+
+            logging.info(f"Moving lickspout {delta_step} um {direction} original position at bias {bias}.",
+                         extra={"tags": [self.warning_log_tag]})
+
+            if self.stage_widget is not None:
+                pos["x"] += delta_step
+                self.stage_widget.stage_model.update_position({i: x for i, x in enumerate(pos.values())})
+            else:
+                self._Move("x", pos["x"] + delta_step)
+
+            self.last_bias_intervention = trial_number  # reset check
 
     def bias_calculated(
         self,

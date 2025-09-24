@@ -3035,6 +3035,7 @@ class GenerateTrials:
             if current_receiveN == ReceiveN:
                 break
         with data_lock:
+
             self.B_RewardedHistory = np.append(
                 self.B_RewardedHistory, B_CurrentRewarded, axis=1
             )
@@ -3081,10 +3082,16 @@ class GenerateTrials:
         """set the right valve time"""
         channel3.RightValue1(float(RightValue * 1000 * Multiplier))
 
-    def _GiveLeft(self, channel3):
-        """manually give left water"""
+    def _GiveLeft(self, channel3, open_time: float = None):
+        """manually give left water
+
+        :param open_time: optional open_time of water. If not provided, default will be the task parameter volume open_time
+        """
 
         tp = self.task_logic.task_parameters
+
+        open_time = open_time if open_time else self.win.left_valve_open_time
+
         multiplier = (
             self.warmup_settings["multiplier"]
             if self.task_logic.task_parameters.auto_water is None
@@ -3092,16 +3099,23 @@ class GenerateTrials:
             else tp.auto_water.multiplier
         )
         channel3.LeftValue1(
-            float(self.win.left_valve_open_time * 1000 * multiplier)
+            float(open_time * 1000 * multiplier)
         )
         time.sleep(0.01)
         channel3.ManualWater_Left(int(1))
-        channel3.LeftValue1(float(self.win.left_valve_open_time * 1000))
+        channel3.LeftValue1(float(open_time * 1000))
 
-    def _GiveRight(self, channel3):
-        """manually give right water"""
+    def _GiveRight(self, channel3, open_time: float = None):
+        """manually give right water
+
+        :param open_time: optional open_time of water. If not provided, default will be the task parameter volume open_time
+
+        """
 
         tp = self.task_logic.task_parameters
+
+        open_time = open_time if open_time else self.win.right_valve_open_time
+
         multiplier = (
             self.warmup_settings["multiplier"]
             if self.task_logic.task_parameters.auto_water is None
@@ -3109,11 +3123,11 @@ class GenerateTrials:
             else tp.auto_water.multiplier
         )
         channel3.RightValue1(
-            float(self.win.right_valve_open_time * 1000 * multiplier)
+            float(open_time * 1000 * multiplier)
         )
         time.sleep(0.01)
         channel3.ManualWater_Right(int(1))
-        channel3.RightValue1(float(self.win.right_valve_open_time * 1000))
+        channel3.RightValue1(float(open_time * 1000))
 
     def _get_irregular_timestamp(self, Channel2, data_lock: Lock):
         """Get timestamps occurred irregularly (e.g. licks and reward delivery time)"""
