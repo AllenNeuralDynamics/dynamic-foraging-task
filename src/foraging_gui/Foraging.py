@@ -5836,12 +5836,9 @@ class Window(QMainWindow):
             self.water_reward_attempts += 1
             self.last_bias_intervention = trial_number  # reset check
 
-    def lick_spout_bias_correction(self,
-                                   bias: float,
-                                   trial_number: int):
-
+    def lick_spout_bias_correction(self, bias: float, trial_number: int):
         """
-         Evaluate and move lick spout based on bias. Negative bias correlates to left; positive, right.
+        Evaluate and move lick spout based on bias. Negative bias correlates to left; positive, right.
         :param bias: bias value
         :param trial_number: trial number at which bias value was calculated
         """
@@ -5852,26 +5849,33 @@ class Window(QMainWindow):
         pos = self._GetPositions()
         displacement = pos["x"] - self.lick_spout_start["x"]
 
-        if spout_specs and trial_number - self.last_bias_intervention > trial_interval:  # check if stage needs to move
+        # check if stage needs to move
+        if spout_specs and trial_number - self.last_bias_intervention > trial_interval:
 
-            # aind stage uses mm and newscale stage us um. Convert units depending on what stage is being used
+            # aind stage uses mm and newscale stage uses um
             step_size = spout_specs.step_size_um if not self.stage_widget else spout_specs.step_size_um * 10e-4
 
-            upper_correction = abs(bias) > bias_specs.bias_upper_threshold and displacement > spout_specs.range_um
+            # Determine if movement is needed
+            upper_correction = abs(bias) > bias_specs.bias_upper_threshold and abs(displacement) > spout_specs.range_um
             lower_correction = abs(bias) < bias_specs.bias_upper_threshold and displacement != 0.0
 
-            if not upper_correction and not lower_correction:   # no movement necessary
-                return
+            if not upper_correction and not lower_correction:
+                return  # no movement necessary
 
             if lower_correction:
-                delta_step = min(step_size, abs(displacement)) if bias < 0 else -min(step_size, abs(displacement))
+                # Always move toward start position
+                delta_step = -step_size if displacement > 0 else step_size
+                # Limit step size so we don't overshoot
+                delta_step = max(min(abs(delta_step), abs(displacement)), 0) * (1 if delta_step > 0 else -1)
                 direction = "towards"
             else:
                 delta_step = step_size if bias >= 0 else -step_size
                 direction = "away"
 
-            logging.info(f"Moving lickspout {delta_step} um {direction} original position at bias {bias}.",
-                         extra={"tags": [self.warning_log_tag]})
+            logging.info(
+                f"Moving lickspout {delta_step} um {direction} original position at bias {bias}.",
+                extra={"tags": [self.warning_log_tag]}
+            )
 
             if self.stage_widget is not None:
                 pos["x"] += delta_step
