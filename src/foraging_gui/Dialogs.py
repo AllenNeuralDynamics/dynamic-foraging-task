@@ -668,8 +668,6 @@ class WaterCalibrationDialog(QDialog):
         save the calibration result of the single point calibration (left valve)
         :param valve: string specifying valve side
         """
-        save = getattr(self, f"Save{valve}")
-        save.setStyleSheet("background-color : green;")
         QApplication.processEvents()
 
         valve_open_time = str(getattr(self, f"Spot{valve}OpenTime"))
@@ -685,9 +683,7 @@ class WaterCalibrationDialog(QDialog):
             tube_weight=float(before_txt),
             append=True,
         )
-        save.setStyleSheet("background-color : none")
-        save.setChecked(False)
-
+        
     def _LoadCalibrationParameters(self):
         self.WaterCalibrationPar = {}
         if os.path.exists(self.MainWindow.WaterCalibrationParFiles):
