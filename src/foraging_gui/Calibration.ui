@@ -451,44 +451,25 @@
              <string/>
             </property>
         </widget>
-        <widget class="QPushButton" name="SaveLeft">
-            <property name="geometry">
-                <rect>
-                    <x>580</x>
-                    <y>20</y>
-                    <width>80</width>
-                    <height>25</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>Save</string>
-            </property>
-            <property name="checkable">
-                <bool>true</bool>
-            </property>
-        </widget>
-        <widget class="QPushButton" name="SaveRight">
-            <property name="geometry">
-                <rect>
-                    <x>580</x>
-                    <y>55</y>
-                    <width>80</width>
-                    <height>25</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>Save</string>
-            </property>
-            <property name="checkable">
-                <bool>true</bool>
-            </property>
-        </widget>
+    </widget>
+    <widget class="QCheckBox" name="multi_value_enable">
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>225</y>
+                <width>500</width>
+                <height>10</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Enable Multi-value calibration</string>
+        </property>
     </widget>
     <widget class="QGroupBox" name="groupBox_2">
         <property name="geometry">
             <rect>
                 <x>10</x>
-                <y>190</y>
+                <y>250</y>
                 <width>670</width>
                 <height>125</height>
             </rect>
@@ -809,7 +790,7 @@
         <property name="geometry">
             <rect>
                 <x>20</x>
-                <y>325</y>
+                <y>375</y>
                 <width>650</width>
                 <height>100</height>
             </rect>
@@ -853,8 +834,6 @@
     <zorder>WeightAfterRight</zorder>
     <zorder>TotalWaterSingleLeft</zorder>
     <zorder>TotalWaterSingleRight</zorder>
-    <zorder>SaveLeft</zorder>
-    <zorder>SaveRight</zorder>
     <zorder>label_21</zorder>
     <zorder>CalibrationType</zorder>
     <zorder>IntervalRight_2</zorder>

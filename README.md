@@ -56,17 +56,17 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
 - [Harp Sound Card](https://github.com/harp-tech/device.soundcard)
 - [Harp Audio Amplifier](https://github.com/harp-tech/peripheral.audioamp)
 - [Harp Synchronizer](https://github.com/harp-tech/device.synchronizer)
-  
+
 ## Deployment
 
 #### For initial installation:
-- Follow instructions [here](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Computer-Configuration)           
+- Follow instructions [here](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Computer-Configuration)
 
 #### To launch the software:
 - Run `foraging.bonsai` in `dynamic-foraging-task\src\workflows` to start Bonsai.
 - Activate the `conda` environment created above
 - Run `python dynamic-foraging-task\src\foraging_gui\Foraging.py` to start the GUI.
-- The GUI will leave a log file at `~\Documents\foraging_gui_logs\` named by the tower and date/time. 
+- The GUI will leave a log file at `~\Documents\foraging_gui_logs\` named by the tower and date/time.
 
 #### Automatic Updates
 To configure automatic updates consistent with the [update protocol](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Software-Update-Procedures),please use TaskScheduler to automatically run three batch files at specified times of the week ([instructions](https://github.com/AllenNeuralDynamics/aind-behavior-blog/wiki/Configure-Automatic-Updates))
@@ -87,7 +87,7 @@ To configure automatic updates consistent with the [update protocol](https://git
 ### Menu
 
 #### File
-- **New**: Clear the training parameters 
+- **New**: Clear the training parameters
 - **Open**: Open an existing session and visualization
 - **Save**: Save the current session as a JSON file (or optionally a .mat file)
 - **Exit**: Close the GUI
@@ -99,7 +99,7 @@ To configure automatic updates consistent with the [update protocol](https://git
 - **Snipping**: Open the snipping tools
 - **Simulation**: When one of the simulation methods is selected, it will run the simulation when the **Start** button is pressed.
   - **Win-stay lose-switch**: Foragers employ a win-stay-lose-switch strategy.
-  - **Random**: Foragers randomly select a choice. 
+  - **Random**: Foragers randomly select a choice.
 #### Visualization
 - **Lick distribution**: Open the lick analysis dialogue to display lick-related statistics.
 - **Time distribution**: Display the simulated distribution of block length/ITI time/Delay time.
@@ -118,7 +118,7 @@ To configure automatic updates consistent with the [update protocol](https://git
 - **Open behavior folder**: Open the folder to save the current behavior JSON file
 #### Settings
 - **Open setting folder**: Open the default settings folder. It is in `Documents\ForagingSettings` by default. There are different JSON files to save different default parameters.
-  - **ForagingSettings.json**: General settings. 
+  - **ForagingSettings.json**: General settings.
     - **default_saveFolder**: The default save location. The folder structure is `default_saveFolder\Rig\Animal\Animal_year-month-day_hour-minute-second\`. There are five additional folders: `EphysFolder`, `HarpFolder`, `PhotometryFolder`, `TrainingFolder`, and `VideoFolder` for saving different data sources. Default location: `Documents`
     - **current_box**: To define the rig name.
     - **show_log_info_in_console**: If exists and equals `True`, a copy of log info is sent to the console.
@@ -148,9 +148,9 @@ To configure automatic updates consistent with the [update protocol](https://git
 - **Task**: There are currently five tasks supported (**Coupled Baiting**;**Uncoupled Baiting**;**Coupled Without Baiting**;**Uncoupled Without Baiting**;**RewardN**).
 - **Tower**: The current tower (can be set by **current_box** in **ForagingSettings.json**).
 - **Auto Train**: Click the button to open the [Automatic Training](#automatic-training) dialog, see below
-  
+
 #### Trial-related parameters
-- **training stage**: Select the training stage parameters. These parameters can be saved in **TrainingStagePar.json** through "**Save training**" button. They are task dependent. 
+- **training stage**: Select the training stage parameters. These parameters can be saved in **TrainingStagePar.json** through "**Save training**" button. They are task dependent.
 - **randomness**: There are **exponential** and **even distribution** available. This random generator will be applied to generate **Block length**/**ITI**/**Delay period**.
 - **L(s)**: The left valve open time. The **L(s)** and **L(ul)** are dependent on each other, and the relationship is determined by the water calibration.
 - **L(ul)**: The estimated water volume given by the left valve under the **L(s)**.
@@ -185,9 +185,9 @@ To configure automatic updates consistent with the [update protocol](https://git
 - **stop ignores>**: The session will stop if the number of ignored trials surpasses the limit.
 - **max trial**: The session will stop if the number of trials surpasses the limit.
 - **max time (min)**: The session will stop if the running time of the session surpasses the limit.
-- **auto (Advanced block)**: The block change will also be dependent on the choice of the animal when it is turned on. It's allowed to go to the next block only when there are consecutive points (**points in a row**) that cross the threshold (**switch thr**). 
-- **switch thr**: The block switch threshold (only active after the auto is turned on). 
-- **points in a row**: Consecutive points that cross the threshold (only active after the auto is turned on). 
+- **auto (Advanced block)**: The block change will also be dependent on the choice of the animal when it is turned on. It's allowed to go to the next block only when there are consecutive points (**points in a row**) that cross the threshold (**switch thr**).
+- **switch thr**: The block switch threshold (only active after the auto is turned on).
+- **points in a row**: Consecutive points that cross the threshold (only active after the auto is turned on).
 - **Next block**: It will jump to the next block when it is clicked.
 #### Weight and water
 - **Weight before (g)**: Enter the mouse weight before starting training.
@@ -200,7 +200,7 @@ To configure automatic updates consistent with the [update protocol](https://git
 - **Current right block**: current trial number of the current right block/length of current right block.
 - **Responded trial**: number of responded trial/number of total trial. A trial is regarded as a responded trial if the animal licks one of the lick sprouts within the response time (**RT**).
 - **Reward trial**: number of reward trials/number of total trial.
-- **Total Reward**: Estimated total reward (excluding the manually given reward). 
+- **Total Reward**: Estimated total reward (excluding the manually given reward).
 - **Left choice rewarded**:
 - **Right choice rewarded**:
 - **Early licking**: Statistics of early licking rate in different behavior epochs.
@@ -212,7 +212,7 @@ To configure automatic updates consistent with the [update protocol](https://git
 > If the dialog fails to open, check AWS credentials at `~/.aws/credentials`. See [instructions](#for-initial-installation)
 
 2. For the first session of a new mouse:
-   1. ~~So far, the automatic training system cannot handle our previous Stage 1.1 --> Stage 1.2.<br>~~    
+   1. ~~So far, the automatic training system cannot handle our previous Stage 1.1 --> Stage 1.2.<br>~~
    2. Confirm that this is a new mouse in the automatic training system<br>
    <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/684d4aac-f9a9-4ce7-9536-61aace828c76" width="400"><br>
    3. In "Curriculum Manager", select a desired curriculum for the new mouse. Double-check `curriculum_name`, `curriculum_version`, and `curriculum_schema_version`.<br>
@@ -239,7 +239,7 @@ To configure automatic updates consistent with the [update protocol](https://git
    6. ~~Note that you can still modify some items in `Training parameters`, such as `Valve open time`, `Give left/right`, and `Next block`.~~
    7. You could now close the Auto Training dialog.
    8. Start the training as usual.
-    
+
 5. Override parameters (not recommended)
    1. Once `Apply and lock` is pressed, you can press it again to unlock the parameters and override any of them. But in this case, the automatic training mode is disengaged, and this session is considered "off-curriculum". <br>
    ![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/08b7997c-bdce-421b-8c90-3a7e4dfc5ba7)
@@ -286,7 +286,7 @@ Data for each session is saved as a JSON file with the following files:
 - **goCue_start_time**: 'The go cue start time'
 - **reward_outcome_time**: 'The reward outcome time (reward/no reward/no response)'
 
-### Training paramters 
+### Training paramters
 Here is an overview of the trial structure using a rewarded trial, an unrewarded trial, and an ignored trial as examples.
 ![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/2530ff82-8b78-4feb-af03-410dcdcbfcc6)
 
@@ -340,7 +340,7 @@ Here is an overview of the trial structure using a rewarded trial, an unrewarded
 - **B_RightRewardDeliveryTime**:'The reward delivery time of the right lick spout'
 - **B_LeftLickTime**:'The time of left licks'
 - **B_RightLickTime**:'The time of left licks'
-  
+
 ## Developer Instructions
 The user interface of the GUI was designed based on Qt-designer (introduction available [here](https://realpython.com/qt-designer-python/)).
 

@@ -262,6 +262,28 @@
           </property>
          </widget>
         </item>
+        <item row="2" column="3">
+         <widget class="QSpinBox" name="hab_time_box">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>90</number>
+           </property>
+           <property name="suffix">
+           <string> min</string>
+          </property>
+          <property name="prefix">
+           <string> Habituation: </string>
+          </property>
+         </widget>
+        </item>
         <item row="2" column="1">
          <widget class="QPushButton" name="Save">
           <property name="sizePolicy">
@@ -712,8 +734,8 @@
                    </property>
                    <property name="maximumSize">
                     <size>
-                     <width>300</width>
-                     <height>16777215</height>
+                     <width>240</width>
+                     <height>300</height>
                     </size>
                    </property>
                    <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -737,16 +759,22 @@
                         <verstretch>8</verstretch>
                        </sizepolicy>
                       </property>
+                      <property name="baseSize">
+                       <size>
+                        <width>270</width>
+                        <height>300</height>
+                       </size>
+                      </property>
                       <property name="minimumSize">
                        <size>
-                        <width>0</width>
+                        <width>255</width>
                         <height>300</height>
                        </size>
                       </property>
                       <property name="maximumSize">
                        <size>
-                        <width>16777215</width>
-                        <height>16777215</height>
+                        <width>270</width>
+                        <height>300</height>
                        </size>
                       </property>
                       <property name="font">
@@ -1903,16 +1931,10 @@
                          <property name="enabled">
                           <bool>true</bool>
                          </property>
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
                          <property name="maximumSize">
                           <size>
                            <width>100</width>
-                           <height>150</height>
+                           <height>50</height>
                           </size>
                          </property>
                          <property name="currentIndex">
@@ -1932,12 +1954,6 @@
                        </item>
                        <item row="5" column="0">
                         <widget class="QLabel" name="label_34">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
                          <property name="text">
                           <string>align to go cue=</string>
                          </property>
@@ -1946,79 +1962,6 @@
                          </property>
                          <property name="alignment">
                           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                      </layout>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QGroupBox" name="groupBox_7">
-                      <property name="maximumSize">
-                       <size>
-                        <width>260</width>
-                        <height>110</height>
-                       </size>
-                      </property>
-                      <property name="font">
-                       <font>
-                        <pointsize>8</pointsize>
-                        <weight>50</weight>
-                        <italic>false</italic>
-                        <bold>false</bold>
-                       </font>
-                      </property>
-                      <property name="title">
-                       <string>Manual motor stage</string>
-                      </property>
-                      <layout class="QGridLayout" name="gridLayout_11">
-                       <item row="0" column="0">
-                        <widget class="QPushButton" name="MoveXP_2">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="minimumSize">
-                          <size>
-                           <width>20</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>100</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string>Move Left</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="0" column="1">
-                        <widget class="QPushButton" name="MoveXN_2">
-                         <property name="sizePolicy">
-                          <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                          </sizepolicy>
-                         </property>
-                         <property name="minimumSize">
-                          <size>
-                           <width>20</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>100</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string>Move Right</string>
                          </property>
                         </widget>
                        </item>
@@ -3717,8 +3660,8 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="12" column="15">
-                       <widget class="QLineEdit" name="MaxTrial">
+                      <item row="12" column="3">
+                       <widget class="QSpinBox" name="auto_stop_ignore_win">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                           <horstretch>7</horstretch>
@@ -3731,8 +3674,8 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
-                         <string>1000</string>
+                        <property name="value">
+                         <number>30</number>
                         </property>
                        </widget>
                       </item>
@@ -4587,8 +4530,8 @@ Double dipping:
                         </property>
                        </widget>
                       </item>
-                      <item row="16" column="10">
-                       <widget class="QLineEdit" name="RewardDelayMin">
+                      <item row="12" column="6">
+                       <widget class="QDoubleSpinBox" name="auto_stop_ignore_ratio_threshold">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
                           <horstretch>0</horstretch>
@@ -4601,8 +4544,8 @@ Double dipping:
                           <height>16777215</height>
                          </size>
                         </property>
-                        <property name="text">
-                         <string>1</string>
+                        <property name="value">
+                         <double>.8</double>
                         </property>
                        </widget>
                       </item>
@@ -5189,6 +5132,8 @@ Current pair:
     <addaction name="action_Calibration"/>
     <addaction name="actionLaser_Calibration"/>
     <addaction name="actionMeta_Data"/>
+    <addaction name="actionOptical_Tagging"/>
+    <addaction name="actionRandom_Reward"/>
     <addaction name="separator"/>
     <addaction name="menuSimulation"/>
     <addaction name="actionDrawing_after_stopping"/>
@@ -5315,6 +5260,7 @@ Current pair:
    </attribute>
    <addaction name="action_Calibration"/>
    <addaction name="actionLaser_Calibration"/>
+   <addaction name="actionOptical_Tagging"/>
    <addaction name="actionMeta_Data"/>
   </widget>
   <widget class="QToolBar" name="toolBar_3">
@@ -5579,43 +5525,29 @@ Current pair:
     <string>Open video folder</string>
    </property>
   </action>
+  <action name="actionOptical_Tagging">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>resources/OpticalTagging.jpg</normaloff>resources/OpticalTagging.jpg</iconset>
+   </property>
+   <property name="text">
+    <string>Optical Tagging</string>
+   </property>
+  </action>
+  <action name="actionRandom_Reward">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Random Reward</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>Task</tabstop>
  </tabstops>
  <resources/>
- <connections>
-  <connection>
-   <sender>MoveXP_2</sender>
-   <signal>clicked()</signal>
-   <receiver>MoveXP</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>412</x>
-     <y>128</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>337</x>
-     <y>414</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>MoveXN_2</sender>
-   <signal>clicked()</signal>
-   <receiver>MoveXN</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>487</x>
-     <y>132</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>404</x>
-     <y>424</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
 </ui>
