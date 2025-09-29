@@ -683,7 +683,7 @@ class WaterCalibrationDialog(QDialog):
             tube_weight=float(before_txt),
             append=True,
         )
-        
+
     def _LoadCalibrationParameters(self):
         self.WaterCalibrationPar = {}
         if os.path.exists(self.MainWindow.WaterCalibrationParFiles):
