@@ -765,6 +765,12 @@
                         <height>300</height>
                        </size>
                       </property>
+                      <property name="baseSize">
+                       <size>
+                        <width>270</width>
+                        <height>300</height>
+                       </size>
+                      </property>
                       <property name="minimumSize">
                        <size>
                         <width>255</width>
