@@ -15,6 +15,7 @@ from serial import Serial
 from serial.tools.list_ports import comports as list_comports
 
 from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
+from aind_dynamic_foraging_basic_analysis import compute_foraging_efficiency
 
 if PLATFORM == "win32":
     from newscale.usbxpress import USBXpressDevice, USBXpressLib
@@ -1027,20 +1028,15 @@ class GenerateTrials:
         random_number_R=None,
     ):  # Calculate foraging efficiency (only for 2lp)
         """Calculating the foraging efficiency of baiting tasks (Code is from Han)"""
-        # --- Optimal-aver (use optimal expectation as 100% efficiency) ---
-        p_stars = np.zeros_like(p_Ls)
-        for i, (p_L, p_R) in enumerate(zip(p_Ls, p_Rs)):  # Sum over all ps
-            p_max = np.max([p_L, p_R])
-            p_min = np.min([p_L, p_R])
-            if p_min == 0 or p_max >= 1:
-                p_stars[i] = p_max
-            else:
-                m_star = np.floor(np.log(1 - p_max) / np.log(1 - p_min))
-                p_stars[i] = p_max + (
-                    1 - (1 - p_min) ** (m_star + 1) - p_max**2
-                ) / (m_star + 1)
 
-        for_eff_optimal = float(reward_rate / np.nanmean(p_stars))
+        for_eff_optimal = compute_foraging_efficiency(
+            baited=self.TP_Task in ["Coupled Baiting", "Uncoupled Baiting"],
+            choice_history=np.where(self.B_AnimalResponseHistory == 2, np.nan, self.B_AnimalResponseHistory),
+            reward_history=self.B_RewardedHistory[0] | self.B_RewardedHistory[1],
+            p_reward=self.B_RewardProHistory,
+            random_number=[self.B_CurrentRewardProbRandomNumber[:, 0], self.B_CurrentRewardProbRandomNumber[:, 1]],
+            autowater_offered=(self.B_AutoWaterTrial[0, :] == 1) | (self.B_AutoWaterTrial[1, :] == 1),
+        )
 
         if random_number_L is None:
             return for_eff_optimal, np.nan
