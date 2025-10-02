@@ -232,7 +232,7 @@ class Window(QMainWindow):
         self._InitializeBonsai()
 
         # connect to Slims
-        self._ConnectSlims()
+        #self._ConnectSlims()
 
         # Set up threads
         self.threadpool = QThreadPool()  # get animal response
