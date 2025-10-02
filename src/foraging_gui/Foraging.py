@@ -61,7 +61,9 @@ from foraging_gui.Dialogs import (
     OptogeneticsDialog,
     TimeDistributionDialog,
     WaterCalibrationDialog,
-    get_curriculum_string,
+    OpticalTaggingDialog,
+    RandomRewardDialog,
+    get_curriculum_string
 )
 from foraging_gui.GenerateMetadata import generate_metadata
 from foraging_gui.MyFunctions import (
@@ -274,6 +276,8 @@ class Window(QMainWindow):
         self.OpenLaserCalibration = 0
         self.OpenCamera = 0
         self.OpenMetadata = 0
+        self.OpenRandomReward = 0
+        self.OpenOpticalTagging = 0
         self.NewTrialRewardOrder = 0
         self.LickSta = 0
         self.LickSta_ToInitializeVisual = 1
@@ -304,6 +308,8 @@ class Window(QMainWindow):
         self._LaserCalibration()  # to open the laser calibration panel
         self._WaterCalibration()  # to open the water calibration panel
         self._Camera()
+        self._OpticalTagging()
+        self._RandomReward()
         self._InitializeMotorStage()
         self._Metadata()
         self.RewardFamilies = [
@@ -454,6 +460,8 @@ class Window(QMainWindow):
         self.sound_button.attenuationChanged.connect(self.change_attenuation)
 
         self.actionMeta_Data.triggered.connect(self._Metadata)
+        self.actionOptical_Tagging.triggered.connect(self._OpticalTagging)
+        self.actionRandom_Reward.triggered.connect(self._RandomReward)
         self.action_Optogenetics.triggered.connect(self._Optogenetics)
         self.actionLicks_sta.triggered.connect(self._LickSta)
         self.actionTime_distribution.triggered.connect(self._TimeDistribution)
@@ -1428,7 +1436,7 @@ class Window(QMainWindow):
             pass
         else:
             self._StopCurrentSession()
-        
+
         # We don't need to stop the recording when the start_from_camera is True as the logging is from the camera
         if start_from_camera == False:
             # Turn off the camera recording if it it on
@@ -1558,15 +1566,20 @@ class Window(QMainWindow):
     def _LoadSchedule(self):
         if os.path.exists(self.Settings["schedule_path"]):
             schedule = pd.read_csv(self.Settings["schedule_path"])
-        
+
             # Find the correct week on the schedule
             dividers = schedule[[isinstance(x,str)and('/' in x) for x in schedule['Mouse ID'].values]]
-            today = datetime.now().strftime('%m/%d/%Y')
-   
-            # Multiple weeks on the schedule 
+            today = datetime.now()
+
+            # Multiple weeks on the schedule
             if len(dividers) > 1:
-                first = dividers.iloc[0]['Mouse ID']
-                if datetime.strptime(today, "%m/%d/%Y") < datetime.strptime(first,"%m/%d/%Y"):
+                first = datetime.strptime(dividers.iloc[0]['Mouse ID'], "%m/%d/%Y")
+
+                # switch schedule at Friday 5pm
+                cutoff = first - timedelta(days=3)  # Go back to Friday
+                cutoff = cutoff.replace(hour=17, minute=0, second=0, microsecond=0)  # 5 PM
+
+                if today < cutoff:
                     # Use last weeks schedule
                     schedule = schedule.loc[dividers.index.values[1]:]
                 else:
@@ -1579,7 +1592,7 @@ class Window(QMainWindow):
                 for x in schedule["Mouse ID"].unique()
                 if isinstance(x, str) and (len(x) > 3) and ("/" not in x)
             ]
-            
+
             # Clear rows without a mouse
             self.schedule = schedule.dropna(subset=["Mouse ID"]).copy()
             logging.info("Loaded behavior schedule")
@@ -3498,6 +3511,26 @@ class Window(QMainWindow):
         else:
             self.Camera_dialog.hide()
 
+    def _OpticalTagging(self):
+        '''Open the optical tagging dialog'''
+        if self.OpenOpticalTagging==0:
+            self.OpticalTagging_dialog = OpticalTaggingDialog(MainWindow=self)
+            self.OpenOpticalTagging=1
+        if self.actionOptical_Tagging.isChecked()==True:
+            self.OpticalTagging_dialog.show()
+        else:
+            self.OpticalTagging_dialog.hide()
+
+    def _RandomReward(self):
+        '''Open the random reward dialog'''
+        if self.OpenRandomReward==0:
+            self.RandomReward_dialog = RandomRewardDialog(MainWindow=self)
+            self.OpenRandomReward=1
+        if self.actionRandom_Reward.isChecked()==True:
+            self.RandomReward_dialog.show()
+        else:
+            self.RandomReward_dialog.hide()
+
     def play_beep(self):
         """
         Convenience function to play tone
@@ -3838,6 +3871,8 @@ class Window(QMainWindow):
                 "Opto_dialog",
                 "Camera_dialog",
                 "Metadata_dialog",
+                'OpticalTagging_dialog',
+                'RandomReward_dialog'
             ]
             for dialog_name in dialogs:
                 if hasattr(self, dialog_name):
@@ -3968,6 +4003,9 @@ class Window(QMainWindow):
             # save manual water
             Obj["ManualWaterVolume"] = self.ManualWaterVolume
 
+            # save the random water
+            Obj['RandomWaterVolume']=self.RandomReward_dialog.random_reward_par['RandomWaterVolume']
+
             # save camera start/stop time
             Obj["Camera_dialog"][
                 "camera_start_time"
@@ -3995,6 +4033,12 @@ class Window(QMainWindow):
         else:
             Obj["stage_in_use"] = "unknown training stage"
             Obj["curriculum_in_use"] = "off curriculum"
+
+        # save optical tagging parameters
+        Obj['optical_tagging_par']=self.OpticalTagging_dialog.optical_tagging_par
+
+        # save random reward parameters
+        Obj['random_reward_par']=self.RandomReward_dialog.random_reward_par
 
         # generate the metadata file and update slims
         try:
@@ -4072,8 +4116,17 @@ class Window(QMainWindow):
                     with open(self.SaveFile, "w") as outfile:
                         json.dump(Obj2, outfile, indent=4, cls=NumpyEncoder)
                 elif self.SaveFile.endswith(".json"):
-                    with open(self.SaveFile, "w") as outfile:
+                    # Crashses during save can corupt a json file.
+                    # Make tmp file to save to
+                    tmp_file_name = self.SaveFile.split('.json')[0]
+                    tmp_file_name = tmp_file_name + '_tmp.json'
+                    with open(tmp_file_name, "w") as outfile:
                         json.dump(Obj, outfile, indent=4, cls=NumpyEncoder)
+                    # After file is safely saved, remove the old save file
+                    # and rewrite the new one.
+                    if os.path.isfile(self.SaveFile):
+                        os.remove(self.SaveFile)
+                    os.rename(tmp_file_name,self.SaveFile)
 
         # Toggle unsaved data to False
         if BackupSave == 0:
@@ -4610,6 +4663,8 @@ class Window(QMainWindow):
                 "Camera_dialog",
                 "centralwidget",
                 "TrainingParameters",
+                'OpticalTagging_dialog',
+                'RandomReward_dialog'
             ]
             for dialog_name in dialogs:
                 if hasattr(self, dialog_name):
@@ -4657,6 +4712,8 @@ class Window(QMainWindow):
                             CurrentObj = Obj["LaserCalibration_dialog"]
                         elif widget.parent().objectName() == "MetaData":
                             CurrentObj = Obj["Metadata_dialog"]
+                        elif widget.parent().objectName()=='RandomReward':
+                            CurrentObj=Obj.get('RandomReward_dialog', {})
                         else:
                             CurrentObj = Obj.copy()
                     except Exception:
@@ -6361,7 +6418,7 @@ class Window(QMainWindow):
         if not self.Start.isChecked():
             logging.info("ending trial loop")
             return
-        
+
         logging.info("starting trial loop")
 
         # Track elapsed time in case Bonsai Stalls
@@ -6929,14 +6986,14 @@ class Window(QMainWindow):
             if hasattr(self, "ManualWaterVolume"):
                 ManualWaterVolume = np.sum(self.ManualWaterVolume)
             else:
-                ManualWaterVolume = 0
-            water_in_session = BS_TotalReward + ManualWaterVolume
-            self.water_in_session = water_in_session
-            if (
-                self.WeightAfter.text() != ""
-                and self.BaseWeight.text() != ""
-                and self.TargetRatio.text() != ""
-            ):
+                ManualWaterVolume=0
+
+            if hasattr(self,'RandomReward_dialog'):
+                RandomWaterVolume=np.sum(self.RandomReward_dialog.random_reward_par['RandomWaterVolume'])
+
+            water_in_session=BS_TotalReward+ManualWaterVolume+RandomWaterVolume
+            self.water_in_session=water_in_session
+            if self.WeightAfter.text()!='' and self.BaseWeight.text()!='' and self.TargetRatio.text()!='':
                 # calculate the suggested water
                 suggested_water = target_weight - float(
                     self.WeightAfter.text()
