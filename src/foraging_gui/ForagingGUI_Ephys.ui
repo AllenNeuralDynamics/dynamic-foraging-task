@@ -71,8 +71,8 @@
      <rect>
       <x>650</x>
       <y>20</y>
-      <width>152</width>
-      <height>20</height>
+      <width>118</width>
+      <height>19</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -116,6 +116,11 @@
     <item>
      <property name="text">
       <string>RewardN</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Delayed Response</string>
      </property>
     </item>
    </widget>
@@ -2305,7 +2310,7 @@
       </sizepolicy>
      </property>
      <property name="value">
-      <double>.8</double>
+      <double>0.800000000000000</double>
      </property>
     </widget>
     <widget class="QLabel" name="label_62">
@@ -2784,17 +2789,17 @@
     <property name="styleSheet">
      <string notr="true"/>
     </property>
-    <property name="minimum">
-      <number>0</number>
-     </property>
-     <property name="maximum">
-      <number>90</number>
-     </property>
-     <property name="suffix">
+    <property name="suffix">
      <string> min</string>
-      </property>
-     <property name="prefix">
+    </property>
+    <property name="prefix">
      <string> Habituation: </string>
+    </property>
+    <property name="minimum">
+     <number>0</number>
+    </property>
+    <property name="maximum">
+     <number>90</number>
     </property>
    </widget>
    <widget class="QPushButton" name="NewSession">
@@ -4559,6 +4564,7 @@
      </item>
     </layout>
    </widget>
+   <zorder>hab_time_box</zorder>
    <zorder>TrainingParameters</zorder>
    <zorder>StartFIP</zorder>
    <zorder>FIPMode</zorder>
@@ -4603,7 +4609,7 @@
      <x>0</x>
      <y>0</y>
      <width>1951</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
    <property name="sizePolicy">
