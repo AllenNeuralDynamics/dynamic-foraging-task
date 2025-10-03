@@ -1,5 +1,9 @@
-Extensions
-Gallery
+bin
+obj
 Packages
+Bonsai.exe.WebView2
+Settings/
+*.bin
+*.dll
 *.exe
 *.exe.settings
