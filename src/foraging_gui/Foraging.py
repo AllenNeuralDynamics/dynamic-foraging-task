@@ -1623,7 +1623,7 @@ class Window(QMainWindow):
             return
         logging.info("Getting protocol")
         protocol = self._GetInfoFromSchedule(mouse_id, "Protocol")
-        if (protocol is None) or (protocol == "") or (np.isnan(protocol)):
+        if (protocol is None) or (protocol == "") or (isinstance(protocol, (int, float, np.generic)) and np.isnan(protocol)):
             if not self.Settings["add_default_project_name"]:
                 logging.info(
                     "Protocol not on schedule, not using default because add_default_project_name=False"
