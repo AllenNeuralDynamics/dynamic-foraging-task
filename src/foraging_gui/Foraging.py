@@ -1634,7 +1634,7 @@ class Window(QMainWindow):
                 protocol = 2414
 
         self.Metadata_dialog.meta_data["session_metadata"]["IACUCProtocol"] = (
-            str(int(protocol))
+            str(protocol)
         )
         self.Metadata_dialog._update_metadata(
             update_rig_metadata=False, update_session_metadata=True
