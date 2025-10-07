@@ -22,8 +22,10 @@
                  xmlns:viz="clr-namespace:Bonsai.Design.Visualizers;assembly=Bonsai.Design.Visualizers"
                  xmlns:spk="clr-namespace:Bonsai.Spinnaker;assembly=Bonsai.Spinnaker"
                  xmlns:ffmpeg="clr-namespace:Bonsai.FFmpeg;assembly=Bonsai.FFmpeg"
-                 xmlns:p6="clr-namespace:;assembly=Extensions"
+                 xmlns:p6="clr-namespace:AllenNeuralDynamics.VrForaging;assembly=AllenNeuralDynamics.Core.Design"
+                 xmlns:p7="clr-namespace:AllenNeuralDynamics.Core.Design;assembly=AllenNeuralDynamics.Core.Design"
                  xmlns:gui="clr-namespace:Bonsai.Gui;assembly=Bonsai.Gui"
+                 xmlns:p8="clr-namespace:;assembly=Extensions"
                  xmlns="https://bonsai-rx.org/2018/workflow">
   <Workflow>
     <Nodes>
@@ -9302,14 +9304,24 @@
             <Expression xsi:type="SubscribeSubject">
               <Name>CameraImage_Bottom</Name>
             </Expression>
+            <Expression xsi:type="p6:IplImageSaturationVisualizerBuilder">
+              <p6:Minimum>0</p6:Minimum>
+              <p6:Maximum>255</p6:Maximum>
+              <p6:OverlayAlpha>1</p6:OverlayAlpha>
+            </Expression>
             <Expression xsi:type="VisualizerMapping">
-              <VisualizerType xsi:type="TypeMapping" TypeArguments="p6:IplImageRotateVisualizer" />
+              <VisualizerType xsi:type="TypeMapping" TypeArguments="p7:IplImageSaturationVisualizer" />
             </Expression>
             <Expression xsi:type="SubscribeSubject">
               <Name>CameraImage_Right</Name>
             </Expression>
+            <Expression xsi:type="p6:IplImageSaturationVisualizerBuilder">
+              <p6:Minimum>0</p6:Minimum>
+              <p6:Maximum>255</p6:Maximum>
+              <p6:OverlayAlpha>1</p6:OverlayAlpha>
+            </Expression>
             <Expression xsi:type="VisualizerMapping">
-              <VisualizerType xsi:type="TypeMapping" TypeArguments="p6:IplImageRotateVisualizer" />
+              <VisualizerType xsi:type="TypeMapping" TypeArguments="p7:IplImageSaturationVisualizer" />
             </Expression>
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
               <viz:Name>CameraRecording</viz:Name>
@@ -9405,10 +9417,12 @@
             <Edge From="54" To="55" Label="Source1" />
             <Edge From="55" To="56" Label="Source2" />
             <Edge From="57" To="58" Label="Source1" />
-            <Edge From="58" To="61" Label="Source1" />
-            <Edge From="59" To="60" Label="Source1" />
-            <Edge From="60" To="61" Label="Source2" />
-            <Edge From="62" To="63" Label="Source1" />
+            <Edge From="58" To="59" Label="Source1" />
+            <Edge From="59" To="63" Label="Source1" />
+            <Edge From="60" To="61" Label="Source1" />
+            <Edge From="61" To="62" Label="Source1" />
+            <Edge From="62" To="63" Label="Source2" />
+            <Edge From="64" To="65" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
@@ -10160,13 +10174,13 @@
               <Name>CameraImage_Bottom_Preview</Name>
             </Expression>
             <Expression xsi:type="VisualizerMapping">
-              <VisualizerType xsi:type="TypeMapping" TypeArguments="p6:IplImageRotateVisualizer" />
+              <VisualizerType xsi:type="TypeMapping" TypeArguments="p8:IplImageRotateVisualizer" />
             </Expression>
             <Expression xsi:type="SubscribeSubject">
               <Name>CameraImage_Right_Preview</Name>
             </Expression>
             <Expression xsi:type="VisualizerMapping">
-              <VisualizerType xsi:type="TypeMapping" TypeArguments="p6:IplImageRotateVisualizer" />
+              <VisualizerType xsi:type="TypeMapping" TypeArguments="p8:IplImageRotateVisualizer" />
             </Expression>
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
               <viz:Name>CameraPreview</viz:Name>
