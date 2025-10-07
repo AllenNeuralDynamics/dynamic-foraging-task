@@ -148,6 +148,8 @@ To configure automatic updates consistent with the [update protocol](https://git
 - **Task**: There are currently five tasks supported (**Coupled Baiting**;**Uncoupled Baiting**;**Coupled Without Baiting**;**Uncoupled Without Baiting**;**RewardN**).
 - **Tower**: The current tower (can be set by **current_box** in **ForagingSettings.json**).
 - **Auto Train**: Click the button to open the [Automatic Training](#automatic-training) dialog, see below
+- **Example Curriculum**:
+ <img width="646" height="295" alt="image" src="https://github.com/user-attachments/assets/088a5bb1-8070-4d46-bbba-3b9977453b41" />
 
 #### Trial-related parameters
 - **training stage**: Select the training stage parameters. These parameters can be saved in **TrainingStagePar.json** through "**Save training**" button. They are task dependent.
