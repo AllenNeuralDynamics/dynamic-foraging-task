@@ -2887,7 +2887,7 @@
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM3</harp:PortName>
+                <harp:PortName>COM4</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -9422,7 +9422,9 @@
         <Property Name="Path" DisplayName="SettingsPath" />
       </Expression>
       <Expression xsi:type="Combinator">
-        <Combinator xsi:type="io:ReadAllText" />
+        <Combinator xsi:type="io:ReadAllText">
+          <io:Path>C:\Users\micah.woodard\Documents\ForagingSettings\Settings_box1.csv</io:Path>
+        </Combinator>
       </Expression>
       <Expression xsi:type="Parse">
         <Pattern>%s,%s</Pattern>
@@ -9464,7 +9466,7 @@
               <gui:Enabled>true</gui:Enabled>
               <gui:Visible>true</gui:Visible>
               <gui:Font>Microsoft Sans Serif, 15.75pt, style=Bold</gui:Font>
-              <gui:Text>4xx-x-A</gui:Text>
+              <gui:Text>667-1-A</gui:Text>
             </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="SubscribeSubject">
