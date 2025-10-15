@@ -9422,7 +9422,9 @@
         <Property Name="Path" DisplayName="SettingsPath" />
       </Expression>
       <Expression xsi:type="Combinator">
-        <Combinator xsi:type="io:ReadAllText" />
+        <Combinator xsi:type="io:ReadAllText">
+           <io:Path />
+        </Combinator>
       </Expression>
       <Expression xsi:type="Parse">
         <Pattern>%s,%s</Pattern>
