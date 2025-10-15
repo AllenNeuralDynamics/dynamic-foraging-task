@@ -8810,12 +8810,12 @@
     <EditorDialogSettings>
       <Visible>true</Visible>
       <Location>
-        <X>-2784</X>
-        <Y>104</Y>
+        <X>-1902</X>
+        <Y>388</Y>
       </Location>
       <Size>
-        <Width>314</Width>
-        <Height>238</Height>
+        <Width>998</Width>
+        <Height>877</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
