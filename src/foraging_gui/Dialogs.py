@@ -1466,7 +1466,6 @@ class WaterCalibrationDialog(QDialog):
                 self.Warning.setText(f"Spot check {valve.lower()} cancelled")
                 pre_weight.setText("")
                 total_water.setText("")
-                save.setStyleSheet("color: black;background-color : none;")
                 self.EmergencyStop.setChecked(False)
                 self.EmergencyStop.setStyleSheet("background-color : none;")
                 spot_check.setChecked(False)
