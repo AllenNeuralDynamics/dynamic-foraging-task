@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>882</width>
-    <height>801</height>
+    <width>888</width>
+    <height>815</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -349,14 +349,30 @@
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>0</x>
+     <x>10</x>
      <y>20</y>
      <width>881</width>
-     <height>161</height>
+     <height>169</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="3" column="4">
+    <item row="1" column="0">
+     <widget class="QLabel" name="label1_5">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>duration (s)=</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::PlainText</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="3">
      <widget class="QPushButton" name="CopyToSession">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -372,7 +388,36 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="6">
+    <item row="4" column="1">
+     <widget class="QLineEdit" name="LaserPowerMeasured">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QPushButton" name="Open">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>open</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="11">
      <widget class="QComboBox" name="CopyLaser">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -392,64 +437,7 @@
       </item>
      </widget>
     </item>
-    <item row="1" column="8">
-     <widget class="QLineEdit" name="Frequency_1">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>40</string>
-      </property>
-     </widget>
-    </item>
     <item row="3" column="2">
-     <widget class="QPushButton" name="Save">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Save</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="8">
-     <widget class="QComboBox" name="Location_1">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <item>
-       <property name="text">
-        <string>Both</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Laser_1</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Laser_2</string>
-       </property>
-      </item>
-     </widget>
-    </item>
-    <item row="1" column="7">
      <widget class="QLabel" name="label1_13">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -465,106 +453,7 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="9">
-     <widget class="QLabel" name="label1_14">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>RD (s)=</string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::PlainText</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLineEdit" name="Duration_1">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>10</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="5">
-     <widget class="QLabel" name="label1_4">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>copy laser=</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1">
-     <widget class="QPushButton" name="Capture">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Capture</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="10">
-     <widget class="QComboBox" name="Protocol_1">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <item>
-       <property name="text">
-        <string>Sine</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Pulse</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Constant</string>
-       </property>
-      </item>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="QPushButton" name="Open">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>open</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="4">
+    <item row="1" column="3">
      <widget class="QLineEdit" name="PulseDur_1">
       <property name="enabled">
        <bool>false</bool>
@@ -583,8 +472,8 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="7">
-     <widget class="QLabel" name="label1_2">
+    <item row="0" column="0">
+     <widget class="QLabel" name="label1_1">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -592,72 +481,11 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>location=</string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::PlainText</enum>
+       <string>Laser=</string>
       </property>
      </widget>
     </item>
-    <item row="0" column="9">
-     <widget class="QLabel" name="label1_12">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>protocol=</string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::PlainText</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="2">
-     <widget class="QLabel" name="label1_3">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>copy condition=</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label1_5">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>duration (s)=</string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::PlainText</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="6">
-     <widget class="QLineEdit" name="voltage">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>0.1</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="5">
+    <item row="2" column="2">
      <widget class="QLabel" name="label1_6">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -673,26 +501,7 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="2">
-     <widget class="QLabel" name="label1_15">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>pulse dur(s)=</string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::PlainText</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="4">
+    <item row="5" column="11">
      <widget class="QComboBox" name="CopyCondition">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -722,8 +531,36 @@
       </item>
      </widget>
     </item>
-    <item row="3" column="5" colspan="2">
-     <widget class="QPushButton" name="CopyFromOpto">
+    <item row="0" column="3">
+     <widget class="QComboBox" name="Location_1">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <item>
+       <property name="text">
+        <string>Both</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Laser_1</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Laser_2</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="6" column="2">
+     <widget class="QPushButton" name="Save">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -731,15 +568,15 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>Copy from optogenetics</string>
+       <string>Save</string>
       </property>
       <property name="checkable">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
      </widget>
     </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label1_1">
+    <item row="2" column="0">
+     <widget class="QLabel" name="label1_12">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -747,7 +584,10 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>Laser=</string>
+       <string>protocol=</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::PlainText</enum>
       </property>
      </widget>
     </item>
@@ -781,20 +621,7 @@
       </item>
      </widget>
     </item>
-    <item row="1" column="10">
-     <widget class="QLineEdit" name="RD_1">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>1</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0" colspan="2">
+    <item row="4" column="0">
      <widget class="QLabel" name="label1_17">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -813,8 +640,11 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="2" colspan="3">
-     <widget class="QLineEdit" name="LaserPowerMeasured">
+    <item row="1" column="2">
+     <widget class="QLabel" name="label1_15">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -822,9 +652,205 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string/>
+       <string>pulse dur(s)=</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::PlainText</enum>
       </property>
      </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QComboBox" name="Protocol_1">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <item>
+       <property name="text">
+        <string>Sine</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Pulse</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Constant</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QLabel" name="label1_2">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>location=</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::PlainText</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="3">
+     <widget class="QLineEdit" name="voltage">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>0.1</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="Duration_1">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>10</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="1">
+     <widget class="QPushButton" name="Capture">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Capture</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QLineEdit" name="RD_1">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>1</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="label1_14">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>RD (s)=</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::PlainText</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="3">
+     <widget class="QLineEdit" name="Frequency_1">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>40</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="10">
+     <widget class="QLabel" name="label1_4">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>copy laser=</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="10">
+     <widget class="QLabel" name="label1_3">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>copy condition=</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="4" colspan="3">
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="6" column="10" colspan="2">
+     <widget class="QPushButton" name="CopyFromOpto">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Copy from optogenetics</string>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="7">
+     <spacer name="verticalSpacer_2">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
     </item>
    </layout>
   </widget>
