@@ -260,3 +260,12 @@ class RigClient:
     def StopCameraPreview(self, value):
         # stop the camera preview workflow
         self.send("/stopcamerapreview", value)
+
+    def GiveSecondStimulus(self,value):
+        # Give second stimulus
+        self.send("/GiveSecondStimulus", value)
+
+    def SecondStimulusDelay(self,value):
+        # Second stimulus delay
+        self.send("/SecondStimulusDelay", value)
+
