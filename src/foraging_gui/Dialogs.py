@@ -131,6 +131,12 @@ class OptogeneticsDialog(QDialog):
     def __init__(self, MainWindow, parent=None):
         super().__init__(parent)
         uic.loadUi("Optogenetics.ui", self)
+
+        # resize if foraging gui
+        if MainWindow.default_ui == "ForagingGUI.ui":
+            self.setMaximumWidth(800)
+            self.QScrollOptogenetics.setFixedSize(770, 271)
+
         self.condition_idx = [
             1,
             2,
@@ -1460,7 +1466,6 @@ class WaterCalibrationDialog(QDialog):
                 self.Warning.setText(f"Spot check {valve.lower()} cancelled")
                 pre_weight.setText("")
                 total_water.setText("")
-                save.setStyleSheet("color: black;background-color : none;")
                 self.EmergencyStop.setChecked(False)
                 self.EmergencyStop.setStyleSheet("background-color : none;")
                 spot_check.setChecked(False)

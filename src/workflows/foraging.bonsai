@@ -9419,12 +9419,19 @@
         <Combinator xsi:type="rx:Repeat" />
       </Expression>
       <Expression xsi:type="ExternalizedMapping">
-        <Property Name="FileName" DisplayName="SettingsPath" />
+        <Property Name="Path" DisplayName="SettingsPath" />
       </Expression>
-      <Expression xsi:type="io:CsvReader">
-        <io:FileName>C:\Users\micah.woodard\Documents\ForagingSettings\Settings_box1.csv</io:FileName>
-        <io:ScanPattern>%s,%s</io:ScanPattern>
-        <io:SkipRows>0</io:SkipRows>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="io:ReadAllText">
+           <io:Path />
+        </Combinator>
+      </Expression>
+      <Expression xsi:type="Parse">
+        <Pattern>%s,%s</Pattern>
+        <Separator>\r\n</Separator>
+      </Expression>
+      <Expression xsi:type="Combinator">
+        <Combinator xsi:type="rx:Merge" />
       </Expression>
       <Expression xsi:type="rx:ToDictionary">
         <rx:KeySelector>Item1</rx:KeySelector>
@@ -10220,7 +10227,9 @@
       <Edge From="14" To="15" Label="Source1" />
       <Edge From="15" To="16" Label="Source1" />
       <Edge From="16" To="17" Label="Source1" />
-      <Edge From="19" To="20" Label="Source1" />
+      <Edge From="17" To="18" Label="Source1" />
+      <Edge From="18" To="19" Label="Source1" />
+      <Edge From="21" To="22" Label="Source1" />
     </Edges>
   </Workflow>
 </WorkflowBuilder>
