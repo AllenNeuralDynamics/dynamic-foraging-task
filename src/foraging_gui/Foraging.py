@@ -3800,7 +3800,7 @@ class Window(QMainWindow):
             and self.InitializeBonsaiSuccessfully == 1
             and BackupSave == 0
         ):
-            self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
+            self.GeneratedTrials._get_irregular_timestamp(self.Channel2, self.data_lock)
 
         # Create new folders.
         if self.CreateNewFolder == 1:
@@ -6143,7 +6143,7 @@ class Window(QMainWindow):
             )
             worker1.signals.finished.connect(self._thread_complete)
             workerLick = Worker(
-                GeneratedTrials._get_irregular_timestamp, self.Channel2
+                GeneratedTrials._get_irregular_timestamp, self.Channel2, self.data_lock
             )
             workerLick.signals.finished.connect(self._thread_complete2)
             workerPlot = Worker(
