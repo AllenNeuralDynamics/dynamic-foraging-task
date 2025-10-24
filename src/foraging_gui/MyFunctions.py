@@ -56,6 +56,8 @@ class GenerateTrials:
         self.B_CurrentRewardProbRandomNumber = []
         self.B_ITIHistory = []
         self.B_DelayHistory = []
+        self.B_SecondStimulusDelay=[]
+        self.B_RewardDelay=[]
         self.B_ResponseTimeHistory = []
         self.B_CurrentRewardProb = np.empty((2,))
         self.B_AnimalCurrentResponse = []
@@ -82,6 +84,8 @@ class GenerateTrials:
         self.B_GoCueTimeBehaviorBoard = np.array([]).astype(
             float
         )  # the time from the behavior board
+        self.B_GoCueTimeSoundCardSecondStimulus=np.array([]).astype(float) # the time of the second sound
+        self.B_GoCueTimeSoundCard=np.array([]).astype(float) # the time from the soundcard
         self.B_GoCueTimeSoundCard = np.array([]).astype(
             float
         )  # the time from the soundcard
@@ -523,23 +527,31 @@ class GenerateTrials:
                 np.random.exponential(float(self.TP_ITIBeta), 1)
                 + float(self.TP_ITIMin)
             )
+            self.CurrentDelay = float(np.random.exponential(float(self.TP_DelayBeta),1)+float(self.TP_DelayMin))
         elif self.TP_Randomness == "Even":
             self.CurrentITI = random.uniform(
                 float(self.TP_ITIMin), float(self.TP_ITIMax)
             )
+            self.CurrentDelay=random.uniform(float(self.TP_DelayMin),float(self.TP_DelayMax))
+
+        if self.TP_RandomnessSecondStimulus=='Exponential':
+            self.CurrentSecondStimulusDelay = float(np.random.exponential(float(self.TP_SecondStimulusBeta),1)+float(self.TP_SecondStimulusMin))
+        elif self.TP_RandomnessSecondStimulus=='Even':
+            self.CurrentSecondStimulusDelay=random.uniform(float(self.TP_SecondStimulusMin),float(self.TP_SecondStimulusMax))
+
+        if self.TP_RandomnessRewardDelay=='Exponential':
+            self.CurrentRewardDelay = float(np.random.exponential(float(self.TP_RewardDelayBeta),1)+float(self.TP_RewardDelayMin))
+        elif self.TP_RandomnessRewardDelay=='Even':
+            self.CurrentRewardDelay=random.uniform(float(self.TP_RewardDelayMin),float(self.TP_RewardDelayMax))
+
         if self.CurrentITI > float(self.TP_ITIMax):
             self.CurrentITI = float(self.TP_ITIMax)
-        if self.TP_Randomness == "Exponential":
-            self.CurrentDelay = float(
-                np.random.exponential(float(self.TP_DelayBeta), 1)
-                + float(self.TP_DelayMin)
-            )
-        elif self.TP_Randomness == "Even":
-            self.CurrentDelay = random.uniform(
-                float(self.TP_DelayMin), float(self.TP_DelayMax)
-            )
         if self.CurrentDelay > float(self.TP_DelayMax):
             self.CurrentDelay = float(self.TP_DelayMax)
+        if self.CurrentSecondStimulusDelay>float(self.TP_SecondStimulusMax):
+            self.CurrentSecondStimulusDelay=float(self.TP_SecondStimulusMax)
+        if self.CurrentRewardDelay>float(self.TP_RewardDelayMax):
+            self.CurrentRewardDelay=float(self.TP_RewardDelayMax)
         # extremely important. Currently, the shaders timer does not allow delay close to zero.
         if self.CurrentITI < 0.05:
             self.CurrentITI = 0.05
@@ -548,6 +560,8 @@ class GenerateTrials:
         self.B_ITIHistory.append(self.CurrentITI)
         self.B_DelayHistory.append(self.CurrentDelay)
         self.B_ResponseTimeHistory.append(float(self.TP_ResponseTime))
+        self.B_SecondStimulusDelay.append(self.CurrentSecondStimulusDelay)
+        self.B_RewardDelay.append(self.CurrentRewardDelay)
 
     def _check_coupled_block_transition(self):
         """Check if we should perform a block change for the next trial.
@@ -2446,17 +2460,40 @@ class GenerateTrials:
             else:
                 Channel1.PassGoCue(int(0))
                 Channel1.PassRewardOutcome(int(0))
-            Channel1.LeftValue(float(self.TP_LeftValue) * 1000)
-            Channel1.RightValue(float(self.TP_RightValue) * 1000)
+            # check if we should give the second reinforcement
+            if self.TP_GiveSecondStimulus=='on':
+                # open the gate for the second auditory stimulus
+                Channel1.GiveSecondStimulus(int(1))
+                # set the delay time after the second reinforcement
+                Channel1.SecondStimulusDelay(float(self.CurrentSecondStimulusDelay))
+            else:
+                Channel1.GiveSecondStimulus(int(0))
+            Channel1.LeftValue(float(self.TP_LeftValue)*1000)
+            Channel1.RightValue(float(self.TP_RightValue)*1000)
             Channel1.RewardConsumeTime(float(self.TP_RewardConsumeTime))
+
             Channel1.Left_Bait(int(self.CurrentBait[0]))
             Channel1.Right_Bait(int(self.CurrentBait[1]))
             Channel1.ITI(float(self.CurrentITI))
-            if self.TP_RewardDelay == "":
-                self.TP_RewardDelay = 0
-            Channel1.RewardDelay(float(self.TP_RewardDelay))
+            reward_delay = self.CurrentRewardDelay
+            reward_delay = self.CurrentRewardDelay
+            if self.TP_GiveSecondStimulus == 'on':
+                # The delay time set in the GUI is corresponding to the delay time after the first reinforcement
+                reward_delay = float(reward_delay) + float(self.CurrentSecondStimulusDelay)
+            self.reward_delay = reward_delay
+            Channel1.RewardDelay(float(reward_delay))
             Channel1.DelayTime(float(self.CurrentDelay))
             Channel1.ResponseTime(float(self.TP_ResponseTime))
+            # If there is a reward delay and a second stimulus delay, the trial end time should be adjusted accordingly.
+            # The trial end time is determined by the sum of:
+            # - reward outcome timestamp (which includes reward, no reward, or no response)
+            # - reward consume time
+            # The reward delay and second stimulus delay are added to the reward outcome time,
+            # thereby extending the trial end time.
+            # The next trial will start after this adjusted trial end time.
+            # The reward consume time will also add extra self.TP_RewardDelay for no response trial in this case.
+            adjusted_reward_consume_time=float(self.TP_RewardConsumeTime)+float(reward_delay)
+            Channel1.RewardConsumeTime(adjusted_reward_consume_time)
             if self.B_LaserOnTrial[self.B_CurrentTrialN] == 1:
                 Channel1.start(3)
                 self.CurrentStartType = 3
@@ -2587,6 +2624,7 @@ class GenerateTrials:
         self.B_GoCueTimeSoundCard = np.append(
             self.B_GoCueTimeBehaviorBoard, GoCueTimeBehaviorBoard
         )
+        self.B_GoCueTimeSoundCardSecondStimulus=np.append(self.B_GoCueTimeSoundCardSecondStimulus,GoCueTimeBehaviorBoard)
         self.B_DOPort2Output = np.append(self.B_DOPort2Output, B_DOPort2Output)
         # get the event time
         self.B_TrialStartTime = np.append(
@@ -2657,6 +2695,8 @@ class GenerateTrials:
         in_delay = 0  # 0, the next /BehaviorEvent is not the delay; 1, the next /BehaviorEvent is the delay following the /TrialStartTime
         first_behavior_event = 0
         first_delay_start = 0
+        soundcard_eventN = 0
+        GoCueTimeSoundCard_SecondStimulus = None
         while 1:
             Rec = Channel1.receive()
             if Rec[0].address not in ["/BehaviorEvent", "/DelayStartTime"]:
@@ -2676,6 +2716,9 @@ class GenerateTrials:
                 RewardOutcomeTime = Rec[1][1][0]
             elif Rec[0].address == "/RewardOutcome":
                 TrialOutcome = Rec[1][1][0]
+                if TrialOutcome!='NoResponse' and self.TP_GiveSecondStimulus=='on':
+                    # expecting another /GoCueTimeSoundCard
+                    ReceiveN+=1
                 if TrialOutcome == "NoResponse":
                     with data_lock:
                         self.B_AnimalCurrentResponse = 2
@@ -2711,40 +2754,43 @@ class GenerateTrials:
             elif Rec[0].address == "/TrialEndTime":
                 TrialEndTime = Rec[1][1][0]
             elif Rec[0].address == "/GoCueTimeSoundCard":
-                # give auto water after Co cue
-                # Randomlizing the order to avoid potential bias.
-                if np.random.random(1) < 0.5:
-                    if self.CurrentAutoRewardTrial[0] == 1:
-                        Channel3.AutoWater_Left(int(1))
-                    if self.CurrentAutoRewardTrial[1] == 1:
-                        Channel3.AutoWater_Right(int(1))
+                if soundcard_eventN == 1:
+                    GoCueTimeSoundCard_SecondStimulus=Rec[1][1][0]
                 else:
-                    if self.CurrentAutoRewardTrial[1] == 1:
-                        Channel3.AutoWater_Right(int(1))
-                    if self.CurrentAutoRewardTrial[0] == 1:
-                        Channel3.AutoWater_Left(int(1))
+                    # give auto water after Co cue
+                    # Randomlizing the order to avoid potential bias.
+                    if np.random.random(1) < 0.5:
+                        if self.CurrentAutoRewardTrial[0] == 1:
+                            Channel3.AutoWater_Left(int(1))
+                        if self.CurrentAutoRewardTrial[1] == 1:
+                            Channel3.AutoWater_Right(int(1))
+                    else:
+                        if self.CurrentAutoRewardTrial[1] == 1:
+                            Channel3.AutoWater_Right(int(1))
+                        if self.CurrentAutoRewardTrial[0] == 1:
+                            Channel3.AutoWater_Left(int(1))
 
-                # give reserved manual water
-                if (
-                    float(self.win.give_left_volume_reserved) > 0
-                    or float(self.win.give_right_volume_reserved) > 0
-                ):
-                    # Set the text of a label or text widget to show the reserved volumes
-                    logging.info(
-                        f"Give reserved manual water (ul) left: {self.win.give_left_volume_reserved}; "
-                        f"right: {self.win.give_right_volume_reserved}",
-                        extra={"tags": [self.win.warning_log_tag]},
-                    )
+                    # give reserved manual water
+                    if (
+                        float(self.win.give_left_volume_reserved) > 0
+                        or float(self.win.give_right_volume_reserved) > 0
+                    ):
+                        # Set the text of a label or text widget to show the reserved volumes
+                        logging.info(
+                            f"Give reserved manual water (ul) left: {self.win.give_left_volume_reserved}; "
+                            f"right: {self.win.give_right_volume_reserved}",
+                            extra={"tags": [self.win.warning_log_tag]},
+                        )
 
-                # The manual water of two sides are given sequentially. Randomlizing the order to avoid bias.
-                if np.random.random(1) < 0.5:
-                    self.win._give_reserved_water(valve="left")
-                    self.win._give_reserved_water(valve="right")
-                else:
-                    self.win._give_reserved_water(valve="right")
-                    self.win._give_reserved_water(valve="left")
-                GoCueTimeSoundCard = Rec[1][1][0]
-                in_delay = 0
+                    # The manual water of two sides are given sequentially. Randomlizing the order to avoid bias.
+                    if np.random.random(1) < 0.5:
+                        self.win._give_reserved_water(valve="left")
+                        self.win._give_reserved_water(valve="right")
+                    else:
+                        self.win._give_reserved_water(valve="right")
+                        self.win._give_reserved_water(valve="left")
+                    GoCueTimeSoundCard = Rec[1][1][0]
+                soundcard_eventN = soundcard_eventN + 1
             elif (
                 Rec[0].address == "/DOPort2Output"
             ):  # this port is used to trigger optogenetics aligned to Go cue
@@ -2762,13 +2808,14 @@ class GenerateTrials:
                         first_behavior_event = 1
                         current_receiveN += 1  # only count once
                 else:
-                    if behavior_eventN == 0:
-                        GoCueTimeBehaviorBoard = Rec[1][1][0]
-                    elif behavior_eventN == 1:
-                        TrialEndTimeHarp = Rec[1][1][0]
-                    behavior_eventN += 1
-                    current_receiveN += 1
-            if current_receiveN == ReceiveN:
+                    if behavior_eventN==0:
+                        GoCueTimeBehaviorBoard=Rec[1][1][0]
+                        in_delay = 0
+                    elif behavior_eventN==1:
+                        TrialEndTimeHarp=Rec[1][1][0]
+                    behavior_eventN+=1
+                    current_receiveN+=1
+            if current_receiveN==ReceiveN:
                 break
         with data_lock:
             self.B_RewardedHistory = np.append(
@@ -2791,6 +2838,9 @@ class GenerateTrials:
             self.B_GoCueTimeBehaviorBoard = np.append(
                 self.B_GoCueTimeBehaviorBoard, GoCueTimeBehaviorBoard
             )
+            self.B_GoCueTimeSoundCardSecondStimulus = np.append(self.B_GoCueTimeSoundCardSecondStimulus,
+                                                                GoCueTimeSoundCard_SecondStimulus)
+
             self.B_GoCueTimeSoundCard = np.append(
                 self.B_GoCueTimeSoundCard, GoCueTimeSoundCard
             )
