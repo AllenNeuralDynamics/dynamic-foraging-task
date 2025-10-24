@@ -3211,9 +3211,6 @@ class GenerateTrials:
                     self.B_AutoRightWaterStartTime = np.append(
                         self.B_AutoRightWaterStartTime, Rec[1][1][0]
                     )
-                self.B_AutoRightWaterStartTime = np.append(
-                    self.B_AutoRightWaterStartTime, Rec[1][1][0]
-                )
             elif Rec[0].address == "/EnvironmentSensorTemperature":
                 value = Rec[1][1][0] if type(Rec[1][1][0]) != float else round(Rec[1][1][0], 1)
                 self.B_EnvironmentSensorTemperature.append(value)
