@@ -165,6 +165,7 @@ class GenerateTrials:
         )  # 1: normal trials with delay; 3: optogenetics trials without delay
         self.GeneFinish = 1
         self.GetResponseFinish = 1
+        self.bias_AutoWater = 0     # flag to indicate autowater triggered by bias algorithm
 
         # create dict with mapped parameter keys paired with empty list for Obj dict
         task_parameter_lists = {k: [] if "TP_" in k else v for k, v in
@@ -2609,8 +2610,8 @@ class GenerateTrials:
             self.B_BaitHistory, self.CurrentBait.reshape(2, 1), axis=1
         )
         # determine auto water
+        self.CurrentAutoRewardTrial = [0, 0]
         if self.CurrentAutoReward == 1:
-            self.CurrentAutoRewardTrial = [0, 0]
             if (
                 self.task_logic.task_parameters.auto_water.auto_water_type
                 == "Natural"
@@ -2639,8 +2640,9 @@ class GenerateTrials:
                 if self.CurrentAutoRewardTrial[i] == 1:
                     self.CurrentBait[i] = 0
                     self.B_Baited[i] = False
-        else:
-            self.CurrentAutoRewardTrial = [0, 0]
+        elif self.bias_AutoWater != [0, 0]:     # auto water due to bias
+            np.logical_or(self.bias_AutoWater, self.CurrentAutoRewardTrial)
+
         self.B_AutoWaterTrial = np.append(
             self.B_AutoWaterTrial,
             np.array(self.CurrentAutoRewardTrial).reshape(2, 1),
