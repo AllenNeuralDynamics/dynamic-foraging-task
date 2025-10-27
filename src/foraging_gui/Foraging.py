@@ -413,6 +413,7 @@ class Window(QMainWindow):
         )  # update dashboard value
         self.bias_indicator.biasOver.connect(self.bias_correction)  # check wether to give water or move lickspouts if bias is over
         self.bias_indicator.biasUnder.connect(self.lick_spout_bias_correction)  # move lickspout back toward center when threshold is below
+        self.bias_indicator.biasUnder.connect(lambda bias: setattr(self, "water_reward_attempts", 0))   # reset water rewards when bias drops below threshold
         self.bias_indicator.setSizePolicy(
             QSizePolicy.Maximum, QSizePolicy.Maximum
         )
@@ -5798,6 +5799,7 @@ class Window(QMainWindow):
             if self.water_reward_attempts < specs.max_water_reward_attempts:
                 logging.info(f"Bias over threshold. Attempting water intervention.")
                 self.water_reward_bias_correction(bias, trial_number)
+                self.water_reward_attempts += 1
 
             else:
                 logging.info(f"Maximum watering attempts exceeded. Moving lickspouts for bias. ",
@@ -5833,7 +5835,6 @@ class Window(QMainWindow):
 
             open_time = self.calculate_valve_open_time(valve, specs.volume_ul)
             getattr(self.GeneratedTrials, f"_Give{valve}")(self.Channel3, open_time)
-            self.water_reward_attempts += 1
             self.last_bias_intervention = trial_number  # reset check
 
     def lick_spout_bias_correction(self, bias: float, trial_number: int):
