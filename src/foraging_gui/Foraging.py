@@ -237,7 +237,7 @@ class Window(QMainWindow):
         self._InitializeBonsai()
 
         # connect to Slims
-        self._ConnectSlims()
+        #self._ConnectSlims()
 
         # Set up threads
         self.threadpool = QThreadPool()  # get animal response
@@ -4514,6 +4514,7 @@ class Window(QMainWindow):
             )
         self.ID.setText(mouse_id)
         self.Experimenter.setText(experimenter)
+        self.Experimenter.returnPressed.emit()  # validate username
         self.ID.returnPressed.emit()
         self._GetProjectName(mouse_id)
         self._GetProtocol(mouse_id)
@@ -4805,6 +4806,8 @@ class Window(QMainWindow):
 
                         if isinstance(widget, QtWidgets.QLineEdit):
                             widget.setText(final_value)
+                            if key == "Experimenter":
+                                widget.returnPressed.emit() # validate experiment name
                             if key in {
                                 "BaseWeight",
                                 "TotalWater",
