@@ -1623,7 +1623,7 @@ class Window(QMainWindow):
             return
         logging.info("Getting protocol")
         protocol = self._GetInfoFromSchedule(mouse_id, "Protocol")
-        if (protocol is None) or (protocol == "") or (np.isnan(protocol)):
+        if (protocol is None) or (protocol == "") or (isinstance(protocol, (int, float, np.generic)) and np.isnan(protocol)):
             if not self.Settings["add_default_project_name"]:
                 logging.info(
                     "Protocol not on schedule, not using default because add_default_project_name=False"
@@ -1634,7 +1634,7 @@ class Window(QMainWindow):
                 protocol = 2414
 
         self.Metadata_dialog.meta_data["session_metadata"]["IACUCProtocol"] = (
-            str(int(protocol))
+            str(protocol)
         )
         self.Metadata_dialog._update_metadata(
             update_rig_metadata=False, update_session_metadata=True
@@ -3800,7 +3800,7 @@ class Window(QMainWindow):
             and self.InitializeBonsaiSuccessfully == 1
             and BackupSave == 0
         ):
-            self.GeneratedTrials._get_irregular_timestamp(self.Channel2)
+            self.GeneratedTrials._get_irregular_timestamp(self.Channel2, self.data_lock)
 
         # Create new folders.
         if self.CreateNewFolder == 1:
@@ -6143,7 +6143,7 @@ class Window(QMainWindow):
             )
             worker1.signals.finished.connect(self._thread_complete)
             workerLick = Worker(
-                GeneratedTrials._get_irregular_timestamp, self.Channel2
+                GeneratedTrials._get_irregular_timestamp, self.Channel2, self.data_lock
             )
             workerLick.signals.finished.connect(self._thread_complete2)
             workerPlot = Worker(

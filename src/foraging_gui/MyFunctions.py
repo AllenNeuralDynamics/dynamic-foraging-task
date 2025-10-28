@@ -2,6 +2,7 @@ import logging
 import math
 import random
 import sys
+import threading
 import time
 import traceback
 from datetime import datetime
@@ -15,6 +16,7 @@ from serial import Serial
 from serial.tools.list_ports import comports as list_comports
 
 from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
+from aind_dynamic_foraging_basic_analysis import compute_foraging_efficiency
 
 if PLATFORM == "win32":
     from newscale.usbxpress import USBXpressDevice, USBXpressLib
@@ -54,6 +56,8 @@ class GenerateTrials:
         self.B_CurrentRewardProbRandomNumber = []
         self.B_ITIHistory = []
         self.B_DelayHistory = []
+        self.B_SecondStimulusDelay=[]
+        self.B_RewardDelay=[]
         self.B_ResponseTimeHistory = []
         self.B_CurrentRewardProb = np.empty((2,))
         self.B_AnimalCurrentResponse = []
@@ -80,6 +84,8 @@ class GenerateTrials:
         self.B_GoCueTimeBehaviorBoard = np.array([]).astype(
             float
         )  # the time from the behavior board
+        self.B_GoCueTimeSoundCardSecondStimulus=np.array([]).astype(float) # the time of the second sound
+        self.B_GoCueTimeSoundCard=np.array([]).astype(float) # the time from the soundcard
         self.B_GoCueTimeSoundCard = np.array([]).astype(
             float
         )  # the time from the soundcard
@@ -521,23 +527,31 @@ class GenerateTrials:
                 np.random.exponential(float(self.TP_ITIBeta), 1)
                 + float(self.TP_ITIMin)
             )
+            self.CurrentDelay = float(np.random.exponential(float(self.TP_DelayBeta),1)+float(self.TP_DelayMin))
         elif self.TP_Randomness == "Even":
             self.CurrentITI = random.uniform(
                 float(self.TP_ITIMin), float(self.TP_ITIMax)
             )
+            self.CurrentDelay=random.uniform(float(self.TP_DelayMin),float(self.TP_DelayMax))
+
+        if self.TP_RandomnessSecondStimulus=='Exponential':
+            self.CurrentSecondStimulusDelay = float(np.random.exponential(float(self.TP_SecondStimulusBeta),1)+float(self.TP_SecondStimulusMin))
+        elif self.TP_RandomnessSecondStimulus=='Even':
+            self.CurrentSecondStimulusDelay=random.uniform(float(self.TP_SecondStimulusMin),float(self.TP_SecondStimulusMax))
+
+        if self.TP_RandomnessRewardDelay=='Exponential':
+            self.CurrentRewardDelay = float(np.random.exponential(float(self.TP_RewardDelayBeta),1)+float(self.TP_RewardDelayMin))
+        elif self.TP_RandomnessRewardDelay=='Even':
+            self.CurrentRewardDelay=random.uniform(float(self.TP_RewardDelayMin),float(self.TP_RewardDelayMax))
+
         if self.CurrentITI > float(self.TP_ITIMax):
             self.CurrentITI = float(self.TP_ITIMax)
-        if self.TP_Randomness == "Exponential":
-            self.CurrentDelay = float(
-                np.random.exponential(float(self.TP_DelayBeta), 1)
-                + float(self.TP_DelayMin)
-            )
-        elif self.TP_Randomness == "Even":
-            self.CurrentDelay = random.uniform(
-                float(self.TP_DelayMin), float(self.TP_DelayMax)
-            )
         if self.CurrentDelay > float(self.TP_DelayMax):
             self.CurrentDelay = float(self.TP_DelayMax)
+        if self.CurrentSecondStimulusDelay>float(self.TP_SecondStimulusMax):
+            self.CurrentSecondStimulusDelay=float(self.TP_SecondStimulusMax)
+        if self.CurrentRewardDelay>float(self.TP_RewardDelayMax):
+            self.CurrentRewardDelay=float(self.TP_RewardDelayMax)
         # extremely important. Currently, the shaders timer does not allow delay close to zero.
         if self.CurrentITI < 0.05:
             self.CurrentITI = 0.05
@@ -546,6 +560,8 @@ class GenerateTrials:
         self.B_ITIHistory.append(self.CurrentITI)
         self.B_DelayHistory.append(self.CurrentDelay)
         self.B_ResponseTimeHistory.append(float(self.TP_ResponseTime))
+        self.B_SecondStimulusDelay.append(self.CurrentSecondStimulusDelay)
+        self.B_RewardDelay.append(self.CurrentRewardDelay)
 
     def _check_coupled_block_transition(self):
         """Check if we should perform a block change for the next trial.
@@ -928,42 +944,7 @@ class GenerateTrials:
         # foraging efficiency
         Len = np.shape(self.B_RewardedHistory)[1]
         if Len > 0:
-            reward_rate = np.sum(self.B_RewardedHistory) / Len
-            p_Ls = self.B_RewardProHistory[0][:Len]
-            p_Rs = self.B_RewardProHistory[1][:Len]
-            random_number_L = np.concatenate(
-                self.B_CurrentRewardProbRandomNumber, axis=0
-            )[0::2][:Len]
-            random_number_R = np.concatenate(
-                self.B_CurrentRewardProbRandomNumber, axis=0
-            )[1::2][:Len]
-            if self.TP_Task in ["Coupled Baiting", "Uncoupled Baiting"]:
-                self.B_for_eff_optimal, self.B_for_eff_optimal_random_seed = (
-                    self.foraging_eff(
-                        reward_rate,
-                        p_Ls,
-                        p_Rs,
-                        random_number_L,
-                        random_number_R,
-                    )
-                )
-            elif self.TP_Task in [
-                "Coupled Without Baiting",
-                "Uncoupled Without Baiting",
-            ]:
-                self.B_for_eff_optimal, self.B_for_eff_optimal_random_seed = (
-                    self.foraging_eff_no_baiting(
-                        reward_rate,
-                        p_Ls,
-                        p_Rs,
-                        random_number_L,
-                        random_number_R,
-                    )
-                )
-            else:
-                self.B_for_eff_optimal = np.nan
-                self.B_for_eff_optimal_random_seed = np.nan
-            """Some complex calculations can be separated from _GenerateATrial using different threads"""
+            self.B_for_eff_optimal, self.B_for_eff_optimal_random_seed = self.foraging_eff()
 
     def _process_values(
         self, values, auto_water_trial, multiplier_values, rewarded_history
@@ -984,118 +965,17 @@ class GenerateTrials:
                 logging.error(str(e))
         return BS_AutoWater, BS_EarnedReward, BS_AutoWater_N, BS_EarnedReward_N
 
-    def foraging_eff_no_baiting(
-        self,
-        reward_rate,
-        p_Ls,
-        p_Rs,
-        random_number_L=None,
-        random_number_R=None,
-    ):  # Calculate foraging efficiency (only for 2lp)
-        """Calculating the foraging efficiency of no baiting tasks (Code is from Han)"""
-        # --- Optimal-aver (use optimal expectation as 100% efficiency) ---
-        for_eff_optimal = float(
-            reward_rate / np.nanmean(np.max([p_Ls, p_Rs], axis=0))
+    def foraging_eff(self):
+        """Calculating the foraging efficiency"""
+        return compute_foraging_efficiency(
+            baited=self.TP_Task in ["Coupled Baiting", "Uncoupled Baiting"],
+            choice_history=np.where(self.B_AnimalResponseHistory == 2, np.nan, self.B_AnimalResponseHistory),
+            reward_history=self.B_RewardedHistory[0] | self.B_RewardedHistory[1],
+            p_reward=self.B_RewardProHistory[:, :-1],
+            random_number=[[arr[0] for arr in self.B_CurrentRewardProbRandomNumber],
+                           [arr[1] for arr in self.B_CurrentRewardProbRandomNumber]],
+            autowater_offered=(self.B_AutoWaterTrial[0, :] == 1) | (self.B_AutoWaterTrial[1, :] == 1),
         )
-
-        if random_number_L is None:
-            return for_eff_optimal, np.nan
-
-        # --- Optimal-actual (uses the actual random numbers by simulation)
-        reward_refills = np.vstack(
-            [p_Ls >= random_number_L, p_Rs >= random_number_R]
-        )
-        optimal_choices = np.argmax(
-            [p_Ls, p_Rs], axis=0
-        )  # Greedy choice, assuming the agent knows the groundtruth
-        optimal_rewards = (
-            reward_refills[0][optimal_choices == 0].sum()
-            + reward_refills[1][optimal_choices == 1].sum()
-        )
-        for_eff_optimal_random_seed = float(
-            reward_rate / (optimal_rewards / len(optimal_choices))
-        )
-
-        return for_eff_optimal, for_eff_optimal_random_seed
-
-    def foraging_eff(
-        self,
-        reward_rate,
-        p_Ls,
-        p_Rs,
-        random_number_L=None,
-        random_number_R=None,
-    ):  # Calculate foraging efficiency (only for 2lp)
-        """Calculating the foraging efficiency of baiting tasks (Code is from Han)"""
-        # --- Optimal-aver (use optimal expectation as 100% efficiency) ---
-        p_stars = np.zeros_like(p_Ls)
-        for i, (p_L, p_R) in enumerate(zip(p_Ls, p_Rs)):  # Sum over all ps
-            p_max = np.max([p_L, p_R])
-            p_min = np.min([p_L, p_R])
-            if p_min == 0 or p_max >= 1:
-                p_stars[i] = p_max
-            else:
-                m_star = np.floor(np.log(1 - p_max) / np.log(1 - p_min))
-                p_stars[i] = p_max + (
-                    1 - (1 - p_min) ** (m_star + 1) - p_max**2
-                ) / (m_star + 1)
-
-        for_eff_optimal = float(reward_rate / np.nanmean(p_stars))
-
-        if random_number_L is None:
-            return for_eff_optimal, np.nan
-
-        # --- Optimal-actual (uses the actual random numbers by simulation)
-        block_trans = np.where(np.diff(np.hstack([np.inf, p_Ls, np.inf])))[
-            0
-        ].tolist()
-        reward_refills = [p_Ls >= random_number_L, p_Rs >= random_number_R]
-        reward_optimal_random_seed = 0
-
-        # Generate optimal choice pattern
-        for b_start, b_end in zip(block_trans[:-1], block_trans[1:]):
-            p_max = np.max([p_Ls[b_start], p_Rs[b_start]])
-            p_min = np.min([p_Ls[b_start], p_Rs[b_start]])
-            side_max = np.argmax([p_Ls[b_start], p_Rs[b_start]])
-
-            # Get optimal choice pattern and expected optimal rate
-            if p_min == 0 or p_max >= 1:
-                this_choice = np.array(
-                    [1] * (b_end - b_start)
-                )  # Greedy is obviously optimal
-            else:
-                m_star = np.floor(np.log(1 - p_max) / np.log(1 - p_min))
-                this_choice = np.array(
-                    (
-                        ([1] * int(m_star) + [0])
-                        * (1 + int((b_end - b_start) / (m_star + 1)))
-                    )[: b_end - b_start]
-                )
-
-            # Do simulation, using optimal choice pattern and actual random numbers
-            reward_refill = np.vstack(
-                [
-                    reward_refills[1 - side_max][b_start:b_end],
-                    reward_refills[side_max][b_start:b_end],
-                ]
-            ).astype(
-                int
-            )  # Max = 1, Min = 0
-            reward_remain = [0, 0]
-            for t in range(b_end - b_start):
-                reward_available = reward_remain | reward_refill[:, t]
-                reward_optimal_random_seed += reward_available[this_choice[t]]
-                reward_remain = reward_available.copy()
-                reward_remain[this_choice[t]] = 0
-
-            if reward_optimal_random_seed:
-                for_eff_optimal_random_seed = float(
-                    reward_rate / (reward_optimal_random_seed / len(p_Ls))
-                )
-            else:
-                for_eff_optimal_random_seed = np.nan
-
-        return for_eff_optimal, for_eff_optimal_random_seed
 
     def _LickSta(self, Trials=None):
         """Perform lick stats for the input trials"""
@@ -2580,17 +2460,40 @@ class GenerateTrials:
             else:
                 Channel1.PassGoCue(int(0))
                 Channel1.PassRewardOutcome(int(0))
-            Channel1.LeftValue(float(self.TP_LeftValue) * 1000)
-            Channel1.RightValue(float(self.TP_RightValue) * 1000)
+            # check if we should give the second reinforcement
+            if self.TP_GiveSecondStimulus=='on':
+                # open the gate for the second auditory stimulus
+                Channel1.GiveSecondStimulus(int(1))
+                # set the delay time after the second reinforcement
+                Channel1.SecondStimulusDelay(float(self.CurrentSecondStimulusDelay))
+            else:
+                Channel1.GiveSecondStimulus(int(0))
+            Channel1.LeftValue(float(self.TP_LeftValue)*1000)
+            Channel1.RightValue(float(self.TP_RightValue)*1000)
             Channel1.RewardConsumeTime(float(self.TP_RewardConsumeTime))
+
             Channel1.Left_Bait(int(self.CurrentBait[0]))
             Channel1.Right_Bait(int(self.CurrentBait[1]))
             Channel1.ITI(float(self.CurrentITI))
-            if self.TP_RewardDelay == "":
-                self.TP_RewardDelay = 0
-            Channel1.RewardDelay(float(self.TP_RewardDelay))
+            reward_delay = self.CurrentRewardDelay
+            reward_delay = self.CurrentRewardDelay
+            if self.TP_GiveSecondStimulus == 'on':
+                # The delay time set in the GUI is corresponding to the delay time after the first reinforcement
+                reward_delay = float(reward_delay) + float(self.CurrentSecondStimulusDelay)
+            self.reward_delay = reward_delay
+            Channel1.RewardDelay(float(reward_delay))
             Channel1.DelayTime(float(self.CurrentDelay))
             Channel1.ResponseTime(float(self.TP_ResponseTime))
+            # If there is a reward delay and a second stimulus delay, the trial end time should be adjusted accordingly.
+            # The trial end time is determined by the sum of:
+            # - reward outcome timestamp (which includes reward, no reward, or no response)
+            # - reward consume time
+            # The reward delay and second stimulus delay are added to the reward outcome time,
+            # thereby extending the trial end time.
+            # The next trial will start after this adjusted trial end time.
+            # The reward consume time will also add extra self.TP_RewardDelay for no response trial in this case.
+            adjusted_reward_consume_time=float(self.TP_RewardConsumeTime)+float(reward_delay)
+            Channel1.RewardConsumeTime(adjusted_reward_consume_time)
             if self.B_LaserOnTrial[self.B_CurrentTrialN] == 1:
                 Channel1.start(3)
                 self.CurrentStartType = 3
@@ -2721,6 +2624,7 @@ class GenerateTrials:
         self.B_GoCueTimeSoundCard = np.append(
             self.B_GoCueTimeBehaviorBoard, GoCueTimeBehaviorBoard
         )
+        self.B_GoCueTimeSoundCardSecondStimulus=np.append(self.B_GoCueTimeSoundCardSecondStimulus,GoCueTimeBehaviorBoard)
         self.B_DOPort2Output = np.append(self.B_DOPort2Output, B_DOPort2Output)
         # get the event time
         self.B_TrialStartTime = np.append(
@@ -2791,6 +2695,8 @@ class GenerateTrials:
         in_delay = 0  # 0, the next /BehaviorEvent is not the delay; 1, the next /BehaviorEvent is the delay following the /TrialStartTime
         first_behavior_event = 0
         first_delay_start = 0
+        soundcard_eventN = 0
+        GoCueTimeSoundCard_SecondStimulus = None
         while 1:
             Rec = Channel1.receive()
             if Rec[0].address not in ["/BehaviorEvent", "/DelayStartTime"]:
@@ -2810,6 +2716,9 @@ class GenerateTrials:
                 RewardOutcomeTime = Rec[1][1][0]
             elif Rec[0].address == "/RewardOutcome":
                 TrialOutcome = Rec[1][1][0]
+                if TrialOutcome!='NoResponse' and self.TP_GiveSecondStimulus=='on':
+                    # expecting another /GoCueTimeSoundCard
+                    ReceiveN+=1
                 if TrialOutcome == "NoResponse":
                     with data_lock:
                         self.B_AnimalCurrentResponse = 2
@@ -2845,40 +2754,43 @@ class GenerateTrials:
             elif Rec[0].address == "/TrialEndTime":
                 TrialEndTime = Rec[1][1][0]
             elif Rec[0].address == "/GoCueTimeSoundCard":
-                # give auto water after Co cue
-                # Randomlizing the order to avoid potential bias.
-                if np.random.random(1) < 0.5:
-                    if self.CurrentAutoRewardTrial[0] == 1:
-                        Channel3.AutoWater_Left(int(1))
-                    if self.CurrentAutoRewardTrial[1] == 1:
-                        Channel3.AutoWater_Right(int(1))
+                if soundcard_eventN == 1:
+                    GoCueTimeSoundCard_SecondStimulus=Rec[1][1][0]
                 else:
-                    if self.CurrentAutoRewardTrial[1] == 1:
-                        Channel3.AutoWater_Right(int(1))
-                    if self.CurrentAutoRewardTrial[0] == 1:
-                        Channel3.AutoWater_Left(int(1))
+                    # give auto water after Co cue
+                    # Randomlizing the order to avoid potential bias.
+                    if np.random.random(1) < 0.5:
+                        if self.CurrentAutoRewardTrial[0] == 1:
+                            Channel3.AutoWater_Left(int(1))
+                        if self.CurrentAutoRewardTrial[1] == 1:
+                            Channel3.AutoWater_Right(int(1))
+                    else:
+                        if self.CurrentAutoRewardTrial[1] == 1:
+                            Channel3.AutoWater_Right(int(1))
+                        if self.CurrentAutoRewardTrial[0] == 1:
+                            Channel3.AutoWater_Left(int(1))
 
-                # give reserved manual water
-                if (
-                    float(self.win.give_left_volume_reserved) > 0
-                    or float(self.win.give_right_volume_reserved) > 0
-                ):
-                    # Set the text of a label or text widget to show the reserved volumes
-                    logging.info(
-                        f"Give reserved manual water (ul) left: {self.win.give_left_volume_reserved}; "
-                        f"right: {self.win.give_right_volume_reserved}",
-                        extra={"tags": [self.win.warning_log_tag]},
-                    )
+                    # give reserved manual water
+                    if (
+                        float(self.win.give_left_volume_reserved) > 0
+                        or float(self.win.give_right_volume_reserved) > 0
+                    ):
+                        # Set the text of a label or text widget to show the reserved volumes
+                        logging.info(
+                            f"Give reserved manual water (ul) left: {self.win.give_left_volume_reserved}; "
+                            f"right: {self.win.give_right_volume_reserved}",
+                            extra={"tags": [self.win.warning_log_tag]},
+                        )
 
-                # The manual water of two sides are given sequentially. Randomlizing the order to avoid bias.
-                if np.random.random(1) < 0.5:
-                    self.win._give_reserved_water(valve="left")
-                    self.win._give_reserved_water(valve="right")
-                else:
-                    self.win._give_reserved_water(valve="right")
-                    self.win._give_reserved_water(valve="left")
-                GoCueTimeSoundCard = Rec[1][1][0]
-                in_delay = 0
+                    # The manual water of two sides are given sequentially. Randomlizing the order to avoid bias.
+                    if np.random.random(1) < 0.5:
+                        self.win._give_reserved_water(valve="left")
+                        self.win._give_reserved_water(valve="right")
+                    else:
+                        self.win._give_reserved_water(valve="right")
+                        self.win._give_reserved_water(valve="left")
+                    GoCueTimeSoundCard = Rec[1][1][0]
+                soundcard_eventN = soundcard_eventN + 1
             elif (
                 Rec[0].address == "/DOPort2Output"
             ):  # this port is used to trigger optogenetics aligned to Go cue
@@ -2896,13 +2808,14 @@ class GenerateTrials:
                         first_behavior_event = 1
                         current_receiveN += 1  # only count once
                 else:
-                    if behavior_eventN == 0:
-                        GoCueTimeBehaviorBoard = Rec[1][1][0]
-                    elif behavior_eventN == 1:
-                        TrialEndTimeHarp = Rec[1][1][0]
-                    behavior_eventN += 1
-                    current_receiveN += 1
-            if current_receiveN == ReceiveN:
+                    if behavior_eventN==0:
+                        GoCueTimeBehaviorBoard=Rec[1][1][0]
+                        in_delay = 0
+                    elif behavior_eventN==1:
+                        TrialEndTimeHarp=Rec[1][1][0]
+                    behavior_eventN+=1
+                    current_receiveN+=1
+            if current_receiveN==ReceiveN:
                 break
         with data_lock:
             self.B_RewardedHistory = np.append(
@@ -2925,6 +2838,9 @@ class GenerateTrials:
             self.B_GoCueTimeBehaviorBoard = np.append(
                 self.B_GoCueTimeBehaviorBoard, GoCueTimeBehaviorBoard
             )
+            self.B_GoCueTimeSoundCardSecondStimulus = np.append(self.B_GoCueTimeSoundCardSecondStimulus,
+                                                                GoCueTimeSoundCard_SecondStimulus)
+
             self.B_GoCueTimeSoundCard = np.append(
                 self.B_GoCueTimeSoundCard, GoCueTimeSoundCard
             )
@@ -2973,83 +2889,102 @@ class GenerateTrials:
         channel3.ManualWater_Right(int(1))
         channel3.RightValue1(float(self.win.RightValue.text()) * 1000)
 
-    def _get_irregular_timestamp(self, Channel2):
+    def _get_irregular_timestamp(self, Channel2, data_lock: threading.Lock):
         """Get timestamps occurred irregularly (e.g. licks and reward delivery time)"""
         while not Channel2.msgs.empty():
             Rec = Channel2.receive()
             if Rec[0].address == "/LeftLickTime":
-                self.B_LeftLickTime = np.append(
-                    self.B_LeftLickTime, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_LeftLickTime = np.append(
+                        self.B_LeftLickTime, Rec[1][1][0]
+                    )
             elif Rec[0].address == "/RightLickTime":
-                self.B_RightLickTime = np.append(
+                with data_lock:
+                    self.B_RightLickTime = np.append(
                     self.B_RightLickTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/LeftRewardDeliveryTime":
-                self.B_LeftRewardDeliveryTime = np.append(
+                with data_lock:
+                    self.B_LeftRewardDeliveryTime = np.append(
                     self.B_LeftRewardDeliveryTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/RightRewardDeliveryTime":
-                self.B_RightRewardDeliveryTime = np.append(
+                with data_lock:
+                    self.B_RightRewardDeliveryTime = np.append(
                     self.B_RightRewardDeliveryTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/LeftRewardDeliveryTimeHarp":
-                self.B_LeftRewardDeliveryTimeHarp = np.append(
+                with data_lock:
+                    self.B_LeftRewardDeliveryTimeHarp = np.append(
                     self.B_LeftRewardDeliveryTimeHarp, Rec[1][1][0]
                 )
             elif Rec[0].address == "/RightRewardDeliveryTimeHarp":
-                self.B_RightRewardDeliveryTimeHarp = np.append(
+                with data_lock:
+                    self.B_RightRewardDeliveryTimeHarp = np.append(
                     self.B_RightRewardDeliveryTimeHarp, Rec[1][1][0]
                 )
             elif Rec[0].address == "/PhotometryRising":
-                self.B_PhotometryRisingTimeHarp = np.append(
+                with data_lock:
+                    self.B_PhotometryRisingTimeHarp = np.append(
                     self.B_PhotometryRisingTimeHarp, Rec[1][1][0]
                 )
             elif Rec[0].address == "/PhotometryFalling":
-                self.B_PhotometryFallingTimeHarp = np.append(
+                with data_lock:
+                    self.B_PhotometryFallingTimeHarp = np.append(
                     self.B_PhotometryFallingTimeHarp, Rec[1][1][0]
                 )
             elif Rec[0].address == "/OptogeneticsTimeHarp":
-                self.B_OptogeneticsTimeHarp = np.append(
+                with data_lock:
+                    self.B_OptogeneticsTimeHarp = np.append(
                     self.B_OptogeneticsTimeHarp, Rec[1][1][0]
                 )
             elif Rec[0].address == "/ManualLeftWaterStartTime":
-                self.B_ManualLeftWaterStartTime = np.append(
+                with data_lock:
+                    self.B_ManualLeftWaterStartTime = np.append(
                     self.B_ManualLeftWaterStartTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/ManualRightWaterStartTime":
-                self.B_ManualRightWaterStartTime = np.append(
+                with data_lock:
+                    self.B_ManualRightWaterStartTime = np.append(
                     self.B_ManualRightWaterStartTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/EarnedLeftWaterStartTime":
-                self.B_EarnedLeftWaterStartTime = np.append(
+                with data_lock:
+                    self.B_EarnedLeftWaterStartTime = np.append(
                     self.B_EarnedLeftWaterStartTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/EarnedRightWaterStartTime":
-                self.B_EarnedRightWaterStartTime = np.append(
+                with data_lock:
+                    self.B_EarnedRightWaterStartTime = np.append(
                     self.B_EarnedRightWaterStartTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/AutoLeftWaterStartTime":
-                self.B_AutoLeftWaterStartTime = np.append(
+                with data_lock:
+                    self.B_AutoLeftWaterStartTime = np.append(
                     self.B_AutoLeftWaterStartTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/AutoRightWaterStartTime":
-                self.B_AutoRightWaterStartTime = np.append(
+                with data_lock:
+                    self.B_AutoRightWaterStartTime = np.append(
                     self.B_AutoRightWaterStartTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/EnvironmentSensorTemperature":
-                value = Rec[1][1][0] if type(Rec[1][1][0]) != float else round(Rec[1][1][0], 1)
-                self.B_EnvironmentSensorTemperature.append(value)
+                with data_lock:
+                    value = Rec[1][1][0] if type(Rec[1][1][0]) != float else round(Rec[1][1][0], 1)
+                    self.B_EnvironmentSensorTemperature.append(value)
 
             elif Rec[0].address == "/EnvironmentSensorHumidity":
-                value = Rec[1][1][0] if type(Rec[1][1][0]) != float else round(Rec[1][1][0], 1)
-                self.B_EnvironmentSensorHumidity.append(value)
+                with data_lock:
+                    value = Rec[1][1][0] if type(Rec[1][1][0]) != float else round(Rec[1][1][0], 1)
+                    self.B_EnvironmentSensorHumidity.append(value)
 
             elif Rec[0].address == "/EnvironmentSensorPressure":
-                self.B_EnvironmentSensorPressure.append(Rec[1][1][0])
+                with data_lock:
+                    self.B_EnvironmentSensorPressure.append(Rec[1][1][0])
 
             elif Rec[0].address == "/EnvironmentSensorTimestamp":
-                self.B_EnvironmentSensorTimestamp.append(Rec[1][1][0])
+                with data_lock:
+                    self.B_EnvironmentSensorTimestamp.append(Rec[1][1][0])
 
     def _DeletePreviousLicks(self, Channel2):
         """Delete licks from the previous session"""
