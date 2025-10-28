@@ -51,7 +51,7 @@ class PlotV(FigureCanvas):
             return
 
         if Channel is not None:
-            GeneratedTrials._get_irregular_timestamp(Channel)
+            GeneratedTrials._get_irregular_timestamp(Channel, self.main_win.data_lock)
 
         # Unpack data
         self.B_AnimalResponseHistory = GeneratedTrials.B_AnimalResponseHistory

@@ -2,6 +2,7 @@ import logging
 import math
 import random
 import sys
+import threading
 import time
 import traceback
 from datetime import datetime
@@ -2838,83 +2839,102 @@ class GenerateTrials:
         channel3.ManualWater_Right(int(1))
         channel3.RightValue1(float(self.win.RightValue.text()) * 1000)
 
-    def _get_irregular_timestamp(self, Channel2):
+    def _get_irregular_timestamp(self, Channel2, data_lock: threading.Lock):
         """Get timestamps occurred irregularly (e.g. licks and reward delivery time)"""
         while not Channel2.msgs.empty():
             Rec = Channel2.receive()
             if Rec[0].address == "/LeftLickTime":
-                self.B_LeftLickTime = np.append(
-                    self.B_LeftLickTime, Rec[1][1][0]
-                )
+                with data_lock:
+                    self.B_LeftLickTime = np.append(
+                        self.B_LeftLickTime, Rec[1][1][0]
+                    )
             elif Rec[0].address == "/RightLickTime":
-                self.B_RightLickTime = np.append(
+                with data_lock:
+                    self.B_RightLickTime = np.append(
                     self.B_RightLickTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/LeftRewardDeliveryTime":
-                self.B_LeftRewardDeliveryTime = np.append(
+                with data_lock:
+                    self.B_LeftRewardDeliveryTime = np.append(
                     self.B_LeftRewardDeliveryTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/RightRewardDeliveryTime":
-                self.B_RightRewardDeliveryTime = np.append(
+                with data_lock:
+                    self.B_RightRewardDeliveryTime = np.append(
                     self.B_RightRewardDeliveryTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/LeftRewardDeliveryTimeHarp":
-                self.B_LeftRewardDeliveryTimeHarp = np.append(
+                with data_lock:
+                    self.B_LeftRewardDeliveryTimeHarp = np.append(
                     self.B_LeftRewardDeliveryTimeHarp, Rec[1][1][0]
                 )
             elif Rec[0].address == "/RightRewardDeliveryTimeHarp":
-                self.B_RightRewardDeliveryTimeHarp = np.append(
+                with data_lock:
+                    self.B_RightRewardDeliveryTimeHarp = np.append(
                     self.B_RightRewardDeliveryTimeHarp, Rec[1][1][0]
                 )
             elif Rec[0].address == "/PhotometryRising":
-                self.B_PhotometryRisingTimeHarp = np.append(
+                with data_lock:
+                    self.B_PhotometryRisingTimeHarp = np.append(
                     self.B_PhotometryRisingTimeHarp, Rec[1][1][0]
                 )
             elif Rec[0].address == "/PhotometryFalling":
-                self.B_PhotometryFallingTimeHarp = np.append(
+                with data_lock:
+                    self.B_PhotometryFallingTimeHarp = np.append(
                     self.B_PhotometryFallingTimeHarp, Rec[1][1][0]
                 )
             elif Rec[0].address == "/OptogeneticsTimeHarp":
-                self.B_OptogeneticsTimeHarp = np.append(
+                with data_lock:
+                    self.B_OptogeneticsTimeHarp = np.append(
                     self.B_OptogeneticsTimeHarp, Rec[1][1][0]
                 )
             elif Rec[0].address == "/ManualLeftWaterStartTime":
-                self.B_ManualLeftWaterStartTime = np.append(
+                with data_lock:
+                    self.B_ManualLeftWaterStartTime = np.append(
                     self.B_ManualLeftWaterStartTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/ManualRightWaterStartTime":
-                self.B_ManualRightWaterStartTime = np.append(
+                with data_lock:
+                    self.B_ManualRightWaterStartTime = np.append(
                     self.B_ManualRightWaterStartTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/EarnedLeftWaterStartTime":
-                self.B_EarnedLeftWaterStartTime = np.append(
+                with data_lock:
+                    self.B_EarnedLeftWaterStartTime = np.append(
                     self.B_EarnedLeftWaterStartTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/EarnedRightWaterStartTime":
-                self.B_EarnedRightWaterStartTime = np.append(
+                with data_lock:
+                    self.B_EarnedRightWaterStartTime = np.append(
                     self.B_EarnedRightWaterStartTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/AutoLeftWaterStartTime":
-                self.B_AutoLeftWaterStartTime = np.append(
+                with data_lock:
+                    self.B_AutoLeftWaterStartTime = np.append(
                     self.B_AutoLeftWaterStartTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/AutoRightWaterStartTime":
-                self.B_AutoRightWaterStartTime = np.append(
+                with data_lock:
+                    self.B_AutoRightWaterStartTime = np.append(
                     self.B_AutoRightWaterStartTime, Rec[1][1][0]
                 )
             elif Rec[0].address == "/EnvironmentSensorTemperature":
-                value = Rec[1][1][0] if type(Rec[1][1][0]) != float else round(Rec[1][1][0], 1)
-                self.B_EnvironmentSensorTemperature.append(value)
+                with data_lock:
+                    value = Rec[1][1][0] if type(Rec[1][1][0]) != float else round(Rec[1][1][0], 1)
+                    self.B_EnvironmentSensorTemperature.append(value)
 
             elif Rec[0].address == "/EnvironmentSensorHumidity":
-                value = Rec[1][1][0] if type(Rec[1][1][0]) != float else round(Rec[1][1][0], 1)
-                self.B_EnvironmentSensorHumidity.append(value)
+                with data_lock:
+                    value = Rec[1][1][0] if type(Rec[1][1][0]) != float else round(Rec[1][1][0], 1)
+                    self.B_EnvironmentSensorHumidity.append(value)
 
             elif Rec[0].address == "/EnvironmentSensorPressure":
-                self.B_EnvironmentSensorPressure.append(Rec[1][1][0])
+                with data_lock:
+                    self.B_EnvironmentSensorPressure.append(Rec[1][1][0])
 
             elif Rec[0].address == "/EnvironmentSensorTimestamp":
-                self.B_EnvironmentSensorTimestamp.append(Rec[1][1][0])
+                with data_lock:
+                    self.B_EnvironmentSensorTimestamp.append(Rec[1][1][0])
 
     def _DeletePreviousLicks(self, Channel2):
         """Delete licks from the previous session"""
