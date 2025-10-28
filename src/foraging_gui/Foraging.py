@@ -5793,8 +5793,6 @@ class Window(QMainWindow):
 
         if specs.trial_interval <= trial_number-self.last_bias_intervention and abs(bias) > specs.bias_upper_threshold:
 
-            self.last_bias_intervention = trial_number
-
             # first try water intervention
             if self.water_reward_attempts < specs.max_water_reward_attempts:
                 logging.info(f"Bias over threshold. Attempting water intervention.")
@@ -5829,12 +5827,14 @@ class Window(QMainWindow):
         past_n_choices = self.GeneratedTrials.B_AnimalResponseHistory[-specs.n_choices:]
         logging.info(f"{abs(bias) > threshold} {pl != pr} {set(past_n_choices) == {low_prob_choice}} {pl} {pr} {set(past_n_choices)} {low_prob_choice}")
         if specs and abs(bias) > threshold and pl != pr and set(past_n_choices) == {low_prob_choice}:
-            valve = "Left" if low_prob_choice == 1 else "Right"     # give water on un-licked higher prob side
+            valve = int(not low_prob_choice)     # give water on un-licked higher prob side
 
-            logging.info(f"Giving water on {valve} side.", extra={"tags": [self.warning_log_tag]})
+            logging.info(f"Giving water on {'left' if valve == 0 else 'right'} side.", extra={"tags": [self.warning_log_tag]})
+            auto_water = [0, 0]
+            with self.trial_lock:   # Give autowater for next trial
+                auto_water[valve] = 1
+                self.GeneratedTrials.bias_AutoWater = auto_water
 
-            open_time = self.calculate_valve_open_time(valve, specs.volume_ul)
-            getattr(self.GeneratedTrials, f"_Give{valve}")(self.Channel3, open_time)
             self.last_bias_intervention = trial_number  # reset check
 
     def lick_spout_bias_correction(self, bias: float, trial_number: int):
