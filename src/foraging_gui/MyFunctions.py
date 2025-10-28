@@ -2641,7 +2641,7 @@ class GenerateTrials:
                     self.CurrentBait[i] = 0
                     self.B_Baited[i] = False
         elif self.bias_AutoWater != [0, 0]:     # auto water due to bias
-            np.logical_or(self.bias_AutoWater, self.CurrentAutoRewardTrial)
+            self.CurrentAutoRewardTrial = np.logical_or(self.bias_AutoWater, self.CurrentAutoRewardTrial)
 
         self.B_AutoWaterTrial = np.append(
             self.B_AutoWaterTrial,
