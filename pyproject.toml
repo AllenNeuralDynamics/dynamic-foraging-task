@@ -43,12 +43,11 @@ dependencies = [
     "pykeepass >=4.0.7, <5",
     "pyyaml >=6, <7",
     "pyqtgraph >=0.13, <2",
-    "ms_active_directory >= 1.14.1",
+    "ms-active-directory",
+    "cryptography",
     "winkerberos; sys_platform == 'win32'",
-    "ldap3 >= 2.9.1; sys_platform == 'win32'",
-    "gssapi >= 1.10.1",
+    "ldap3; sys_platform == 'win32'",
     "msal; sys_platform == 'win32'",
-    "cryptography >= 46.0.3"
 ]
 
 [project.optional-dependencies]
