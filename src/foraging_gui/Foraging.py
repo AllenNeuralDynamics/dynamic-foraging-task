@@ -658,15 +658,21 @@ class Window(QMainWindow):
 
     def validate_experimenter(self):
         """Function to validate username and reset Experimentor textbox if invalide"""
-
-        is_valid = validate_aind_username(self.Experimenter.text())
-        if not is_valid:
+        try:
+            is_valid = validate_aind_username(self.Experimenter.text())
+            if not is_valid:
+                errorbox = QtWidgets.QMessageBox()
+                errorbox.setWindowTitle("Invalid Experimenter Name")
+                errorbox.setText(f"Experimenter name {self.Experimenter.text()} does not match any username in "
+                                 f"corp.alleninstitute.org. Please try again with your Allen Institute credentials. ")
+                errorbox.exec_()
+                self.Experimenter.clear()
+        except Exception as e:
             errorbox = QtWidgets.QMessageBox()
-            errorbox.setWindowTitle("Invalid Experimenter Name")
-            errorbox.setText(f"Experimenter name {self.Experimenter.text()} does not match any username in "
-                             f"corp.alleninstitute.org. Please try again with your Allen Institute credentials. ")
+            errorbox.setWindowTitle("Error with Validation")
+            errorbox.setText(f"Cannot validate experimenter name.")
             errorbox.exec_()
-            self.Experimenter.clear()
+
 
     def _set_reference(self):
         """
