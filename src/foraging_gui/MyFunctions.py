@@ -2666,7 +2666,7 @@ class GenerateTrials:
                 in_delay = 1  # the next /BehaviorEvent is the delay
             elif Rec[0].address == "/DelayStartTime":
                 DelayStartTime.append(Rec[1][1][0])
-                if first_delay_start == 0:F
+                if first_delay_start == 0:
                     first_delay_start = 1
                     current_receiveN += 1
             elif Rec[0].address == "/GoCueTime":
