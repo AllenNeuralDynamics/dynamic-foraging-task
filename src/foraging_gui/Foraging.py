@@ -15,6 +15,11 @@ import webbrowser
 from datetime import date, datetime, timedelta, timezone
 from hashlib import md5
 from pathlib import Path
+from typing import Optional
+import ldap3
+import ms_active_directory
+import concurrent.futures
+import getpass
 
 import harp
 import logging_loki
@@ -597,6 +602,7 @@ class Window(QMainWindow):
                 self.behavior_session_model, "experimenter", [text]
             )
         )
+        self.Experimenter.returnPressed.connect(self.validate_experimenter)
         self.ID.textChanged.connect(
             lambda subject: setattr(
                 self.behavior_session_model, "subject", subject
@@ -649,6 +655,24 @@ class Window(QMainWindow):
             # Iterate over each child of the container that is a QLineEdit or QDoubleSpinBox
             for child in container.findChildren((QtWidgets.QLineEdit)):
                 child.returnPressed.connect(self.keyPressEvent)
+
+    def validate_experimenter(self):
+        """Function to validate username and reset Experimentor textbox if invalide"""
+        try:
+            is_valid = validate_aind_username(self.Experimenter.text())
+            if not is_valid:
+                errorbox = QtWidgets.QMessageBox()
+                errorbox.setWindowTitle("Invalid Experimenter Name")
+                errorbox.setText(f"Experimenter name {self.Experimenter.text()} does not match any username in "
+                                 f"corp.alleninstitute.org. Please try again with your Allen Institute credentials. ")
+                errorbox.exec_()
+                self.Experimenter.clear()
+        except Exception as e:
+            errorbox = QtWidgets.QMessageBox()
+            errorbox.setWindowTitle("Error with Validation")
+            errorbox.setText(f"Cannot validate experimenter name.")
+            errorbox.exec_()
+
 
     def _set_reference(self):
         """
@@ -4496,6 +4520,7 @@ class Window(QMainWindow):
             )
         self.ID.setText(mouse_id)
         self.Experimenter.setText(experimenter)
+        self.Experimenter.returnPressed.emit()  # validate username
         self.ID.returnPressed.emit()
         self._GetProjectName(mouse_id)
         self._GetProtocol(mouse_id)
@@ -4787,6 +4812,8 @@ class Window(QMainWindow):
 
                         if isinstance(widget, QtWidgets.QLineEdit):
                             widget.setText(final_value)
+                            if key == "Experimenter":
+                                widget.returnPressed.emit() # validate experiment name
                             if key in {
                                 "BaseWeight",
                                 "TotalWater",
@@ -7185,6 +7212,59 @@ class Window(QMainWindow):
                 "Could not generate upload manifest. "
                 + "Please alert the mouse owner, and report on github.",
             )
+
+def validate_aind_username(
+        username: str,
+        domain: str = "corp.alleninstitute.org",
+        domain_username: Optional[str] = None,
+        timeout: Optional[float] = 2,
+) -> bool:
+    """
+    Validates if the given username exists in the AIND Active Directory.
+
+    This function authenticates with the corporate Active Directory and searches
+    for the specified username to verify its existence within the organization.
+    See https://github.com/AllenNeuralDynamics/aind-watchdog-service/issues/110#issuecomment-2828869619
+
+    Args:
+        username: The username to validate against Active Directory
+        domain: The Active Directory domain to search. Defaults to Allen Institute domain
+        domain_username: Username for domain authentication. Defaults to current user
+        timeout: Timeout in seconds for the validation operation
+
+    Returns:
+        bool: True if the username exists in Active Directory, False otherwise
+
+    Raises:
+        concurrent.futures.TimeoutError: If the validation operation times out
+
+    Example:
+        ```python
+        # Validate a username in Active Directory
+        is_valid = validate_aind_username("j.doe")
+        ```
+    """
+
+    def _helper(username: str, domain: str, domain_username: Optional[str]) -> bool:
+        """A function submitted to a thread pool to validate the username."""
+        if domain_username is None:
+            domain_username = getpass.getuser()
+        _domain = ms_active_directory.ADDomain(domain)
+        session = _domain.create_session_as_user(
+            domain_username,
+            authentication_mechanism=ldap3.SASL,
+            sasl_mechanism=ldap3.GSSAPI,
+        )
+        return session.find_user_by_name(username) is not None
+
+    try:
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(_helper, username, domain, domain_username)
+            result = future.result(timeout=timeout)
+            return result
+    except concurrent.futures.TimeoutError as e:
+        logger.error("Timeout occurred while validating username: %s", e)
+        raise
 
 
 def setup_loki_logging(box_number):
