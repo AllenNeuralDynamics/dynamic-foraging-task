@@ -1101,7 +1101,7 @@ class generate_metadata:
             _get_field(
                 self.Obj,
                 field_list=["ExtraWater", "SuggestedWater"],
-                default=np.nan,
+                default=None,
             )
         )
         water_day_total = float(_get_field(self.Obj, "TotalWater"))
