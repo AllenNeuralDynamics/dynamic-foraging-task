@@ -50,7 +50,7 @@ class RigClient:
         self.last_message_time = time.time()
 
         # Selectively log photometry messages
-        if ("PhotometryRising" in msg_str) or ("PhotometryFalling" in msg_str):
+        if ("PhotometryRising" in msg_str) or ("PhotometryFalling" in msg_str) or :
             # Only selectively log these two messages
 
             if self.track_photometry_messages(msg.address):
@@ -67,6 +67,8 @@ class RigClient:
                         1 / self.photometry_message_tolerance
                     )
                 )
+        elif "EnvironmentSensor" in msg_str:
+            return  # do not log EnvironmentSensor logs as they clutter file
         else:
             # Print and add to log
             print(CurrentMessage)
