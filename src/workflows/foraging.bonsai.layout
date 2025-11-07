@@ -9694,7 +9694,7 @@
               <VisualizerTypeName>IplImageRotateVisualizer</VisualizerTypeName>
               <VisualizerSettings>
                 <IplImageRotateVisualizer>
-                  <InvertHorizontal>false</InvertHorizontal>
+                  <InvertHorizontal>true</InvertHorizontal>
                   <InvertVertical>false</InvertVertical>
                   <RotateAngle>0</RotateAngle>
                 </IplImageRotateVisualizer>
@@ -10235,7 +10235,7 @@
               <VisualizerTypeName>IplImageRotateVisualizer</VisualizerTypeName>
               <VisualizerSettings>
                 <IplImageRotateVisualizer>
-                  <InvertHorizontal>false</InvertHorizontal>
+                  <InvertHorizontal>true</InvertHorizontal>
                   <InvertVertical>false</InvertVertical>
                   <RotateAngle>0</RotateAngle>
                 </IplImageRotateVisualizer>
