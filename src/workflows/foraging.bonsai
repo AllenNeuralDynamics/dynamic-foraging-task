@@ -3658,23 +3658,6 @@
                     </PropertyMappings>
                   </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Timer">
-                      <rx:DueTime>PT0S</rx:DueTime>
-                      <rx:Period>PT1S</rx:Period>
-                    </Combinator>
-                  </Expression>
-                  <Expression xsi:type="harp:CreateMessage">
-                    <harp:MessageType>Write</harp:MessageType>
-                    <harp:Payload xsi:type="harp:CreateOperationControlPayload">
-                      <harp:OperationMode>Active</harp:OperationMode>
-                      <harp:DumpRegisters>true</harp:DumpRegisters>
-                      <harp:MuteReplies>false</harp:MuteReplies>
-                      <harp:VisualIndicators>Off</harp:VisualIndicators>
-                      <harp:OperationLed>Off</harp:OperationLed>
-                      <harp:Heartbeat>Enabled</harp:Heartbeat>
-                    </harp:Payload>
-                  </Expression>
-                  <Expression xsi:type="Combinator">
                     <Combinator xsi:type="p3:Device">
                       <harp:OperationMode>Active</harp:OperationMode>
                       <harp:OperationLed>On</harp:OperationLed>
@@ -3693,11 +3676,9 @@
                 <Edges>
                   <Edge From="0" To="1" Label="Source1" />
                   <Edge From="1" To="2" Label="Source1" />
-                  <Edge From="2" To="5" Label="Source1" />
+                  <Edge From="2" To="3" Label="Source1" />
                   <Edge From="3" To="4" Label="Source1" />
-                  <Edge From="4" To="5" Label="Source2" />
-                  <Edge From="5" To="6" Label="Source1" />
-                  <Edge From="6" To="7" Label="Source1" />
+                  <Edge From="4" To="5" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -5110,7 +5091,10 @@
                     <Name>EnvironmentSensor</Name>
                   </Expression>
                   <Expression xsi:type="p3:Parse">
-                    <harp:Register xsi:type="p3:Temperature" />
+                    <harp:Register xsi:type="p3:TimestampedSensorData" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Value.Temperature</Selector>
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorTemperature</osc:Address>
@@ -5122,7 +5106,10 @@
                     <Name>EnvironmentSensor</Name>
                   </Expression>
                   <Expression xsi:type="p3:Parse">
-                    <harp:Register xsi:type="p3:Humidity" />
+                    <harp:Register xsi:type="p3:TimestampedSensorData" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Value.Humidity</Selector>
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorHumidity</osc:Address>
@@ -5134,7 +5121,10 @@
                     <Name>EnvironmentSensor</Name>
                   </Expression>
                   <Expression xsi:type="p3:Parse">
-                    <harp:Register xsi:type="p3:Pressure" />
+                    <harp:Register xsi:type="p3:TimestampedSensorData" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Value.Pressure</Selector>
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorPressure</osc:Address>
@@ -5146,7 +5136,10 @@
                     <Name>EnvironmentSensor</Name>
                   </Expression>
                   <Expression xsi:type="p3:Parse">
-                    <harp:Register xsi:type="p3:TimestampedTemperature" />
+                    <harp:Register xsi:type="p3:TimestampedSensorData" />
+                  </Expression>
+                  <Expression xsi:type="MemberSelector">
+                    <Selector>Seconds</Selector>
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorTimestamp</osc:Address>
@@ -5271,15 +5264,19 @@
                   <Edge From="134" To="135" Label="Source1" />
                   <Edge From="135" To="136" Label="Source1" />
                   <Edge From="136" To="137" Label="Source1" />
-                  <Edge From="138" To="139" Label="Source1" />
+                  <Edge From="137" To="138" Label="Source1" />
                   <Edge From="139" To="140" Label="Source1" />
                   <Edge From="140" To="141" Label="Source1" />
+                  <Edge From="141" To="142" Label="Source1" />
                   <Edge From="142" To="143" Label="Source1" />
-                  <Edge From="143" To="144" Label="Source1" />
                   <Edge From="144" To="145" Label="Source1" />
+                  <Edge From="145" To="146" Label="Source1" />
                   <Edge From="146" To="147" Label="Source1" />
                   <Edge From="147" To="148" Label="Source1" />
-                  <Edge From="148" To="149" Label="Source1" />
+                  <Edge From="149" To="150" Label="Source1" />
+                  <Edge From="150" To="151" Label="Source1" />
+                  <Edge From="151" To="152" Label="Source1" />
+                  <Edge From="152" To="153" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
