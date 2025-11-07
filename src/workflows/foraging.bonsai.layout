@@ -44,7 +44,7 @@
         <Y>5</Y>
       </Location>
       <Size>
-        <Width>679</Width>
+        <Width>1297</Width>
         <Height>805</Height>
       </Size>
       <WindowState>Normal</WindowState>
@@ -502,7 +502,7 @@
         <Y>5</Y>
       </Location>
       <Size>
-        <Width>679</Width>
+        <Width>1297</Width>
         <Height>805</Height>
       </Size>
       <WindowState>Normal</WindowState>
@@ -1020,7 +1020,7 @@
         <Y>5</Y>
       </Location>
       <Size>
-        <Width>679</Width>
+        <Width>1297</Width>
         <Height>805</Height>
       </Size>
       <WindowState>Normal</WindowState>
@@ -1044,7 +1044,7 @@
             <Y>5</Y>
           </Location>
           <Size>
-            <Width>679</Width>
+            <Width>1297</Width>
             <Height>805</Height>
           </Size>
           <WindowState>Normal</WindowState>
@@ -3856,7 +3856,7 @@
         <Y>5</Y>
       </Location>
       <Size>
-        <Width>679</Width>
+        <Width>1297</Width>
         <Height>805</Height>
       </Size>
       <WindowState>Normal</WindowState>
@@ -4000,7 +4000,7 @@
             <Y>5</Y>
           </Location>
           <Size>
-            <Width>679</Width>
+            <Width>1297</Width>
             <Height>805</Height>
           </Size>
           <WindowState>Normal</WindowState>
@@ -4482,7 +4482,7 @@
             <Y>5</Y>
           </Location>
           <Size>
-            <Width>679</Width>
+            <Width>1297</Width>
             <Height>805</Height>
           </Size>
           <WindowState>Normal</WindowState>
@@ -5090,6 +5090,42 @@
             </Size>
             <WindowState>Normal</WindowState>
           </DialogSettings>
+          <DialogSettings>
+            <Visible>false</Visible>
+            <Location>
+              <X>0</X>
+              <Y>0</Y>
+            </Location>
+            <Size>
+              <Width>0</Width>
+              <Height>0</Height>
+            </Size>
+            <WindowState>Normal</WindowState>
+          </DialogSettings>
+          <DialogSettings>
+            <Visible>false</Visible>
+            <Location>
+              <X>0</X>
+              <Y>0</Y>
+            </Location>
+            <Size>
+              <Width>0</Width>
+              <Height>0</Height>
+            </Size>
+            <WindowState>Normal</WindowState>
+          </DialogSettings>
+          <DialogSettings>
+            <Visible>false</Visible>
+            <Location>
+              <X>0</X>
+              <Y>0</Y>
+            </Location>
+            <Size>
+              <Width>0</Width>
+              <Height>0</Height>
+            </Size>
+            <WindowState>Normal</WindowState>
+          </DialogSettings>
         </EditorVisualizerLayout>
       </DialogSettings>
       <DialogSettings>
@@ -5220,7 +5256,7 @@
         <Y>5</Y>
       </Location>
       <Size>
-        <Width>679</Width>
+        <Width>1297</Width>
         <Height>805</Height>
       </Size>
       <WindowState>Normal</WindowState>
@@ -9252,6 +9288,30 @@
     </Size>
     <WindowState>Normal</WindowState>
   </DialogSettings>
+  <DialogSettings>
+    <Visible>false</Visible>
+    <Location>
+      <X>0</X>
+      <Y>0</Y>
+    </Location>
+    <Size>
+      <Width>0</Width>
+      <Height>0</Height>
+    </Size>
+    <WindowState>Normal</WindowState>
+  </DialogSettings>
+  <DialogSettings>
+    <Visible>false</Visible>
+    <Location>
+      <X>0</X>
+      <Y>0</Y>
+    </Location>
+    <Size>
+      <Width>0</Width>
+      <Height>0</Height>
+    </Size>
+    <WindowState>Normal</WindowState>
+  </DialogSettings>
   <DialogSettings xsi:type="WorkflowEditorSettings">
     <Visible>false</Visible>
     <Location>
@@ -10358,7 +10418,7 @@
         <Y>5</Y>
       </Location>
       <Size>
-        <Width>679</Width>
+        <Width>1297</Width>
         <Height>805</Height>
       </Size>
       <WindowState>Normal</WindowState>
@@ -10534,7 +10594,7 @@
         <Y>5</Y>
       </Location>
       <Size>
-        <Width>679</Width>
+        <Width>1297</Width>
         <Height>805</Height>
       </Size>
       <WindowState>Normal</WindowState>
