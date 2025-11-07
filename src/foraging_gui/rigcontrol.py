@@ -50,7 +50,7 @@ class RigClient:
         self.last_message_time = time.time()
 
         # Selectively log photometry messages
-        if ("PhotometryRising" in msg_str) or ("PhotometryFalling" in msg_str) or :
+        if ("PhotometryRising" in msg_str) or ("PhotometryFalling" in msg_str):
             # Only selectively log these two messages
 
             if self.track_photometry_messages(msg.address):
