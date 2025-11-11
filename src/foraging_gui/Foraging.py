@@ -2619,6 +2619,7 @@ class Window(QMainWindow):
                 "aind_watchdog_service",
                 "manifest",
             ),
+            "transfer_service_job_type": "dynamic_foraging",
             "auto_engage": True,
             "clear_figure_after_save": True,
             "add_default_project_name": True,
