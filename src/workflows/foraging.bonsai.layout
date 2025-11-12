@@ -10426,7 +10426,7 @@
               <VisualizerTypeName>Bonsai.Design.Visualizers.BooleanTimeSeriesVisualizer</VisualizerTypeName>
               <VisualizerSettings>
                 <BooleanTimeSeriesVisualizer>
-                  <Capacity>640</Capacity>
+                  <Capacity>60</Capacity>
                 </BooleanTimeSeriesVisualizer>
               </VisualizerSettings>
             </MashupSettings>
@@ -10435,7 +10435,7 @@
               <VisualizerTypeName>Bonsai.Design.Visualizers.BooleanTimeSeriesVisualizer</VisualizerTypeName>
               <VisualizerSettings>
                 <BooleanTimeSeriesVisualizer>
-                  <Capacity>640</Capacity>
+                  <Capacity>60</Capacity>
                 </BooleanTimeSeriesVisualizer>
               </VisualizerSettings>
             </MashupSettings>
@@ -10739,7 +10739,7 @@
     <VisualizerTypeName>Bonsai.Design.Visualizers.TimeSeriesVisualizer</VisualizerTypeName>
     <VisualizerSettings>
       <TimeSeriesVisualizer>
-        <Capacity>640</Capacity>
+        <Capacity>60</Capacity>
         <Min>0</Min>
         <Max>1.1</Max>
         <AutoScale>true</AutoScale>
