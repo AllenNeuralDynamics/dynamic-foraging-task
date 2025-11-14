@@ -6232,6 +6232,7 @@ class Window(QMainWindow):
             contents = {
                 "acquisition_datetime": self.session_model.date,
                 "name": self.session_model.session_name,
+                "transfer_service_job_type": self.Settings.get("transfer_service_job_type"),
                 "platform": "behavior",
                 "subject_id": int(self.session_model.subject),
                 "capsule_id": capsule_id,
