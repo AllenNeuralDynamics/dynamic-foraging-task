@@ -67,6 +67,8 @@ class RigClient:
                         1 / self.photometry_message_tolerance
                     )
                 )
+        elif "EnvironmentSensor" in msg_str:
+            return  # do not log EnvironmentSensor logs as they clutter file
         else:
             # Print and add to log
             print(CurrentMessage)
