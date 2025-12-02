@@ -13,6 +13,7 @@ A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments,
   - [Menu](#menu)
   - [Toolbars](#toolbars)
   - [Training Parameters](#training-parameters)
+  - [How training parameters define the task](#how-training-parameters-define-the-task)
   - [Automatic training](#automatic-training)
   - [Water Calibration](#water-calibration)
   - [Laser Calibration](#laser-calibration)
@@ -148,8 +149,10 @@ To configure automatic updates consistent with the [update protocol](https://git
 - **Task**: There are currently five tasks supported (**Coupled Baiting**;**Uncoupled Baiting**;**Coupled Without Baiting**;**Uncoupled Without Baiting**;**RewardN**).
 - **Tower**: The current tower (can be set by **current_box** in **ForagingSettings.json**).
 - **Auto Train**: Click the button to open the [Automatic Training](#automatic-training) dialog, see below
+- **Example Curriculum**:
+ <img width="646" height="295" alt="image" src="https://github.com/user-attachments/assets/088a5bb1-8070-4d46-bbba-3b9977453b41" />
 
-#### Trial-related parameters
+#### Task-related parameters
 - **training stage**: Select the training stage parameters. These parameters can be saved in **TrainingStagePar.json** through "**Save training**" button. They are task dependent.
 - **randomness**: There are **exponential** and **even distribution** available. This random generator will be applied to generate **Block length**/**ITI**/**Delay period**.
 - **L(s)**: The left valve open time. The **L(s)** and **L(ul)** are dependent on each other, and the relationship is determined by the water calibration.
@@ -205,6 +208,37 @@ To configure automatic updates consistent with the [update protocol](https://git
 - **Right choice rewarded**:
 - **Early licking**: Statistics of early licking rate in different behavior epochs.
 - **Double dipping**: Double dipping statistics in different behavior epochs and conditions.
+
+### How training parameters define the task
+
+#### Block structure
+1. **Uncoupled tasks (Uncoupled Baiting or Uncoupled Without Baiting)**
+   <img width="1447" height="386" alt="image" src="https://github.com/user-attachments/assets/6879325d-0a2a-45c5-8ada-9387e99c0024" />
+   ([Grossman et al. 2022](https://www.sciencedirect.com/science/article/pii/S0960982221016821))
+   - The actual reward probabilities are controled by the parameter `UncoupledReward` (typically {0.1, 0.4, 0.7}).
+   - "Baiting" = if an unchosen action would have been rewarded, the reward was delivered upon the next choice of
+that alternative.
+   - See [code here](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/blob/main/src/foraging_gui/reward_schedules/uncoupled_block.py).
+
+2. **Coupled tasks (Coupled Baiting or Coupled Without Baiting)**
+   - The reward probabilities on both sides ($p_L$ and $p_R$) change together in an anticorrelated manner.
+   - $p_L + p_R$ is fixed at `BaseRewardSum`, whereas their ratio is chosen from a "ratio pool" that consists of the first `RewardPairsN` pairs in a certain `RewardFamily`. There are four preset families:
+     - Family 1: {8:1, 6:1, 3:1, 1:1}
+     - Family 2: {8:1, 1:1}
+     - Family 3: {1:0, 9:1, 8:2, 7:3, 6:4, 5:5}
+     - Family 4: {6:1, 3:1, 1:1}
+     
+     For example,
+     - `RewardFamily` = 3, `RewardPairsN` = 1, `BaseRewardSum` = 0.8 (typical STAGE_1_WARMUP stage) gives you a ratio pool with only one ratio {1:0} and two possible $p_L$, $p_R$ pairs: [0.8, 0.0], [0.0, 0.8]
+     - `RewardFamily` = 1, `RewardPairsN` = 4, `BaseRewardSum` = 0.45 (typical GRADUATED stage) gives you a ratio pool of {8:1, 6:1, 3:1, 1:1} and seven possible $p_L$, $p_R$ pairs: [0.4, 0.05], [0.39, 0.06], [0.34, 0.11], [0.225, 0.225], [0.11, 0.34], [0.06, 0.39], [0.05, 0.4]
+   - The consecutive blocks will never have the same better side (or have a ratio of 1:1 at the same time). For example, [0.4, 0.05] will never follow [0.39, 0.06], and [0.225, 0.225] will never follow another [0.225, 0.225].
+   - Block lengths were drawn from a truncated exponential distribution controled by `block_min`, `block_max`, and `block_beta` (see [code](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/blob/main/src/foraging_gui/reward_schedules/test_truncexp.py)).
+   - "Baiting" is the same as above.
+   - See [code here](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/blob/ba12c335daae87144585b70325b048786188cd4d/src/foraging_gui/MyFunctions.py#L552).
+
+#### Trial structure
+Here is an overview of the trial structure using a rewarded trial, an unrewarded trial, and an ignored trial as examples.
+![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/2530ff82-8b78-4feb-af03-410dcdcbfcc6)
 
 ### Automatic training
 1. In the main dialog, press `Auto Train` button <img src="https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/836a4432-b1b2-4f92-9c66-2441a9d77a82" width="150"> or `Ctrl + Alt + A` to open the Automatic Training dialog
@@ -285,10 +319,6 @@ Data for each session is saved as a JSON file with the following files:
 - **delay_start_time**: 'The delay start time'
 - **goCue_start_time**: 'The go cue start time'
 - **reward_outcome_time**: 'The reward outcome time (reward/no reward/no response)'
-
-### Training paramters
-Here is an overview of the trial structure using a rewarded trial, an unrewarded trial, and an ignored trial as examples.
-![image](https://github.com/AllenNeuralDynamics/dynamic-foraging-task/assets/24734299/2530ff82-8b78-4feb-af03-410dcdcbfcc6)
 
 #### Behavior structure
 - **bait_left**:'Whether the current left licksprout has a bait or not'
