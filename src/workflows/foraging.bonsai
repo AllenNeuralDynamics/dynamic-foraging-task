@@ -8238,28 +8238,24 @@
                         <Expression xsi:type="MulticastSubject">
                           <Name>BehaviorCommands</Name>
                         </Expression>
-                        <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="StringProperty">
-                            <Value>-colorspace bt709 -color_primaries bt709 -color_range full -color_trc linear</Value>
-                          </Combinator>
+                        <Expression xsi:type="SubscribeSubject">
+                          <Name>ComPorts</Name>
                         </Expression>
-                        <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="rx:Take">
-                            <rx:Count>1</rx:Count>
-                          </Combinator>
+                        <Expression xsi:type="Index">
+                          <Operand xsi:type="StringProperty">
+                            <Value>ffmpeg_input_args</Value>
+                          </Operand>
                         </Expression>
                         <Expression xsi:type="rx:AsyncSubject">
                           <Name>FfmpegInputArgs</Name>
                         </Expression>
-                        <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="StringProperty">
-                            <Value>-vf "scale=out_color_matrix=bt709:out_range=full,format=bgr24,scale=out_range=full" -c:v h264_nvenc -pix_fmt yuv420p -color_range full -colorspace bt709 -color_trc linear -tune hq -preset p4 -rc vbr -cq 12 -b:v 0M -metadata author="Allen Institute for Neural Dynamics" -maxrate 700M -bufsize 350M</Value>
-                          </Combinator>
+                        <Expression xsi:type="SubscribeSubject">
+                          <Name>ComPorts</Name>
                         </Expression>
-                        <Expression xsi:type="Combinator">
-                          <Combinator xsi:type="rx:Take">
-                            <rx:Count>1</rx:Count>
-                          </Combinator>
+                        <Expression xsi:type="Index">
+                          <Operand xsi:type="StringProperty">
+                            <Value>ffmpeg_output_args</Value>
+                          </Operand>
                         </Expression>
                         <Expression xsi:type="rx:AsyncSubject">
                           <Name>FfmpegOutputArgs</Name>
