@@ -948,67 +948,98 @@ class Window(QMainWindow):
         self._connect_Sessionlist(connect=True)
 
     def _check_drop_frames(self, save_tag=1):
-        """check if there are any drop frames in the video"""
+        """Check if there are any dropped frames in the video.
+
+        This function supports two folder structures inside `video_folder`:
+        1) Flat structure:
+                video_folder/
+                    CameraA.avi
+                    CameraA.csv
+                    CameraB.avi
+                    CameraB.csv
+            Here, CameraA and CameraB are camera names.
+
+        2) Nested structure:
+                video_folder/
+                    CameraA/
+                        video.mp4
+                        metadata.csv
+                    CameraB/
+                        video.mp4
+                        metadata.csv
+            Here, the subfolder name (e.g. 'CameraA') is the camera name, and
+            frame counts are taken from 'metadata.csv'.
+        """
         if self.to_check_drop_frames == 1:
             return_tag = 0
+
+            # If we are loading from an existing object (save_tag == 0),
+            # reuse previously stored results if available
             if save_tag == 0:
                 if "drop_frames_warning_text" in self.Obj:
-                    self.drop_frames_warning_text = self.Obj[
-                        "drop_frames_warning_text"
-                    ]
+                    self.drop_frames_warning_text = self.Obj["drop_frames_warning_text"]
                     self.drop_frames_tag = self.Obj["drop_frames_tag"]
                     self.trigger_length = self.Obj["trigger_length"]
                     self.frame_num = self.Obj["frame_num"]
                     return_tag = 1
+
             if return_tag == 0:
+                # Initialize drop-frame related fields
                 self.drop_frames_tag = 0
                 self.trigger_length = 0
                 self.drop_frames_warning_text = ""
                 self.frame_num = {}
                 use_default_folder_structure = 0
+
+                # Determine Harp and video folders
                 if save_tag == 1:
-                    # check the drop frames of the current session
+                    # Check the drop frames of the current session
                     if hasattr(self, "HarpFolder"):
                         HarpFolder = self.HarpFolder
                         video_folder = self.VideoFolder
                     else:
                         use_default_folder_structure = 1
                 elif save_tag == 0:
+                    # Check the drop frames of a loaded session
                     if "HarpFolder" in self.Obj:
-                        # check the drop frames of the loaded session
                         HarpFolder = self.Obj["HarpFolder"]
                         video_folder = self.Obj["VideoFolder"]
                     else:
                         use_default_folder_structure = 1
+
                 if use_default_folder_structure:
-                    # use the default folder structure
+                    # Old folder structure
                     HarpFolder = os.path.join(
                         os.path.dirname(os.path.dirname(self.fname)),
                         "HarpFolder",
-                    )  # old folder structure
+                    )
                     video_folder = os.path.join(
                         os.path.dirname(os.path.dirname(self.fname)),
                         "VideoFolder",
-                    )  # old folder structure
+                    )
                     if not os.path.exists(HarpFolder):
+                        # New folder structure
                         HarpFolder = os.path.join(
-                            os.path.dirname(self.fname), "raw.harp"
-                        )  # new folder structure
+                            os.path.dirname(self.fname),
+                            "raw.harp",
+                        )
                         video_folder = os.path.join(
                             os.path.dirname(os.path.dirname(self.fname)),
                             "behavior-videos",
-                        )  # new folder structure
+                        )
 
                 camera_trigger_file = os.path.join(
                     HarpFolder, "BehaviorEvents", "Event_94.bin"
                 )
+
+                # Determine trigger length
                 if os.path.exists(camera_trigger_file):
-                    # sleep some time to wait for the finish of saving video
+                    # Wait for video saving to complete
                     time.sleep(5)
                     triggers = harp.read(camera_trigger_file)
                     self.trigger_length = len(triggers)
                 elif len(os.listdir(video_folder)) == 0:
-                    # no video data saved.
+                    # No video data saved
                     self.trigger_length = 0
                     self.to_check_drop_frames = 0
                     return
@@ -1031,31 +1062,99 @@ class Window(QMainWindow):
                     self.trigger_length = 0
                     self.to_check_drop_frames = 0
                     return
-                csv_files = [
-                    file
-                    for file in os.listdir(video_folder)
-                    if file.endswith(".csv")
-                ]
-                avi_files = [
-                    file
-                    for file in os.listdir(video_folder)
-                    if file.endswith(".avi")
+
+                # Inspect contents of video_folder to determine structure
+                entries = os.listdir(video_folder)
+                csv_files = [f for f in entries if f.endswith(".csv")]
+                avi_files = [f for f in entries if f.endswith(".avi")]
+                subfolders = [
+                    d for d in entries
+                    if os.path.isdir(os.path.join(video_folder, d))
                 ]
 
-                for avi_file in avi_files:
-                    csv_file = avi_file.replace(".avi", ".csv")
-                    camera_name = avi_file.replace(".avi", "")
-                    if csv_file not in csv_files:
-                        self.drop_frames_warning_text += (
-                            f"No csv file found for {avi_file}"
-                        )
-                    else:
-                        current_frames = pd.read_csv(
-                            os.path.join(video_folder, csv_file), header=None
-                        )
+                # ---------------------------------------------------------
+                # Case 1: flat structure with .avi + .csv in video_folder
+                # ---------------------------------------------------------
+                if avi_files:
+                    for avi_file in avi_files:
+                        csv_file = avi_file.replace(".avi", ".csv")
+                        camera_name = avi_file.replace(".avi", "")
+                        if csv_file not in csv_files:
+                            this_text = f"No csv file found for {avi_file}"
+                            self.drop_frames_warning_text += this_text
+                        else:
+                            current_frames = pd.read_csv(
+                                os.path.join(video_folder, csv_file),
+                                header=None,
+                            )
+                            num_frames = len(current_frames)
+                            if num_frames != self.trigger_length:
+                                this_text = (
+                                    f"Error: {avi_file} has {num_frames} frames, "
+                                    f"but {self.trigger_length} triggers. "
+                                )
+                                self.drop_frames_warning_text += this_text
+                                logging.error(
+                                    this_text,
+                                    extra={"tags": [self.warning_log_tag]},
+                                )
+                                self.drop_frames_tag = 1
+                            else:
+                                this_text = (
+                                    f"Correct: {avi_file} has {num_frames} frames "
+                                    f"and {self.trigger_length} triggers. "
+                                )
+                                self.drop_frames_warning_text += this_text
+                                logging.info(
+                                    this_text,
+                                    extra={"tags": [self.warning_log_tag]},
+                                )
+                            self.frame_num[camera_name] = num_frames
+
+                # ---------------------------------------------------------
+                # Case 2: nested structure with camera subfolders
+                #         Each subfolder contains video.mp4 + metadata.csv
+                # ---------------------------------------------------------
+                if subfolders:
+                    for camera_name in subfolders:
+                        cam_dir = os.path.join(video_folder, camera_name)
+                        if not os.path.isdir(cam_dir):
+                            continue
+
+                        # Expect metadata.csv inside the subfolder
+                        metadata_path = os.path.join(cam_dir, "metadata.csv")
+                        if not os.path.exists(metadata_path):
+                            this_text = (
+                                f"No metadata.csv file found for camera {camera_name}"
+                            )
+                            self.drop_frames_warning_text += this_text
+                            logging.error(
+                                this_text,
+                                extra={"tags": [self.warning_log_tag]},
+                            )
+                            self.drop_frames_tag = 1
+                            continue
+
+                        # Count frames from metadata.csv
+                        current_frames = pd.read_csv(metadata_path)
                         num_frames = len(current_frames)
+
+                        # Try to identify the mp4 file for logging purposes
+                        mp4_files = [
+                            f for f in os.listdir(cam_dir)
+                            if f.lower().endswith(".mp4")
+                        ]
+                        if mp4_files:
+                            video_file = mp4_files[0]
+                        else:
+                            # Fall back to a generic name if no mp4 is found
+                            video_file = "video.mp4"
+
                         if num_frames != self.trigger_length:
-                            this_text = f"Error: {avi_file} has {num_frames} frames, but {self.trigger_length} triggers. "
+                            this_text = (
+                                f"Error: {camera_name}/{video_file} has "
+                                f"{num_frames} frames, but {self.trigger_length} triggers. "
+                            )
                             self.drop_frames_warning_text += this_text
                             logging.error(
                                 this_text,
@@ -1063,16 +1162,21 @@ class Window(QMainWindow):
                             )
                             self.drop_frames_tag = 1
                         else:
-                            this_text = f"Correct: {avi_file} has {num_frames} frames and {self.trigger_length} triggers. "
+                            this_text = (
+                                f"Correct: {camera_name}/{video_file} has "
+                                f"{num_frames} frames and {self.trigger_length} triggers. "
+                            )
                             self.drop_frames_warning_text += this_text
                             logging.info(
                                 this_text,
                                 extra={"tags": [self.warning_log_tag]},
                             )
+
                         self.frame_num[camera_name] = num_frames
 
-            # only check drop frames once each session
+            # Only check drop frames once each session
             self.to_check_drop_frames = 0
+
 
     def _warmup(self):
         """warm up the session before starting.
