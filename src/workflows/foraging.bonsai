@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<WorkflowBuilder Version="2.8.2"
+<WorkflowBuilder Version="2.8.5"
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xmlns:rx="clr-namespace:Bonsai.Reactive;assembly=Bonsai.Core"
                  xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -5355,6 +5355,15 @@
               <Name>ToBonsaiOSC</Name>
             </Expression>
             <Expression xsi:type="SubscribeSubject">
+              <Name>RootPath</Name>
+            </Expression>
+            <Expression xsi:type="Format">
+              <Format>{0}/../../</Format>
+            </Expression>
+            <Expression xsi:type="rx:AsyncSubject">
+              <Name>LoggingRootPath</Name>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
               <Name>FromBonsaiOSC</Name>
             </Expression>
             <Expression xsi:type="osc:Parse">
@@ -8046,6 +8055,11 @@
             <Expression xsi:type="SubscribeSubject">
               <Name>EnvironmentSensor</Name>
             </Expression>
+            <Expression xsi:type="IncludeWorkflow" Path="AllenNeuralDynamics.HarpUtils:LogHarpDeviceWithMetadata.bonsai">
+              <DeviceMetadata />
+              <Modality>Behavior</Modality>
+              <DeviceName xsi:nil="true" />
+            </Expression>
             <Expression xsi:type="GroupWorkflow">
               <Name>CameraRecording</Name>
               <Workflow>
@@ -9403,7 +9417,7 @@
             <Edge From="4" To="5" Label="Source1" />
             <Edge From="6" To="7" Label="Source1" />
             <Edge From="7" To="8" Label="Source1" />
-            <Edge From="8" To="9" Label="Source1" />
+            <Edge From="9" To="10" Label="Source1" />
             <Edge From="10" To="11" Label="Source1" />
             <Edge From="11" To="12" Label="Source1" />
             <Edge From="13" To="14" Label="Source1" />
@@ -9421,25 +9435,28 @@
             <Edge From="31" To="32" Label="Source1" />
             <Edge From="32" To="33" Label="Source1" />
             <Edge From="34" To="35" Label="Source1" />
-            <Edge From="36" To="37" Label="Source1" />
+            <Edge From="35" To="36" Label="Source1" />
+            <Edge From="37" To="38" Label="Source1" />
             <Edge From="39" To="40" Label="Source1" />
-            <Edge From="41" To="42" Label="Source1" />
-            <Edge From="43" To="44" Label="Source1" />
-            <Edge From="46" To="51" Label="Source1" />
-            <Edge From="47" To="48" Label="Source1" />
+            <Edge From="42" To="43" Label="Source1" />
+            <Edge From="44" To="45" Label="Source1" />
+            <Edge From="46" To="47" Label="Source1" />
             <Edge From="48" To="49" Label="Source1" />
-            <Edge From="49" To="50" Label="Source1" />
-            <Edge From="50" To="51" Label="Source2" />
-            <Edge From="53" To="58" Label="Source1" />
-            <Edge From="54" To="55" Label="Source1" />
-            <Edge From="55" To="56" Label="Source1" />
-            <Edge From="56" To="57" Label="Source1" />
-            <Edge From="57" To="58" Label="Source2" />
+            <Edge From="50" To="55" Label="Source1" />
+            <Edge From="51" To="52" Label="Source1" />
+            <Edge From="52" To="53" Label="Source1" />
+            <Edge From="53" To="54" Label="Source1" />
+            <Edge From="54" To="55" Label="Source2" />
+            <Edge From="57" To="62" Label="Source1" />
+            <Edge From="58" To="59" Label="Source1" />
             <Edge From="59" To="60" Label="Source1" />
-            <Edge From="60" To="63" Label="Source1" />
-            <Edge From="61" To="62" Label="Source1" />
-            <Edge From="62" To="63" Label="Source2" />
-            <Edge From="64" To="65" Label="Source1" />
+            <Edge From="60" To="61" Label="Source1" />
+            <Edge From="61" To="62" Label="Source2" />
+            <Edge From="63" To="64" Label="Source1" />
+            <Edge From="64" To="67" Label="Source1" />
+            <Edge From="65" To="66" Label="Source1" />
+            <Edge From="66" To="67" Label="Source2" />
+            <Edge From="68" To="69" Label="Source1" />
           </Edges>
         </Workflow>
       </Expression>
