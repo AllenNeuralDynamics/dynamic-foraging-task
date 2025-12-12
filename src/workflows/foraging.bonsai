@@ -8238,27 +8238,39 @@
                         <Expression xsi:type="MulticastSubject">
                           <Name>BehaviorCommands</Name>
                         </Expression>
-                        <Expression xsi:type="SubscribeSubject">
-                          <Name>ComPorts</Name>
+                        <Expression xsi:type="Disable">
+                          <Builder xsi:type="SubscribeSubject">
+                            <Name>ComPorts</Name>
+                          </Builder>
                         </Expression>
-                        <Expression xsi:type="Index">
-                          <Operand xsi:type="StringProperty">
-                            <Value>ffmpeg_input_args</Value>
-                          </Operand>
+                        <Expression xsi:type="Disable">
+                          <Builder xsi:type="Index">
+                            <Operand xsi:type="StringProperty">
+                              <Value>ffmpeg_input_args</Value>
+                            </Operand>
+                          </Builder>
                         </Expression>
-                        <Expression xsi:type="rx:AsyncSubject">
-                          <Name>FfmpegInputArgs</Name>
+                        <Expression xsi:type="Disable">
+                          <Builder xsi:type="rx:AsyncSubject">
+                            <Name>FfmpegInputArgs</Name>
+                          </Builder>
                         </Expression>
-                        <Expression xsi:type="SubscribeSubject">
-                          <Name>ComPorts</Name>
+                        <Expression xsi:type="Disable">
+                          <Builder xsi:type="SubscribeSubject">
+                            <Name>ComPorts</Name>
+                          </Builder>
                         </Expression>
-                        <Expression xsi:type="Index">
-                          <Operand xsi:type="StringProperty">
-                            <Value>ffmpeg_output_args</Value>
-                          </Operand>
+                        <Expression xsi:type="Disable">
+                          <Builder xsi:type="Index">
+                            <Operand xsi:type="StringProperty">
+                              <Value>ffmpeg_output_args</Value>
+                            </Operand>
+                          </Builder>
                         </Expression>
-                        <Expression xsi:type="rx:AsyncSubject">
-                          <Name>FfmpegOutputArgs</Name>
+                        <Expression xsi:type="Disable">
+                          <Builder xsi:type="rx:AsyncSubject">
+                            <Name>FfmpegOutputArgs</Name>
+                          </Builder>
                         </Expression>
                         <Expression xsi:type="rx:Defer">
                           <Name>SideCameraLeft</Name>
@@ -8352,21 +8364,29 @@
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="harp:CreateTimestamped" />
                               </Expression>
-                              <Expression xsi:type="SubscribeSubject">
-                                <Name>FfmpegOutputArgs</Name>
+                              <Expression xsi:type="Disable">
+                                <Builder xsi:type="SubscribeSubject">
+                                  <Name>FfmpegOutputArgs</Name>
+                                </Builder>
                               </Expression>
-                              <Expression xsi:type="PropertyMapping">
-                                <PropertyMappings>
-                                  <Property Name="OutputArguments" />
-                                </PropertyMappings>
+                              <Expression xsi:type="Disable">
+                                <Builder xsi:type="PropertyMapping">
+                                  <PropertyMappings>
+                                    <Property Name="OutputArguments" />
+                                  </PropertyMappings>
+                                </Builder>
                               </Expression>
-                              <Expression xsi:type="SubscribeSubject">
-                                <Name>FfmpegInputArgs</Name>
+                              <Expression xsi:type="Disable">
+                                <Builder xsi:type="SubscribeSubject">
+                                  <Name>FfmpegInputArgs</Name>
+                                </Builder>
                               </Expression>
-                              <Expression xsi:type="PropertyMapping">
-                                <PropertyMappings>
-                                  <Property Name="InputArguments" />
-                                </PropertyMappings>
+                              <Expression xsi:type="Disable">
+                                <Builder xsi:type="PropertyMapping">
+                                  <PropertyMappings>
+                                    <Property Name="InputArguments" />
+                                  </PropertyMappings>
+                                </Builder>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
                                 <Name>CameraFrequency</Name>
@@ -8536,21 +8556,29 @@
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="harp:CreateTimestamped" />
                               </Expression>
-                              <Expression xsi:type="SubscribeSubject">
-                                <Name>FfmpegOutputArgs</Name>
+                              <Expression xsi:type="Disable">
+                                <Builder xsi:type="SubscribeSubject">
+                                  <Name>FfmpegOutputArgs</Name>
+                                </Builder>
                               </Expression>
-                              <Expression xsi:type="PropertyMapping">
-                                <PropertyMappings>
-                                  <Property Name="OutputArguments" />
-                                </PropertyMappings>
+                              <Expression xsi:type="Disable">
+                                <Builder xsi:type="PropertyMapping">
+                                  <PropertyMappings>
+                                    <Property Name="OutputArguments" />
+                                  </PropertyMappings>
+                                </Builder>
                               </Expression>
-                              <Expression xsi:type="SubscribeSubject">
-                                <Name>FfmpegInputArgs</Name>
+                              <Expression xsi:type="Disable">
+                                <Builder xsi:type="SubscribeSubject">
+                                  <Name>FfmpegInputArgs</Name>
+                                </Builder>
                               </Expression>
-                              <Expression xsi:type="PropertyMapping">
-                                <PropertyMappings>
-                                  <Property Name="InputArguments" />
-                                </PropertyMappings>
+                              <Expression xsi:type="Disable">
+                                <Builder xsi:type="PropertyMapping">
+                                  <PropertyMappings>
+                                    <Property Name="InputArguments" />
+                                  </PropertyMappings>
+                                </Builder>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
                                 <Name>CameraFrequency</Name>
@@ -8723,21 +8751,29 @@
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="harp:CreateTimestamped" />
                               </Expression>
-                              <Expression xsi:type="SubscribeSubject">
-                                <Name>FfmpegOutputArgs</Name>
+                              <Expression xsi:type="Disable">
+                                <Builder xsi:type="SubscribeSubject">
+                                  <Name>FfmpegOutputArgs</Name>
+                                </Builder>
                               </Expression>
-                              <Expression xsi:type="PropertyMapping">
-                                <PropertyMappings>
-                                  <Property Name="OutputArguments" />
-                                </PropertyMappings>
+                              <Expression xsi:type="Disable">
+                                <Builder xsi:type="PropertyMapping">
+                                  <PropertyMappings>
+                                    <Property Name="OutputArguments" />
+                                  </PropertyMappings>
+                                </Builder>
                               </Expression>
-                              <Expression xsi:type="SubscribeSubject">
-                                <Name>FfmpegInputArgs</Name>
+                              <Expression xsi:type="Disable">
+                                <Builder xsi:type="SubscribeSubject">
+                                  <Name>FfmpegInputArgs</Name>
+                                </Builder>
                               </Expression>
-                              <Expression xsi:type="PropertyMapping">
-                                <PropertyMappings>
-                                  <Property Name="InputArguments" />
-                                </PropertyMappings>
+                              <Expression xsi:type="Disable">
+                                <Builder xsi:type="PropertyMapping">
+                                  <PropertyMappings>
+                                    <Property Name="InputArguments" />
+                                  </PropertyMappings>
+                                </Builder>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
                                 <Name>CameraFrequency</Name>
@@ -8910,21 +8946,29 @@
                               <Expression xsi:type="Combinator">
                                 <Combinator xsi:type="harp:CreateTimestamped" />
                               </Expression>
-                              <Expression xsi:type="SubscribeSubject">
-                                <Name>FfmpegOutputArgs</Name>
+                              <Expression xsi:type="Disable">
+                                <Builder xsi:type="SubscribeSubject">
+                                  <Name>FfmpegOutputArgs</Name>
+                                </Builder>
                               </Expression>
-                              <Expression xsi:type="PropertyMapping">
-                                <PropertyMappings>
-                                  <Property Name="OutputArguments" />
-                                </PropertyMappings>
+                              <Expression xsi:type="Disable">
+                                <Builder xsi:type="PropertyMapping">
+                                  <PropertyMappings>
+                                    <Property Name="OutputArguments" />
+                                  </PropertyMappings>
+                                </Builder>
                               </Expression>
-                              <Expression xsi:type="SubscribeSubject">
-                                <Name>FfmpegInputArgs</Name>
+                              <Expression xsi:type="Disable">
+                                <Builder xsi:type="SubscribeSubject">
+                                  <Name>FfmpegInputArgs</Name>
+                                </Builder>
                               </Expression>
-                              <Expression xsi:type="PropertyMapping">
-                                <PropertyMappings>
-                                  <Property Name="InputArguments" />
-                                </PropertyMappings>
+                              <Expression xsi:type="Disable">
+                                <Builder xsi:type="PropertyMapping">
+                                  <PropertyMappings>
+                                    <Property Name="InputArguments" />
+                                  </PropertyMappings>
+                                </Builder>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
                                 <Name>CameraFrequency</Name>
