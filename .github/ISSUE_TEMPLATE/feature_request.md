@@ -14,7 +14,7 @@ A clear and concise description of what the problem is. Ex. I'm always frustrate
 A clear and concise description of what you want to happen.
 
 **Approval Steps, please check off when completed**
-- [ ] Scientific Merti review from Platform leadership team
+- [ ] Scientific Merit review from Platform leadership team
 - [ ] SIPE HW review of proposed changes
 - [ ] SIPE SW review of proposed changes
 - [ ] SciComp review of metadata of changes to metadata
