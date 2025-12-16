@@ -1824,6 +1824,23 @@ class Window(QMainWindow):
             )
             return []
 
+    def parse_setting_csv_file(self, csv_file) -> pd.DataFrame:
+        # Read CSV with Python engine to allow irregular columns
+        df = pd.read_csv(
+            csv_file,
+            sep=',',
+            header=None,
+            engine='python',
+            dtype=str,
+            index_col=None
+        )
+
+        # only parse at first comma
+        df['key'] = df.iloc[:, 0]
+        df['value'] = df.iloc[:, 1:].apply(lambda x: ','.join(x.dropna()), axis=1)
+
+        return df
+
     def _GetSettings(self):
         """
         Load the settings that are specific to this computer
@@ -1844,15 +1861,8 @@ class Window(QMainWindow):
             )
         try:
             # Open the csv settings file
-            with open(self.SettingsBoxFile, 'r', encoding='utf-8') as f:
-                for line in f:
-                    line = line.strip()
-                    if not line:  # skip empty lines
-                        continue
-                    if ',' in line: # split at the first comma only
-                        key, value = line.split(',', 1)
-                        self.SettingsBox[key.strip()] = value.strip()
-
+            df = self.parse_setting_csv_file(self.SettingsBoxFile)
+            self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
             logging.info("Loaded settings_box file")
         except Exception as e:
             logging.error(
@@ -2486,7 +2496,7 @@ class Window(QMainWindow):
         rig_settings = self.Settings.copy()
         rig_settings["rig_name"] = self.rig_name
         rig_settings["box_number"] = self.box_number
-        df = pd.read_csv(self.SettingsBoxFile, index_col=None, header=None)
+        df = self.parse_setting_csv_file(self.SettingsBoxFile)
         rig_settings["box_settings"] = {
             row[0]: row[1] for index, row in df.iterrows()
         }
