@@ -1824,23 +1824,17 @@ class Window(QMainWindow):
             )
             return []
 
-    def parse_setting_csv_file(self, csv_file) -> pd.DataFrame:
-        # Read CSV with Python engine to allow irregular columns
-        df = pd.read_csv(
-            csv_file,
-            sep=',',
-            header=None,
-            engine='python',
-            dtype=str,
-            index_col=None
-        )
-
-        # only parse at first comma
-        df['key'] = df.iloc[:, 0]
-        df['value'] = df.iloc[:, 1:].apply(lambda x: ','.join(x.dropna()), axis=1)
-
-        return df
-
+    def parse_setting_csv_file(self, csv_file) -> dict:
+        settings = {}
+        with open(csv_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                if ',' in line:
+                    key, value = line.split(',', 1)
+                    settings[key.strip()] = value.strip()
+        return settings
     def _GetSettings(self):
         """
         Load the settings that are specific to this computer
@@ -1861,8 +1855,7 @@ class Window(QMainWindow):
             )
         try:
             # Open the csv settings file
-            df = self.parse_setting_csv_file(self.SettingsBoxFile)
-            self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
+            self.SettingsBox = self.parse_setting_csv_file(self.SettingsBoxFile)
             logging.info("Loaded settings_box file")
         except Exception as e:
             logging.error(
@@ -2496,10 +2489,7 @@ class Window(QMainWindow):
         rig_settings = self.Settings.copy()
         rig_settings["rig_name"] = self.rig_name
         rig_settings["box_number"] = self.box_number
-        df = self.parse_setting_csv_file(self.SettingsBoxFile)
-        rig_settings["box_settings"] = {
-            row[0]: row[1] for index, row in df.iterrows()
-        }
+        rig_settings["box_settings"] = self.parse_setting_csv_file(self.SettingsBoxFile)
         rig_settings["computer_name"] = socket.gethostname()
         rig_settings["bonsai_version"] = self._get_bonsai_version(
             rig_settings["bonsai_config_path"]
