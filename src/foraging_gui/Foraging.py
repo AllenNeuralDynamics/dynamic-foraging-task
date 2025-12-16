@@ -1844,8 +1844,15 @@ class Window(QMainWindow):
             )
         try:
             # Open the csv settings file
-            df = pd.read_csv(self.SettingsBoxFile, index_col=None, header=None)
-            self.SettingsBox = {row[0]: row[1] for _, row in df.iterrows()}
+            with open(self.SettingsBoxFile, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:  # skip empty lines
+                        continue
+                    if ',' in line: # split at the first comma only
+                        key, value = line.split(',', 1)
+                        self.SettingsBox[key.strip()] = value.strip()
+
             logging.info("Loaded settings_box file")
         except Exception as e:
             logging.error(
