@@ -1881,7 +1881,7 @@ class Window(QMainWindow):
             )
 
         # Validate Bonsai Settings file
-        self.SettingsBox = BonsaiSettingsModel(**self.SettingsBox).model_dump()
+        self.SettingsBox = BonsaiSettingsModel(**self.SettingsBox).model_dump() # dump to get default values
         logging.info("Settings_box.csv file validated")
 
         # Get default settings for ForagingSettings.JSON
