@@ -1399,12 +1399,12 @@
       <DialogSettings>
         <Visible>true</Visible>
         <Location>
-          <X>323</X>
-          <Y>803</Y>
+          <X>327</X>
+          <Y>818</Y>
         </Location>
         <Size>
-          <Width>419</Width>
-          <Height>268</Height>
+          <Width>415</Width>
+          <Height>253</Height>
         </Size>
         <WindowState>Normal</WindowState>
         <VisualizerTypeName>Bonsai.Design.Visualizers.TableLayoutPanelVisualizer</VisualizerTypeName>
@@ -1729,11 +1729,11 @@
         <Visible>true</Visible>
         <Location>
           <X>5</X>
-          <Y>801</Y>
+          <Y>761</Y>
         </Location>
         <Size>
           <Width>333</Width>
-          <Height>270</Height>
+          <Height>309</Height>
         </Size>
         <WindowState>Normal</WindowState>
         <VisualizerTypeName>Bonsai.Design.Visualizers.TableLayoutPanelVisualizer</VisualizerTypeName>
@@ -1917,11 +1917,11 @@
         <Visible>true</Visible>
         <Location>
           <X>525</X>
-          <Y>802</Y>
+          <Y>816</Y>
         </Location>
         <Size>
           <Width>419</Width>
-          <Height>269</Height>
+          <Height>255</Height>
         </Size>
         <WindowState>Normal</WindowState>
         <VisualizerTypeName>Bonsai.Design.Visualizers.TableLayoutPanelVisualizer</VisualizerTypeName>
