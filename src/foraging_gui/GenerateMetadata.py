@@ -1135,7 +1135,7 @@ class generate_metadata:
             },
             "task_parameters": self._get_task_parameters(),
             "ffmpeg_parameters": {"InputArguments": self.Obj["settings_box"]["ffmpeg_input_args"],
-                                  "OutputArguments": self.Obj["settings_box"]["ffmpeg_input_args"]}
+                                  "OutputArguments": self.Obj["settings_box"]["ffmpeg_output_args"]}
         }
 
         return output_parameters
