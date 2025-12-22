@@ -784,6 +784,15 @@ class generate_metadata:
                     self.Obj["Camera_dialog"]["camera_stop_time"],
                     "%Y-%m-%d %H:%M:%S.%f",
                 )
+
+            ffmpeg_software = Software(
+                name="LogSpinnakerFfmpeg",
+                version="",
+                url="https://www.nuget.org/packages/AllenNeuralDynamics.Core",
+                parameters={"InputArguments": self.Obj["settings_box"]["ffmpeg_input_args"],
+                            "OutputArguments": self.Obj["settings_box"]["ffmpeg_input_args"]}
+            )
+
             self.high_speed_camera_streams.append(
                 Stream(
                     stream_modalities=[Modality.BEHAVIOR_VIDEOS],
@@ -793,7 +802,7 @@ class generate_metadata:
                         "%Y-%m-%d %H:%M:%S.%f",
                     ),
                     stream_end_time=camera_stop_time,
-                    software=self.behavior_software,
+                    software=self.behavior_software + [ffmpeg_software],    # adds ffmpeg codec args
                 )
             )
         else:

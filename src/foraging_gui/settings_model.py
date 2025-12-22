@@ -135,8 +135,8 @@ class BonsaiSettingsModel(BaseModel):
         default=8,
         description="Gain for the body camera"
     )
-    ffmpeg_output_args: str = Field(default='-vf "scale=out_color_matrix=bt709:out_range=full,format=bgr24,scale=out_range=full" -c:v h264_nvenc -pix_fmt yuv420p -color_range full -colorspace bt709 -color_trc linear -tune hq -preset p4 -rc vbr -cq 12 -b:v 0M -metadata author="Allen Institute for Neural Dynamics" -maxrate 700M -bufsize 350M')
-    ffmpeg_input_args: str = Field(default='-colorspace bt709 -color_primaries bt709 -color_range full -color_trc linear')
+    ffmpeg_output_args: str = Field()   # required field so no default
+    ffmpeg_input_args: str = Field()    # required field so no default
 
 class DFTSettingsModel(BaseModel):
     """
