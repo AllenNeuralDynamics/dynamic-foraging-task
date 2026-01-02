@@ -135,7 +135,8 @@ class BonsaiSettingsModel(BaseModel):
         default=8,
         description="Gain for the body camera"
     )
-
+    ffmpeg_output_args: str = Field()   # required field so no default
+    ffmpeg_input_args: str = Field()    # required field so no default
 
 class DFTSettingsModel(BaseModel):
     """
