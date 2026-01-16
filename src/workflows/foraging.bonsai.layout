@@ -29,11 +29,11 @@
       <Visible>true</Visible>
       <Location>
         <X>4</X>
-        <Y>5</Y>
+        <Y>4</Y>
       </Location>
       <Size>
-        <Width>650</Width>
-        <Height>501</Height>
+        <Width>1979</Width>
+        <Height>1284</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -1415,7 +1415,7 @@
               <VisualizerTypeName>IplImageRotateVisualizer</VisualizerTypeName>
               <VisualizerSettings>
                 <IplImageRotateVisualizer>
-                  <InvertHorizontal>false</InvertHorizontal>
+                  <InvertHorizontal>true</InvertHorizontal>
                   <InvertVertical>false</InvertVertical>
                   <RotateAngle>0</RotateAngle>
                 </IplImageRotateVisualizer>
@@ -1601,18 +1601,18 @@
     </Location>
     <Size>
       <Width>335</Width>
-      <Height>62</Height>
+      <Height>64</Height>
     </Size>
     <WindowState>Normal</WindowState>
     <EditorDialogSettings>
       <Visible>true</Visible>
       <Location>
         <X>4</X>
-        <Y>5</Y>
+        <Y>4</Y>
       </Location>
       <Size>
-        <Width>650</Width>
-        <Height>501</Height>
+        <Width>1979</Width>
+        <Height>1284</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -1726,14 +1726,38 @@
         <WindowState>Normal</WindowState>
       </DialogSettings>
       <DialogSettings>
+        <Visible>false</Visible>
+        <Location>
+          <X>0</X>
+          <Y>0</Y>
+        </Location>
+        <Size>
+          <Width>0</Width>
+          <Height>0</Height>
+        </Size>
+        <WindowState>Normal</WindowState>
+      </DialogSettings>
+      <DialogSettings>
+        <Visible>false</Visible>
+        <Location>
+          <X>0</X>
+          <Y>0</Y>
+        </Location>
+        <Size>
+          <Width>0</Width>
+          <Height>0</Height>
+        </Size>
+        <WindowState>Normal</WindowState>
+      </DialogSettings>
+      <DialogSettings>
         <Visible>true</Visible>
         <Location>
           <X>5</X>
-          <Y>761</Y>
+          <Y>773</Y>
         </Location>
         <Size>
           <Width>333</Width>
-          <Height>309</Height>
+          <Height>297</Height>
         </Size>
         <WindowState>Normal</WindowState>
         <VisualizerTypeName>Bonsai.Design.Visualizers.TableLayoutPanelVisualizer</VisualizerTypeName>
@@ -1747,21 +1771,27 @@
               </VisualizerSettings>
             </MashupSettings>
             <MashupSettings>
-              <Source>5</Source>
-              <VisualizerTypeName>Bonsai.Design.Visualizers.BooleanTimeSeriesVisualizer</VisualizerTypeName>
+              <Source>6</Source>
+              <VisualizerTypeName>Bonsai.Design.Visualizers.RollingGraphVisualizer</VisualizerTypeName>
               <VisualizerSettings>
-                <BooleanTimeSeriesVisualizer>
-                  <Capacity>640</Capacity>
-                </BooleanTimeSeriesVisualizer>
+                <RollingGraphVisualizer>
+                  <Capacity>120</Capacity>
+                  <Min>-1</Min>
+                  <Max>1</Max>
+                  <AutoScale>false</AutoScale>
+                </RollingGraphVisualizer>
               </VisualizerSettings>
             </MashupSettings>
             <MashupSettings>
-              <Source>7</Source>
-              <VisualizerTypeName>Bonsai.Design.Visualizers.BooleanTimeSeriesVisualizer</VisualizerTypeName>
+              <Source>9</Source>
+              <VisualizerTypeName>Bonsai.Design.Visualizers.RollingGraphVisualizer</VisualizerTypeName>
               <VisualizerSettings>
-                <BooleanTimeSeriesVisualizer>
-                  <Capacity>640</Capacity>
-                </BooleanTimeSeriesVisualizer>
+                <RollingGraphVisualizer>
+                  <Capacity>120</Capacity>
+                  <Min>-1</Min>
+                  <Max>1</Max>
+                  <AutoScale>false</AutoScale>
+                </RollingGraphVisualizer>
               </VisualizerSettings>
             </MashupSettings>
           </TableLayoutPanelVisualizer>
@@ -1784,11 +1814,11 @@
       <Visible>true</Visible>
       <Location>
         <X>4</X>
-        <Y>5</Y>
+        <Y>4</Y>
       </Location>
       <Size>
-        <Width>650</Width>
-        <Height>501</Height>
+        <Width>1979</Width>
+        <Height>1284</Height>
       </Size>
       <WindowState>Normal</WindowState>
     </EditorDialogSettings>
@@ -1932,7 +1962,7 @@
               <VisualizerTypeName>IplImageRotateVisualizer</VisualizerTypeName>
               <VisualizerSettings>
                 <IplImageRotateVisualizer>
-                  <InvertHorizontal>false</InvertHorizontal>
+                  <InvertHorizontal>true</InvertHorizontal>
                   <InvertVertical>false</InvertVertical>
                   <RotateAngle>0</RotateAngle>
                 </IplImageRotateVisualizer>
