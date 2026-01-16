@@ -9452,7 +9452,7 @@
       </Expression>
       <Expression xsi:type="Combinator">
         <Combinator xsi:type="io:ReadAllText">
-          <io:Path>C:\Users\micah.woodard\Documents\ForagingSettings\Settings_box1.csv</io:Path>
+          <io:Path />
         </Combinator>
       </Expression>
       <Expression xsi:type="Combinator">
