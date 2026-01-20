@@ -14,15 +14,15 @@
                  xmlns:p2="clr-namespace:AllenNeuralDynamics.LicketySplitLickDetector;assembly=AllenNeuralDynamics.LicketySplitLickDetector"
                  xmlns:p3="clr-namespace:AllenNeuralDynamics.EnvironmentSensor;assembly=AllenNeuralDynamics.EnvironmentSensor"
                  xmlns:p4="clr-namespace:AllenNeuralDynamics.Core;assembly=AllenNeuralDynamics.Core"
+                 xmlns:p5="clr-namespace:AllenNeuralDynamics.SniffDetector;assembly=AllenNeuralDynamics.SniffDetector"
                  xmlns:dsp="clr-namespace:Bonsai.Dsp;assembly=Bonsai.Dsp"
-                 xmlns:p5="clr-namespace:Bonsai.DAQmx;assembly=Extensions"
+                 xmlns:p6="clr-namespace:Bonsai.DAQmx;assembly=Extensions"
                  xmlns:vid="clr-namespace:Bonsai.Video;assembly=Bonsai.Video"
                  xmlns:cv="clr-namespace:Bonsai.Vision;assembly=Bonsai.Vision"
                  xmlns:io="clr-namespace:Bonsai.IO;assembly=Bonsai.System"
                  xmlns:viz="clr-namespace:Bonsai.Design.Visualizers;assembly=Bonsai.Design.Visualizers"
                  xmlns:spk="clr-namespace:Bonsai.Spinnaker;assembly=Bonsai.Spinnaker"
-                 xmlns:ffmpeg="clr-namespace:Bonsai.FFmpeg;assembly=Bonsai.FFmpeg"
-                 xmlns:p6="clr-namespace:;assembly=Extensions"
+                 xmlns:p7="clr-namespace:;assembly=Extensions"
                  xmlns:gui="clr-namespace:Bonsai.Gui;assembly=Bonsai.Gui"
                  xmlns="https://bonsai-rx.org/2018/workflow">
   <Workflow>
@@ -756,7 +756,7 @@
                         </Expression>
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="gl:Delay">
-                            <gl:DueTime>PT8.28S</gl:DueTime>
+                            <gl:DueTime>PT3.458S</gl:DueTime>
                           </Combinator>
                         </Expression>
                         <Expression xsi:type="WorkflowOutput" />
@@ -778,7 +778,7 @@
                   </Expression>
                   <Expression xsi:type="Combinator">
                     <Combinator xsi:type="gl:Delay">
-                      <gl:DueTime>PT1S</gl:DueTime>
+                      <gl:DueTime>PT0.102S</gl:DueTime>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -1532,7 +1532,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Disabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM10</harp:PortName>
+                      <harp:PortName>COM6</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:BehaviorSubject">
@@ -2887,7 +2887,7 @@
                 <harp:VisualIndicators>On</harp:VisualIndicators>
                 <harp:Heartbeat>Disabled</harp:Heartbeat>
                 <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                <harp:PortName>COM3</harp:PortName>
+                <harp:PortName>COM4</harp:PortName>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:PublishSubject">
@@ -3156,7 +3156,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Enabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM14</harp:PortName>
+                      <harp:PortName>COM6</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:PublishSubject">
@@ -3186,7 +3186,7 @@
                       <harp:VisualIndicators>On</harp:VisualIndicators>
                       <harp:Heartbeat>Enabled</harp:Heartbeat>
                       <harp:IgnoreErrors>false</harp:IgnoreErrors>
-                      <harp:PortName>COM13</harp:PortName>
+                      <harp:PortName>COM5</harp:PortName>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="rx:PublishSubject">
@@ -3384,12 +3384,10 @@
                       <Property Name="PortName" />
                     </PropertyMappings>
                   </Expression>
-                  <Expression xsi:type="SubscribeSubject">
-                    <Name>LoggingStarted</Name>
-                  </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="rx:Delay">
-                      <rx:DueTime>PT2S</rx:DueTime>
+                    <Combinator xsi:type="rx:Timer">
+                      <rx:DueTime>PT0S</rx:DueTime>
+                      <rx:Period>PT1S</rx:Period>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="harp:CreateMessage">
@@ -3422,12 +3420,11 @@
                 <Edges>
                   <Edge From="0" To="1" Label="Source1" />
                   <Edge From="1" To="2" Label="Source1" />
-                  <Edge From="2" To="6" Label="Source1" />
+                  <Edge From="2" To="5" Label="Source1" />
                   <Edge From="3" To="4" Label="Source1" />
-                  <Edge From="4" To="5" Label="Source1" />
-                  <Edge From="5" To="6" Label="Source2" />
+                  <Edge From="4" To="5" Label="Source2" />
+                  <Edge From="5" To="6" Label="Source1" />
                   <Edge From="6" To="7" Label="Source1" />
-                  <Edge From="7" To="8" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -3437,6 +3434,115 @@
             <Expression xsi:type="Combinator">
               <Combinator xsi:type="p4:ContainsKey">
                 <p4:Key>EnvSen</p4:Key>
+              </Combinator>
+            </Expression>
+            <Expression xsi:type="rx:Condition">
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="WorkflowInput">
+                    <Name>Source1</Name>
+                  </Expression>
+                  <Expression xsi:type="WorkflowOutput" />
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="1" Label="Source1" />
+                </Edges>
+              </Workflow>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="rx:SubscribeWhen" />
+            </Expression>
+            <Expression xsi:type="GroupWorkflow">
+              <Name>SniffDetector</Name>
+              <Workflow>
+                <Nodes>
+                  <Expression xsi:type="rx:BehaviorSubject" TypeArguments="harp:HarpMessage">
+                    <rx:Name>SniffDetectorCommands</rx:Name>
+                  </Expression>
+                  <Expression xsi:type="SubscribeSubject">
+                    <Name>ComPorts</Name>
+                  </Expression>
+                  <Expression xsi:type="Index">
+                    <Operand xsi:type="StringProperty">
+                      <Value>SniffDetector</Value>
+                    </Operand>
+                  </Expression>
+                  <Expression xsi:type="PropertyMapping">
+                    <PropertyMappings>
+                      <Property Name="PortName" />
+                    </PropertyMappings>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="p5:Device">
+                      <harp:OperationMode>Active</harp:OperationMode>
+                      <harp:OperationLed>On</harp:OperationLed>
+                      <harp:DumpRegisters>true</harp:DumpRegisters>
+                      <harp:VisualIndicators>On</harp:VisualIndicators>
+                      <harp:Heartbeat>Disabled</harp:Heartbeat>
+                      <harp:IgnoreErrors>false</harp:IgnoreErrors>
+                      <harp:PortName>COMx</harp:PortName>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="rx:PublishSubject">
+                    <Name>SniffDetectorEvents</Name>
+                  </Expression>
+                  <Expression xsi:type="WorkflowOutput" />
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:Timer">
+                      <rx:DueTime>PT0S</rx:DueTime>
+                      <rx:Period>PT1S</rx:Period>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="harp:CreateMessage">
+                    <harp:MessageType>Write</harp:MessageType>
+                    <harp:Payload xsi:type="harp:CreateOperationControlPayload">
+                      <harp:OperationMode>Active</harp:OperationMode>
+                      <harp:DumpRegisters>true</harp:DumpRegisters>
+                      <harp:MuteReplies>false</harp:MuteReplies>
+                      <harp:VisualIndicators>Off</harp:VisualIndicators>
+                      <harp:OperationLed>Off</harp:OperationLed>
+                      <harp:Heartbeat>Enabled</harp:Heartbeat>
+                    </harp:Payload>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>SniffDetectorCommands</Name>
+                  </Expression>
+                  <Expression xsi:type="Combinator">
+                    <Combinator xsi:type="rx:Delay">
+                      <rx:DueTime>PT0.05S</rx:DueTime>
+                    </Combinator>
+                  </Expression>
+                  <Expression xsi:type="p5:CreateMessage">
+                    <harp:MessageType>Write</harp:MessageType>
+                    <harp:Payload xsi:type="p5:CreateRawVoltageDispatchRatePayload">
+                      <p5:RawVoltageDispatchRate>200</p5:RawVoltageDispatchRate>
+                    </harp:Payload>
+                  </Expression>
+                  <Expression xsi:type="MulticastSubject">
+                    <Name>SniffDetectorCommands</Name>
+                  </Expression>
+                </Nodes>
+                <Edges>
+                  <Edge From="0" To="4" Label="Source1" />
+                  <Edge From="1" To="2" Label="Source1" />
+                  <Edge From="2" To="3" Label="Source1" />
+                  <Edge From="3" To="4" Label="Source2" />
+                  <Edge From="4" To="5" Label="Source1" />
+                  <Edge From="5" To="6" Label="Source1" />
+                  <Edge From="7" To="8" Label="Source1" />
+                  <Edge From="8" To="9" Label="Source1" />
+                  <Edge From="9" To="10" Label="Source1" />
+                  <Edge From="10" To="11" Label="Source1" />
+                  <Edge From="11" To="12" Label="Source1" />
+                </Edges>
+              </Workflow>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>ComPorts</Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="p4:ContainsKey">
+                <p4:Key>SniffDetector</p4:Key>
               </Combinator>
             </Expression>
             <Expression xsi:type="rx:Condition">
@@ -3479,6 +3585,10 @@
             <Edge From="23" To="24" Label="Source1" />
             <Edge From="24" To="25" Label="Source1" />
             <Edge From="25" To="26" Label="Source2" />
+            <Edge From="27" To="31" Label="Source1" />
+            <Edge From="28" To="29" Label="Source1" />
+            <Edge From="29" To="30" Label="Source1" />
+            <Edge From="30" To="31" Label="Source2" />
           </Edges>
         </Workflow>
       </Expression>
@@ -4703,10 +4813,7 @@
                     <Name>EnvironmentSensor</Name>
                   </Expression>
                   <Expression xsi:type="p3:Parse">
-                    <harp:Register xsi:type="p3:TimestampedSensorData" />
-                  </Expression>
-                  <Expression xsi:type="MemberSelector">
-                    <Selector>Value.Temperature</Selector>
+                    <harp:Register xsi:type="p3:Temperature" />
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorTemperature</osc:Address>
@@ -4718,10 +4825,7 @@
                     <Name>EnvironmentSensor</Name>
                   </Expression>
                   <Expression xsi:type="p3:Parse">
-                    <harp:Register xsi:type="p3:TimestampedSensorData" />
-                  </Expression>
-                  <Expression xsi:type="MemberSelector">
-                    <Selector>Value.Humidity</Selector>
+                    <harp:Register xsi:type="p3:Humidity" />
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorHumidity</osc:Address>
@@ -4733,10 +4837,7 @@
                     <Name>EnvironmentSensor</Name>
                   </Expression>
                   <Expression xsi:type="p3:Parse">
-                    <harp:Register xsi:type="p3:TimestampedSensorData" />
-                  </Expression>
-                  <Expression xsi:type="MemberSelector">
-                    <Selector>Value.Pressure</Selector>
+                    <harp:Register xsi:type="p3:Pressure" />
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorPressure</osc:Address>
@@ -4748,10 +4849,7 @@
                     <Name>EnvironmentSensor</Name>
                   </Expression>
                   <Expression xsi:type="p3:Parse">
-                    <harp:Register xsi:type="p3:TimestampedSensorData" />
-                  </Expression>
-                  <Expression xsi:type="MemberSelector">
-                    <Selector>Seconds</Selector>
+                    <harp:Register xsi:type="p3:TimestampedTemperature" />
                   </Expression>
                   <Expression xsi:type="osc:Format">
                     <osc:Address>/EnvironmentSensorTimestamp</osc:Address>
@@ -4876,19 +4974,15 @@
                   <Edge From="134" To="135" Label="Source1" />
                   <Edge From="135" To="136" Label="Source1" />
                   <Edge From="136" To="137" Label="Source1" />
-                  <Edge From="137" To="138" Label="Source1" />
+                  <Edge From="138" To="139" Label="Source1" />
                   <Edge From="139" To="140" Label="Source1" />
                   <Edge From="140" To="141" Label="Source1" />
-                  <Edge From="141" To="142" Label="Source1" />
                   <Edge From="142" To="143" Label="Source1" />
+                  <Edge From="143" To="144" Label="Source1" />
                   <Edge From="144" To="145" Label="Source1" />
-                  <Edge From="145" To="146" Label="Source1" />
                   <Edge From="146" To="147" Label="Source1" />
                   <Edge From="147" To="148" Label="Source1" />
-                  <Edge From="149" To="150" Label="Source1" />
-                  <Edge From="150" To="151" Label="Source1" />
-                  <Edge From="151" To="152" Label="Source1" />
-                  <Edge From="152" To="153" Label="Source1" />
+                  <Edge From="148" To="149" Label="Source1" />
                 </Edges>
               </Workflow>
             </Expression>
@@ -4941,29 +5035,29 @@
                     <Property Name="TriggerSource" />
                   </Expression>
                   <Expression xsi:type="Combinator">
-                    <Combinator xsi:type="p5:TriggeredAnalogOutput">
-                      <p5:SignalSource />
-                      <p5:TriggerSource>/Dev1/PFI0</p5:TriggerSource>
-                      <p5:SampleRate>5000</p5:SampleRate>
-                      <p5:ActiveEdge>Rising</p5:ActiveEdge>
-                      <p5:SampleMode>FiniteSamples</p5:SampleMode>
-                      <p5:BufferSize>50002</p5:BufferSize>
-                      <p5:Channels>
-                        <p5:AnalogOutputChannelConfiguration>
-                          <p5:ChannelName />
-                          <p5:MinimumValue>-10</p5:MinimumValue>
-                          <p5:MaximumValue>10</p5:MaximumValue>
-                          <p5:PhysicalChannel>Dev1/ao0</p5:PhysicalChannel>
-                          <p5:VoltageUnits>Volts</p5:VoltageUnits>
-                        </p5:AnalogOutputChannelConfiguration>
-                        <p5:AnalogOutputChannelConfiguration>
-                          <p5:ChannelName />
-                          <p5:MinimumValue>-10</p5:MinimumValue>
-                          <p5:MaximumValue>10</p5:MaximumValue>
-                          <p5:PhysicalChannel>Dev1/ao1</p5:PhysicalChannel>
-                          <p5:VoltageUnits>Volts</p5:VoltageUnits>
-                        </p5:AnalogOutputChannelConfiguration>
-                      </p5:Channels>
+                    <Combinator xsi:type="p6:TriggeredAnalogOutput">
+                      <p6:SignalSource />
+                      <p6:TriggerSource>/Dev1/PFI0</p6:TriggerSource>
+                      <p6:SampleRate>5000</p6:SampleRate>
+                      <p6:ActiveEdge>Rising</p6:ActiveEdge>
+                      <p6:SampleMode>FiniteSamples</p6:SampleMode>
+                      <p6:BufferSize>50002</p6:BufferSize>
+                      <p6:Channels>
+                        <p6:AnalogOutputChannelConfiguration>
+                          <p6:ChannelName />
+                          <p6:MinimumValue>-10</p6:MinimumValue>
+                          <p6:MaximumValue>10</p6:MaximumValue>
+                          <p6:PhysicalChannel>Dev1/ao0</p6:PhysicalChannel>
+                          <p6:VoltageUnits>Volts</p6:VoltageUnits>
+                        </p6:AnalogOutputChannelConfiguration>
+                        <p6:AnalogOutputChannelConfiguration>
+                          <p6:ChannelName />
+                          <p6:MinimumValue>-10</p6:MinimumValue>
+                          <p6:MaximumValue>10</p6:MaximumValue>
+                          <p6:PhysicalChannel>Dev1/ao1</p6:PhysicalChannel>
+                          <p6:VoltageUnits>Volts</p6:VoltageUnits>
+                        </p6:AnalogOutputChannelConfiguration>
+                      </p6:Channels>
                     </Combinator>
                   </Expression>
                   <Expression xsi:type="Combinator">
@@ -5324,12 +5418,6 @@
           <rx:Count>1</rx:Count>
         </Combinator>
       </Expression>
-      <Expression xsi:type="rx:PublishSubject">
-        <Name>LoggingStarted</Name>
-      </Expression>
-      <Expression xsi:type="SubscribeSubject">
-        <Name>LoggingStarted</Name>
-      </Expression>
       <Expression xsi:type="rx:CreateObservable">
         <Name>RestartLoggers</Name>
         <Workflow>
@@ -5348,20 +5436,21 @@
             <Expression xsi:type="SubscribeSubject">
               <Name>RootPath</Name>
             </Expression>
+            <Expression xsi:type="Format">
+              <Format>{0}/../../</Format>
+              <Selector />
+            </Expression>
+            <Expression xsi:type="rx:AsyncSubject">
+              <Name>LoggingRootPath</Name>
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>RootPath</Name>
+            </Expression>
             <Expression xsi:type="osc:Format">
               <osc:Address>/loggerstarted</osc:Address>
             </Expression>
             <Expression xsi:type="MulticastSubject">
               <Name>ToBonsaiOSC</Name>
-            </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>RootPath</Name>
-            </Expression>
-            <Expression xsi:type="Format">
-              <Format>{0}/../../</Format>
-            </Expression>
-            <Expression xsi:type="rx:AsyncSubject">
-              <Name>LoggingRootPath</Name>
             </Expression>
             <Expression xsi:type="SubscribeSubject">
               <Name>FromBonsaiOSC</Name>
@@ -8052,22 +8141,6 @@
             <Expression xsi:type="IncludeWorkflow" Path="Extensions\LogHarpDemux.bonsai">
               <LogName>EnvironmentSensorEvents</LogName>
             </Expression>
-            <Expression xsi:type="SubscribeSubject">
-              <Name>EnvironmentSensor</Name>
-            </Expression>
-            <Expression xsi:type="Combinator">
-              <Combinator xsi:type="p3:GetMetadata" />
-            </Expression>
-            <Expression xsi:type="PropertyMapping">
-              <PropertyMappings>
-                <Property Name="DeviceMetadata" />
-              </PropertyMappings>
-            </Expression>
-            <Expression xsi:type="IncludeWorkflow" Path="AllenNeuralDynamics.HarpUtils:LogHarpDeviceWithMetadata.bonsai">
-              <DeviceMetadata />
-              <Modality>Behavior</Modality>
-              <DeviceName xsi:nil="true" />
-            </Expression>
             <Expression xsi:type="GroupWorkflow">
               <Name>CameraRecording</Name>
               <Workflow>
@@ -8165,7 +8238,29 @@
                         <Expression xsi:type="MulticastSubject">
                           <Name>BehaviorCommands</Name>
                         </Expression>
-                        <Expression xsi:type="GroupWorkflow">
+                        <Expression xsi:type="SubscribeSubject">
+                          <Name>ComPorts</Name>
+                        </Expression>
+                        <Expression xsi:type="Index">
+                          <Operand xsi:type="StringProperty">
+                            <Value>ffmpeg_input_args</Value>
+                          </Operand>
+                        </Expression>
+                        <Expression xsi:type="rx:AsyncSubject">
+                          <Name>FfmpegInputArgs</Name>
+                        </Expression>
+                        <Expression xsi:type="SubscribeSubject">
+                          <Name>ComPorts</Name>
+                        </Expression>
+                        <Expression xsi:type="Index">
+                          <Operand xsi:type="StringProperty">
+                            <Value>ffmpeg_output_args</Value>
+                          </Operand>
+                        </Expression>
+                        <Expression xsi:type="rx:AsyncSubject">
+                          <Name>FfmpegOutputArgs</Name>
+                        </Expression>
+                        <Expression xsi:type="rx:Defer">
                           <Name>SideCameraLeft</Name>
                           <Workflow>
                             <Nodes>
@@ -8250,6 +8345,7 @@
                               <Expression xsi:type="rx:PublishSubject">
                                 <Name>SideCameraLeftFrames</Name>
                               </Expression>
+                              <Expression xsi:type="WorkflowOutput" />
                               <Expression xsi:type="SubscribeSubject">
                                 <Name>SideCameraLeftFrames</Name>
                               </Expression>
@@ -8257,38 +8353,19 @@
                                 <Combinator xsi:type="harp:CreateTimestamped" />
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
-                                <Name>RootPath</Name>
-                              </Expression>
-                              <Expression xsi:type="Format">
-                                <Format>{0}/../../behavior-videos/side_camera_left.csv</Format>
-                                <Selector />
+                                <Name>FfmpegOutputArgs</Name>
                               </Expression>
                               <Expression xsi:type="PropertyMapping">
                                 <PropertyMappings>
-                                  <Property Name="FileName" />
+                                  <Property Name="OutputArguments" />
                                 </PropertyMappings>
                               </Expression>
-                              <Expression xsi:type="io:CsvWriter">
-                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-04-05_18-01-27\behavior\raw.harp/../../behavior-videos/side_camera_left.csv</io:FileName>
-                                <io:Append>false</io:Append>
-                                <io:Overwrite>true</io:Overwrite>
-                                <io:Suffix>None</io:Suffix>
-                                <io:IncludeHeader>false</io:IncludeHeader>
-                                <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp</io:Selector>
-                              </Expression>
-                              <Expression xsi:type="MemberSelector">
-                                <Selector>Value.Image</Selector>
-                              </Expression>
                               <Expression xsi:type="SubscribeSubject">
-                                <Name>RootPath</Name>
-                              </Expression>
-                              <Expression xsi:type="Format">
-                                <Format>{0}/../../behavior-videos/side_camera_left.avi</Format>
-                                <Selector />
+                                <Name>FfmpegInputArgs</Name>
                               </Expression>
                               <Expression xsi:type="PropertyMapping">
                                 <PropertyMappings>
-                                  <Property Name="FileName" />
+                                  <Property Name="InputArguments" />
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
@@ -8299,27 +8376,14 @@
                                   <Property Name="FrameRate" />
                                 </PropertyMappings>
                               </Expression>
-                              <Expression xsi:type="SubscribeSubject">
-                                <Name>ComPorts</Name>
-                              </Expression>
-                              <Expression xsi:type="Index">
-                                <Operand xsi:type="StringProperty">
-                                  <Value>codec</Value>
-                                </Operand>
-                              </Expression>
-                              <Expression xsi:type="PropertyMapping">
-                                <PropertyMappings>
-                                  <Property Name="OutputArguments" />
-                                </PropertyMappings>
-                              </Expression>
-                              <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="ffmpeg:VideoWriter">
-                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-04-05_18-01-27\behavior\raw.harp/../../behavior-videos/side_camera_left.avi</ffmpeg:FileName>
-                                  <ffmpeg:Suffix>None</ffmpeg:Suffix>
-                                  <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
-                                  <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24</ffmpeg:OutputArguments>
-                                </Combinator>
+                              <Expression xsi:type="IncludeWorkflow" Path="AllenNeuralDynamics.Core:LogSpinnakerFfmpeg.bonsai">
+                                <Modality>BehaviorVideos</Modality>
+                                <LogName>SideCameraLeft</LogName>
+                                <VideoExtension>mp4</VideoExtension>
+                                <OutputArguments>-vf "scale=out_color_matrix=bt709:out_range=full,format=bgr24,scale=out_range=full" -c:v h264_nvenc -pix_fmt yuv420p -color_range full -colorspace bt709 -color_trc linear -tune hq -preset p4 -rc vbr -cq 12 -b:v 0M -metadata author="Allen Institute for Neural Dynamics" -maxrate 700M -bufsize 350M</OutputArguments>
+                                <InputArguments>-colorspace bt709 -color_primaries bt709 -color_range full -color_trc linear</InputArguments>
+                                <Verbosity>Verbose</Verbosity>
+                                <FrameRate>500</FrameRate>
                               </Expression>
                             </Nodes>
                             <Edges>
@@ -8339,21 +8403,15 @@
                               <Edge From="13" To="14" Label="Source1" />
                               <Edge From="14" To="15" Label="Source2" />
                               <Edge From="15" To="16" Label="Source1" />
-                              <Edge From="17" To="18" Label="Source1" />
-                              <Edge From="18" To="22" Label="Source1" />
-                              <Edge From="19" To="20" Label="Source1" />
+                              <Edge From="16" To="17" Label="Source1" />
+                              <Edge From="18" To="19" Label="Source1" />
+                              <Edge From="19" To="26" Label="Source1" />
                               <Edge From="20" To="21" Label="Source1" />
-                              <Edge From="21" To="22" Label="Source2" />
+                              <Edge From="21" To="26" Label="Source2" />
                               <Edge From="22" To="23" Label="Source1" />
-                              <Edge From="23" To="32" Label="Source1" />
+                              <Edge From="23" To="26" Label="Source3" />
                               <Edge From="24" To="25" Label="Source1" />
-                              <Edge From="25" To="26" Label="Source1" />
-                              <Edge From="26" To="32" Label="Source2" />
-                              <Edge From="27" To="28" Label="Source1" />
-                              <Edge From="28" To="32" Label="Source3" />
-                              <Edge From="29" To="30" Label="Source1" />
-                              <Edge From="30" To="31" Label="Source1" />
-                              <Edge From="31" To="32" Label="Source4" />
+                              <Edge From="25" To="26" Label="Source4" />
                             </Edges>
                           </Workflow>
                         </Expression>
@@ -8386,7 +8444,7 @@
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="rx:SubscribeWhen" />
                         </Expression>
-                        <Expression xsi:type="GroupWorkflow">
+                        <Expression xsi:type="rx:Defer">
                           <Name>BottomCamera</Name>
                           <Workflow>
                             <Nodes>
@@ -8471,6 +8529,7 @@
                               <Expression xsi:type="rx:PublishSubject">
                                 <Name>BottomCameraFrames</Name>
                               </Expression>
+                              <Expression xsi:type="WorkflowOutput" />
                               <Expression xsi:type="SubscribeSubject">
                                 <Name>BottomCameraFrames</Name>
                               </Expression>
@@ -8478,41 +8537,19 @@
                                 <Combinator xsi:type="harp:CreateTimestamped" />
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
-                                <Name>RootPath</Name>
-                              </Expression>
-                              <Expression xsi:type="Format">
-                                <Format>{0}/../../behavior-videos/bottom_camera.csv</Format>
-                                <Selector />
+                                <Name>FfmpegOutputArgs</Name>
                               </Expression>
                               <Expression xsi:type="PropertyMapping">
                                 <PropertyMappings>
-                                  <Property Name="FileName" />
+                                  <Property Name="OutputArguments" />
                                 </PropertyMappings>
                               </Expression>
-                              <Expression xsi:type="io:CsvWriter">
-                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-04-05_18-01-27\behavior\raw.harp/../../behavior-videos/bottom_camera.csv</io:FileName>
-                                <io:Append>false</io:Append>
-                                <io:Overwrite>true</io:Overwrite>
-                                <io:Suffix>None</io:Suffix>
-                                <io:IncludeHeader>false</io:IncludeHeader>
-                                <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp</io:Selector>
-                              </Expression>
-                              <Expression xsi:type="MemberSelector">
-                                <Selector>Value.Image</Selector>
-                              </Expression>
-                              <Expression xsi:type="rx:PublishSubject">
-                                <Name>CameraImage_Bottom</Name>
-                              </Expression>
                               <Expression xsi:type="SubscribeSubject">
-                                <Name>RootPath</Name>
-                              </Expression>
-                              <Expression xsi:type="Format">
-                                <Format>{0}/../../behavior-videos/bottom_camera.avi</Format>
-                                <Selector />
+                                <Name>FfmpegInputArgs</Name>
                               </Expression>
                               <Expression xsi:type="PropertyMapping">
                                 <PropertyMappings>
-                                  <Property Name="FileName" />
+                                  <Property Name="InputArguments" />
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
@@ -8523,27 +8560,14 @@
                                   <Property Name="FrameRate" />
                                 </PropertyMappings>
                               </Expression>
-                              <Expression xsi:type="SubscribeSubject">
-                                <Name>ComPorts</Name>
-                              </Expression>
-                              <Expression xsi:type="Index">
-                                <Operand xsi:type="StringProperty">
-                                  <Value>codec</Value>
-                                </Operand>
-                              </Expression>
-                              <Expression xsi:type="PropertyMapping">
-                                <PropertyMappings>
-                                  <Property Name="OutputArguments" />
-                                </PropertyMappings>
-                              </Expression>
-                              <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="ffmpeg:VideoWriter">
-                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-04-05_18-01-27\behavior\raw.harp/../../behavior-videos/bottom_camera.avi</ffmpeg:FileName>
-                                  <ffmpeg:Suffix>None</ffmpeg:Suffix>
-                                  <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
-                                  <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24</ffmpeg:OutputArguments>
-                                </Combinator>
+                              <Expression xsi:type="IncludeWorkflow" Path="AllenNeuralDynamics.Core:LogSpinnakerFfmpeg.bonsai">
+                                <Modality>BehaviorVideos</Modality>
+                                <LogName>BottomCamera</LogName>
+                                <VideoExtension>mp4</VideoExtension>
+                                <OutputArguments>-vf "scale=out_color_matrix=bt709:out_range=full,format=bgr24,scale=out_range=full" -c:v h264_nvenc -pix_fmt yuv420p -color_range full -colorspace bt709 -color_trc linear -tune hq -preset p4 -rc vbr -cq 12 -b:v 0M -metadata author="Allen Institute for Neural Dynamics" -maxrate 700M -bufsize 350M</OutputArguments>
+                                <InputArguments>-colorspace bt709 -color_primaries bt709 -color_range full -color_trc linear</InputArguments>
+                                <Verbosity>Verbose</Verbosity>
+                                <FrameRate>500</FrameRate>
                               </Expression>
                             </Nodes>
                             <Edges>
@@ -8563,22 +8587,15 @@
                               <Edge From="13" To="14" Label="Source1" />
                               <Edge From="14" To="15" Label="Source2" />
                               <Edge From="15" To="16" Label="Source1" />
-                              <Edge From="17" To="18" Label="Source1" />
-                              <Edge From="18" To="22" Label="Source1" />
-                              <Edge From="19" To="20" Label="Source1" />
+                              <Edge From="16" To="17" Label="Source1" />
+                              <Edge From="18" To="19" Label="Source1" />
+                              <Edge From="19" To="26" Label="Source1" />
                               <Edge From="20" To="21" Label="Source1" />
-                              <Edge From="21" To="22" Label="Source2" />
+                              <Edge From="21" To="26" Label="Source2" />
                               <Edge From="22" To="23" Label="Source1" />
-                              <Edge From="23" To="24" Label="Source1" />
-                              <Edge From="24" To="33" Label="Source1" />
-                              <Edge From="25" To="26" Label="Source1" />
-                              <Edge From="26" To="27" Label="Source1" />
-                              <Edge From="27" To="33" Label="Source2" />
-                              <Edge From="28" To="29" Label="Source1" />
-                              <Edge From="29" To="33" Label="Source3" />
-                              <Edge From="30" To="31" Label="Source1" />
-                              <Edge From="31" To="32" Label="Source1" />
-                              <Edge From="32" To="33" Label="Source4" />
+                              <Edge From="23" To="26" Label="Source3" />
+                              <Edge From="24" To="25" Label="Source1" />
+                              <Edge From="25" To="26" Label="Source4" />
                             </Edges>
                           </Workflow>
                         </Expression>
@@ -8611,7 +8628,10 @@
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="rx:SubscribeWhen" />
                         </Expression>
-                        <Expression xsi:type="GroupWorkflow">
+                        <Expression xsi:type="rx:PublishSubject">
+                          <Name>BottomCameraFrames</Name>
+                        </Expression>
+                        <Expression xsi:type="rx:Defer">
                           <Name>SideCameraRight</Name>
                           <Workflow>
                             <Nodes>
@@ -8696,6 +8716,7 @@
                               <Expression xsi:type="rx:PublishSubject">
                                 <Name>SideCameraRightFrames</Name>
                               </Expression>
+                              <Expression xsi:type="WorkflowOutput" />
                               <Expression xsi:type="SubscribeSubject">
                                 <Name>SideCameraRightFrames</Name>
                               </Expression>
@@ -8703,41 +8724,19 @@
                                 <Combinator xsi:type="harp:CreateTimestamped" />
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
-                                <Name>RootPath</Name>
-                              </Expression>
-                              <Expression xsi:type="Format">
-                                <Format>{0}/../../behavior-videos/side_camera_right.csv</Format>
-                                <Selector />
+                                <Name>FfmpegOutputArgs</Name>
                               </Expression>
                               <Expression xsi:type="PropertyMapping">
                                 <PropertyMappings>
-                                  <Property Name="FileName" />
+                                  <Property Name="OutputArguments" />
                                 </PropertyMappings>
                               </Expression>
-                              <Expression xsi:type="io:CsvWriter">
-                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-04-05_18-01-27\behavior\raw.harp/../../behavior-videos/side_camera_right.csv</io:FileName>
-                                <io:Append>false</io:Append>
-                                <io:Overwrite>true</io:Overwrite>
-                                <io:Suffix>None</io:Suffix>
-                                <io:IncludeHeader>false</io:IncludeHeader>
-                                <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp</io:Selector>
-                              </Expression>
-                              <Expression xsi:type="MemberSelector">
-                                <Selector>Value.Image</Selector>
-                              </Expression>
-                              <Expression xsi:type="rx:PublishSubject">
-                                <Name>CameraImage_Right</Name>
-                              </Expression>
                               <Expression xsi:type="SubscribeSubject">
-                                <Name>RootPath</Name>
-                              </Expression>
-                              <Expression xsi:type="Format">
-                                <Format>{0}/../../behavior-videos/side_camera_right.avi</Format>
-                                <Selector />
+                                <Name>FfmpegInputArgs</Name>
                               </Expression>
                               <Expression xsi:type="PropertyMapping">
                                 <PropertyMappings>
-                                  <Property Name="FileName" />
+                                  <Property Name="InputArguments" />
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
@@ -8748,27 +8747,14 @@
                                   <Property Name="FrameRate" />
                                 </PropertyMappings>
                               </Expression>
-                              <Expression xsi:type="SubscribeSubject">
-                                <Name>ComPorts</Name>
-                              </Expression>
-                              <Expression xsi:type="Index">
-                                <Operand xsi:type="StringProperty">
-                                  <Value>codec</Value>
-                                </Operand>
-                              </Expression>
-                              <Expression xsi:type="PropertyMapping">
-                                <PropertyMappings>
-                                  <Property Name="OutputArguments" />
-                                </PropertyMappings>
-                              </Expression>
-                              <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="ffmpeg:VideoWriter">
-                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-04-05_18-01-27\behavior\raw.harp/../../behavior-videos/side_camera_right.avi</ffmpeg:FileName>
-                                  <ffmpeg:Suffix>None</ffmpeg:Suffix>
-                                  <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
-                                  <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24</ffmpeg:OutputArguments>
-                                </Combinator>
+                              <Expression xsi:type="IncludeWorkflow" Path="AllenNeuralDynamics.Core:LogSpinnakerFfmpeg.bonsai">
+                                <Modality>BehaviorVideos</Modality>
+                                <LogName>SideCameraRight</LogName>
+                                <VideoExtension>mp4</VideoExtension>
+                                <OutputArguments>-vf "scale=out_color_matrix=bt709:out_range=full,format=bgr24,scale=out_range=full" -c:v h264_nvenc -pix_fmt yuv420p -color_range full -colorspace bt709 -color_trc linear -tune hq -preset p4 -rc vbr -cq 12 -b:v 0M -metadata author="Allen Institute for Neural Dynamics" -maxrate 700M -bufsize 350M</OutputArguments>
+                                <InputArguments>-colorspace bt709 -color_primaries bt709 -color_range full -color_trc linear</InputArguments>
+                                <Verbosity>Verbose</Verbosity>
+                                <FrameRate>500</FrameRate>
                               </Expression>
                             </Nodes>
                             <Edges>
@@ -8788,22 +8774,15 @@
                               <Edge From="13" To="14" Label="Source1" />
                               <Edge From="14" To="15" Label="Source2" />
                               <Edge From="15" To="16" Label="Source1" />
-                              <Edge From="17" To="18" Label="Source1" />
-                              <Edge From="18" To="22" Label="Source1" />
-                              <Edge From="19" To="20" Label="Source1" />
+                              <Edge From="16" To="17" Label="Source1" />
+                              <Edge From="18" To="19" Label="Source1" />
+                              <Edge From="19" To="26" Label="Source1" />
                               <Edge From="20" To="21" Label="Source1" />
-                              <Edge From="21" To="22" Label="Source2" />
+                              <Edge From="21" To="26" Label="Source2" />
                               <Edge From="22" To="23" Label="Source1" />
-                              <Edge From="23" To="24" Label="Source1" />
-                              <Edge From="24" To="33" Label="Source1" />
-                              <Edge From="25" To="26" Label="Source1" />
-                              <Edge From="26" To="27" Label="Source1" />
-                              <Edge From="27" To="33" Label="Source2" />
-                              <Edge From="28" To="29" Label="Source1" />
-                              <Edge From="29" To="33" Label="Source3" />
-                              <Edge From="30" To="31" Label="Source1" />
-                              <Edge From="31" To="32" Label="Source1" />
-                              <Edge From="32" To="33" Label="Source4" />
+                              <Edge From="23" To="26" Label="Source3" />
+                              <Edge From="24" To="25" Label="Source1" />
+                              <Edge From="25" To="26" Label="Source4" />
                             </Edges>
                           </Workflow>
                         </Expression>
@@ -8836,7 +8815,10 @@
                         <Expression xsi:type="Combinator">
                           <Combinator xsi:type="rx:SubscribeWhen" />
                         </Expression>
-                        <Expression xsi:type="GroupWorkflow">
+                        <Expression xsi:type="rx:PublishSubject">
+                          <Name>SideCameraRightFrames</Name>
+                        </Expression>
+                        <Expression xsi:type="rx:Defer">
                           <Name>BodyCamera</Name>
                           <Workflow>
                             <Nodes>
@@ -8921,6 +8903,7 @@
                               <Expression xsi:type="rx:PublishSubject">
                                 <Name>BodyCameraFrames</Name>
                               </Expression>
+                              <Expression xsi:type="WorkflowOutput" />
                               <Expression xsi:type="SubscribeSubject">
                                 <Name>BodyCameraFrames</Name>
                               </Expression>
@@ -8928,38 +8911,19 @@
                                 <Combinator xsi:type="harp:CreateTimestamped" />
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
-                                <Name>RootPath</Name>
-                              </Expression>
-                              <Expression xsi:type="Format">
-                                <Format>{0}/../../behavior-videos/body_camera.csv</Format>
-                                <Selector />
+                                <Name>FfmpegOutputArgs</Name>
                               </Expression>
                               <Expression xsi:type="PropertyMapping">
                                 <PropertyMappings>
-                                  <Property Name="FileName" />
+                                  <Property Name="OutputArguments" />
                                 </PropertyMappings>
                               </Expression>
-                              <Expression xsi:type="io:CsvWriter">
-                                <io:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-04-05_18-01-27\behavior\raw.harp/../../behavior-videos/body_camera.csv</io:FileName>
-                                <io:Append>false</io:Append>
-                                <io:Overwrite>true</io:Overwrite>
-                                <io:Suffix>None</io:Suffix>
-                                <io:IncludeHeader>false</io:IncludeHeader>
-                                <io:Selector>Seconds,Value.ChunkData.FrameID,Value.ChunkData.Timestamp</io:Selector>
-                              </Expression>
-                              <Expression xsi:type="MemberSelector">
-                                <Selector>Value.Image</Selector>
-                              </Expression>
                               <Expression xsi:type="SubscribeSubject">
-                                <Name>RootPath</Name>
-                              </Expression>
-                              <Expression xsi:type="Format">
-                                <Format>{0}/../../behavior-videos/body_camera.avi</Format>
-                                <Selector />
+                                <Name>FfmpegInputArgs</Name>
                               </Expression>
                               <Expression xsi:type="PropertyMapping">
                                 <PropertyMappings>
-                                  <Property Name="FileName" />
+                                  <Property Name="InputArguments" />
                                 </PropertyMappings>
                               </Expression>
                               <Expression xsi:type="SubscribeSubject">
@@ -8970,27 +8934,14 @@
                                   <Property Name="FrameRate" />
                                 </PropertyMappings>
                               </Expression>
-                              <Expression xsi:type="SubscribeSubject">
-                                <Name>ComPorts</Name>
-                              </Expression>
-                              <Expression xsi:type="Index">
-                                <Operand xsi:type="StringProperty">
-                                  <Value>codec</Value>
-                                </Operand>
-                              </Expression>
-                              <Expression xsi:type="PropertyMapping">
-                                <PropertyMappings>
-                                  <Property Name="OutputArguments" />
-                                </PropertyMappings>
-                              </Expression>
-                              <Expression xsi:type="Combinator">
-                                <Combinator xsi:type="ffmpeg:VideoWriter">
-                                  <ffmpeg:FileName>D:\BehaviorData\323_EPHYS3\0\behavior_0_2025-04-05_18-01-27\behavior\raw.harp/../../behavior-videos/body_camera.avi</ffmpeg:FileName>
-                                  <ffmpeg:Suffix>None</ffmpeg:Suffix>
-                                  <ffmpeg:Overwrite>true</ffmpeg:Overwrite>
-                                  <ffmpeg:FrameRate>500</ffmpeg:FrameRate>
-                                  <ffmpeg:OutputArguments>-vcodec h264_nvenc -crf 23 -preset fast -b:v 50M -v 24</ffmpeg:OutputArguments>
-                                </Combinator>
+                              <Expression xsi:type="IncludeWorkflow" Path="AllenNeuralDynamics.Core:LogSpinnakerFfmpeg.bonsai">
+                                <Modality>BehaviorVideos</Modality>
+                                <LogName>BodyCamera</LogName>
+                                <VideoExtension>mp4</VideoExtension>
+                                <OutputArguments>-vf "scale=out_color_matrix=bt709:out_range=full,format=bgr24,scale=out_range=full" -c:v h264_nvenc -pix_fmt yuv420p -color_range full -colorspace bt709 -color_trc linear -tune hq -preset p4 -rc vbr -cq 12 -b:v 0M -metadata author="Allen Institute for Neural Dynamics" -maxrate 700M -bufsize 350M</OutputArguments>
+                                <InputArguments>-colorspace bt709 -color_primaries bt709 -color_range full -color_trc linear</InputArguments>
+                                <Verbosity>Verbose</Verbosity>
+                                <FrameRate>500</FrameRate>
                               </Expression>
                             </Nodes>
                             <Edges>
@@ -9010,21 +8961,15 @@
                               <Edge From="13" To="14" Label="Source1" />
                               <Edge From="14" To="15" Label="Source2" />
                               <Edge From="15" To="16" Label="Source1" />
-                              <Edge From="17" To="18" Label="Source1" />
-                              <Edge From="18" To="22" Label="Source1" />
-                              <Edge From="19" To="20" Label="Source1" />
+                              <Edge From="16" To="17" Label="Source1" />
+                              <Edge From="18" To="19" Label="Source1" />
+                              <Edge From="19" To="26" Label="Source1" />
                               <Edge From="20" To="21" Label="Source1" />
-                              <Edge From="21" To="22" Label="Source2" />
+                              <Edge From="21" To="26" Label="Source2" />
                               <Edge From="22" To="23" Label="Source1" />
-                              <Edge From="23" To="32" Label="Source1" />
+                              <Edge From="23" To="26" Label="Source3" />
                               <Edge From="24" To="25" Label="Source1" />
-                              <Edge From="25" To="26" Label="Source1" />
-                              <Edge From="26" To="32" Label="Source2" />
-                              <Edge From="27" To="28" Label="Source1" />
-                              <Edge From="28" To="32" Label="Source3" />
-                              <Edge From="29" To="30" Label="Source1" />
-                              <Edge From="30" To="31" Label="Source1" />
-                              <Edge From="31" To="32" Label="Source4" />
+                              <Edge From="25" To="26" Label="Source4" />
                             </Edges>
                           </Workflow>
                         </Expression>
@@ -9074,11 +9019,10 @@
                         <Edge From="14" To="15" Label="Source1" />
                         <Edge From="15" To="16" Label="Source1" />
                         <Edge From="16" To="17" Label="Source1" />
-                        <Edge From="18" To="23" Label="Source1" />
+                        <Edge From="18" To="19" Label="Source1" />
                         <Edge From="19" To="20" Label="Source1" />
-                        <Edge From="20" To="21" Label="Source1" />
                         <Edge From="21" To="22" Label="Source1" />
-                        <Edge From="22" To="23" Label="Source2" />
+                        <Edge From="22" To="23" Label="Source1" />
                         <Edge From="24" To="29" Label="Source1" />
                         <Edge From="25" To="26" Label="Source1" />
                         <Edge From="26" To="27" Label="Source1" />
@@ -9089,11 +9033,18 @@
                         <Edge From="32" To="33" Label="Source1" />
                         <Edge From="33" To="34" Label="Source1" />
                         <Edge From="34" To="35" Label="Source2" />
-                        <Edge From="36" To="41" Label="Source1" />
-                        <Edge From="37" To="38" Label="Source1" />
+                        <Edge From="35" To="36" Label="Source1" />
+                        <Edge From="37" To="42" Label="Source1" />
                         <Edge From="38" To="39" Label="Source1" />
                         <Edge From="39" To="40" Label="Source1" />
-                        <Edge From="40" To="41" Label="Source2" />
+                        <Edge From="40" To="41" Label="Source1" />
+                        <Edge From="41" To="42" Label="Source2" />
+                        <Edge From="42" To="43" Label="Source1" />
+                        <Edge From="44" To="49" Label="Source1" />
+                        <Edge From="45" To="46" Label="Source1" />
+                        <Edge From="46" To="47" Label="Source1" />
+                        <Edge From="47" To="48" Label="Source1" />
+                        <Edge From="48" To="49" Label="Source2" />
                       </Edges>
                     </Workflow>
                   </Expression>
@@ -9350,16 +9301,22 @@
               <Combinator xsi:type="rx:SubscribeWhen" />
             </Expression>
             <Expression xsi:type="SubscribeSubject">
-              <Name>CameraImage_Bottom</Name>
+              <Name>BottomCameraFrames</Name>
+            </Expression>
+            <Expression xsi:type="MemberSelector">
+              <Selector>Item1.Image</Selector>
             </Expression>
             <Expression xsi:type="VisualizerMapping">
-              <VisualizerType xsi:type="TypeMapping" TypeArguments="p6:IplImageRotateVisualizer" />
+              <VisualizerType xsi:type="TypeMapping" TypeArguments="p7:IplImageRotateVisualizer" />
             </Expression>
             <Expression xsi:type="SubscribeSubject">
-              <Name>CameraImage_Right</Name>
+              <Name>SideCameraRightFrames</Name>
+            </Expression>
+            <Expression xsi:type="MemberSelector">
+              <Selector>Item1.Image</Selector>
             </Expression>
             <Expression xsi:type="VisualizerMapping">
-              <VisualizerType xsi:type="TypeMapping" TypeArguments="p6:IplImageRotateVisualizer" />
+              <VisualizerType xsi:type="TypeMapping" TypeArguments="p7:IplImageRotateVisualizer" />
             </Expression>
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
               <viz:Name>CameraRecording</viz:Name>
@@ -9368,6 +9325,22 @@
               <viz:ColumnStyles />
               <viz:RowStyles />
               <viz:CellSpans />
+            </Expression>
+            <Expression xsi:type="SubscribeSubject">
+              <Name>SniffDetectorEvents</Name>
+            </Expression>
+            <Expression xsi:type="Combinator">
+              <Combinator xsi:type="p5:GetMetadata" />
+            </Expression>
+            <Expression xsi:type="PropertyMapping">
+              <PropertyMappings>
+                <Property Name="DeviceMetadata" />
+              </PropertyMappings>
+            </Expression>
+            <Expression xsi:type="IncludeWorkflow" Path="AllenNeuralDynamics.HarpUtils:LogHarpDeviceWithMetadata.bonsai">
+              <DeviceMetadata xsi:nil="true" />
+              <Modality>Behavior</Modality>
+              <DeviceName>SniffDetector</DeviceName>
             </Expression>
             <Expression xsi:type="Disable">
               <Builder xsi:type="rx:Defer">
@@ -9446,24 +9419,25 @@
             <Edge From="42" To="43" Label="Source1" />
             <Edge From="44" To="45" Label="Source1" />
             <Edge From="46" To="47" Label="Source1" />
-            <Edge From="48" To="51" Label="Source1" />
+            <Edge From="48" To="53" Label="Source1" />
             <Edge From="49" To="50" Label="Source1" />
-            <Edge From="50" To="51" Label="Source2" />
-            <Edge From="52" To="57" Label="Source1" />
-            <Edge From="53" To="54" Label="Source1" />
-            <Edge From="54" To="55" Label="Source1" />
+            <Edge From="50" To="51" Label="Source1" />
+            <Edge From="51" To="52" Label="Source1" />
+            <Edge From="52" To="53" Label="Source2" />
+            <Edge From="54" To="59" Label="Source1" />
             <Edge From="55" To="56" Label="Source1" />
-            <Edge From="56" To="57" Label="Source2" />
-            <Edge From="58" To="63" Label="Source1" />
-            <Edge From="59" To="60" Label="Source1" />
+            <Edge From="56" To="57" Label="Source1" />
+            <Edge From="57" To="58" Label="Source1" />
+            <Edge From="58" To="59" Label="Source2" />
             <Edge From="60" To="61" Label="Source1" />
             <Edge From="61" To="62" Label="Source1" />
-            <Edge From="62" To="63" Label="Source2" />
+            <Edge From="62" To="66" Label="Source1" />
+            <Edge From="63" To="64" Label="Source1" />
             <Edge From="64" To="65" Label="Source1" />
-            <Edge From="65" To="68" Label="Source1" />
-            <Edge From="66" To="67" Label="Source1" />
-            <Edge From="67" To="68" Label="Source2" />
-            <Edge From="69" To="70" Label="Source1" />
+            <Edge From="65" To="66" Label="Source2" />
+            <Edge From="67" To="70" Label="Source1" />
+            <Edge From="68" To="69" Label="Source1" />
+            <Edge From="69" To="70" Label="Source2" />
           </Edges>
         </Workflow>
       </Expression>
@@ -9481,16 +9455,8 @@
           <io:Path />
         </Combinator>
       </Expression>
-      <Expression xsi:type="Parse">
-        <Pattern>%s,%s</Pattern>
-        <Separator>\r\n</Separator>
-      </Expression>
       <Expression xsi:type="Combinator">
-        <Combinator xsi:type="rx:Merge" />
-      </Expression>
-      <Expression xsi:type="rx:ToDictionary">
-        <rx:KeySelector>Item1</rx:KeySelector>
-        <rx:ElementSelector>Item2</rx:ElementSelector>
+        <Combinator xsi:type="p7:ParseSettingCsv" />
       </Expression>
       <Expression xsi:type="Combinator">
         <Combinator xsi:type="rx:Take">
@@ -9521,15 +9487,29 @@
               <gui:Enabled>true</gui:Enabled>
               <gui:Visible>true</gui:Visible>
               <gui:Font>Microsoft Sans Serif, 15.75pt, style=Bold</gui:Font>
-              <gui:Text>4xx-x-A</gui:Text>
+              <gui:Text>667-1-A</gui:Text>
             </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="SubscribeSubject">
               <Name>LeftLick</Name>
             </Expression>
+            <Expression xsi:type="viz:RollingGraphBuilder">
+              <viz:SymbolType>None</viz:SymbolType>
+              <viz:LineWidth>1</viz:LineWidth>
+              <viz:Capacity>50</viz:Capacity>
+              <viz:Min>0</viz:Min>
+              <viz:Max>1.1</viz:Max>
+            </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="SubscribeSubject">
               <Name>RightLick</Name>
+            </Expression>
+            <Expression xsi:type="viz:RollingGraphBuilder">
+              <viz:SymbolType>None</viz:SymbolType>
+              <viz:LineWidth>1</viz:LineWidth>
+              <viz:Capacity>50</viz:Capacity>
+              <viz:Min>0</viz:Min>
+              <viz:Max>1.1</viz:Max>
             </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
@@ -9550,11 +9530,13 @@
             <Edge From="1" To="2" Label="Source1" />
             <Edge From="2" To="3" Label="Source1" />
             <Edge From="3" To="4" Label="Source1" />
-            <Edge From="4" To="9" Label="Source1" />
+            <Edge From="4" To="11" Label="Source1" />
             <Edge From="5" To="6" Label="Source1" />
-            <Edge From="6" To="9" Label="Source2" />
-            <Edge From="7" To="8" Label="Source1" />
-            <Edge From="8" To="9" Label="Source3" />
+            <Edge From="6" To="7" Label="Source1" />
+            <Edge From="7" To="11" Label="Source2" />
+            <Edge From="8" To="9" Label="Source1" />
+            <Edge From="9" To="10" Label="Source1" />
+            <Edge From="10" To="11" Label="Source3" />
           </Edges>
         </Workflow>
       </Expression>
@@ -10222,13 +10204,13 @@
               <Name>CameraImage_Bottom_Preview</Name>
             </Expression>
             <Expression xsi:type="VisualizerMapping">
-              <VisualizerType xsi:type="TypeMapping" TypeArguments="p6:IplImageRotateVisualizer" />
+              <VisualizerType xsi:type="TypeMapping" TypeArguments="p7:IplImageRotateVisualizer" />
             </Expression>
             <Expression xsi:type="SubscribeSubject">
               <Name>CameraImage_Right_Preview</Name>
             </Expression>
             <Expression xsi:type="VisualizerMapping">
-              <VisualizerType xsi:type="TypeMapping" TypeArguments="p6:IplImageRotateVisualizer" />
+              <VisualizerType xsi:type="TypeMapping" TypeArguments="p7:IplImageRotateVisualizer" />
             </Expression>
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
               <viz:Name>CameraPreview</viz:Name>
@@ -10271,21 +10253,33 @@
       <Expression xsi:type="Combinator">
         <Combinator xsi:type="rx:Repeat" />
       </Expression>
+      <Expression xsi:type="SubscribeSubject">
+        <Name>SniffDetectorEvents</Name>
+      </Expression>
+      <Expression xsi:type="p5:Parse">
+        <harp:Register xsi:type="p5:TimestampedRawVoltage" />
+      </Expression>
+      <Expression xsi:type="Annotation">
+        <Text><![CDATA[UseThisToVisualizeSniffDetector]]></Text>
+      </Expression>
+      <Expression xsi:type="MemberSelector">
+        <Selector>Value</Selector>
+      </Expression>
     </Nodes>
     <Edges>
       <Edge From="7" To="8" Label="Source1" />
       <Edge From="8" To="9" Label="Source1" />
       <Edge From="9" To="10" Label="Source1" />
+      <Edge From="10" To="11" Label="Source1" />
       <Edge From="11" To="12" Label="Source1" />
-      <Edge From="12" To="13" Label="Source1" />
       <Edge From="13" To="14" Label="Source1" />
+      <Edge From="14" To="15" Label="Source1" />
       <Edge From="15" To="16" Label="Source1" />
       <Edge From="16" To="17" Label="Source1" />
-      <Edge From="17" To="18" Label="Source1" />
-      <Edge From="18" To="19" Label="Source1" />
       <Edge From="19" To="20" Label="Source1" />
-      <Edge From="20" To="21" Label="Source1" />
-      <Edge From="23" To="24" Label="Source1" />
+      <Edge From="21" To="22" Label="Source1" />
+      <Edge From="22" To="24" Label="Source1" />
+      <Edge From="23" To="24" Label="Source2" />
     </Edges>
   </Workflow>
 </WorkflowBuilder>

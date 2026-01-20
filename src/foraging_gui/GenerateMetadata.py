@@ -658,10 +658,7 @@ class generate_metadata:
             session_params["animal_weight_post"] = float(
                 self.Obj["WeightAfter"]
             )
-        if self.Obj["BaseWeight"] != "":
-            session_params["animal_weight_prior"] = float(
-                self.Obj["BaseWeight"]
-            )
+        session_params["animal_weight_prior"] = None
         session = Session(**session_params)
         session.write_standard_file(output_directory=self.output_folder)
         self.session_metadata_success = True
@@ -784,6 +781,7 @@ class generate_metadata:
                     self.Obj["Camera_dialog"]["camera_stop_time"],
                     "%Y-%m-%d %H:%M:%S.%f",
                 )
+
             self.high_speed_camera_streams.append(
                 Stream(
                     stream_modalities=[Modality.BEHAVIOR_VIDEOS],
@@ -793,7 +791,7 @@ class generate_metadata:
                         "%Y-%m-%d %H:%M:%S.%f",
                     ),
                     stream_end_time=camera_stop_time,
-                    software=self.behavior_software,
+                    software=self.behavior_software
                 )
             )
         else:
@@ -1133,6 +1131,8 @@ class generate_metadata:
                 ),
             },
             "task_parameters": self._get_task_parameters(),
+            "ffmpeg_parameters": {"ffmpeg_input_args": self.Obj["settings_box"]["ffmpeg_input_args"],
+                                  "ffmpeg_output_args": self.Obj["settings_box"]["ffmpeg_output_args"]}
         }
 
         return output_parameters
