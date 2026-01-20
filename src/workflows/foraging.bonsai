@@ -9496,9 +9496,9 @@
             <Expression xsi:type="viz:RollingGraphBuilder">
               <viz:SymbolType>None</viz:SymbolType>
               <viz:LineWidth>1</viz:LineWidth>
-              <viz:Capacity>120</viz:Capacity>
+              <viz:Capacity>50</viz:Capacity>
               <viz:Min>0</viz:Min>
-              <viz:Max>1.2</viz:Max>
+              <viz:Max>1.1</viz:Max>
             </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="SubscribeSubject">
@@ -9507,9 +9507,9 @@
             <Expression xsi:type="viz:RollingGraphBuilder">
               <viz:SymbolType>None</viz:SymbolType>
               <viz:LineWidth>1</viz:LineWidth>
-              <viz:Capacity>120</viz:Capacity>
+              <viz:Capacity>50</viz:Capacity>
               <viz:Min>0</viz:Min>
-              <viz:Max>1.2</viz:Max>
+              <viz:Max>1.1</viz:Max>
             </Expression>
             <Expression xsi:type="VisualizerMapping" />
             <Expression xsi:type="viz:TableLayoutPanelBuilder">
