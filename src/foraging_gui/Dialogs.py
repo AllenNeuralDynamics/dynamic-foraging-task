@@ -708,7 +708,7 @@ class WaterCalibrationDialog(QDialog):
         if "Full" not in self.WaterCalibrationPar:
             self.WaterCalibrationPar["Full"] = {}
             self.WaterCalibrationPar["Full"]["TimeMin"] = 0.02
-            self.WaterCalibrationPar["Full"]["TimeMax"] = 0.03
+            self.WaterCalibrationPar["Full"]["TimeMax"] = 0.04
             self.WaterCalibrationPar["Full"]["Stride"] = 0.01
             self.WaterCalibrationPar["Full"]["Interval"] = 0.1
             self.WaterCalibrationPar["Full"]["Cycle"] = 1000
