@@ -301,7 +301,6 @@ class GenerateTrials:
 
         try:
             if self.TP_OptogeneticsB == "on":
-                # deterministic selection
                 self._SelectOptogeneticsCondition_Modulo()
 
                 # log session gating state (set by _CheckSessionControl inside selector)
@@ -345,7 +344,6 @@ class GenerateTrials:
 
         try:
             if self.TP_OptogeneticsB == "on":
-                # deterministic selection
                 self._SelectOptogeneticsCondition_AlternatingBlocks()
 
                 # log session gating state (set by _CheckSessionControl inside selector)

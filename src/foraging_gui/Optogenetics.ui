@@ -6017,7 +6017,14 @@
      </widget>
     </item>
     <item>
-     <widget class="QSpinBox" name="ScheduleStartTrial"/>
+     <widget class="QSpinBox" name="ScheduleStartTrial">
+      <property name="singleStep">
+       <number>1</number>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

@@ -2988,60 +2988,52 @@ class Window(QMainWindow):
                     ]:
                         continue
 
-                    # check for empty string condition
+                    # --- validate numeric input safely ---
                     try:
-                        float(child.text())
+                        print("PARSE:", type(child).__name__, child.objectName(),
+                        "text=", repr(child.text() if hasattr(child,"text") else None))
+                        
+                        if isinstance(child, (QtWidgets.QSpinBox, QtWidgets.QDoubleSpinBox)):
+                            new_val = child.value()  # never ""
+                        else:
+                            txt = child.text().strip()
+                            if txt == "":
+                                raise ValueError("empty")
+                            new_val = float(txt)
+
                     except Exception:
-                        # Invalid float. Do not change the parameter, reset back to previous value
                         logging.warning(
                             "Cannot convert input to float: {}, '{}'".format(
-                                child.objectName(), child.text()
+                                child.objectName(), child.text() if hasattr(child, "text") else ""
                             )
                         )
-                        if isinstance(child, QtWidgets.QDoubleSpinBox):
-                            child.setValue(
-                                float(
-                                    getattr(
-                                        Parameters, "TP_" + child.objectName()
-                                    )
-                                )
-                            )
-                        elif isinstance(child, QtWidgets.QSpinBox):
-                            child.setValue(
-                                int(
-                                    getattr(
-                                        Parameters, "TP_" + child.objectName()
-                                    )
-                                )
-                            )
-                        else:
-                            if (
-                                hasattr(Parameters, "TP_" + child.objectName())
-                                and child.objectName() != ""
-                            ):
-                                child.setText(
-                                    getattr(
-                                        Parameters, "TP_" + child.objectName()
-                                    )
-                                )
+                        # reset to previous TP value if we have it
+                        tp_name = "TP_" + child.objectName()
+                        if hasattr(Parameters, tp_name) and child.objectName() != "":
+                            old_txt = getattr(Parameters, tp_name)
+                            # if old value is empty, fall back to 0
+                            if old_txt == "":
+                                old_txt = "0"
+                            if isinstance(child, QtWidgets.QDoubleSpinBox):
+                                child.setValue(float(old_txt))
+                            elif isinstance(child, QtWidgets.QSpinBox):
+                                child.setValue(int(float(old_txt)))
+                            else:
+                                child.setText(old_txt)
+
                     else:
-                        if (
-                            hasattr(Parameters, "TP_" + child.objectName())
-                            and child.objectName() != ""
-                        ):
-                            # If this parameter changed, add the change to the log
-                            old = getattr(
-                                Parameters, "TP_" + child.objectName()
-                            )
-                            if old != "":
-                                old = float(old)
-                            new = float(child.text())
-                            if new != old:
+                        # log change (compare numeric values)
+                        tp_name = "TP_" + child.objectName()
+                        if hasattr(Parameters, tp_name) and child.objectName() != "":
+                            old = getattr(Parameters, tp_name)
+                            old_val = float(old) if old != "" else 0.0
+                            if float(new_val) != float(old_val):
                                 logging.info(
                                     "Changing parameter: {}, {} -> {}".format(
-                                        child.objectName(), old, new
+                                        child.objectName(), old_val, new_val
                                     )
                                 )
+
 
             # update the current training parameters
             self._GetTrainingParameters()
