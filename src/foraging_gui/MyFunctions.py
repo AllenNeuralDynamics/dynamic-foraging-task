@@ -242,7 +242,14 @@ class GenerateTrials:
         # to decide if we should stop the session
         self._CheckStop()
         # optogenetics section
-        self._PerformOptogenetics(Channel4)
+
+        if self.TP_OptoMode == "Original":
+            self._PerformOptogenetics(Channel4)
+        elif self.TP_OptoMode == "PdCO":
+            self._PerformOptogenetics_Modulo(Channel4)
+        elif self.TP_OptoMode == "Block":
+            self._PerformOptogenetics_PdCO_AlternatingBlocks(Channel4)
+            
         # check warm up for the next trial
         self._CheckWarmUp()
         # finish to generate the next trial
@@ -286,6 +293,94 @@ class GenerateTrials:
             self.B_LaserDuration.append(0)
             self.B_SelectedCondition.append(0)
             self.CurrentLaserAmplitude = [0, 0]
+
+    def _PerformOptogenetics_Modulo(self, Channel4):
+        """Optogenetics using deterministic shifted-modulo schedule (row 1/2)."""
+        control_trial = 0
+        self.opto_error_tag = 0
+
+        try:
+            if self.TP_OptogeneticsB == "on":
+                # deterministic selection
+                self._SelectOptogeneticsCondition_Modulo()
+
+                # log session gating state (set by _CheckSessionControl inside selector)
+                self.B_session_control_state.append(self.session_control_state)
+
+                if self.SelctedCondition != 0:
+                    self.LaserOn = 1
+                    self.B_LaserOnTrial.append(self.LaserOn)
+
+                    # prepare waveform for next trial
+                    self._GetLaserWaveForm()
+
+                    self.B_SelectedCondition.append(self.SelctedCondition)
+                else:
+                    control_trial = 1
+            else:
+                control_trial = 1
+                self.B_session_control_state.append(0)
+
+            self.B_opto_error.append(self.opto_error_tag)
+
+        except Exception as e:
+            control_trial = 1
+            self.B_opto_error.append(1)
+            self.B_session_control_state.append(0)
+            logging.error(str(e))
+
+        if control_trial == 1:
+            self.LaserOn = 0
+            self.B_LaserOnTrial.append(self.LaserOn)
+            self.B_LaserAmplitude.append([0, 0])
+            self.B_LaserDuration.append(0)
+            self.B_SelectedCondition.append(0)
+            self.CurrentLaserAmplitude = [0, 0]
+
+
+    def _PerformOptogenetics_AlternatingBlocks(self, Channel4):
+        """Optogenetics using deterministic alternating blocks schedule (row 1/2)."""
+        control_trial = 0
+        self.opto_error_tag = 0
+
+        try:
+            if self.TP_OptogeneticsB == "on":
+                # deterministic selection
+                self._SelectOptogeneticsCondition_AlternatingBlocks()
+
+                # log session gating state (set by _CheckSessionControl inside selector)
+                self.B_session_control_state.append(self.session_control_state)
+
+                if self.SelctedCondition != 0:
+                    self.LaserOn = 1
+                    self.B_LaserOnTrial.append(self.LaserOn)
+
+                    # prepare waveform for next trial
+                    self._GetLaserWaveForm()
+
+                    self.B_SelectedCondition.append(self.SelctedCondition)
+                else:
+                    control_trial = 1
+            else:
+                control_trial = 1
+                self.B_session_control_state.append(0)
+
+            self.B_opto_error.append(self.opto_error_tag)
+
+        except Exception as e:
+            control_trial = 1
+            self.B_opto_error.append(1)
+            self.B_session_control_state.append(0)
+            logging.error(str(e))
+
+        if control_trial == 1:
+            self.LaserOn = 0
+            self.B_LaserOnTrial.append(self.LaserOn)
+            self.B_LaserAmplitude.append([0, 0])
+            self.B_LaserDuration.append(0)
+            self.B_SelectedCondition.append(0)
+            self.CurrentLaserAmplitude = [0, 0]
+
 
     def _CheckSessionControl(self):
         """Check if the session control is on"""
@@ -2352,6 +2447,62 @@ class GenerateTrials:
                 non_zero_indices[0][-1] + 1
             ) < float(self.TP_MinOptoInterval):
                 self.SelctedCondition = 0
+
+    def _SelectOptogeneticsCondition_Modulo(self):
+        """select Laser 1 or 2 once every X trials starting at StartTrial"""
+        # respect session-wide gating like original
+        self._CheckSessionControl()
+        if self.session_control_state == 0 and self.TP_SessionWideControl == "on":
+            self.SelctedCondition = 0
+            return
+
+        trial_num = len(self.B_SelectedCondition) + 1  # upcoming trial (1-based)
+
+        period = int(self.TP_SchedulePeriod)
+        start_trial = int(self.TP_ScheduleStartTrial)
+        start_laser = str(self.TP_ScheduleStartLaser).strip().lower()
+
+        if period <= 0 or trial_num < start_trial:
+            self.SelctedCondition = 0
+            return
+
+        hit = ((trial_num - start_trial) % period == 0)
+
+        if not hit:
+            self.SelctedCondition = 0
+            return
+
+        self.SelctedCondition = "2" if start_laser in ["505nm", "laser 2", "2", "laser_2"] else "1"
+
+
+    def _SelectOptogeneticsCondition_AlternatingBlocks(self):
+        """alternate Laser 1/2 in blocks of X trials starting at StartTrial"""
+        # respect session-wide gating like original
+        self._CheckSessionControl()
+        if self.session_control_state == 0 and self.TP_SessionWideControl == "on":
+            self.SelctedCondition = 0
+            return
+
+        trial_num = len(self.B_SelectedCondition) + 1  # upcoming trial (1-based)
+
+        block_size = int(self.TP_SchedulePeriod)
+        start_trial = int(self.TP_ScheduleStartTrial)
+        start_laser = str(self.TP_ScheduleStartLaser).strip().lower()
+
+        if block_size <= 0 or trial_num < start_trial:
+            self.SelctedCondition = 0
+            return
+
+        first = "2" if start_laser in ["505nm","laser 2", "2", "laser_2"] else "1"
+
+        idx = trial_num - start_trial          # 0 at start_trial
+        block_index = idx // block_size        # 0,1,2,...
+
+        if block_index % 2 == 0:
+            self.SelctedCondition = first
+        else:
+            self.SelctedCondition = "2" if first == "1" else "1"
+
 
     def _InitiateATrial(self, Channel1, Channel4):
         # Indicate that unsaved data exists
