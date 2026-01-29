@@ -2989,10 +2989,7 @@ class Window(QMainWindow):
                         continue
 
                     # --- validate numeric input safely ---
-                    try:
-                        print("PARSE:", type(child).__name__, child.objectName(),
-                        "text=", repr(child.text() if hasattr(child,"text") else None))
-                        
+                    try:                        
                         if isinstance(child, (QtWidgets.QSpinBox, QtWidgets.QDoubleSpinBox)):
                             new_val = child.value()  # never ""
                         else:
