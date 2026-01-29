@@ -248,7 +248,7 @@ class GenerateTrials:
         elif self.TP_OptoMode == "PdCO":
             self._PerformOptogenetics_Modulo(Channel4)
         elif self.TP_OptoMode == "Block":
-            self._PerformOptogenetics_PdCO_AlternatingBlocks(Channel4)
+            self._PerformOptogenetics_AlternatingBlocks(Channel4)
             
         # check warm up for the next trial
         self._CheckWarmUp()
@@ -2470,7 +2470,7 @@ class GenerateTrials:
             self.SelctedCondition = 0
             return
 
-        self.SelctedCondition = "2" if start_laser in ["505nm", "laser 2", "2", "laser_2"] else "1"
+        self.SelctedCondition = 2 if start_laser in ["505nm", "laser 2", "2", "laser_2"] else 1
 
 
     def _SelectOptogeneticsCondition_AlternatingBlocks(self):
@@ -2491,7 +2491,7 @@ class GenerateTrials:
             self.SelctedCondition = 0
             return
 
-        first = "2" if start_laser in ["505nm","laser 2", "2", "laser_2"] else "1"
+        first = 2 if start_laser in ["505nm","laser 2", "2", "laser_2"] else 1
 
         idx = trial_num - start_trial          # 0 at start_trial
         block_index = idx // block_size        # 0,1,2,...
@@ -2499,7 +2499,7 @@ class GenerateTrials:
         if block_index % 2 == 0:
             self.SelctedCondition = first
         else:
-            self.SelctedCondition = "2" if first == "1" else "1"
+            self.SelctedCondition = 2 if first == 1 else 1
 
 
     def _InitiateATrial(self, Channel1, Channel4):
