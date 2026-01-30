@@ -6554,6 +6554,8 @@ class Window(QMainWindow):
         stall_duration = 5 * 60
 
         logging.info(f"Starting session.")
+        logging.info("Pre-generating trial 1 parameters before trial loop")
+        GeneratedTrials._GenerateATrial(self.Channel4)
 
         while self.Start.isChecked():
             QApplication.processEvents()
