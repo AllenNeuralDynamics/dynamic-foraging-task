@@ -6622,9 +6622,6 @@ class Window(QMainWindow):
 
                 # initiate the generated trial
                 try:
-                    GeneratedTrials._InitiateATrial(
-                        self.Channel, self.Channel4
-                    )
                     #Diagnostic - JL 260130
                     t = GeneratedTrials.B_CurrentTrialN
                     logging.info(
@@ -6633,7 +6630,11 @@ class Window(QMainWindow):
                         f"len(Cond)={len(GeneratedTrials.B_SelectedCondition)} "
                         f"len(Dur)={len(GeneratedTrials.B_LaserDuration)} "
                         f"len(Amp)={len(GeneratedTrials.B_LaserAmplitude)}"
-)
+                    )
+                    GeneratedTrials._InitiateATrial(
+                        self.Channel, self.Channel4
+                    )
+
 
                 except Exception as e:
                     if "ConnectionAbortedError" in str(e):
