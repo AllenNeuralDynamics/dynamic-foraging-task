@@ -6578,22 +6578,18 @@ class Window(QMainWindow):
                     + str(GeneratedTrials.B_CurrentTrialN + 1)
                 )
 
-                #Print whether laser is on or off for this trial
-                t = GeneratedTrials.B_CurrentTrialN
-                laser_on = None 
-                cond = None
-                laser_label = "NA"
-                if hasattr(GeneratedTrials, "B_LaserOnTrial") and len(GeneratedTrials.B_LaserOnTrial) > t:
-                    laser_on = int(GeneratedTrials.B_LaserOnTrial[t])
+                # Print whether laser is on/off for the *trial params currently available*
+                if hasattr(GeneratedTrials, "B_LaserOnTrial") and len(GeneratedTrials.B_LaserOnTrial) > 0:
+                    laser_on = int(GeneratedTrials.B_LaserOnTrial[-1])
                 else:
-                    laser_on = 0  # fallback if not yet populated
-                if hasattr(GeneratedTrials, "B_SelectedCondition") and len(GeneratedTrials.B_SelectedCondition) > t:
-                    cond = int(GeneratedTrials.B_SelectedCondition[t])
+                    laser_on = 0
+
+                if hasattr(GeneratedTrials, "B_SelectedCondition") and len(GeneratedTrials.B_SelectedCondition) > 0:
+                    cond = int(GeneratedTrials.B_SelectedCondition[-1])
                 else:
                     cond = 0
 
                 if laser_on == 1:
-                    # Convention: condition 1 = Laser 1, condition 2 = Laser 2
                     if cond == 1:
                         laser_label = "Laser 1"
                     elif cond == 2:
@@ -6602,9 +6598,11 @@ class Window(QMainWindow):
                         laser_label = f"Condition {cond}"
                 else:
                     laser_label = "Control"
+
                 opto_msg = f"opto_on={laser_on} ({laser_label})"
                 print(opto_msg)
                 logging.info(opto_msg)
+
 
                 if (
                     self.GeneratedTrials.TP_AutoReward

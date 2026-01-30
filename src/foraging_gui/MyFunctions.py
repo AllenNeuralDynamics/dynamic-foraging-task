@@ -263,6 +263,9 @@ class GenerateTrials:
             if self.TP_OptogeneticsB == "on":  # optogenetics is turned on
                 # select the current optogenetics condition
                 self._SelectOptogeneticsCondition()
+
+                self.LaserOn = 1 if int(self.SelctedCondition) != 0 else 0 #enforce 260130
+
                 # session control is regarded as off when the optogenetics is turned off
                 self.B_session_control_state.append(self.session_control_state)
                 if self.SelctedCondition != 0:
@@ -302,20 +305,19 @@ class GenerateTrials:
         try:
             if self.TP_OptogeneticsB == "on":
                 self._SelectOptogeneticsCondition_Modulo()
-
+                self.LaserOn = 1 if int(self.SelctedCondition) != 0 else 0
                 # log session gating state (set by _CheckSessionControl inside selector)
                 self.B_session_control_state.append(self.session_control_state)
 
-                if self.SelctedCondition != 0:
+                if int(self.SelctedCondition) != 0:
                     self.LaserOn = 1
-                    self.B_LaserOnTrial.append(self.LaserOn)
-
-                    # prepare waveform for next trial
                     self._GetLaserWaveForm()
 
-                    self.B_SelectedCondition.append(self.SelctedCondition)
+                    self.B_LaserOnTrial.append(1)
+                    self.B_SelectedCondition.append(int(self.SelctedCondition))
                 else:
                     control_trial = 1
+
             else:
                 control_trial = 1
                 self.B_session_control_state.append(0)
@@ -345,20 +347,19 @@ class GenerateTrials:
         try:
             if self.TP_OptogeneticsB == "on":
                 self._SelectOptogeneticsCondition_AlternatingBlocks()
-
+                self.LaserOn = 1 if int(self.SelctedCondition) != 0 else 0
                 # log session gating state (set by _CheckSessionControl inside selector)
                 self.B_session_control_state.append(self.session_control_state)
 
-                if self.SelctedCondition != 0:
+                if int(self.SelctedCondition) != 0:
                     self.LaserOn = 1
-                    self.B_LaserOnTrial.append(self.LaserOn)
-
-                    # prepare waveform for next trial
                     self._GetLaserWaveForm()
 
-                    self.B_SelectedCondition.append(self.SelctedCondition)
+                    self.B_LaserOnTrial.append(1)
+                    self.B_SelectedCondition.append(int(self.SelctedCondition))
                 else:
                     control_trial = 1
+
             else:
                 control_trial = 1
                 self.B_session_control_state.append(0)
