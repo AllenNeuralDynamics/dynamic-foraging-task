@@ -245,9 +245,9 @@ class GenerateTrials:
 
         if self.TP_OptoMode == "Original":
             self._PerformOptogenetics(Channel4)
-        elif self.TP_OptoMode == "PdCO":
+        elif self.TP_OptoMode == "PdCO 1":
             self._PerformOptogenetics_Modulo(Channel4)
-        elif self.TP_OptoMode == "Block":
+        elif self.TP_OptoMode == "PdCO Block":
             self._PerformOptogenetics_AlternatingBlocks(Channel4)
             
         # check warm up for the next trial
