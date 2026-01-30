@@ -6554,8 +6554,6 @@ class Window(QMainWindow):
         stall_duration = 5 * 60
 
         logging.info(f"Starting session.")
-        logging.info("Pre-generating trial 1 parameters before trial loop")
-        GeneratedTrials._GenerateATrial(self.Channel4)
 
         while self.Start.isChecked():
             QApplication.processEvents()
@@ -6624,19 +6622,9 @@ class Window(QMainWindow):
 
                 # initiate the generated trial
                 try:
-                    #Diagnostic - JL 260130
-                    t = GeneratedTrials.B_CurrentTrialN
-                    logging.info(
-                        f"ABOUT TO INITIATE trial_idx={t} "
-                        f"len(LaserOn)={len(GeneratedTrials.B_LaserOnTrial)} "
-                        f"len(Cond)={len(GeneratedTrials.B_SelectedCondition)} "
-                        f"len(Dur)={len(GeneratedTrials.B_LaserDuration)} "
-                        f"len(Amp)={len(GeneratedTrials.B_LaserAmplitude)}"
-                    )
                     GeneratedTrials._InitiateATrial(
                         self.Channel, self.Channel4
                     )
-
 
                 except Exception as e:
                     if "ConnectionAbortedError" in str(e):
