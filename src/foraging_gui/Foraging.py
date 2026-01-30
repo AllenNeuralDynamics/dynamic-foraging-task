@@ -6625,6 +6625,16 @@ class Window(QMainWindow):
                     GeneratedTrials._InitiateATrial(
                         self.Channel, self.Channel4
                     )
+                    #Diagnostic - JL 260130
+                    t = GeneratedTrials.B_CurrentTrialN
+                    logging.info(
+                        f"ABOUT TO INITIATE trial_idx={t} "
+                        f"len(LaserOn)={len(GeneratedTrials.B_LaserOnTrial)} "
+                        f"len(Cond)={len(GeneratedTrials.B_SelectedCondition)} "
+                        f"len(Dur)={len(GeneratedTrials.B_LaserDuration)} "
+                        f"len(Amp)={len(GeneratedTrials.B_LaserAmplitude)}"
+)
+
                 except Exception as e:
                     if "ConnectionAbortedError" in str(e):
                         logging.info("lost bonsai connection: InitiateATrial")
