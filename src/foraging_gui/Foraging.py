@@ -6578,14 +6578,20 @@ class Window(QMainWindow):
                     + str(GeneratedTrials.B_CurrentTrialN + 1)
                 )
 
+                t = GeneratedTrials.B_CurrentTrialN
+                t_last = len(getattr(GeneratedTrials, "B_LaserOnTrial", [])) - 1
+                logging.info(f"t_exec={t} t_last_generated={t_last}") #Check to see if indexing behind
+                laser_on = 0
+                cond = 0
+
                 # Print whether laser is on/off for the *trial params currently available*
-                if hasattr(GeneratedTrials, "B_LaserOnTrial") and len(GeneratedTrials.B_LaserOnTrial) > 0:
-                    laser_on = int(GeneratedTrials.B_LaserOnTrial[-1])
+                if hasattr(GeneratedTrials, "B_LaserOnTrial") and len(GeneratedTrials.B_LaserOnTrial) > t:
+                    laser_on = int(GeneratedTrials.B_LaserOnTrial[t])
                 else:
                     laser_on = 0
 
-                if hasattr(GeneratedTrials, "B_SelectedCondition") and len(GeneratedTrials.B_SelectedCondition) > 0:
-                    cond = int(GeneratedTrials.B_SelectedCondition[-1])
+                if hasattr(GeneratedTrials, "B_SelectedCondition") and len(GeneratedTrials.B_SelectedCondition) > t:
+                    cond = int(GeneratedTrials.B_SelectedCondition[t])
                 else:
                     cond = 0
 
