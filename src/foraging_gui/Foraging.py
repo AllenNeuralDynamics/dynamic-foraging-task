@@ -2935,7 +2935,11 @@ class Window(QMainWindow):
                         "laser_2_calibration_power",
                         "laser_1_calibration_voltage",
                         "laser_2_calibration_voltage",
-                        "hab_time_box"
+                        "hab_time_box",
+                        "min_reward_randomwalk",
+                        "max_reward_randomwalk",
+                        "sigma_randomwalk",
+                        "mean_randomwalk"
                     }:
                         continue
                     if child.objectName() == "UncoupledReward":
@@ -3110,6 +3114,10 @@ class Window(QMainWindow):
                             "laser_2_calibration_power",
                             "laser_1_calibration_voltage",
                             "laser_2_calibration_voltage",
+                            "min_reward_randomwalk",
+                            "max_reward_randomwalk",
+                            "sigma_randomwalk",
+                            "mean_randomwalk"
                         }:
                             child.setStyleSheet(
                                 f"color: {self.default_text_color};"
