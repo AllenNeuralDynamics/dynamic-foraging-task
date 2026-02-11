@@ -2283,7 +2283,7 @@ Double dipping:
                <widget class="QWidget" name="scrollAreaWidgetContents_2">
                 <property name="geometry">
                  <rect>
-                  <x>0</x>
+                  <x>-321</x>
                   <y>-71</y>
                   <width>952</width>
                   <height>412</height>
@@ -4463,6 +4463,48 @@ Double dipping:
                         <property name="alignment">
                          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                         </property>
+                       </widget>
+                      </item>
+                      <item row="15" column="14">
+                       <widget class="QLabel" name="label_122">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="text">
+                         <string>baiting=</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::AutoText</enum>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="15" column="15">
+                       <widget class="QComboBox" name="baiting_random_walk">
+                        <property name="enabled">
+                         <bool>true</bool>
+                        </property>
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <item>
+                         <property name="text">
+                          <string>off</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>on</string>
+                         </property>
+                        </item>
                        </widget>
                       </item>
                      </layout>

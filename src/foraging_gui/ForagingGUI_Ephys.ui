@@ -2877,6 +2877,31 @@
       <enum>Qt::AutoText</enum>
      </property>
     </widget>
+    <widget class="QLabel" name="label_122">
+     <property name="geometry">
+      <rect>
+       <x>990</x>
+       <y>340</y>
+       <width>84</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>baiting=</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
    </widget>
    <widget class="QPushButton" name="Load">
     <property name="geometry">
@@ -4762,6 +4787,35 @@
      </item>
     </layout>
    </widget>
+   <widget class="QComboBox" name="baiting_random_walk">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>1090</x>
+      <y>850</y>
+      <width>80</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <item>
+     <property name="text">
+      <string>off</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>on</string>
+     </property>
+    </item>
+   </widget>
    <zorder>hab_time_box</zorder>
    <zorder>TrainingParameters</zorder>
    <zorder>StartFIP</zorder>
@@ -4800,6 +4854,7 @@
    <zorder>DiskSpaceProgreeBar</zorder>
    <zorder>diskspace</zorder>
    <zorder>motor_stage_widget</zorder>
+   <zorder>baiting_random_walk</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
