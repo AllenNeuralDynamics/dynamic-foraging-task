@@ -2434,7 +2434,7 @@ class GenerateTrials:
         RandomNumber = np.random.random(2)
         self.B_CurrentRewardProbRandomNumber.append(RandomNumber)
         self.CurrentBait = self.B_CurrentRewardProb > RandomNumber
-        if self.TP_Task in ["Coupled Baiting", "Uncoupled Baiting"]:
+        if (self.TP_Task in ["Coupled Baiting", "Uncoupled Baiting"]) or (self.TP_baiting_random_walk == "on" and self.TP_Task == "Random Walk"):
             self.CurrentBait = self.CurrentBait | self.B_Baited
         # For task rewardN, if this is the "initial N trials" of the active side, no bait will be be given.
         if self.BaitPermitted == False:
