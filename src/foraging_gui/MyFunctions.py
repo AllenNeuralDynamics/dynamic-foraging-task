@@ -1,4 +1,5 @@
 import logging
+import re
 import math
 import random
 import sys
@@ -16,6 +17,7 @@ from serial import Serial
 from serial.tools.list_ports import comports as list_comports
 
 from foraging_gui.reward_schedules.uncoupled_block import UncoupledBlocks
+from foraging_gui.reward_schedules.random_walk import RandomWalkReward
 from aind_dynamic_foraging_basic_analysis import compute_foraging_efficiency
 
 if PLATFORM == "win32":
@@ -157,7 +159,9 @@ class GenerateTrials:
         # to decide if it's an auto water trial. will give water in _GetAnimalResponse
         self._CheckAutoWater()
 
-        # --- Handle reward schedule ---
+        # -------------------------------------------------------------------
+        # Updated task logic with Random Walk integrated
+        # -------------------------------------------------------------------
         if self.TP_Task in [
             "Coupled Baiting",
             "Coupled Without Baiting",
@@ -169,56 +173,119 @@ class GenerateTrials:
             if any(self.B_ANewBlock == 1):
                 # assign the next block's reward prob to self.B_CurrentRewardProb
                 self._generate_next_coupled_block()
+
         elif self.TP_Task in [
             "Uncoupled Baiting",
             "Uncoupled Without Baiting",
+            "Random Walk",
         ]:
-            # -- Use Han's standalone class --
-            if self.B_CurrentTrialN == -1 or not hasattr(
-                self, "uncoupled_blocks"
-            ):  # Or the user start uncoupled in the midde of the session
-                # Get uncoupled task settings
-                self.RewardProbPoolUncoupled = (
-                    self._get_uncoupled_reward_prob_pool()
+            # ============================================================
+            # Random Walk
+            # ============================================================
+            if self.TP_Task == "Random Walk":
+                if self.B_CurrentTrialN == -1 or not hasattr(self, "random_walk_reward"):
+                    # Parse parameters (expected to be strings, but parser is robust)
+                    p_min = parse_lr_param_string(
+                        self.TP_min_reward_randomwalk,
+                        name="TP_min_reward_randomwalk",
+                    )
+                    p_max = parse_lr_param_string(
+                        self.TP_max_reward_randomwalk,
+                        name="TP_max_reward_randomwalk",
+                    )
+                    sigma = parse_lr_param_string(
+                        self.TP_sigma_randomwalk,
+                        name="TP_sigma_randomwalk",
+                    )
+                    mean = parse_lr_param_string(
+                        self.TP_mean_randomwalk,
+                        name="TP_mean_randomwalk",
+                    )
+
+                    # Optional safety clamps (comment out if you want raw behavior)
+                    p_min = clamp_lr(p_min, lo=0.0, hi=1.0, name="p_min")
+                    p_max = clamp_lr(p_max, lo=0.0, hi=1.0, name="p_max")
+                    sigma = clamp_lr(sigma, lo=0.0, hi=10.0, name="sigma")  # sigma must be >= 0
+
+                    # Basic consistency check
+                    if any(pm > px for pm, px in zip(p_min, p_max)):
+                        raise ValueError(
+                            f"Random Walk requires p_min <= p_max per side. Got p_min={p_min}, p_max={p_max}."
+                        )
+
+                    # Initialize RandomWalkReward.
+                    # IMPORTANT: RandomWalkReward.first_trial() is called inside __init__()
+                    # so trial 0 already exists after construction. Do NOT call next_trial() here.
+                    self.random_walk_reward = RandomWalkReward(
+                        p_min=p_min,
+                        p_max=p_max,
+                        sigma=sigma,
+                        mean=mean,
+                    )
+                    msg_uncoupled_block = ""
+                else:
+                    # Add animal's last choice (optional bookkeeping)
+                    self.random_walk_reward.add_choice(
+                        ["L", "R", "ignored"][int(self.B_AnimalResponseHistory[-1])]
+                    )
+                    self.random_walk_reward.next_trial()
+                    msg_uncoupled_block = ""
+
+                # Update current reward probabilities
+                for i, side in enumerate(["L", "R"]):
+                    self.B_CurrentRewardProb[i] = self.random_walk_reward.trial_rwd_prob[side][-1]
+
+                # Random walk does not have blocks; keep BlockLenHistory explicit
+                self.BlockLenHistory[0] = [np.nan]
+                self.BlockLenHistory[1] = [np.nan]
+
+                # Log (empty msg is fine; keep consistent API)
+                logging.warning(
+                    msg_uncoupled_block,
+                    extra={"tags": [self.win.warning_log_tag]},
                 )
 
-                # Initialize the UncoupledBlocks object and generate the first trial
-                self.uncoupled_blocks = UncoupledBlocks(
-                    rwd_prob_array=self.RewardProbPoolUncoupled,
-                    block_min=int(self.TP_BlockMin),
-                    block_max=int(self.TP_BlockMax),
-                    persev_add=True,  # Hard-coded to True for now
-                    perseverative_limit=4,  # Hard-coded to 4 for now
-                    max_block_tally=3,  # Hard-coded to 3 for now
-                )
-                _, msg_uncoupled_block = self.uncoupled_blocks.next_trial()
+            # ============================================================
+            # Uncoupled blocks (your existing logic)
+            # ============================================================
             else:
-                # Add animal's last choice and generate the next trial
-                self.uncoupled_blocks.add_choice(
-                    ["L", "R", "ignored"][
-                        int(self.B_AnimalResponseHistory[-1])
-                    ]
-                )
-                _, msg_uncoupled_block = self.uncoupled_blocks.next_trial()
+                # -- Use Han's standalone class --
+                if self.B_CurrentTrialN == -1 or not hasattr(self, "uncoupled_blocks"):
+                    # Get uncoupled task settings
+                    self.RewardProbPoolUncoupled = self._get_uncoupled_reward_prob_pool()
 
-            # Extract parameters from the UncoupledBlocks object
-            for i, side in enumerate(["L", "R"]):
-                # Update self.B_CurrentRewardProb from trial_rwd_prob
-                self.B_CurrentRewardProb[i] = (
-                    self.uncoupled_blocks.trial_rwd_prob[side][-1]
-                )
+                    # Initialize the UncoupledBlocks object and generate the first trial
+                    self.uncoupled_blocks = UncoupledBlocks(
+                        rwd_prob_array=self.RewardProbPoolUncoupled,
+                        block_min=int(self.TP_BlockMin),
+                        block_max=int(self.TP_BlockMax),
+                        persev_add=True,             # Hard-coded to True for now
+                        perseverative_limit=4,       # Hard-coded to 4 for now
+                        max_block_tally=3,           # Hard-coded to 3 for now
+                    )
+                    _, msg_uncoupled_block = self.uncoupled_blocks.next_trial()
+                else:
+                    # Add animal's last choice and generate the next trial
+                    self.uncoupled_blocks.add_choice(
+                        ["L", "R", "ignored"][int(self.B_AnimalResponseHistory[-1])]
+                    )
+                    _, msg_uncoupled_block = self.uncoupled_blocks.next_trial()
 
-                # Update self.BlockLenHistory from diff(block_ends)
-                # Note we don't need override_block_len here since all
-                # overrides are handled by the UncoupledBlocks object
-                self.BlockLenHistory[i] = list(
-                    np.diff([0] + self.uncoupled_blocks.block_ends[side])
-                )
+                # Extract parameters from the UncoupledBlocks object
+                for i, side in enumerate(["L", "R"]):
+                    # Update self.B_CurrentRewardProb from trial_rwd_prob
+                    self.B_CurrentRewardProb[i] = self.uncoupled_blocks.trial_rwd_prob[side][-1]
 
-            # Show msg
-            logging.warning(
-                msg_uncoupled_block, extra={"tags": [self.win.warning_log_tag]}
-            )
+                    # Update self.BlockLenHistory from diff(block_ends)
+                    self.BlockLenHistory[i] = list(
+                        np.diff([0] + self.uncoupled_blocks.block_ends[side])
+                    )
+
+                # Show msg
+                logging.warning(
+                    msg_uncoupled_block,
+                    extra={"tags": [self.win.warning_log_tag]},
+                )
 
         # Append the (updated) current reward probability to the history
         self.B_RewardProHistory = np.append(
@@ -248,6 +315,9 @@ class GenerateTrials:
         # finish to generate the next trial
         self.GeneFinish = 1
 
+
+    
+    
     def _PerformOptogenetics(self, Channel4):
         """Optogenetics section to generate optogenetics parameters and send waveform to Bonsai"""
         control_trial = 0
@@ -3313,3 +3383,42 @@ class EphysRecording:
         r = requests.get(self.api_endpoint + "recording")
 
         return r.json()
+    
+
+def parse_lr_param_string(x: str, *, name: str) -> list[float]:
+    """
+    Robustly parse a string into [L, R].
+
+    Intended to be error-tolerant for messy inputs like:
+        "0,0"
+        "[0,0"
+        "0,0]"
+        "[0,0]"
+        "[0,0\n0,0]"
+        "abc[0.1, 0.9]xyz"
+
+    Strategy:
+    - Extract numeric tokens with regex
+    - Use the first two numbers as [L, R]
+    """
+    if x is None:
+        raise ValueError(f"{name} is None")
+    if not isinstance(x, str):
+        x = str(x)
+
+    nums = re.findall(r"-?\d+(?:\.\d+)?", x)
+    if len(nums) < 2:
+        raise ValueError(
+            f"{name} must contain at least two numeric values (L,R). Got: {x!r}"
+        )
+    return [float(nums[0]), float(nums[1])]
+
+
+def clamp_lr(vals: list[float], *, lo: float, hi: float, name: str) -> list[float]:
+    """
+    Clamp [L, R] into [lo, hi].
+    """
+    out = [min(hi, max(lo, float(v))) for v in vals]
+    if out != vals:
+        logging.warning(f"{name} clamped from {vals} to {out}")
+    return out
