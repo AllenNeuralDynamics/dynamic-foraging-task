@@ -71,8 +71,8 @@
      <rect>
       <x>650</x>
       <y>20</y>
-      <width>152</width>
-      <height>20</height>
+      <width>118</width>
+      <height>19</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -118,6 +118,11 @@
       <string>RewardN</string>
      </property>
     </item>
+    <item>
+     <property name="text">
+      <string>Random Walk</string>
+     </property>
+    </item>
    </widget>
    <widget class="Line" name="line_2">
     <property name="geometry">
@@ -147,7 +152,7 @@
       <x>10</x>
       <y>510</y>
       <width>1191</width>
-      <height>331</height>
+      <height>371</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -2305,7 +2310,7 @@
       </sizepolicy>
      </property>
      <property name="value">
-      <double>.8</double>
+      <double>0.800000000000000</double>
      </property>
     </widget>
     <widget class="QLabel" name="label_62">
@@ -2674,6 +2679,204 @@
       <bool>true</bool>
      </property>
     </widget>
+    <widget class="QLabel" name="label_67">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>340</y>
+       <width>91</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>min reward pro=</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="min_reward_randomwalk">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>340</y>
+       <width>81</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>0,0</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_119">
+     <property name="geometry">
+      <rect>
+       <x>280</x>
+       <y>340</y>
+       <width>115</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>max reward pro=</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="max_reward_randomwalk">
+     <property name="geometry">
+      <rect>
+       <x>400</x>
+       <y>340</y>
+       <width>81</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>1,1</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="mean_randomwalk">
+     <property name="geometry">
+      <rect>
+       <x>860</x>
+       <y>340</y>
+       <width>81</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>0,0</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="sigma_randomwalk">
+     <property name="geometry">
+      <rect>
+       <x>615</x>
+       <y>340</y>
+       <width>81</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>0.15,0.15</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_121">
+     <property name="geometry">
+      <rect>
+       <x>770</x>
+       <y>340</y>
+       <width>84</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>mean=</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_120">
+     <property name="geometry">
+      <rect>
+       <x>530</x>
+       <y>340</y>
+       <width>81</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>sigma=</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_66">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>340</y>
+       <width>63</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Random walk:</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+    </widget>
    </widget>
    <widget class="QPushButton" name="Load">
     <property name="geometry">
@@ -2784,17 +2987,17 @@
     <property name="styleSheet">
      <string notr="true"/>
     </property>
-    <property name="minimum">
-      <number>0</number>
-     </property>
-     <property name="maximum">
-      <number>90</number>
-     </property>
-     <property name="suffix">
+    <property name="suffix">
      <string> min</string>
-      </property>
-     <property name="prefix">
+    </property>
+    <property name="prefix">
      <string> Habituation: </string>
+    </property>
+    <property name="minimum">
+     <number>0</number>
+    </property>
+    <property name="maximum">
+     <number>90</number>
     </property>
    </widget>
    <widget class="QPushButton" name="NewSession">
@@ -3081,7 +3284,7 @@
     <property name="geometry">
      <rect>
       <x>90</x>
-      <y>860</y>
+      <y>890</y>
       <width>80</width>
       <height>20</height>
      </rect>
@@ -3107,7 +3310,7 @@
     <property name="geometry">
      <rect>
       <x>3</x>
-      <y>860</y>
+      <y>890</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -3737,7 +3940,7 @@
     <property name="geometry">
      <rect>
       <x>2</x>
-      <y>900</y>
+      <y>930</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -3762,7 +3965,7 @@
     <property name="geometry">
      <rect>
       <x>89</x>
-      <y>900</y>
+      <y>930</y>
       <width>80</width>
       <height>20</height>
      </rect>
@@ -3788,7 +3991,7 @@
     <property name="geometry">
      <rect>
       <x>183</x>
-      <y>900</y>
+      <y>930</y>
       <width>101</width>
       <height>20</height>
      </rect>
@@ -3813,7 +4016,7 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>900</y>
+      <y>930</y>
       <width>80</width>
       <height>20</height>
      </rect>
@@ -3832,7 +4035,7 @@
     <property name="geometry">
      <rect>
       <x>380</x>
-      <y>900</y>
+      <y>930</y>
       <width>100</width>
       <height>20</height>
      </rect>
@@ -3854,7 +4057,7 @@
     <property name="geometry">
      <rect>
       <x>500</x>
-      <y>900</y>
+      <y>930</y>
       <width>100</width>
       <height>20</height>
      </rect>
@@ -3876,7 +4079,7 @@
     <property name="geometry">
      <rect>
       <x>620</x>
-      <y>900</y>
+      <y>930</y>
       <width>100</width>
       <height>20</height>
      </rect>
@@ -3898,7 +4101,7 @@
     <property name="geometry">
      <rect>
       <x>710</x>
-      <y>900</y>
+      <y>930</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -3923,7 +4126,7 @@
     <property name="geometry">
      <rect>
       <x>795</x>
-      <y>900</y>
+      <y>930</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -3975,7 +4178,7 @@
     <property name="geometry">
      <rect>
       <x>830</x>
-      <y>830</y>
+      <y>860</y>
       <width>371</width>
       <height>81</height>
      </rect>
@@ -4014,7 +4217,7 @@
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>858</y>
+      <y>888</y>
       <width>131</width>
       <height>25</height>
      </rect>
@@ -4030,7 +4233,7 @@
     <property name="geometry">
      <rect>
       <x>400</x>
-      <y>860</y>
+      <y>890</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -4055,7 +4258,7 @@
     <property name="geometry">
      <rect>
       <x>490</x>
-      <y>860</y>
+      <y>890</y>
       <width>131</width>
       <height>20</height>
      </rect>
@@ -4559,6 +4762,7 @@
      </item>
     </layout>
    </widget>
+   <zorder>hab_time_box</zorder>
    <zorder>TrainingParameters</zorder>
    <zorder>StartFIP</zorder>
    <zorder>FIPMode</zorder>
@@ -4603,7 +4807,7 @@
      <x>0</x>
      <y>0</y>
      <width>1951</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
    <property name="sizePolicy">
