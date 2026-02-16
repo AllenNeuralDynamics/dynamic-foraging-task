@@ -77,56 +77,71 @@ class RandomWalkReward:
         acorr = acorr / var / len(ndata)
         return acorr
 
-    def plot_reward_schedule(self):
-        fig, ax = plt.subplots(
-            2,
-            2,
-            figsize=[15, 7],
-            sharex="col",
-            gridspec_kw=dict(width_ratios=[4, 1], wspace=0.1),
-        )
+    def plot_reward_schedule(self, axes=None):
+        MAX_TRIALS = 1000
+        standalone = axes is None
+
+        if standalone:
+            fig, axes = plt.subplot_mosaic(
+                [["history", "autocorr"], ["sum", "autocorr"]],
+                figsize=[15, 4],
+                gridspec_kw=dict(width_ratios=[4, 1], hspace=0.1, wspace=0.2),
+            )
+            axes["sum"].sharex(axes["history"])
 
         for s, col in zip(["L", "R"], ["r", "b"]):
-            ax[0, 0].plot(
-                self.trial_rwd_prob[s], col, marker=".", alpha=0.5, lw=2
+            axes["history"].plot(
+                self.trial_rwd_prob[s][:MAX_TRIALS], col, marker=".", alpha=0.5, lw=2
             )
-            ax[0, 1].plot(self.auto_corr(self.trial_rwd_prob[s]), col)
+            axes["autocorr"].plot(self.auto_corr(self.trial_rwd_prob[s]), col)
 
-        ax[1, 0].plot(
-            np.array(self.trial_rwd_prob["L"])
-            + np.array(self.trial_rwd_prob["R"]),
-            label="sum",
-        )
-        ax[1, 0].plot(
-            np.array(self.trial_rwd_prob["R"])
-            / (
-                np.array(self.trial_rwd_prob["L"])
-                + np.array(self.trial_rwd_prob["R"])
-            ),
-            label="R/(L+R)",
-        )
-        ax[1, 0].legend()
+        p_l = np.array(self.trial_rwd_prob["L"])[:MAX_TRIALS]
+        p_r = np.array(self.trial_rwd_prob["R"])[:MAX_TRIALS]
+        axes["sum"].plot(p_l + p_r, label="sum")
+        axes["sum"].plot(p_r / (p_l + p_r), label="R/(L+R)")
+        axes["sum"].legend()
 
-        ax[0, 1].set(title="auto correlation", xlim=[0, 100])
-        ax[0, 1].axhline(y=0, c="k", ls="--")
+        axes["autocorr"].set(title=f"auto correlation from {self.trial_now-1} trials", xlim=[0, 100])
+        axes["autocorr"].axhline(y=0, c="k", ls="--")
+        axes["autocorr"].set_box_aspect(1)
+        axes["history"].set_title(f"sigma = {self.sigma}", loc="left")
 
-        plt.show()
+        if standalone:
+            plt.show()
 
 
 if __name__ == "__main__":
-    total_trial = 1000
+    total_trial = 10000
+    sigmas = [0.05, 0.1, 0.15]
 
-    reward_schedule = RandomWalkReward(
-        p_min=[0.1, 0.1], p_max=0.9, sigma=[0.1, 0.1], mean=[-0.0, 0.0]
+    mosaic_layout = []
+    for i in range(len(sigmas)):
+        mosaic_layout += [[f"h{i}", f"a{i}"], [f"s{i}", f"a{i}"]]
+
+    fig, ax = plt.subplot_mosaic(
+        mosaic_layout,
+        figsize=[15, 4 * len(sigmas)],
+        gridspec_kw=dict(width_ratios=[4, 1], hspace=0.3, wspace=0.2),
     )
 
-    while reward_schedule.trial_now <= total_trial:
-        reward_schedule.next_trial()
-        """
-        run protocol here
-        """
+    for i, sigma in enumerate(sigmas):
+        reward_schedule = RandomWalkReward(
+            p_min=[0.1, 0.1], p_max=0.9, sigma=[sigma, sigma], mean=[-0.0, 0.0]
+        )
+        while reward_schedule.trial_now <= total_trial:
+            reward_schedule.next_trial()
 
-    reward_schedule.plot_reward_schedule()
+        axes = {"history": ax[f"h{i}"], "sum": ax[f"s{i}"], "autocorr": ax[f"a{i}"]}
+        ax[f"s{i}"].sharex(ax[f"h{i}"])
+        if i > 0:
+            ax[f"h{i}"].sharex(ax["h0"])
+        reward_schedule.plot_reward_schedule(axes=axes)
 
-    pass
+    # Hide x tick labels on all left-column axes except the bottom sum panel
+    for i in range(len(sigmas)):
+        ax[f"h{i}"].tick_params(labelbottom=False)
+        if i < len(sigmas) - 1:
+            ax[f"s{i}"].tick_params(labelbottom=False)
+
+    plt.show()
     # %%
