@@ -4,9 +4,12 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.IO;
+using CsvHelper;
+using System.Globalization;
 
 [Combinator]
-[Description("Parses lines, splitting at the first comma.")]
+[Description("Parses CSV synchronously.")]
 [WorkflowElementCategory(ElementCategory.Transform)]
 public class ParseSettingCsv
 {
@@ -14,22 +17,21 @@ public class ParseSettingCsv
     {
         return source.Select(value =>
         {
-            // split into lines
-            var lines = value.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            
-            var settings = new Dictionary<string, string>();
-            foreach (var line in lines)
+           var settings = new Dictionary<string, string>();
+
+            using (var reader = new StringReader(value))
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
             {
-                int commaIndex = line.IndexOf(',');
-                if (commaIndex >= 0)    // skip if no comma in line
+                while (csv.Read())
                 {
-                    string key = line.Substring(0, commaIndex);
-                    string val = line.Substring(commaIndex + 1);
+                    var key = csv.GetField(0);
+                    var val = csv.GetField(1);
                     settings[key] = val;
                 }
             }
 
             return settings;
+
         });
     }
 }
