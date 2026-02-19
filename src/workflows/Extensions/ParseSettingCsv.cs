@@ -17,7 +17,7 @@ public class ParseSettingCsv
     {
         return source.Select(value =>
         {
-           var settings = new Dictionary<string, string>();
+            var settings = new Dictionary<string, string>();
 
             using (var reader = new StringReader(value))
             using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
