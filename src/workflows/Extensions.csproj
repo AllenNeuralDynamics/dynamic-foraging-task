@@ -10,6 +10,7 @@
     <PackageReference Include="Bonsai.Osc" Version="2.7.0" />
     <PackageReference Include="Bonsai.DAQmx" Version="0.2.1-alpha1" />
     <PackageReference Include="Bonsai.Vision.Design" Version="2.7.0" />
+    <PackageReference Include="CsvHelper" Version="27.2.1" />
   </ItemGroup>
 
 </Project>
