@@ -1,4 +1,4 @@
-# Dynamic Foraging Task
+# Dynamic Foraging Task  
 
 A [Bonsai](https://bonsai-rx.org/) workflow for lick-based foraging experiments, with a [PyQt](https://wiki.python.org/moin/PyQt) frontend for visualizing performance and modifying task parameters.
 
