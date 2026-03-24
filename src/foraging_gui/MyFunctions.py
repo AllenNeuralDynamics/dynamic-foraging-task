@@ -500,7 +500,7 @@ class GenerateTrials:
         if self.TP_Randomness == "Exponential":
             self.BlockLen = np.array(
                 int(
-                    np.random.exponential(float(self.TP_BlockBeta), 1)
+                    np.random.exponential(float(self.TP_BlockBeta))
                     + float(self.TP_BlockMin)
                 )
             )
@@ -520,7 +520,7 @@ class GenerateTrials:
         # get the ITI time and delay time
         if self.TP_Randomness == "Exponential":
             self.CurrentITI = float(
-                np.random.exponential(float(self.TP_ITIBeta), 1)
+                np.random.exponential(float(self.TP_ITIBeta))
                 + float(self.TP_ITIMin)
             )
         elif self.TP_Randomness == "Even":
@@ -531,7 +531,7 @@ class GenerateTrials:
             self.CurrentITI = float(self.TP_ITIMax)
         if self.TP_Randomness == "Exponential":
             self.CurrentDelay = float(
-                np.random.exponential(float(self.TP_DelayBeta), 1)
+                np.random.exponential(float(self.TP_DelayBeta))
                 + float(self.TP_DelayMin)
             )
         elif self.TP_Randomness == "Even":
