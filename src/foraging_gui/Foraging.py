@@ -7331,9 +7331,10 @@ class Window(QMainWindow):
 
 def get_user_email(username: str) -> str:
     domain = ms_active_directory.ADDomain("corp.alleninstitute.org")
+    domain_username = getpass.getuser()
     session = domain.create_session_as_user(
-        "svc_mpe",
-        authentication_mechanism=ldap3.ASL,
+        domain_username,
+        authentication_mechanism=ldap3.SASL,
         sasl_mechanism=ldap3.GSSAPI,
     )
 
