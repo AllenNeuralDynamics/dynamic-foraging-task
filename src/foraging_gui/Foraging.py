@@ -1829,7 +1829,7 @@ class Window(QMainWindow):
     def parse_setting_csv_file(self, csv_file: str) -> dict:
         with open(csv_file, newline='') as csvfile:
             reader = csv.reader(csvfile)
-        return {rows[0]:rows[1] for rows in reader}
+            return {rows[0]:rows[1] for rows in reader}
 
     def _GetSettings(self):
         """
