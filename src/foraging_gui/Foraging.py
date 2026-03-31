@@ -7277,7 +7277,7 @@ class Window(QMainWindow):
 
             # Determine sci email
             sci = self._GetInfoFromSchedule(self.behavior_session_model.subject, "PI")
-            sci_email = None if not sci else get_user_email(sci)
+            sci_email = "svc_aind_behavior@alleninstitute.org" if not sci else get_user_email(sci)
 
             # Define contents of manifest file
             contents = {
