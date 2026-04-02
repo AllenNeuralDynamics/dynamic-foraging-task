@@ -88,6 +88,8 @@ from foraging_gui.Visualization import (
     PlotV,
 )
 from foraging_gui.warning_widget import WarningWidget
+import csv
+
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear()  # clear handlers so console output can be configured
@@ -1824,17 +1826,11 @@ class Window(QMainWindow):
             )
             return []
 
-    def parse_setting_csv_file(self, csv_file) -> dict:
-        settings = {}
-        with open(csv_file, 'r', encoding='utf-8') as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                if ',' in line:
-                    key, value = line.split(',', 1)
-                    settings[key.strip()] = value.strip()
-        return settings
+    def parse_setting_csv_file(self, csv_file: str) -> dict:
+        with open(csv_file, newline='') as csvfile:
+            reader = csv.reader(csvfile)
+            return {rows[0]:rows[1] for rows in reader}
+
     def _GetSettings(self):
         """
         Load the settings that are specific to this computer
