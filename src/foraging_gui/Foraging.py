@@ -88,6 +88,8 @@ from foraging_gui.Visualization import (
     PlotV,
 )
 from foraging_gui.warning_widget import WarningWidget
+import csv
+
 
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear()  # clear handlers so console output can be configured
@@ -1824,17 +1826,11 @@ class Window(QMainWindow):
             )
             return []
 
-    def parse_setting_csv_file(self, csv_file) -> dict:
-        settings = {}
-        with open(csv_file, 'r', encoding='utf-8') as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                if ',' in line:
-                    key, value = line.split(',', 1)
-                    settings[key.strip()] = value.strip()
-        return settings
+    def parse_setting_csv_file(self, csv_file: str) -> dict:
+        with open(csv_file, newline='') as csvfile:
+            reader = csv.reader(csvfile)
+            return {rows[0]:rows[1] for rows in reader}
+
     def _GetSettings(self):
         """
         Load the settings that are specific to this computer
@@ -7275,6 +7271,10 @@ class Window(QMainWindow):
                     self.VideoFolder.replace("\\", "/")
                 ]
 
+            # Determine sci email
+            sci = self._GetInfoFromSchedule(self.behavior_session_model.subject, "PI")
+            sci_email = "svc_aind_behavior@alleninstitute.org" if not sci else get_user_email(sci)
+
             # Define contents of manifest file
             contents = {
                 "acquisition_datetime": self.behavior_session_model.date,
@@ -7299,6 +7299,7 @@ class Window(QMainWindow):
                 "schedule_time": schedule_time,
                 "project_name": self.Metadata_dialog.ProjectName.currentText(),
                 "script": {},
+                "user_email": sci_email 
             }
 
             # Define filename of manifest
@@ -7323,6 +7324,21 @@ class Window(QMainWindow):
                 "Could not generate upload manifest. "
                 + "Please alert the mouse owner, and report on github.",
             )
+
+def get_user_email(username: str) -> str:
+    domain = ms_active_directory.ADDomain("corp.alleninstitute.org")
+    domain_username = getpass.getuser()
+    session = domain.create_session_as_user(
+        domain_username,
+        authentication_mechanism=ldap3.SASL,
+        sasl_mechanism=ldap3.GSSAPI,
+    )
+
+    ad_user = session.find_user_by_name(username, attributes_to_lookup=["mail"])
+    if ad_user is None:
+        raise ValueError(f"User '{username}' not found in Active Directory.")
+    return ad_user.all_attributes["mail"]
+
 
 def validate_aind_username(
         username: str,

@@ -135,6 +135,9 @@ class BonsaiSettingsModel(BaseModel):
         default=8,
         description="Gain for the body camera"
     )
+
+    video_file_format: Literal["mp4", "mkv"] = Field(default="mkv", description="File format to write video files to.")
+
     ffmpeg_output_args: str = Field()   # required field so no default
     ffmpeg_input_args: str = Field()    # required field so no default
 
