@@ -478,7 +478,7 @@ def build_rig_json_core(settings, water_calibration, laser_calibration):
 
         components["objectives"] = [
             d.Objective(
-                name="Objective",
+                name="FIP Objective",
                 serial_number=settings["box_settings"][
                     "FipObjectiveSerialNumber"
                 ],
