@@ -7299,7 +7299,7 @@ class Window(QMainWindow):
                 "schedule_time": schedule_time,
                 "project_name": self.Metadata_dialog.ProjectName.currentText(),
                 "script": {},
-                "user_email": sci_email 
+                "upload_notification_email": sci_email 
             }
 
             # Define filename of manifest
