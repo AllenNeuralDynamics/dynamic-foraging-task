@@ -2105,25 +2105,10 @@ class Window(QMainWindow):
             for k, v in water_json
         }
 
-        # extract software information - TODO: Add this to waterlog cli
+        # extract software information to send to waterlog once it can accept it
         logging.info("Extracting software information from first data stream")
         software = session.stimulus_epochs[0].software[0]
-
-        # TODO: validate user first
-        # experimenter_name = self.behavior_session_model.experimenter[0]
-        # try:
-        #     resp = requests.get("http://aind-metadata-service/api/v2/active_directory/{experimenter_name}")
-        #     resp.raise_for_status()
-        #     validated_username = resp.json()['username']
-        # except Exception:
-        #     logging.warning(
-        #         "Could not validate experimenter name against aind-metadata-service", 
-        #         exc_info=True
-        #     )
-        #     validated_username = experimenter_name
-
-        # TODO: Should we remove the suggested water calculation from DF?
-        # That would mean removing the last two arguments below
+        # Access sw name/version with (software.url, software.version)
 
         waterlog_args = [
             self.Settings['waterlog_exe_path'],
@@ -2142,17 +2127,10 @@ class Window(QMainWindow):
             '--water-supplement-delivered',
         ]
 
-        ###  Leftover fields that were previously sent to SLIMS
-        ###  TODO: validate that it's okay to leave them out
-        # total_water_ml=water["water_in_session_total"]+water["water_after_session"],
-        # workstation=session.rig_id,
-        # sw_source=software.url,
-        # sw_version=software.version,
-
         logging.info("Sending water info to waterlog")
         process = subprocess.run([str(arg) for arg in waterlog_args])
-        
-        # TODO: Add message to user to to over to waterlog and hit submit
+
+        QMessageBox.information(self, "Waterlog", "Go to waterlog app to submit water information.")
 
         try:
             process.check_returncode()
