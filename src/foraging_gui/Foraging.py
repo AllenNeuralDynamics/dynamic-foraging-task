@@ -4140,7 +4140,7 @@ class Window(QMainWindow):
                     ]
                     and session is not None
                 ):
-                    self._AddWaterLogResult(session)
+                    self._AddWaterlogResult(session)
                 elif self.BaseWeight.text() == "" or self.WeightAfter.text() == "":
                     logging.warning(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to database"
                                    f" due do unrecorded weight information.")
