@@ -28,6 +28,8 @@ import pandas as pd
 import requests
 import serial
 import yaml
+
+import aind_log_utils
 from aind_auto_train.schema.task import TrainingStage
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_data_schema.core.session import Session
@@ -351,6 +353,9 @@ class Window(QMainWindow):
 
         # load the rig metadata
         self._load_rig_metadata()
+        
+        # setup life-cycle logger
+        self.lifecycle_logger = self.setup_lifecycle_logger()
 
         # Initializes session log handler as None
         self.session_log_handler = None
@@ -364,6 +369,20 @@ class Window(QMainWindow):
             """
             self._ReconnectBonsai()
         logging.info("Start up complete")
+
+    def setup_lifecycle_logger(self):
+        
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(self.SettingsBox), exist_ok=True)
+
+        lifecycle_logger = logging.getLogger("lifecycle")
+        lifecycle_logger.setLevel(logging.INFO)
+        file_handler = logging.FileHandler(self.Settings["lifecycle_log_dir"], encoding="utf-8")
+        file_handler.setLevel(logging.INFO)
+        file_handler.setFormatter(aind_log_utils.DefaultFormatter())
+        lifecycle_logger.addHandler(file_handler)
+
+        return lifecycle_logger
 
     def _load_rig_metadata(self):
         """Load the latest rig metadata"""
@@ -1960,6 +1979,11 @@ class Window(QMainWindow):
                 "Documents",
                 "aind_watchdog_service",
                 "manifest",
+            ),
+            "lifecycle_log_dir": os.path.join(
+                os.path.expanduser("~"),
+                "Documents",
+                "lifecycle_logs",
             ),
             "transfer_service_job_type": "dynamic_foraging_compression",
             "auto_engage": True,
@@ -4225,6 +4249,12 @@ class Window(QMainWindow):
                 elif session is None:
                     logging.warning(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims"
                                   f" due do metadata generation failure.")
+                    
+                # add complete log to lifecycle 
+                self.lifecycle_logger.info("Session ended.", extra={"subject_id": self.behavior_session_model.subject, 
+                                                                      "acquisition_name": self.behavior_session_model.session_name,
+                                                                      "event_type": "stage_complete"})
+                
         except Exception as e:
             logging.warning(
                 "Meta data is not saved!",
@@ -6124,6 +6154,12 @@ class Window(QMainWindow):
             elif self.behavior_session_model.allow_dirty_repo is None:
                 logging.error("Could not check for untracked local changes")
 
+            # log start event
+            if self.StartANewSession != 0:
+                self.lifecycle_logger.info("Session started.", extra={"subject_id": self.behavior_session_model.subject, 
+                                                                      "acquisition_name": self.behavior_session_model.session_name,
+                                                                      "event_type": "stage_start"})
+
             # disable sound button
             self.sound_button.setEnabled(False)
 
@@ -6641,6 +6677,9 @@ class Window(QMainWindow):
                         self.ANewTrial = 1
                         self.Start.setChecked(False)
                         self.Start.setStyleSheet("background-color : none")
+                        self.lifecycle_logger.info("Session failed.", extra={"subject_id": self.behavior_session_model.subject, 
+                                                                      "acquisition_name": self.behavior_session_model.session_name,
+                                                                      "event_type": "stage_failure"})
                         break
                 # receive licks and update figures
                 if self.actionDrawing_after_stopping.isChecked() == False:
@@ -7431,7 +7470,6 @@ def setup_loki_logging(box_number):
     )
     handler.setLevel(logging.INFO)
     logger.root.addHandler(handler)
-
 
 def start_gui_log_file(box_number):
     """
