@@ -373,7 +373,7 @@ class Window(QMainWindow):
     def setup_lifecycle_logger(self):
         
         # Ensure the directory exists
-        os.makedirs(os.path.dirname(self.Settings["lifecycle_log_dir"]), exist_ok=True)
+        os.makedirs(os.path(self.Settings["lifecycle_log_dir"]), exist_ok=True)
 
         lifecycle_logger = logging.getLogger("lifecycle")
         lifecycle_logger.setLevel(logging.INFO)
