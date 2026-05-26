@@ -377,7 +377,10 @@ class Window(QMainWindow):
 
         lifecycle_logger = logging.getLogger("lifecycle")
         lifecycle_logger.setLevel(logging.INFO)
-        file_handler = logging.FileHandler(self.Settings["lifecycle_log_dir"], encoding="utf-8")
+
+        timestamp = datetime.now().strftime("%Y%m%dT%H%M%SZ")
+        filename = f"lifecycle_log_{timestamp}.jsonl"
+        file_handler = logging.FileHandler(os.path.join(self.Settings["lifecycle_log_dir"], filename), encoding="utf-8")
         file_handler.setLevel(logging.INFO)
         file_handler.setFormatter(aind_log_utils.DefaultFormatter())
         lifecycle_logger.addHandler(file_handler)
