@@ -48,7 +48,7 @@ dependencies = [
     "winkerberos; sys_platform == 'win32'",
     "ldap3; sys_platform == 'win32'",
     "msal; sys_platform == 'win32'",
-    "aind-log-utils @ git+https://github.com/AllenNeuralDynamics/aind-log-utils.git@main#subdirectory=python"
+    "aind-log-utils==0.2.8"
 ]
 
 [project.optional-dependencies]
