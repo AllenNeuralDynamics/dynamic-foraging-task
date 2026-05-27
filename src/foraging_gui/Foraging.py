@@ -370,8 +370,12 @@ class Window(QMainWindow):
             self._ReconnectBonsai()
         logging.info("Start up complete")
 
-    def setup_lifecycle_logger(self):
+    def setup_lifecycle_logger(self) -> logging.Logger:
         
+        """
+        Creates logger for start, stop, and failure events with formatter adhering to aind log standards.
+        """
+
         # Ensure the directory exists
         os.makedirs(Path(self.Settings["lifecycle_log_dir"]), exist_ok=True)
 
