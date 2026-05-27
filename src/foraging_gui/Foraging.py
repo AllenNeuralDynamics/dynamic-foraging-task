@@ -3964,7 +3964,11 @@ class Window(QMainWindow):
         if self.CreateNewFolder == 1:
             self._GetSaveFolder()
             self.CreateNewFolder = 0
-
+            # Need to log start event after session_name has been set in _GetSaveFolder. This will only happen once at start of session.
+            self.lifecycle_logger.info("Session started.", extra={"subject_id": self.behavior_session_model.subject, 
+                                                                      "acquisition_name": self.behavior_session_model.session_name,
+                                                                      "event_type": "stage_start"})
+            
         if not os.path.exists(os.path.dirname(self.SaveFileJson)):
             os.makedirs(os.path.dirname(self.SaveFileJson))
             logging.info(
@@ -6156,12 +6160,6 @@ class Window(QMainWindow):
                     )
             elif self.behavior_session_model.allow_dirty_repo is None:
                 logging.error("Could not check for untracked local changes")
-
-            # log start event
-            if self.StartANewSession != 0:
-                self.lifecycle_logger.info("Session started.", extra={"subject_id": self.behavior_session_model.subject, 
-                                                                      "acquisition_name": self.behavior_session_model.session_name,
-                                                                      "event_type": "stage_start"})
 
             # disable sound button
             self.sound_button.setEnabled(False)
