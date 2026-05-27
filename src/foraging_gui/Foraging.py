@@ -1616,6 +1616,7 @@ class Window(QMainWindow):
             self.Save.setStyleSheet(
                 "color: white;background-color : mediumorchid"
             )
+
         else:
             # temporary logging
             loggingtype = 1
@@ -3964,10 +3965,6 @@ class Window(QMainWindow):
         if self.CreateNewFolder == 1:
             self._GetSaveFolder()
             self.CreateNewFolder = 0
-            # Need to log start event after session_name has been set in _GetSaveFolder. This will only happen once at start of session.
-            self.lifecycle_logger.info("Session started.", extra={"subject_id": self.behavior_session_model.subject, 
-                                                                      "acquisition_name": self.behavior_session_model.session_name,
-                                                                      "event_type": "stage_start"})
             
         if not os.path.exists(os.path.dirname(self.SaveFileJson)):
             os.makedirs(os.path.dirname(self.SaveFileJson))
@@ -6223,6 +6220,10 @@ class Window(QMainWindow):
                 # Start logging if the formal logging is not started
                 if self.logging_type != 0:
                     self.Ot_log_folder = self._restartlogging()
+                # Need to log start event after session_name has been set in_restartlogging
+                self.lifecycle_logger.info("Session started.", extra={"subject_id": self.behavior_session_model.subject, 
+                                                                "acquisition_name": self.behavior_session_model.session_name,
+                                                                "event_type": "stage_start"})
             except Exception as e:
                 if "ConnectionAbortedError" in str(e):
                     logging.info("lost bonsai connection: restartlogging()")
