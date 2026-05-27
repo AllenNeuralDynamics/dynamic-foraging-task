@@ -29,7 +29,7 @@ import requests
 import serial
 import yaml
 
-import aind_log_utils
+import log_schema
 from aind_auto_train.schema.task import TrainingStage
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_data_schema.core.session import Session
@@ -382,7 +382,7 @@ class Window(QMainWindow):
         filename = f"lifecycle_log_{timestamp}.jsonl"
         file_handler = logging.FileHandler(os.path.join(self.Settings["lifecycle_log_dir"], filename), encoding="utf-8")
         file_handler.setLevel(logging.INFO)
-        file_handler.setFormatter(aind_log_utils.DefaultFormatter())
+        file_handler.setFormatter(log_schema.DefaultFormatter())
         lifecycle_logger.addHandler(file_handler)
 
         return lifecycle_logger
