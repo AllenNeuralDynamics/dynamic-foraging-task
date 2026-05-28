@@ -1,7 +1,7 @@
 from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
-
+from pathlib import Path
 
 class BonsaiSettingsModel(BaseModel):
     """
@@ -182,6 +182,7 @@ class DFTSettingsModel(BaseModel):
     save_each_trial: bool
     AutomaticUpload: bool
     manifest_flag_dir: str
+    lifecycle_log_dir: Path
     transfer_service_job_type: str
     auto_engage: bool
     clear_figure_after_save: bool
