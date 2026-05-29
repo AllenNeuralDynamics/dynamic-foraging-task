@@ -33,7 +33,6 @@ import log_schema
 from aind_auto_train.schema.task import TrainingStage
 from aind_behavior_services.session import AindBehaviorSessionModel
 from aind_data_schema.core.session import Session
-from aind_slims_api import SlimsClient, models
 from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar,
 )
@@ -239,9 +238,6 @@ class Window(QMainWindow):
 
         # Connect to Bonsai
         self._InitializeBonsai()
-
-        # connect to Slims
-        self._ConnectSlims()
 
         # Set up threads
         self.threadpool = QThreadPool()  # get animal response
@@ -1998,6 +1994,7 @@ class Window(QMainWindow):
             "clear_figure_after_save": True,
             "add_default_project_name": True,
             "check_schedule": False,
+            "waterlog_exe_path": "C://Program Files/AIBS_MPE/waterlog/waterlog.exe",
         }
 
         # Try to load the ForagingSettings.json file
@@ -2129,71 +2126,8 @@ class Window(QMainWindow):
         ]
         self.rig_name = "{}".format(self.current_box)
 
-    def _ConnectSlims(self):
-        """
-        Connect to Slims
-        """
-        try:
-            logging.info("Attempting to connect to Slims")
-            self.slims_client = SlimsClient(
-                username=os.environ["SLIMS_USERNAME"],
-                password=os.environ["SLIMS_PASSWORD"],
-            )
-        except KeyError as e:
-            raise KeyError(
-                "SLIMS_USERNAME and SLIMS_PASSWORD do not exist as "
-                f"environment variables on machine. Please add. {e}"
-            )
-
-        try:
-            self.slims_client.fetch_model(
-                models.SlimsMouseContent, barcode="00000000"
-            )
-        except Exception as e:
-            if "Status 401 – Unauthorized" in str(
-                e
-            ):  # catch error if username and password are incorrect
-                raise Exception(
-                    f"Exception trying to read from Slims: {e}.\n"
-                    f" Please check credentials:\n"
-                    f"Username: {os.environ['SLIMS_USERNAME']}\n"
-                    f"Password: {os.environ['SLIMS_PASSWORD']}"
-                )
-            elif "No record found" not in str(
-                e
-            ):  # bypass if mouse doesn't exist
-                raise Exception(f"Exception trying to read from Slims: {e}.\n")
-        logging.info("Successfully connected to Slims")
-
-    def _AddWaterLogResult(self, session: Session):
-        """
-        Add WaterLogResult to slims based on current state of gui
-
-        :param session: Session object to pull water information from
-
-        """
-
-        try:  # try and find mouse
-            logging.info(
-                f"Attempting to fetch mouse {session.subject_id} from Slims"
-            )
-            mouse = self.slims_client.fetch_model(
-                models.SlimsMouseContent, barcode=session.subject_id
-            )
-        except Exception as e:
-            if "No record found" in str(
-                e
-            ):  # if no mouse found or validation errors on mouse
-                logging.warning(
-                    f'"No record found" error while trying to fetch mouse {session.subject_id}. '
-                    f"Will not log water."
-                )
-                return
-            else:
-                logging.error(
-                    f"While fetching mouse {session.subject_id} model, unexpected error occurred: {e}"
-                )
-                raise e
+    def _AddWaterlogResult(self, session: Session):
+        """Send weight/water information to databases via waterlog app cli"""
 
         # extract water information
         logging.info("Extracting water information from first stimulus epoch")
@@ -2203,53 +2137,41 @@ class Window(QMainWindow):
             for k, v in water_json
         }
 
-        # extract software information
+        # extract software information to send to waterlog once it can accept it
         logging.info("Extracting software information from first data stream")
         software = session.stimulus_epochs[0].software[0]
+        # Access sw name/version with (software.url, software.version)
 
-        # create model
-        logging.info(
-            "Creating SlimsWaterlogResult based on session information."
-        )
-        print(water)
-        model = models.SlimsWaterlogResult(
-            mouse_pk=mouse.pk,
-            date=datetime.now(),
-            weight_g=session.animal_weight_post,
-            operator=self.behavior_session_model.experimenter[0],
-            water_earned_ml=water["water_in_session_total"],
-            water_supplement_delivered_ml=water["water_after_session"],
-            water_supplement_recommended_ml=None,
-            total_water_ml=water["water_in_session_total"]+water["water_after_session"],
-            comments=session.notes,
-            workstation=session.rig_id,
-            sw_source=software.url,
-            sw_version=software.version,
-            test_pk=self.slims_client.fetch_pk(
-                "Test", test_name="test_waterlog"
-            ),
-        )
+        waterlog_args = [
+            self.Settings['waterlog_exe_path'],
+            '--username',
+            self.behavior_session_model.experimenter[0],
+            '--mouse-id',
+            session.subject_id,
+            '--mouse-weight',
+            session.animal_weight_post,
+            '--comment',
+            session.notes,
+            '--earned-water',
+            water["water_in_session_total"],
+            '--water-supplement-ml',
+            water["water_after_session"],
+            '--water-supplement-delivered',
+        ]
 
-        # check if mouse already has waterlog for at session time and if, so update model
-        logging.info(
-            f"Fetching previous waterlog for mouse {session.subject_id}"
-        )
-        waterlog = self.slims_client.fetch_models(
-            models.SlimsWaterlogResult, mouse_pk=mouse.pk, start=0, end=1
-        )
-        if waterlog != [] and waterlog[0].date.strftime(
-            "%Y-%m-%d %H:%M:%S"
-        ) == session.session_start_time.astimezone(timezone.utc).strftime(
-            "%Y-%m-%d %H:%M:%S"
-        ):
-            logging.info(
-                "Waterlog information already exists for this session. Updating waterlog in Slims."
-            )
-            model.pk = waterlog[0].pk
-            self.slims_client.update_model(model=model)
-        else:
-            logging.info("Adding waterlog to Slims.")
-            self.slims_client.add_model(model)
+        logging.info("Sending water info to waterlog")
+        process = subprocess.run([str(arg) for arg in waterlog_args])
+
+        QMessageBox.information(self, "Waterlog", "Go to waterlog app to submit water information.")
+
+        try:
+            process.check_returncode()
+        except Exception:
+            logging.warning(
+                f"Waterlog data for mouse {self.behavior_session_model.subject} cannot be sent to waterlog exe"
+                f", message: {process.stdout}, {process.stderr}",
+                exc_info=True,
+                )
 
     def _InitializeBonsai(self):
         """
@@ -4203,7 +4125,7 @@ class Window(QMainWindow):
         # save random reward parameters
         Obj['random_reward_par']=self.RandomReward_dialog.random_reward_par
 
-        # generate the metadata file and update slims
+        # generate the metadata file and update waterlog
         try:
             # save the metadata collected in the metadata dialogue
             self.Metadata_dialog._save_metadata_dialog_parameters()
@@ -4250,12 +4172,12 @@ class Window(QMainWindow):
                     ]
                     and session is not None
                 ):
-                    self._AddWaterLogResult(session)
+                    self._AddWaterlogResult(session)
                 elif self.BaseWeight.text() == "" or self.WeightAfter.text() == "":
-                    logging.warning(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims"
+                    logging.warning(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to database"
                                    f" due do unrecorded weight information.")
                 elif session is None:
-                    logging.warning(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to slims"
+                    logging.warning(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to database"
                                   f" due do metadata generation failure.")
                     
                 # add complete log to lifecycle 
