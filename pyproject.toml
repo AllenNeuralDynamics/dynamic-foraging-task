@@ -26,7 +26,6 @@ dependencies = [
     "pyOSC3@git+https://github.com/glopesdev/pyosc3.git@master",
     "newscale@git+https://github.com/AllenNeuralDynamics/python-newscale@axes-on-target",
     "aind-auto-train@git+https://github.com/AllenNeuralDynamics/aind-foraging-behavior-bonsai-automatic-training.git@main",
-    "aind-slims-api@git+https://github.com/AllenNeuralDynamics/aind-slims-api@main",
     "aind-dynamic-foraging-models >= 0.12.2",
     "aind-dynamic-foraging-basic-analysis >= 0.3.34",
     "aind-behavior-services >=0.8, <0.9",
@@ -48,6 +47,7 @@ dependencies = [
     "winkerberos; sys_platform == 'win32'",
     "ldap3; sys_platform == 'win32'",
     "msal; sys_platform == 'win32'",
+    "log-schema==0.2.10.dev1"
 ]
 
 [project.optional-dependencies]
