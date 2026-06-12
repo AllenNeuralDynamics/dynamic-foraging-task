@@ -1087,6 +1087,12 @@ class Window(QMainWindow):
                     self.to_check_drop_frames = 0
                     return
 
+                if not os.path.is_dir(video_folder):
+                    self.trigger_length=0
+                    self.to_check_drop_frames=0
+                    logging.warning('Hit unexpected edge case, no video folder, but video trigger file exists')
+                    return
+
                 # Inspect contents of video_folder to determine structure
                 entries = os.listdir(video_folder)
                 csv_files = [f for f in entries if f.endswith(".csv")]
