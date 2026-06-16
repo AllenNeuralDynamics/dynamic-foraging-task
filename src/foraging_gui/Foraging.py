@@ -1087,7 +1087,7 @@ class Window(QMainWindow):
                     self.to_check_drop_frames = 0
                     return
 
-                if not os.path.is_dir(video_folder):
+                if not os.path.isdir(video_folder):
                     self.trigger_length=0
                     self.to_check_drop_frames=0
                     logging.warning('Hit unexpected edge case, no video folder, but video trigger file exists')
