@@ -1990,11 +1990,7 @@ class Window(QMainWindow):
                 "aind_watchdog_service",
                 "manifest",
             ),
-            "lifecycle_log_dir": os.path.join(
-                os.path.expanduser("~"),
-                "Documents",
-                "lifecycle_logs",
-            ),
+            "lifecycle_log_dir": os.path.join("C://Program Data//AllenInstitute//df_gui//logs"),
             "transfer_service_job_type": "dynamic_foraging_compression",
             "auto_engage": True,
             "clear_figure_after_save": True,
@@ -4185,11 +4181,6 @@ class Window(QMainWindow):
                 elif session is None:
                     logging.warning(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to database"
                                   f" due do metadata generation failure.")
-                    
-                # add complete log to lifecycle 
-                self.lifecycle_logger.info("Session ended.", extra={"subject_id": self.behavior_session_model.subject, 
-                                                                      "acquisition_name": self.behavior_session_model.session_name,
-                                                                      "event_type": "stage_complete"})
                 
         except Exception as e:
             logging.warning(
@@ -6446,6 +6437,11 @@ class Window(QMainWindow):
         # save behavior session model
         with open(self.behavior_session_modelJson, "w") as outfile:
             outfile.write(self.behavior_session_model.model_dump_json())
+
+        # add complete log to lifecycle 
+        self.lifecycle_logger.info("Session ended.", extra={"subject_id": self.behavior_session_model.subject, 
+                                                                "acquisition_name": self.behavior_session_model.session_name,
+                                                                "event_type": "stage_complete"})
 
     def log_session(self) -> None:
         """
