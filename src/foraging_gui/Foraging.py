@@ -1990,7 +1990,7 @@ class Window(QMainWindow):
                 "aind_watchdog_service",
                 "manifest",
             ),
-            "lifecycle_log_dir": os.path.join("C://Program Data//AllenInstitute//df_gui//logs"),
+            "lifecycle_log_dir": os.path.join("C://Program Data//AllenInstitute//dynamic-foraging-task//logs"),
             "transfer_service_job_type": "dynamic_foraging_compression",
             "auto_engage": True,
             "clear_figure_after_save": True,
