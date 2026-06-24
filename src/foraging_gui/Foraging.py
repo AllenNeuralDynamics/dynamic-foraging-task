@@ -95,7 +95,7 @@ import csv
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear()  # clear handlers so console output can be configured
 logging.raiseExceptions = os.getenv("FORAGING_DEV_MODE", False)
-
+logging.basicConfig(level=logging.INFO)
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
