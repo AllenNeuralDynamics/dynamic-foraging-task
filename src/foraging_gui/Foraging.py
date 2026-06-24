@@ -7447,9 +7447,7 @@ def start_gui_log_file(box_number):
     file_handler = logging.FileHandler(logging_filename)
     file_handler.setFormatter(log_formatter)
     file_handler.setLevel(logging.INFO)
-    logger = logging.getLogger(__name__) 
-    logger.addHandler(file_handler)
-    logger.setLevel(logging.INFO)
+    logger.root.addHandler(file_handler)
 
     logging.info("Starting logfile!")
     logging.captureWarnings(True)
