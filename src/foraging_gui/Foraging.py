@@ -353,6 +353,14 @@ class Window(QMainWindow):
         # setup life-cycle logger
         self.lifecycle_logger = self.setup_lifecycle_logger()
 
+        # reconfigure root logger
+        root_logger = logging.getLogger(__name__)
+        log_format = "%(asctime)s:%(levelname)s:%(module)s:%(filename)s:%(funcName)s:line %(lineno)d:%(message)s"
+        log_datefmt = "%I:%M:%S %p"
+        correct_formatter = logging.Formatter(fmt=log_format, datefmt=log_datefmt)
+        for handler in root_logger.handlers:
+            handler.setFormatter(correct_formatter)
+
         # Initializes session log handler as None
         self.session_log_handler = None
 
