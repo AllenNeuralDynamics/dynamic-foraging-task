@@ -377,7 +377,7 @@ class Window(QMainWindow):
 
         lifecycle_logger = logging.getLogger("lifecycle")
         lifecycle_logger.setLevel(logging.INFO)
-        lifecycle_logger.propagate = False
+
         timestamp = datetime.now().strftime("%Y%m%dT%H%M%SZ")
         filename = f"lifecycle_log_{timestamp}.jsonl"
         file_handler = logging.FileHandler(os.path.join(self.Settings["lifecycle_log_dir"], filename), encoding="utf-8")
@@ -7439,7 +7439,9 @@ def start_gui_log_file(box_number):
     file_handler = logging.FileHandler(logging_filename)
     file_handler.setFormatter(log_formatter)
     file_handler.setLevel(logging.INFO)
-    logger.root.addHandler(file_handler)
+    logger = logging.getLogger(__name__) 
+    logger.addHandler(file_handler)
+    logger.setLevel(logging.INFO)
 
     logging.info("Starting logfile!")
     logging.captureWarnings(True)
