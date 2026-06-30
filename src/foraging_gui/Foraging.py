@@ -95,7 +95,7 @@ import csv
 logger = logging.getLogger(__name__)
 logger.root.handlers.clear()  # clear handlers so console output can be configured
 logging.raiseExceptions = os.getenv("FORAGING_DEV_MODE", False)
-
+logging.basicConfig(level=logging.INFO)
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -352,6 +352,14 @@ class Window(QMainWindow):
         
         # setup life-cycle logger
         self.lifecycle_logger = self.setup_lifecycle_logger()
+
+        # reconfigure root logger
+        root_logger = logging.getLogger(__name__)
+        log_format = "%(asctime)s:%(levelname)s:%(module)s:%(filename)s:%(funcName)s:line %(lineno)d:%(message)s"
+        log_datefmt = "%I:%M:%S %p"
+        correct_formatter = logging.Formatter(fmt=log_format, datefmt=log_datefmt)
+        for handler in root_logger.handlers:
+            handler.setFormatter(correct_formatter)
 
         # Initializes session log handler as None
         self.session_log_handler = None
@@ -1990,11 +1998,7 @@ class Window(QMainWindow):
                 "aind_watchdog_service",
                 "manifest",
             ),
-            "lifecycle_log_dir": os.path.join(
-                os.path.expanduser("~"),
-                "Documents",
-                "lifecycle_logs",
-            ),
+            "lifecycle_log_dir": os.path.join("C://Program Data//AllenInstitute//dynamic-foraging-task//logs"),
             "transfer_service_job_type": "dynamic_foraging_compression",
             "auto_engage": True,
             "clear_figure_after_save": True,
@@ -4185,11 +4189,6 @@ class Window(QMainWindow):
                 elif session is None:
                     logging.warning(f"Waterlog for mouse {self.behavior_session_model.subject} cannot be added to database"
                                   f" due do metadata generation failure.")
-                    
-                # add complete log to lifecycle 
-                self.lifecycle_logger.info("Session ended.", extra={"subject_id": self.behavior_session_model.subject, 
-                                                                      "acquisition_name": self.behavior_session_model.session_name,
-                                                                      "event_type": "stage_complete"})
                 
         except Exception as e:
             logging.warning(
@@ -6446,6 +6445,11 @@ class Window(QMainWindow):
         # save behavior session model
         with open(self.behavior_session_modelJson, "w") as outfile:
             outfile.write(self.behavior_session_model.model_dump_json())
+
+        # add complete log to lifecycle 
+        self.lifecycle_logger.info("Session ended.", extra={"subject_id": self.behavior_session_model.subject, 
+                                                                "acquisition_name": self.behavior_session_model.session_name,
+                                                                "event_type": "stage_complete"})
 
     def log_session(self) -> None:
         """
