@@ -377,21 +377,26 @@ class Window(QMainWindow):
     def setup_lifecycle_logger(self) -> logging.Logger:
         
         """
-        Creates logger for start, stop, and failure events with formatter adhering to aind log standards.
+        Creates loki logger for start, stop, and failure events with formatter adhering to aind log standards.
         """
 
-        # Ensure the directory exists
-        os.makedirs(Path(self.Settings["lifecycle_log_dir"]), exist_ok=True)
+        username, password = get_loki_credentials()
+        handler = logging_loki.LokiHandler(
+            url="http://eng-logtools:3100",
+            tags={"software_name": "dynamic-foraging-task",
+                  "rig_id": os.environ.get("aibs_comp_id", "unknown"), 
+            },
+            auth=(username, password),
+            version="1",
+        )
+        handler.setLevel(logging.INFO)
+        logger.root.addHandler(handler)
 
         lifecycle_logger = logging.getLogger("lifecycle")
         lifecycle_logger.setLevel(logging.INFO)
-
-        timestamp = datetime.now().strftime("%Y%m%dT%H%M%SZ")
-        filename = f"lifecycle_log_{timestamp}.jsonl"
-        file_handler = logging.FileHandler(os.path.join(self.Settings["lifecycle_log_dir"], filename), encoding="utf-8")
-        file_handler.setLevel(logging.INFO)
-        file_handler.setFormatter(log_schema.DefaultFormatter())
-        lifecycle_logger.addHandler(file_handler)
+        handler.setLevel(logging.INFO)
+        handler.setFormatter(log_schema.DefaultFormatter())
+        lifecycle_logger.addHandler(handler)
 
         return lifecycle_logger
 
@@ -1998,7 +2003,6 @@ class Window(QMainWindow):
                 "aind_watchdog_service",
                 "manifest",
             ),
-            "lifecycle_log_dir": os.path.join("C://Program Data//AllenInstitute//dynamic-foraging-task//logs"),
             "transfer_service_job_type": "dynamic_foraging_compression",
             "auto_engage": True,
             "clear_figure_after_save": True,
@@ -6152,9 +6156,11 @@ class Window(QMainWindow):
                 if self.logging_type != 0:
                     self.Ot_log_folder = self._restartlogging()
                 # Need to log start event after session_name has been set in_restartlogging
-                self.lifecycle_logger.info("Session started.", extra={"subject_id": self.behavior_session_model.subject, 
+                self.lifecycle_logger.info("Session started.", extra={
+                                                                "subject_id": self.behavior_session_model.subject, 
                                                                 "acquisition_name": self.behavior_session_model.session_name,
-                                                                "event_type": "stage_start"})
+                                                                "event_type": "stage_start",
+                                                                })
             except Exception as e:
                 if "ConnectionAbortedError" in str(e):
                     logging.info("lost bonsai connection: restartlogging()")
@@ -7371,16 +7377,23 @@ def validate_aind_username(
         raise
 
 
-def setup_loki_logging(box_number):
+def get_loki_credentials() -> tuple[str, str]:
+    """
+        Fetch loki credentials from the KeePass database.
+    """
     db_file = os.getenv(
         "SIPE_DB_FILE", r"//allen/aibs/mpe/keepass/sipe_sw_passwords.kdbx"
-    )
+        )
     key_file = os.getenv(
         "SIPE_KEY_FILE",
-        r"c:\ProgramData\AIBS_MPE\.secrets\sipe_sw_passwords.keyx",
+        r"c:\ProgramData\AIBS_MPE\.secrets\sipe_sw_passwords.key",
     )
     kp = PyKeePass(db_file, keyfile=key_file)
     entry = kp.find_entries(title="Loki Credentials", first=True)
+    return entry.username, entry.password
+
+def setup_loki_logging(box_number):
+    username, password = get_loki_credentials()
     session = md5(
         (
             "".join([str(datetime.now()), platform.node(), str(os.getpid())])
@@ -7396,7 +7409,7 @@ def setup_loki_logging(box_number):
             "log_session": session,
             "box_name": chr(box_number + 64),  # they use A=1, B=2, ...
         },
-        auth=(entry.username, entry.password),
+        auth=(username, password),
         version="1",
     )
 
