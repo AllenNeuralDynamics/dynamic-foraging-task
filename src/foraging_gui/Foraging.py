@@ -380,18 +380,15 @@ class Window(QMainWindow):
         Creates loki logger for start, stop, and failure events with formatter adhering to aind log standards.
         """
 
-        username, password = get_loki_credentials()
         handler = logging_loki.LokiHandler(
-            url="http://eng-logtools:3100",
+            url="http://eng-logtools:3100/loki/api/v1/push",
             tags={"software_name": "dynamic-foraging-task",
                   "rig_id": os.environ.get("aibs_comp_id", "unknown"), 
             },
-            auth=(username, password),
             version="1",
         )
+        handler.emitter.session.headers["X-Scope-OrgID"] = "tenant1"
         handler.setLevel(logging.INFO)
-        logger.root.addHandler(handler)
-
         lifecycle_logger = logging.getLogger("lifecycle")
         lifecycle_logger.setLevel(logging.INFO)
         handler.setLevel(logging.INFO)
@@ -7376,24 +7373,18 @@ def validate_aind_username(
         logger.error("Timeout occurred while validating username: %s", e)
         raise
 
+def setup_loki_logging(box_number):
 
-def get_loki_credentials() -> tuple[str, str]:
-    """
-        Fetch loki credentials from the KeePass database.
-    """
     db_file = os.getenv(
         "SIPE_DB_FILE", r"//allen/aibs/mpe/keepass/sipe_sw_passwords.kdbx"
         )
     key_file = os.getenv(
         "SIPE_KEY_FILE",
-        r"c:\ProgramData\AIBS_MPE\.secrets\sipe_sw_passwords.key",
+        r"C:\ProgramData\AIBS_MPE\.secrets\sipe_sw_passwords.keyx",
     )
     kp = PyKeePass(db_file, keyfile=key_file)
     entry = kp.find_entries(title="Loki Credentials", first=True)
-    return entry.username, entry.password
 
-def setup_loki_logging(box_number):
-    username, password = get_loki_credentials()
     session = md5(
         (
             "".join([str(datetime.now()), platform.node(), str(os.getpid())])
@@ -7409,7 +7400,7 @@ def setup_loki_logging(box_number):
             "log_session": session,
             "box_name": chr(box_number + 64),  # they use A=1, B=2, ...
         },
-        auth=(username, password),
+        auth=(entry.username, entry.password),
         version="1",
     )
 
