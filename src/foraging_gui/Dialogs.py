@@ -2777,8 +2777,12 @@ class MetadataDialog(QDialog):
         """show the project names"""
         project_names = self.MainWindow._GetApprovedAINDProjectNames()
 
-        # adding project names to the project combobox
+        # Always keep an explicit unset option as the first entry.
+        placeholder = "No project set"
+        self.ProjectName.clear()
+        self.ProjectName.addItem(placeholder)
         self.ProjectName.addItems(project_names)
+        self.ProjectName.setCurrentIndex(0)
 
     def _get_basics(self):
         """get the basic information"""
