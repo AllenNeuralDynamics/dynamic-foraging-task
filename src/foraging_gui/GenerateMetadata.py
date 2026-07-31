@@ -845,7 +845,7 @@ class generate_metadata:
                 detectors=self.fib_detectors,
                 fiber_connections=self.fiber_connections,
                 software=self.behavior_software,
-                notes=f"Fib modality: fib mode: {self.Obj['fiber_mode']}",
+                notes=f"Fib modality: fib mode: {self.Obj['fiber_mode']}, Teensy board and LED driver using digital operation",
             )
         )
 
