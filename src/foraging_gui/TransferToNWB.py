@@ -612,18 +612,13 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
             else:
                 # New format: sound card is the primary source, but validate it
                 # against the behavior-board go cue (same Harp clock as
-                # trial-start / delay-start). Prefer the behavior board, then
-                # CPU time, whenever the sound-card value is missing or deviates
-                # by more than GOCUE_SOUNDCARD_MAX_DEV.
+                # trial-start / delay-start). Fall back to the behavior board
+                # whenever the sound-card value is missing or deviates by more
+                # than GOCUE_SOUNDCARD_MAX_DEV.
                 sc = getattr(obj, "B_GoCueTimeSoundCard")[i]
                 board = (
                     getattr(obj, "B_GoCueTimeBehaviorBoard")[i]
                     if hasattr(obj, "B_GoCueTimeBehaviorBoard")
-                    else np.nan
-                )
-                cpu = (
-                    getattr(obj, "B_GoCueTime")[i]
-                    if hasattr(obj, "B_GoCueTime")
                     else np.nan
                 )
 
@@ -643,12 +638,6 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                             f"{GOCUE_SOUNDCARD_MAX_DEV}s); using behavior board."
                         )
                         goCue_start_time_t = board
-                    elif np.isfinite(cpu):
-                        logger.warning(
-                            f"Trial {i}: B_GoCueTimeSoundCard unreliable and no "
-                            f"behavior-board go cue; falling back to CPU B_GoCueTime."
-                        )
-                        goCue_start_time_t = cpu
 
         trial_kwargs = {
             "start_time": getattr(obj, f"B_TrialStartTime{Harp}")[i],
