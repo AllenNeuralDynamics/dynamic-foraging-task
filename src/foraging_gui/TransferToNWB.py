@@ -594,6 +594,13 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
             LaserFrequencyC = float(getattr(obj, f"TP_Frequency_{Sc}")[i])
             LaserRampingDownC = float(getattr(obj, f"TP_RD_{Sc}")[i])
             LaserPulseDurC = float(getattr(obj, f"TP_PulseDur_{Sc}")[i])
+        # Tolerance (s) for how far the sound-card go cue may deviate from the
+        # behavior-board go cue before it is considered unreliable. On the same
+        # Harp clock these should agree to within a few ms; a larger, often
+        # near-constant offset (~1 s has been observed) indicates the sound-card
+        # timestamp is logged at the end of an audio buffer block rather than at
+        # true go-cue onset.
+        GOCUE_SOUNDCARD_MAX_DEV = 0.1
 
         if Harp == "":
             goCue_start_time_t = getattr(obj, "B_GoCueTime")[i]  # Use CPU time
@@ -603,9 +610,45 @@ def bonsai_to_nwb(fname, save_folder=save_folder):
                     i
                 ]  # Use Harp time, old format
             else:
-                goCue_start_time_t = getattr(obj, "B_GoCueTimeSoundCard")[
-                    i
-                ]  # Use Harp time, new format
+                # New format: sound card is the primary source, but validate it
+                # against the behavior-board go cue (same Harp clock as
+                # trial-start / delay-start). Prefer the behavior board, then
+                # CPU time, whenever the sound-card value is missing or deviates
+                # by more than GOCUE_SOUNDCARD_MAX_DEV.
+                sc = getattr(obj, "B_GoCueTimeSoundCard")[i]
+                board = (
+                    getattr(obj, "B_GoCueTimeBehaviorBoard")[i]
+                    if hasattr(obj, "B_GoCueTimeBehaviorBoard")
+                    else np.nan
+                )
+                cpu = (
+                    getattr(obj, "B_GoCueTime")[i]
+                    if hasattr(obj, "B_GoCueTime")
+                    else np.nan
+                )
+
+                goCue_start_time_t = sc
+                sc_bad = not np.isfinite(sc)
+                sc_off = (
+                    np.isfinite(sc)
+                    and np.isfinite(board)
+                    and abs(sc - board) > GOCUE_SOUNDCARD_MAX_DEV
+                )
+                if sc_bad or sc_off:
+                    if np.isfinite(board):
+                        logger.warning(
+                            f"Trial {i}: B_GoCueTimeSoundCard "
+                            f"{'missing' if sc_bad else f'deviates {sc - board:+.3f}s'} "
+                            f"from B_GoCueTimeBehaviorBoard (tol "
+                            f"{GOCUE_SOUNDCARD_MAX_DEV}s); using behavior board."
+                        )
+                        goCue_start_time_t = board
+                    elif np.isfinite(cpu):
+                        logger.warning(
+                            f"Trial {i}: B_GoCueTimeSoundCard unreliable and no "
+                            f"behavior-board go cue; falling back to CPU B_GoCueTime."
+                        )
+                        goCue_start_time_t = cpu
 
         trial_kwargs = {
             "start_time": getattr(obj, f"B_TrialStartTime{Harp}")[i],
@@ -953,5 +996,6 @@ if __name__ == "__main__":
         r"https://github.com/user-attachments/files/18304002/746346_2025-01-02_10-16-10.json",  # https://github.com/AllenNeuralDynamics/dynamic-foraging-task/pull/1274
         r"https://github.com/user-attachments/files/18304087/746346_2024-12-02_13-16-12.json",  # Empty trials
     ]
+
 
     test_bonsai_json_to_nwb(test_json_urls)

@@ -1977,9 +1977,89 @@ class generate_metadata:
 
 
 if __name__ == "__main__":
-    generate_metadata(
-        json_file=r"Y:\753126\behavior_753126_2024-10-07_10-14-07\behavior\753126_2024-10-07_10-14-07.json",
-        output_folder=r"H:\test",
-    )
+    #generate_metadata(
+    #    json_file=r"Y:\753126\behavior_753126_2024-10-07_10-14-07\behavior\753126_2024-10-07_10-14-07.json",
+    #    output_folder=r"H:\test",
+    #)
     # generate_metadata(json_file=r'Y:\753126\behavior_753126_2024-10-15_12-20-35\behavior\753126_2024-10-15_12-20-35.json',output_folder=r'H:\test')
     # generate_metadata(json_file=r'F:\Test\Metadata\715083_2024-04-22_14-32-07.json', dialog_metadata_file=r'C:\Users\xinxin.yin\Documents\ForagingSettings\metadata_dialog\323_EPHYS3_2024-05-09_12-42-30_metadata_dialog.json', output_folder=r'F:\Test\Metadata')
+
+    from pathlib import Path
+
+
+
+    # List all metadata directories
+    def collect_combined_sessions():
+        mice = [
+            (r"I:\Copy\833880", "833880"),
+            (r"I:\Copy\837468", "837468"),
+            (r"I:\Copy\837687", "837687"),
+        ]
+
+        combined = []
+
+        for base_dir, mouse_id in mice:
+            base = Path(base_dir)
+
+            if not base.exists():
+                print(f"Warning: {base} does not exist")
+                continue
+
+            prefix = f"behavior_{mouse_id}_"
+
+            for item in base.iterdir():
+                if item.is_dir() and item.name.startswith(prefix):
+                    combined.append(str(item / "metadata-dir"))
+
+        # Global chronological sort (timestamp format ensures correct order)
+        combined = sorted(combined)
+
+        return combined
+
+
+    if __name__ == "__main__":
+        metadata_dirs = collect_combined_sessions()
+
+        print("metadata_dirs = [")
+        for path in metadata_dirs:
+            print(f'    r"{path}",')
+        print("]")
+        
+    for metadata_dir in metadata_dirs:
+        metadata_path = Path(metadata_dir)
+        session_dir = metadata_path.parent
+        session_name = session_dir.name
+
+        parts = session_name.split("_")
+        if len(parts) < 4:
+            print(f"⚠ Skipping (unexpected session dir name): {session_dir}")
+            continue
+
+        # behavior_<mouse_id>_<YYYY-MM-DD>_<HH-MM-SS>
+        mouse_id = parts[1]
+        datetime_str = "_".join(parts[2:])  # e.g. 2026-02-16_12-56-20
+
+        # Build json file path
+        json_file = session_dir / "behavior" / f"{mouse_id}_{datetime_str}.json"
+
+        # Create metadata directory if missing
+        try:
+            metadata_path.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            print(f"✗ Failed to create metadata dir: {metadata_path} ({e})")
+            continue
+
+        if not json_file.exists():
+            print(f"⚠ JSON not found, skipping: {json_file}")
+            continue
+
+        print(f"Generating metadata for: {json_file}")
+
+        try:
+            generate_metadata(
+                json_file=str(json_file),
+                output_folder=str(metadata_path),
+            )
+            print("  ✓ Done")
+        except Exception as e:
+            print(f"  ✗ Failed: {e}")

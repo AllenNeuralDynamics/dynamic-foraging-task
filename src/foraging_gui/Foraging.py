@@ -16,8 +16,8 @@ from datetime import date, datetime, timedelta, timezone
 from hashlib import md5
 from pathlib import Path
 from typing import Optional
-import ldap3
-import ms_active_directory
+#import ldap3
+#import ms_active_directory
 import concurrent.futures
 import getpass
 
