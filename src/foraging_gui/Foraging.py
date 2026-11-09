@@ -37,7 +37,6 @@ from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar,
 )
 from pydantic import ValidationError
-from pykeepass import PyKeePass
 from pyOSC3.OSC3 import OSCStreamingClient
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import Qt, QThread, QThreadPool
@@ -7373,46 +7372,6 @@ def validate_aind_username(
         logger.error("Timeout occurred while validating username: %s", e)
         raise
 
-def setup_loki_logging(box_number):
-
-    db_file = os.getenv(
-        "SIPE_DB_FILE", r"//allen/aibs/mpe/keepass/sipe_sw_passwords.kdbx"
-        )
-    key_file = os.getenv(
-        "SIPE_KEY_FILE",
-        r"C:\ProgramData\AIBS_MPE\.secrets\sipe_sw_passwords.keyx",
-    )
-    kp = PyKeePass(db_file, keyfile=key_file)
-    entry = kp.find_entries(title="Loki Credentials", first=True)
-
-    session = md5(
-        (
-            "".join([str(datetime.now()), platform.node(), str(os.getpid())])
-        ).encode("utf-8")
-    ).hexdigest()[:7]
-
-    handler = logging_loki.LokiHandler(
-        url="http://eng-tools/loki/api/v1/push",
-        tags={
-            "hostname": socket.gethostname(),
-            "process_name": __name__,
-            "user_name": os.getlogin(),
-            "log_session": session,
-            "box_name": chr(box_number + 64),  # they use A=1, B=2, ...
-        },
-        auth=(entry.username, entry.password),
-        version="1",
-    )
-
-    handler.setFormatter(
-        logging.Formatter(
-            fmt="%(asctime)s\n%(name)s\n%(levelname)s\n%(funcName)s (%(filename)s:%(lineno)d)\n%(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
-    )
-    handler.setLevel(logging.INFO)
-    logger.root.addHandler(handler)
-
 def start_gui_log_file(box_number):
     """
     Starts a log file for the gui.
@@ -7661,10 +7620,6 @@ if __name__ == "__main__":
 
     # Start logging
     start_gui_log_file(box_number)
-    try:
-        setup_loki_logging(box_number)
-    except Exception as e:  # noqa
-        logging.warning(f"Failed to setup LOKI Handler: {e}")
 
     (
         commit_ID,
